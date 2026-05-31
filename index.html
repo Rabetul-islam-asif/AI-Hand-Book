@@ -41,16 +41,16 @@
             --font-mono: 'Fira Code', monospace;
         }
 
-        /* Light Mode overrides */
+        /* PREMIUM LIGHT MODE / DAY MODE (#ACAEA2 Sage Green Theme) */
         html.light {
-            --bg-primary: #FAFAFC;
-            --bg-secondary: #FFFFFF;
-            --bg-tertiary: #F1F1F6;
-            --text-primary: #1F2937;
-            --text-secondary: #4B5563;
-            --accent-purple: #7C3AED;
-            --accent-cyan: #0891B2;
-            --border-color: rgba(0, 0, 0, 0.08);
+            --bg-primary: #ACAEA2;       /* Beautiful Sage Green main page background */
+            --bg-secondary: #9FA195;     /* Slightly darker sage green for sidebar & header */
+            --bg-tertiary: #929489;      /* Lighter accent/tertiary sage */
+            --text-primary: #161D1A;     /* Deep dark charcoal forest green for ultra-high contrast */
+            --text-secondary: #3A4440;   /* Highly legible slate green */
+            --accent-purple: #6D28D9;
+            --accent-cyan: #0F766E;
+            --border-color: rgba(0, 0, 0, 0.15);
         }
 
         * {
@@ -188,6 +188,7 @@
             height: 100%;
             overflow: hidden;
             background-color: var(--bg-primary);
+            transition: background-color 0.3s ease;
         }
 
         /* Nav Header styling */
@@ -352,6 +353,14 @@
             margin: 28px 0;
             border-left: 4px solid var(--accent-purple);
             background: linear-gradient(90deg, rgba(139, 92, 246, 0.05), transparent);
+            transition: background 0.3s ease;
+        }
+
+        /* ADAPT CARDS BEAUTIFULLY IN LIGHT MODE */
+        html.light .callout-box {
+            background: #BDC0B3 !important; /* Sage card matching the rest of the body */
+            border: 1px solid rgba(0, 0, 0, 0.12) !important;
+            border-left: 4px solid var(--accent-purple) !important;
         }
 
         .callout-box.developer {
@@ -359,9 +368,17 @@
             background: linear-gradient(90deg, rgba(6, 182, 212, 0.05), transparent);
         }
 
+        html.light .callout-box.developer {
+            border-left-color: var(--accent-cyan) !important;
+        }
+
         .callout-box.warning {
             border-left-color: #EF4444;
             background: linear-gradient(90deg, rgba(239, 68, 68, 0.05), transparent);
+        }
+
+        html.light .callout-box.warning {
+            border-left-color: #EF4444 !important;
         }
 
         .callout-title {
@@ -384,7 +401,7 @@
             transition: all 0.3s ease;
         }
 
-        /* Theme 1: Converted from Black to Gorgeous Sage Green (#ACAEA2) with deep charcoal highly legible text */
+        /* Theme 1: Gorgeous Sage Green (#ACAEA2) with deep charcoal highly legible text */
         .visual-pre.theme-matrix {
             background-color: #ACAEA2 !important;
             color: #1A2421 !important; /* Deep dark slate forest green for contrast */
@@ -465,6 +482,21 @@
             background-color: #161D28 !important; /* Soft Night Whitish Blue */
             border-color: rgba(56, 189, 248, 0.15) !important;
         }
+
+        /* AUTO ADAPT PRE BLOCKS FOR LIGHT MODE TO MATCH THE FULL CARD SAGE GREEN #ACAEA2 */
+        html.light pre {
+            background-color: #BDC0B3 !important; /* Full card sage background matching the page! */
+            border-color: rgba(0, 0, 0, 0.12) !important;
+            color: #161D1A !important;
+        }
+        html.light pre code {
+            color: #161D1A !important;
+        }
+        html.light pre .hljs-keyword { color: #7C2D12 !important; font-weight: 700 !important; }
+        html.light pre .hljs-string { color: #065F46 !important; }
+        html.light pre .hljs-title { color: #1E3A8A !important; font-weight: 700 !important; }
+        html.light pre .hljs-comment { color: #4B5563 !important; font-style: italic !important; }
+        html.light pre .hljs-number { color: #9D174D !important; font-weight: 600 !important; }
 
         /* Horizontal dividers */
         hr {
