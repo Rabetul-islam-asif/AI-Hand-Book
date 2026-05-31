@@ -3,7 +3,7 @@
 ---
 
 ### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো প্রি-ট্রেইনড ল্যাঙ্গুয়েজ মডেলকে নিজের পছন্দমতো নির্দিষ্ট ফরম্যাট বা টোনে কথা বলতে শেখানোর প্রথম ধাপ—অর্থাৎ সুপারভাইজড Fine-Tuning (Supervised Fine-Tuning / SFT) এর Mechanism এবং তার Dataset Preparation (Dataset Preparation) প্রসেস গভীরভাবে আয়ত্ত করা। তুমি জানতে পারবে কখন Fine-Tuning করতে হবে বনাম কখন আরএজি (RAG) ব্যবহার করা উচিত এবং কীভাবে চ্যাটফরম্যাট ও Instruction Dataset (Instruction Datasets - Alpaca, ShareGPT formats) তৈরি করতে হয়।
+এই চ্যাপ্টারের মূল লক্ষ্য হলো প্রি-ট্রেইনড ল্যাঙ্গুয়েজ মডেলকে নিজের পছন্দমতো নির্দিষ্ট ফরম্যাট বা টোনে কথা বলতে শেখানোর প্রথম ধাপ—অর্থাৎ Supervised Fine-Tuning (Supervised Fine-Tuning / SFT) এর Mechanism এবং তার Dataset Preparation (Dataset Preparation) প্রসেস গভীরভাবে আয়ত্ত করা। তুমি জানতে পারবে কখন Fine-Tuning করতে হবে বনাম কখন আরএজি (RAG) ব্যবহার করা উচিত এবং কীভাবে চ্যাটফরম্যাট ও Instruction Dataset (Instruction Datasets - Alpaca, ShareGPT formats) তৈরি করতে হয়।
 
 ### Why Should I Care?
 অনেক Developer মনে করো নতুন কোনো নলেজ বা তথ্য শেখানোর জন্য Fine-Tuning করা বেস্ট চয়েস। কিন্তু বাস্তবে নতুন ফ্যাক্টস বা Data মডেলকে ফাইন-টিউনিংয়ের মাধ্যমে শেখাতে গেলে Model তা মুখস্থ না করে হ্যালুসিনেশন বা বিভ্রান্তিকর তথ্য বেশি দেয়। Fine-Tuning হলো মডেলকে **"How to behave"** (কীভাবে কথা বলতে হবে, কী ফরম্যাটে Output দিতে হবে) তা শেখানোর সেরা টুল, এবং আরএজি হলো **"What to say"** (কোন রিয়েল তথ্য বলতে হবে) তার সেরা টুল। এই তফাত না বুঝলে তুমি প্রচুর GPU কস্ট অপ্টিমাইজ করতে পারবে না।
@@ -41,7 +41,7 @@ Fine-Tuning (How to Behave - Modifying Internal weights):
 
 ---
 
-### ২. Core Concepts: সুপারভাইজড Fine-Tuning ও Data স্ট্রাকচার
+### ২. Core Concepts: Supervised Fine-Tuning ও Data স্ট্রাকচার
 
 #### ক. When to Fine-Tune vs. RAG (সিদ্ধান্ত গ্রহণ গাইডলাইন)
 আর্কিটেকচারাল ডিসিশন টেবিল:
@@ -64,12 +64,12 @@ SFT হলো মডেলকে প্রচুর পরিমাণে Instru
 এটি সবচেয়ে কমন ও সরল ফরম্যাট। প্রতিটি Data নোডে ৩টি কিওয়ার্ড থাকে:
 * `instruction`: ইউজার কী টাস্ক দিয়েছে।
 * `input`: টাস্কের সাথে যদি কোনো অতিরিক্ত Context থাকে (অপশনাল)।
-* `output`: এআই কী উত্তর দেবে।
+* `output`: AI কী উত্তর দেবে।
 ```json
 {
   "instruction": "নিচের বাক্যটি বাংলায় অনুবাদ করো।",
   "input": "I love AI engineering.",
-  "output": "আমি এআই ইঞ্জিনিয়ারিং ভালোবাসি।"
+  "output": "আমি AI ইঞ্জিনিয়ারিং ভালোবাসি।"
 }
 ```
 
@@ -115,7 +115,7 @@ Input Tokens (Loss Ignored):           Output Target Tokens (Active Loss 계산)
 
 ### ৪. Real World Example: Cursor-এর `.cursorrules` কাস্টম টোন টিউনিং
 
-Cursor যখন তোমার প্রোজেক্ট স্পেসিফিক নিয়মে Code লেখে:
+Cursor যখন তোমার Project স্পেসিফিক নিয়মে Code লেখে:
 
 1. **System Prompt Alignment:** তারা তাদের ওপেন-সোর্স বেস মডেলকে (যেমন LLaMA) হাজার হাজার Coding কনভেনশন এবং Project রুলস Instruction Dataset দিয়ে Fine-Tuning (SFT) করেছে।
 2. **Behavior Control:** এর ফলে মডেলটি তোমার Project-এর `.cursorrules` File রিড করে ইনস্ট্যান্টলি তোমার টোন ও স্টাইল বুঝতে পারে এবং তোমার স্পেসিফিক ফরম্যাটে Code প্রডিউস করে।
@@ -263,7 +263,7 @@ for idx, data in enumerate(sanitized_dataset):
 
 #### Intermediate
 2. **প্রশ্ন:** Fine-Tuning Dataset তৈরির সময় "Personally Identifiable Information (PII) Masking" কেন আবশ্যক?
-   * **উত্তর:** PII মাস্কিং না করলে কাস্টমারের গোপন ফোন নাম্বার, ইমেইল বা আইডি ইনফরমেশন ফাইন-টিউনিংয়ের সময় Model-এর ওয়েটসে চিরতরে সেভ হয়ে যাবে। পরবর্তীতে Prompt হ্যাকিংয়ের মাধ্যমে এআই সেই গোপন Data পাবলিকলি ফাস করে দিতে পারে, যা বিশাল সিকিউরিটি লিক ঘটাবে।
+   * **উত্তর:** PII মাস্কিং না করলে কাস্টমারের গোপন ফোন নাম্বার, ইমেইল বা আইডি ইনফরমেশন ফাইন-টিউনিংয়ের সময় Model-এর ওয়েটসে চিরতরে সেভ হয়ে যাবে। পরবর্তীতে Prompt হ্যাকিংয়ের মাধ্যমে AI সেই গোপন Data পাবলিকলি ফাস করে দিতে পারে, যা বিশাল সিকিউরিটি লিক ঘটাবে।
 
 #### Advanced
 3. **প্রশ্ন:** SFT ট্রেনিংয়ের সময় Loss ক্যালকুলেশনে কেন "Target Prompt Masking (Index -100)" ব্যবহার করা হয়? এর গুরুত্ব কী?
@@ -280,7 +280,7 @@ for idx, data in enumerate(sanitized_dataset):
 ---
 
 ### biographies.md
-দারুণ! আমরা সফলভাবে সুপারভাইজড ফাইন-টিউনিংয়ের Data প্রিপারেশন ও থিওরি জয় করে ফেলেছি। পরবর্তী চ্যাপ্টারে আমরা এই Fine-Tuning মেমরি ও GPU কম্পিউট কস্ট সাশ্রয় করার জন্য সবচেয়ে বৈপ্লবিক Mechanism নিয়ে আলোচনা করব: **Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)**। লো-র্যাংক অ্যাডাপ্টার (LoRA) এর ম্যাথমেটিক্যাল ইনটুইশন এবং ৪-বিট কোয়ান্টাইজেশন (QLoRA) কীভাবে কনজিউমার ল্যাপটপে এলএলএম ফাইন-টিউন করতে সাহায্য করে, তা আমরা বিস্তারিত শিখব।
+দারুণ! আমরা সফলভাবে Supervised ফাইন-টিউনিংয়ের Data প্রিপারেশন ও থিওরি জয় করে ফেলেছি। পরবর্তী চ্যাপ্টারে আমরা এই Fine-Tuning মেমরি ও GPU কম্পিউট কস্ট সাশ্রয় করার জন্য সবচেয়ে বৈপ্লবিক Mechanism নিয়ে আলোচনা করব: **Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)**। লো-র্যাংক অ্যাডাপ্টার (LoRA) এর ম্যাথমেটিক্যাল ইনটুইশন এবং ৪-বিট কোয়ান্টাইজেশন (QLoRA) কীভাবে কনজিউমার ল্যাপটপে এলএলএম ফাইন-টিউন করতে সাহায্য করে, তা আমরা বিস্তারিত শিখব।
 
 ---
 **Chapter 15 সমাপ্ত।**

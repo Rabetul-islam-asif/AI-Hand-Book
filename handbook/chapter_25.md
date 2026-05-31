@@ -9,7 +9,7 @@
 বেশিরভাগ Developer যখন আরএজি (RAG) বানান, তারা পিডিএফ রিডার দিয়ে টেক্সট রিড করে প্রতি ৫০০ ক্যারেক্টার পর পর র্যান্ডমলি কেটে (Chunk) Vector ডাটাবেসে সেভ করে। এর ফলে অনেক সময় বাক্যের মূল অর্থ বা ইনফরমেশন মাঝখান থেকে কেটে দুই টুকরো হয়ে ভিন্ন চাঙ্কে চলে যায়, যা Model-এর হ্যালুসিনেশন বহুগুণ বাড়ায়। প্রোডাকশন লেভেলে নিখুঁত Document ম্যাচিংয়ের জন্য ডাইনামিক Semantic স্লিটিং এবং রি-র‍্যাঙ্কিং পাইপলাইন শেখা অত্যন্ত জরুরি।
 
 ### Big Picture
-এটি আমাদের বাস্তব প্রোজেক্ট ব্লুপ্রিন্ট লেয়ারের দ্বিতীয় ফ্ল্যাগশিপ মাইলফলক। আগের চ্যাপ্টারে আমরা চ্যাট Memory ইকোসিস্টেম তৈরি করা শিখেছি। এই চ্যাপ্টারে আমরা এআই কোম্পানির সবচেয়ে ডিমান্ডিং সার্ভিস—অর্থাৎ এন্টারপ্রাইজ প্রাইভেট নলেজ বেস Search Engine বানানোর সম্পূর্ণ রানিং Source Code ও Architecture দেখবো।
+এটি আমাদের বাস্তব Project ব্লুপ্রিন্ট লেয়ারের দ্বিতীয় ফ্ল্যাগশিপ মাইলফলক। আগের চ্যাপ্টারে আমরা চ্যাট Memory ইকোসিস্টেম তৈরি করা শিখেছি। এই চ্যাপ্টারে আমরা AI কোম্পানির সবচেয়ে ডিমান্ডিং সার্ভিস—অর্থাৎ এন্টারপ্রাইজ প্রাইভেট নলেজ বেস Search Engine বানানোর সম্পূর্ণ রানিং Source Code ও Architecture দেখবো।
 
 ---
 
@@ -51,7 +51,7 @@ Sentence 3: "Postgres is a SQL database."
 
 ### ২. Core Concepts: আরএজি Data লেয়ারের মূল চালিকাশক্তি
 
-#### ক. Postgres pgvector (রিলেশনাল Database-এর এআই Engine)
+#### ক. Postgres pgvector (রিলেশনাল Database-এর AI Engine)
 pgvector হলো একটি ওপেন-সোর্স এক্সটেনশন যা Postgres ডাটাবেসকে সরাসরি হাই-ডাইমেনশনাল Vector এম্বেডিংস স্টোর এবং কুয়েরি করার ক্ষমতা দেয়।
 * **কেন এটি সেরা প্রোডাকশন চয়েস:** কারণ তোমাকে আলাদা করে কোনো নতুন Vector Database (যেমন Pinecone বা Chroma) হোস্ট করতে হয় না। তোমার রিলেশনাল ইউজারের Data এবং তাদের Document-এর Vector Data একই Postgres ডাটাবেসে অত্যন্ত সুরক্ষিত থাকে এবং তুমি মেটাডাটা দিয়ে ফাস্ট SQL কুয়েরি চালাতে পারো।
 * **ইনডেক্সিং:** pgvector মূলত দুটি ইনডেক্সিং সাপোর্ট করে:
@@ -61,7 +61,7 @@ pgvector হলো একটি ওপেন-সোর্স এক্সটে�
 #### খ. Hybrid Search (হাইব্রিড সার্চের মেলবন্ধন)
 শুধু Vector এম্বেডিংস Search অনেক সময় ব্র্যান্ড নাম বা সুনির্দিষ্ট সিরিয়াল নাম্বারের ক্ষেত্রে ফেইল করে। তাই প্রোডাকশনে আমরা **Hybrid Search** ব্যবহার করি:
 * **Dense Retrieval (Semantic):** Vector সিমিলারিটি দিয়ে অর্থ বোঝে।
-* **Sparse Retrieval (Keyword):** ক্লাসিক্যাল BM25 বা Postgres `tsvector` দিয়ে সুনির্দিষ্ট কিওয়ার্ড (যেমন: *"X-230 Pro"* বা *"Rahim"*) ম্যাচিং করায়।
+* **Sparse Retrieval (Keyword):** Classical BM25 বা Postgres `tsvector` দিয়ে সুনির্দিষ্ট কিওয়ার্ড (যেমন: *"X-230 Pro"* বা *"Rahim"*) ম্যাচিং করায়।
 * **RRF (Reciprocal Rank Fusion):** এই দুটি সার্চের Output স্কোর ফিউশন বা মার্জ করে টপ ৫টি নিখুঁত Document প্রডিউস করে।
 
 ---
@@ -229,7 +229,7 @@ print("Generated Semantic Chunks:\n", semantic_chunks)
 
 🔴 Common Mistake
 
-**ভুল ধারণা:** RAG সিস্টেমে যত বেশি রিলেভেন্ট Document Query করে Model-এর প্রম্পটে পাঠানো হবে, এআই তত ভালো উত্তর দেবে।
+**ভুল ধারণা:** RAG সিস্টেমে যত বেশি রিলেভেন্ট Document Query করে Model-এর প্রম্পটে পাঠানো হবে, AI তত ভালো উত্তর দেবে।
 
 **বাস্তবতা:** একে বলে **Lost in the Context window clutter**। Prompt-এর মধ্যে অপ্রয়োজনীয় ও অতিরিক্ত Duplicate টেক্সট ফিড করলে Model-এর মনোযোগ বিঘ্নিত হয় এবং Latency বেড়ে যায়। প্রোডাকশনে সবসময় টপ ৩ বা ৫টি একদম নিখুঁত Semantic চাঙ্ক পাঠানোই আর্কিটেকচারাল বেস্ট প্র্যাকটিস।
 
@@ -291,13 +291,13 @@ print(f"pgvector Cosine Distance (Closer to 0.0 is better): {cosine_dist:.4f}")
 
 ### XI. Chapter Summary
 * **Semantic Chunking** অর্থগত অমিল মেপে ডাইনামিক স্লিটিং করার বৈপ্লবিক প্রসেস।
-* **pgvector** ও **HNSW** ইনডেক্সিং রিলেশনাল Database Postgres-কে এআই-নেটিভ Vector স্পেড দেয়।
+* **pgvector** ও **HNSW** ইনডেক্সিং রিলেশনাল Database Postgres-কে AI-নেটিভ Vector স্পেড দেয়।
 * কস্ট ও Quality ব্যালেন্সের জন্য প্রোডাকশনে **Hybrid Search** এবং ডাইমেনশন Optimization অত্যন্ত গুরুত্বপূর্ণ।
 
 ---
 
 ### XII. What's Next
-আমরা সফলভাবে Semantic আরএজি পিডিএফ Search Engine Architecture সম্পন্ন করেছি। পরবর্তী চ্যাপ্টারে আমরা পদার্পণ করতে যাচ্ছি এআই এজেন্টের সবচেয়ে জটিল ও রোমাঞ্চকর প্রোজেক্টে: **Part 11 — Building Real AI Products এর Chapter 26: Blueprint 3 — Agentic CLI Code Writer with Auto-Test Healing**। কীভাবে একটি এআই এজেন্ট তোমার কম্পিউটারে স্বয়ংক্রিয়ভাবে Code লিখবে, Code লিখে নিজেই টার্মিনাল Test রান করবে, Test Error আসলে নিজেই সেই Error Log রিড করে Code সেলফ-কারেকশন বা হিলিং সম্পন্ন করবে, তা আমরা পাইথনে সম্পূর্ণ রানিং রিঅ্যাক্ট এজেন্ট Loop আর্কিটেক্ট করে স্বহস্তে Test করবো।
+আমরা সফলভাবে Semantic আরএজি পিডিএফ Search Engine Architecture সম্পন্ন করেছি। পরবর্তী চ্যাপ্টারে আমরা পদার্পণ করতে যাচ্ছি AI এজেন্টের সবচেয়ে জটিল ও রোমাঞ্চকর প্রোজেক্টে: **Part 11 — Building Real AI Products এর Chapter 26: Blueprint 3 — Agentic CLI Code Writer with Auto-Test Healing**। কীভাবে একটি AI এজেন্ট তোমার কম্পিউটারে স্বয়ংক্রিয়ভাবে Code লিখবে, Code লিখে নিজেই টার্মিনাল Test রান করবে, Test Error আসলে নিজেই সেই Error Log রিড করে Code সেলফ-কারেকশন বা হিলিং সম্পন্ন করবে, তা আমরা পাইথনে সম্পূর্ণ রানিং রিঅ্যাক্ট এজেন্ট Loop আর্কিটেক্ট করে স্বহস্তে Test করবো।
 
 ---
 **Chapter 25 সমাপ্ত।**

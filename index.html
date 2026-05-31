@@ -947,7 +947,7 @@
         </div>
         <div class="search-container">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="সার্চ কিওয়ার্ড বা প্রশ্ন..." oninput="handleSearch()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search কিওয়ার্ড বা প্রশ্ন..." oninput="handleSearch()">
         </div>
         <div class="chapters-list" id="chaptersList">
             <!-- Sidebar links populated dynamically by JavaScript -->
@@ -970,7 +970,7 @@
             
             <div class="header-actions">
                 <!-- CODE BLOCK THEME SWITCHER -->
-                <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="কোড ব্যাকগ্রাউন্ড থিম (Black, Sage Green #ACAEA2, Soft Brown, Soft Whitish Blue)">
+                <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="Code ব্যাকগ্রাউন্ড থিম (Black, Sage Green #ACAEA2, Soft Brown, Soft Whitish Blue)">
                     <i class="fa-solid fa-code"></i>
                 </button>
 
@@ -1012,7 +1012,7 @@
         // Chapter indexing matching standard table of contents
         const syllabus = [
             {
-                part: "Part 1 — AI Foundations (এআই এর সূচনা)",
+                part: "Part 1 — AI Foundations (AI এর সূচনা)",
                 chapters: [
                     { num: 1, title: "Paradigm Shift" },
                     { num: 2, title: "The Core Mechanics" }
@@ -1040,14 +1040,14 @@
                 ]
             },
             {
-                part: "Part 5 — LLMs (লার্জ ল্যাঙ্গুয়েজ মডেল)",
+                part: "Part 5 — LLMs (লার্জ ল্যাঙ্গুয়েজ Model)",
                 chapters: [
                     { num: 9, title: "LLM Ecosystem" },
                     { num: 10, title: "Reasoning Models (R1 & o3)" }
                 ]
             },
             {
-                part: "Part 6 — AI Data Layer (ভেক্টর ডাটা)",
+                part: "Part 6 — AI Data Layer (Vector Data)",
                 chapters: [
                     { num: 11, title: "Vector & Distance Metrics" },
                     { num: 12, title: "Vector Databases & Indexing" }
@@ -1061,7 +1061,7 @@
                 ]
             },
             {
-                part: "Part 8 — Fine-Tuning (মডেল ফাইন-টিউনিং)",
+                part: "Part 8 — Fine-Tuning (Model Fine-Tuning)",
                 chapters: [
                     { num: 15, title: "SFT & Dataset Template" },
                     { num: 16, title: "PEFT (LoRA & QLoRA)" },
@@ -1386,7 +1386,7 @@
                             copyCode(copyBtn);
                         };
                         copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
-                        copyBtn.title = 'কোড কপি করুন';
+                        copyBtn.title = 'Code কপি করুন';
                         pre.appendChild(copyBtn);
                     }
                 });
@@ -1559,7 +1559,7 @@
                     <div style="text-align: center; margin-top: 100px;">
                         <i class="fa-solid fa-face-frown" style="font-size: 64px; color: var(--text-secondary); margin-bottom: 20px;"></i>
                         <h2>কোনো ম্যাচ পাওয়া যায়নি</h2>
-                        <p style="margin-top: 10px;">দয়া করে অন্য কোনো কিওয়ার্ড দিয়ে সার্চ ট্রাই করুন।</p>
+                        <p style="margin-top: 10px;">দয়া করে অন্য কোনো কিওয়ার্ড দিয়ে Search ট্রাই করুন।</p>
                     </div>
                 `;
             } else {
@@ -1653,7 +1653,7 @@
                 setTimeout(() => {
                     btn.innerHTML = `<i class="fa-regular fa-copy"></i>`;
                     btn.style.borderColor = "";
-                    btn.title = "কোড কপি করুন";
+                    btn.title = "Code কপি করুন";
                 }, 2000);
             } catch (err) {
                 console.error("Failed to copy code: ", err);

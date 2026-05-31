@@ -1,4 +1,4 @@
-# Chapter 1: The AI Paradigm Shift — কলার হিউম্যান Coding থেকে এআই
+# Chapter 1: The AI Paradigm Shift — কলার হিউম্যান Coding থেকে AI
 
 ---
 
@@ -6,10 +6,10 @@
 এই চ্যাপ্টারের মূল লক্ষ্য হলো Classical Programming (Software 1.0) এবং Artificial Intelligence বা Machine Learning (Software 2.0) এর মধ্যেকার আদর্শিক বা Paradigm Shift (Paradigm Shift) বোঝা। আমরা জানবো কীভাবে আমরা Coding এর চিরাচরিত নিয়ম "Rules + Data = Answers" থেকে সরে এসে "Data + Answers = Rules" এর নতুন যুগে পদার্পণ করেছি।
 
 ### Why Should I Care?
-Developer হিসেবে আমরা সারাজীবন `if-else`, loops এবং complex algorithms দিয়ে Code লিখে অভ্যস্ত। কিন্তু যখন ছবি দেখে বিড়াল চেনা, মানুষের গলার আওয়াজ শুনে ইমোশন বোঝা বা টেক্সট পড়ে স্বয়ংক্রিয়ভাবে Code লেখার মতো জটিল সমস্যার মুখোমুখি হতে হয়, তখন আগের লজিক ভেঙে পড়ে। এই চ্যাপ্টারটি পড়লে তুমি বুঝতে পারবে কখন তোমার ট্র্যাডিশনাল Code লিখতে হবে এবং কখন এআই/Model-এর দিকে ঝুঁকতে হবে।
+Developer হিসেবে আমরা সারাজীবন `if-else`, loops এবং complex algorithms দিয়ে Code লিখে অভ্যস্ত। কিন্তু যখন ছবি দেখে বিড়াল চেনা, মানুষের গলার আওয়াজ শুনে ইমোশন বোঝা বা টেক্সট পড়ে স্বয়ংক্রিয়ভাবে Code লেখার মতো জটিল সমস্যার মুখোমুখি হতে হয়, তখন আগের লজিক ভেঙে পড়ে। এই চ্যাপ্টারটি পড়লে তুমি বুঝতে পারবে কখন তোমার ট্র্যাডিশনাল Code লিখতে হবে এবং কখন AI/Model-এর দিকে ঝুঁকতে হবে।
 
 ### Big Picture
-এটি আমাদের হ্যান্ডবুকের প্রথম চ্যাপ্টার। এখান থেকেই আমাদের এআই Engineering জার্নি শুরু। পরবর্তী চ্যাপ্টারগুলোতে আমরা যখন ডিপ লার্নিংয়ের গভীরে যাবো, তখন এই প্যারাডাইম শিফটের ধারণাটিই তোমার মূল ভিত্তি হিসেবে কাজ করবে।
+এটি আমাদের হ্যান্ডবুকের প্রথম চ্যাপ্টার। এখান থেকেই আমাদের AI Engineering জার্নি শুরু। পরবর্তী চ্যাপ্টারগুলোতে আমরা যখন Deep Learning-এর গভীরে যাবো, তখন এই প্যারাডাইম শিফটের ধারণাটিই তোমার মূল ভিত্তি হিসেবে কাজ করবে।
 
 ---
 
@@ -58,7 +58,7 @@ Machine Learning (Software 2.0):
 ### ২. Core Concepts: প্যারাডাইম শিফটের অন্দরমহল
 
 #### ক. Software 1.0 vs Software 2.0 (আন্দ্রে কার্পাথির তত্ত্ব)
-টেসলার প্রাক্তন এআই ডিরেক্টর আন্দ্রে কার্পাথি (Andrej Karpathy) এই রূপান্তরকে চমৎকারভাবে সংজ্ঞায়িত করেছেন:
+টেসলার প্রাক্তন AI ডিরেক্টর আন্দ্রে কার্পাথি (Andrej Karpathy) এই রূপান্তরকে চমৎকারভাবে সংজ্ঞায়িত করেছেন:
 * **Software 1.0 (Human-Written Code):** এখানে মানুষ নিজে বসে Code-এর লজিক ও Algorithm ডিজাইন করে। যেমন: C++, Python, JavaScript। Code রান করার দায়িত্ব Silicon Chip-এর।
 * **Software 2.0 (Data-Driven Optimization):** এখানে Programmer কোনো সরাসরি লজিক লেখে না। Programmer একটি Optimization Space ডিফাইন করে (যেমন একটি Neural Network Architecture) এবং প্রচুর Data ও কাঙ্ক্ষিত Output সাপ্লাই করে। এরপর GPU ও Optimization Loop খুঁজে বের করে কোন লজিক বা Weights সেট করলে সঠিক উত্তর পাওয়া যাবে।
 
@@ -88,14 +88,14 @@ Machine Learning কীভাবে Data থেকে রুলস তৈরি 
                      [ Loss Calculator: Loss(Y_pred, Y_true) ]
 ```
 
-Data ও উত্তরের মধ্যকার Loss বা Error যত কমে, ডায়াল (Weights) তত নিখুঁত পজিশনে লক হয়। যখন এই Error শূন্যের কাছাকাছি নেমে আসে, তখনই আমরা পাই আমাদের ফাইনাল "রুলস" বা একটি রেডি-টু-ইউজ এআই Model।
+Data ও উত্তরের মধ্যকার Loss বা Error যত কমে, ডায়াল (Weights) তত নিখুঁত পজিশনে লক হয়। যখন এই Error শূন্যের কাছাকাছি নেমে আসে, তখনই আমরা পাই আমাদের ফাইনাল "রুলস" বা একটি রেডি-টু-ইউজ AI Model।
 
 ---
 
 ### ৪. Real World Example: Spam Filter
 
 * **Software 1.0 স্টাইল:** তুমি লিখলে `if "free money" in email.subject: mark_as_spam()`। কিন্তু হ্যাকাররা পরদিনই স্পেলিং বদলে লিখলো `fr33 m0ney`। তোমাকে আবার নতুন Condition লিখতে হলো।
-* **Software 2.0 স্টাইল:** তুমি হাজার হাজার নরমাল ও স্প্যাম ইমেইল এআই Model-এর ভেতর ফিড করে দিলে। Model নিজে নিজেই বুঝে নিলো যে টেক্সটের কোন Pattern বা শব্দের বিন্যাস থাকলে সেটি স্প্যাম হওয়ার চান্স ৯৯.৯%। হ্যাকাররা স্পেলিং পাল্টালেও Model তার জেনারেলাইজেশন ক্ষমতার কারণে সেটি ধরে ফেলে।
+* **Software 2.0 স্টাইল:** তুমি হাজার হাজার নরমাল ও স্প্যাম ইমেইল AI Model-এর ভেতর ফিড করে দিলে। Model নিজে নিজেই বুঝে নিলো যে টেক্সটের কোন Pattern বা শব্দের বিন্যাস থাকলে সেটি স্প্যাম হওয়ার চান্স ৯৯.৯%। হ্যাকাররা স্পেলিং পাল্টালেও Model তার জেনারেলাইজেশন ক্ষমতার কারণে সেটি ধরে ফেলে।
 
 ---
 
@@ -155,9 +155,9 @@ print(f"Software 2.0 Prediction for X=5: {weight * 5 + bias:.2f}") # Output: ~11
 
 🏭 Production Reality
 
-প্রোডাকশনে কাজ করার সময় সব জায়গায় এআই ঢুকিয়ে দেওয়া একটি আর্কিটেকচারাল ভুল। 
+প্রোডাকশনে কাজ করার সময় সব জায়গায় AI ঢুকিয়ে দেওয়া একটি আর্কিটেকচারাল ভুল। 
 
-| Parameter | Software 1.0 (আগের Code) | Software 2.0 (এআই Model) |
+| Parameter | Software 1.0 (আগের Code) | Software 2.0 (AI Model) |
 | :--- | :--- | :--- |
 | **লজিক জেনারেশন** | মানুষ ডিজাইন করে। | Data থেকে অটোমেটিক জেনারেট হয়। |
 | **ডিপেনডেন্সি** | কোনো Data-এর প্রয়োজন নেই, শুধু লজিক। | প্রচুর হাই-Quality Data প্রয়োজন। |
@@ -170,9 +170,9 @@ print(f"Software 2.0 Prediction for X=5: {weight * 5 + bias:.2f}") # Output: ~11
 
 🔴 Common Mistake
 
-**ভুল ধারণা:** এআই Model সব সময় ১০০% পারফেক্ট Output দেয় এবং এটি সাধারণ Coding লজিককে পুরোপুরি প্রতিস্থাপন করবে।
+**ভুল ধারণা:** AI Model সব সময় ১০০% পারফেক্ট Output দেয় এবং এটি সাধারণ Coding লজিককে পুরোপুরি প্রতিস্থাপন করবে।
 
-**বাস্তবতা:** এআই Model কখনো ১০০% Deterministic নয়, এটি Stochastic (Probabilistic)। সাধারণ ম্যাথমেটিক্যাল Calculation বা Database কুয়েরির মতো কাজের জন্য আগের কোডই বেস্ট। যেখানে রুলস মানুষের পক্ষে ডিফাইন করা অসম্ভব (যেমন ফেস ডিটেকশন), কেবল সেখানেই এআই ব্যবহার করা উচিত।
+**বাস্তবতা:** AI Model কখনো ১০০% Deterministic নয়, এটি Stochastic (Probabilistic)। সাধারণ ম্যাথমেটিক্যাল Calculation বা Database কুয়েরির মতো কাজের জন্য আগের কোডই বেস্ট। যেখানে রুলস মানুষের পক্ষে ডিফাইন করা অসম্ভব (যেমন ফেস ডিটেকশন), কেবল সেখানেই AI ব্যবহার করা উচিত।
 
 ---
 
@@ -224,24 +224,24 @@ print(f"Learned conversion rule: F = C * {W:.2f} + {B:.2f}")
    * **উত্তর:** Software 1.0-এ Coder নিজে রুলস বা লজিক লেখেন। আর Software 2.0-এ Data ও অ্যানসার দিয়ে কম্পিউটারকে অপটিমাইজেশনের মাধ্যমে রুলস বা Weight খুঁজে বের করতে দেওয়া হয়।
 
 #### Intermediate
-2. **প্রশ্ন:** এআই মডেলে "ওয়েইট (Weights)" এবং "Bias (Bias)" কী ভূমিকা পালন করে?
+2. **প্রশ্ন:** AI মডেলে "ওয়েইট (Weights)" এবং "Bias (Bias)" কী ভূমিকা পালন করে?
    * **উত্তর:** Weight এবং Bias হলো Model-এর ভেতরের অ্যাডজাস্টেবল Parameter বা গাণিতিক ডায়াল। Training-এর সময় Data থেকে ভুল কমানোর জন্য Optimizer এই প্যারামিটারগুলোর মান অনবরত আপডেট করে রুলস ফিক্স করে।
 
 #### Advanced
-3. **প্রশ্ন:** কেন আন্দ্রে কার্পাথি এআই-কে Software 2.0 বলেছেন? এর আর্কিটেকচারাল কারণ ব্যাখ্যা করো।
-   * **উত্তর:** ট্র্যাডিশনাল Software যেখানে Conditional ইনস্ট্রাকশনে চলে, এআই বা Deep Learning সেখানে গাণিতিক Weight Matrix-এ চলে। এর Source Code মানুষ লেখে না, Source Code তৈরি হয় Data ও Optimization Loop দিয়ে। GPU ও কম্পিউট বাড়ালে এই Software নিজে নিজেই আরও অপটিমাইজড হতে পারে।
+3. **প্রশ্ন:** কেন আন্দ্রে কার্পাথি AI-কে Software 2.0 বলেছেন? এর আর্কিটেকচারাল কারণ ব্যাখ্যা করো।
+   * **উত্তর:** ট্র্যাডিশনাল Software যেখানে Conditional ইনস্ট্রাকশনে চলে, AI বা Deep Learning সেখানে গাণিতিক Weight Matrix-এ চলে। এর Source Code মানুষ লেখে না, Source Code তৈরি হয় Data ও Optimization Loop দিয়ে। GPU ও কম্পিউট বাড়ালে এই Software নিজে নিজেই আরও অপটিমাইজড হতে পারে।
 
 ---
 
 ### ১১. Chapter Summary
-* এআই Engineering মানেই হলো **Software 1.0 থেকে Software 2.0** এর Paradigm Shift।
-* ট্র্যাডিশনাল Code লজিক চালিত আর এআই Model **Optimization ও Data** চালিত।
+* AI Engineering মানেই হলো **Software 1.0 থেকে Software 2.0** এর Paradigm Shift।
+* ট্র্যাডিশনাল Code লজিক চালিত আর AI Model **Optimization ও Data** চালিত।
 * Model-এর মূল রহস্য লুকিয়ে আছে তার অ্যাডজাস্টেবল **Weights & Biases** এর মধ্যে।
 
 ---
 
 ### ১২. What's Next
-আমরা সফলভাবে প্রথম Paradigm Shift বুঝতে পেরেছি। পরবর্তী চ্যাপ্টারে আমরা এই Data ও Model-এর ভেতরের মূল ক্লাসিফিকেশন Mechanism ভেঙে দেখবো: **Chapter 2: The Core Mechanics — Machine Learning & Deep Learning**। সেখানে আমরা সুপারভাইজড, আনসুপারভাইজড ও রিইনফোর্সমেন্ট লার্নিংয়ের ভেতরের স্ট্রাকচার নিয়ে বিষদ আলোচনা করবো।
+আমরা সফলভাবে প্রথম Paradigm Shift বুঝতে পেরেছি। পরবর্তী চ্যাপ্টারে আমরা এই Data ও Model-এর ভেতরের মূল ক্লাসিফিকেশন Mechanism ভেঙে দেখবো: **Chapter 2: The Core Mechanics — Machine Learning & Deep Learning**। সেখানে আমরা Supervised, Unsupervised ও Reinforcement Learning-এর ভেতরের স্ট্রাকচার নিয়ে বিষদ আলোচনা করবো।
 
 ---
 **Chapter 1 সমাপ্ত।**
