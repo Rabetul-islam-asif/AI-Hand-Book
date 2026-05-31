@@ -530,6 +530,14 @@
             color: var(--text-primary) !important;
         }
 
+        /* Force code element backgrounds to be transparent so pre container background determines the color */
+        article pre code,
+        article pre .hljs {
+            background: transparent !important;
+            background-color: transparent !important;
+            padding: 0 !important;
+        }
+
         /* DYNAMIC BACKGROUND COLOR THEMES FOR CODE BLOCKS (pre tags) */
 
         /* 1. BLACK THEME (Deep Dark in Dark Mode, Soft Off-white/Light Gray in Light Mode) */
