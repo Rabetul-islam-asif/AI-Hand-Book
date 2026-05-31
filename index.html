@@ -215,26 +215,50 @@
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
-        .theme-toggle-btn, .font-size-btn {
+        .btn-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2px;
+            background-color: var(--bg-primary);
+            gap: 2px;
+        }
+
+        .theme-toggle-btn, .font-size-btn, .action-btn {
             background: none;
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 13.5px;
             transition: all 0.2s;
+            position: relative;
         }
 
-        .theme-toggle-btn:hover, .font-size-btn:hover {
+        .theme-toggle-btn:hover, .font-size-btn:hover, .action-btn:hover {
             border-color: var(--accent-purple);
             background-color: var(--bg-tertiary);
+        }
+
+        .action-btn.active-theme {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            color: #fff;
+            border: none;
+        }
+
+        .btn-label-small {
+            font-size: 10px;
+            font-weight: 800;
+            margin-left: 2px;
         }
 
         /* Content Container with reader options */
@@ -321,7 +345,7 @@
             font-weight: 500;
         }
 
-        /* Callouts / Developer views / Production Reality boxes */
+        /* CALLOUTS BOXES */
         .callout-box {
             padding: 20px 24px;
             border-radius: 12px;
@@ -345,10 +369,49 @@
             margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
             font-size: 15px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        /* THREE DYNAMIC THEMES FOR VISUAL DIAGRAMS (Matrix, Cyberpunk, Light/Slate) */
+        .visual-pre {
+            padding: 20px !important;
+            border-radius: 10px !important;
+            overflow-x: auto !important;
+            font-family: var(--font-mono) !important;
+            transition: all 0.3s ease;
+        }
+
+        /* Theme 1: Neon Matrix (Default) */
+        .visual-pre.theme-matrix {
+            background-color: #05070a !important;
+            color: #39FF14 !important;
+            border: 1px solid rgba(57, 255, 20, 0.25) !important;
+        }
+        .visual-pre.theme-matrix code {
+            color: #39FF14 !important;
+        }
+
+        /* Theme 2: Cyberpunk / Synthwave */
+        .visual-pre.theme-cyberpunk {
+            background-color: #0b0c16 !important;
+            color: #FF007F !important;
+            border: 1px solid rgba(255, 0, 127, 0.35) !important;
+        }
+        .visual-pre.theme-cyberpunk code {
+            color: #00F0FF !important; /* Glowing Blue codes on Pink ASCII lines */
+        }
+
+        /* Theme 3: Slate High Contrast (Matches site light/dark mode) */
+        .visual-pre.theme-slate {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        .visual-pre.theme-slate code {
+            color: var(--text-primary) !important;
         }
 
         /* Horizontal dividers */
@@ -462,11 +525,30 @@
             <div id="chapterTitleHeader" style="font-weight: 600; font-size: 16px;">
                 Chapter Loading...
             </div>
+            
             <div class="header-actions">
+                <!-- BOLD +/- WEIGHT CONTROL GROUP -->
+                <div class="btn-group" title="লেখার গাঢ়তা (Bold Weight) কমান/বাড়ান">
+                    <button class="action-btn" style="border:none;" onclick="adjustBold(-1)">
+                        <i class="fa-solid fa-bold" style="font-size: 10px;"></i><span class="btn-label-small">-</span>
+                    </button>
+                    <button class="action-btn" style="border:none;" onclick="adjustBold(1)">
+                        <i class="fa-solid fa-bold"></i><span class="btn-label-small">+</span>
+                    </button>
+                </div>
+
+                <!-- DIAGRAM PALETTE THEME CONTROL -->
+                <button class="action-btn" onclick="cycleVisualTheme()" id="diagramThemeBtn" title="ডায়াগ্রামের থিম টগল (৩টি কালার থিম)">
+                    <i class="fa-solid fa-palette"></i>
+                </button>
+
+                <!-- FONT SIZE CONTROL -->
                 <button class="font-size-btn" onclick="toggleFontSize()" title="ফন্ট সাইজ পরিবর্তন">
                     <i class="fa-solid fa-font"></i>
                 </button>
-                <button class="theme-toggle-btn" onclick="toggleTheme()" title="থিম পরিবর্তন">
+
+                <!-- THEME DAY/DARK TOGGLE -->
+                <button class="theme-toggle-btn" onclick="toggleTheme()" title="থিম পরিবর্তন (দিন/রাত)">
                     <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </button>
             </div>
@@ -575,8 +657,10 @@
         let currentChapterNum = 1;
         let isLight = false;
         let fontSizeMode = 0; // 0 = standard, 1 = large, 2 = larger
+        let currentFontWeight = 400; // 300 (Light), 400 (Normal), 500 (Medium), 600 (Bold)
+        let currentVisualTheme = 'matrix'; // matrix, cyberpunk, slate
 
-        // Render Sidebar
+        // Populate sidebar
         function populateSidebar() {
             const listDiv = document.getElementById("chaptersList");
             listDiv.innerHTML = "";
@@ -598,20 +682,81 @@
             });
         }
 
-        // Toggle Sidebar on mobile screens
+        // Toggle Sidebar mobile
         function toggleSidebar() {
             document.getElementById("sidebar").classList.toggle("open");
         }
 
-        // Toggle Dark/Light Mode
+        // Toggle Theme Day/Night
         function toggleTheme() {
             isLight = !isLight;
             document.documentElement.className = isLight ? "light" : "dark";
             const icon = document.getElementById("themeIcon");
             icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
+            
+            // If diagram theme is 'slate', refresh it to adapt to light/dark variables
+            if (currentVisualTheme === 'slate') {
+                applyVisualThemeToPage();
+            }
         }
 
-        // Cycle through Font Sizes for high reading comfort
+        // Adjust Font Boldness Weight step-by-step
+        function adjustBold(direction) {
+            const weights = [300, 400, 500, 600];
+            let idx = weights.indexOf(currentFontWeight);
+            
+            if (direction === 1 && idx < weights.length - 1) {
+                idx++;
+            } else if (direction === -1 && idx > 0) {
+                idx--;
+            }
+            
+            currentFontWeight = weights[idx];
+            applyFontWeightToPage();
+        }
+
+        function applyFontWeightToPage() {
+            const article = document.getElementById("markdownContent");
+            // Set for paragraphs and lists specifically
+            const selectors = article.querySelectorAll("p, li, th, td");
+            selectors.forEach(el => {
+                el.style.fontWeight = currentFontWeight;
+            });
+            localStorage.setItem('fontWeight', currentFontWeight);
+        }
+
+        // Cycle through 3 different visual diagram themes (Matrix, Cyberpunk, Slate)
+        function cycleVisualTheme() {
+            const themes = ['matrix', 'cyberpunk', 'slate'];
+            const idx = themes.indexOf(currentVisualTheme);
+            currentVisualTheme = themes[(idx + 1) % themes.length];
+            
+            applyVisualThemeToPage();
+            
+            // Show dynamic button styling
+            const btn = document.getElementById("diagramThemeBtn");
+            if (currentVisualTheme === 'cyberpunk') {
+                btn.className = "action-btn active-theme";
+                btn.style.background = "linear-gradient(135deg, #FF007F, #00F0FF)";
+            } else if (currentVisualTheme === 'slate') {
+                btn.className = "action-btn active-theme";
+                btn.style.background = "linear-gradient(135deg, #6B7280, #374151)";
+            } else {
+                btn.className = "action-btn";
+                btn.style.background = "";
+            }
+            
+            localStorage.setItem('visualTheme', currentVisualTheme);
+        }
+
+        function applyVisualThemeToPage() {
+            const preElements = document.querySelectorAll('.visual-pre');
+            preElements.forEach(pre => {
+                pre.className = `visual-pre theme-${currentVisualTheme}`;
+            });
+        }
+
+        // Cycle Font Size
         function toggleFontSize() {
             fontSizeMode = (fontSizeMode + 1) % 3;
             const article = document.getElementById("markdownContent");
@@ -624,29 +769,30 @@
             }
         }
 
-        // Fetch and Render Markdown Chapter viamarked.js
+        // Fetch and Render Markdown Chapter via marked.js
         async function loadChapter(chNum) {
             currentChapterNum = chNum;
             populateSidebar();
             
-            // Close mobile sidebar on selection
+            // Close mobile sidebar
             document.getElementById("sidebar").classList.remove("open");
             
             const headerTitle = document.getElementById("chapterTitleHeader");
             headerTitle.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Chapter ${chNum} Loading...`;
             
             try {
-                // Fetch chapter local markdown file
                 const response = await fetch(`/handbook/chapter_${chNum}.md`);
                 if (!response.ok) throw new Error("Chapter file not found");
                 
                 let text = await response.text();
                 
-                // Parse custom visual callouts inside our chapter files
+                // Parse custom visual callouts inside our chapter files into 3-theme controllable pre blocks!
                 text = text.replace(/\[VISUAL\]([\s\S]*?)(?=---|\n\n###)/g, (match, content) => {
                     return `<div class="callout-box developer">
-                        <div class="callout-title"><i class="fa-solid fa-image"></i> Visual Explanation / Architecture Map</div>
-                        <pre style="margin-top:10px; background:#000 !important; color:#0f0;"><code class="language-plaintext">${content.trim()}</code></pre>
+                        <div class="callout-title">
+                            <span><i class="fa-solid fa-image"></i> Visual Explanation / Architecture Map</span>
+                        </div>
+                        <pre class="visual-pre theme-${currentVisualTheme}"><code class="language-plaintext">${content.trim()}</code></pre>
                     </div>`;
                 });
                 
@@ -666,7 +812,7 @@
                 const contentDiv = document.getElementById("markdownContent");
                 contentDiv.innerHTML = marked.parse(text);
                 
-                // Set Header
+                // Set Header title
                 const mainH1 = contentDiv.querySelector("h1");
                 headerTitle.innerText = mainH1 ? mainH1.innerText : `Chapter ${chNum}`;
                 
@@ -688,6 +834,10 @@
                 
                 // Transform Interview Questions into Interactive Flashcards!
                 setupInteractiveInterviewQuestions();
+                
+                // Apply current weights & themes
+                applyFontWeightToPage();
+                applyVisualThemeToPage();
                 
                 // Scroll to top
                 document.querySelector(".content-container").scrollTop = 0;
@@ -711,8 +861,6 @@
             
             headers.forEach(h => {
                 if (h.innerText.includes("Beginner") || h.innerText.includes("Intermediate") || h.innerText.includes("Advanced")) {
-                    // This is an interview category header
-                    // Let's look at subsequent elements and group Q&A pairs
                     let sibling = h.nextElementSibling;
                     let elementsToRemove = [];
                     
@@ -721,7 +869,6 @@
                             const listItems = sibling.querySelectorAll("li");
                             listItems.forEach(li => {
                                 const text = li.innerHTML;
-                                // Split question and answer at "উত্তর:"
                                 if (text.includes("<strong>প্রশ্ন:</strong>") || text.includes("প্রশ্ন:")) {
                                     const parts = text.split(/<strong>উত্তর:<\/strong>|উত্তর:/);
                                     if (parts.length >= 2) {
@@ -759,7 +906,6 @@
         async function handleSearch() {
             const query = document.getElementById("searchInput").value.toLowerCase().trim();
             if (!query) {
-                // If empty search, restore current chapter
                 loadChapter(currentChapterNum);
                 return;
             }
@@ -773,17 +919,14 @@
             `;
             
             let matches = [];
-            // Loop and search all 28 chapters dynamically
             for (let i = 1; i <= 28; i++) {
                 try {
                     const resp = await fetch(`/handbook/chapter_${i}.md`);
                     if (resp.ok) {
                         const text = await resp.text();
-                        // Find paragraphs containing query
                         const lines = text.split("\n");
                         lines.forEach(line => {
                             if (line.toLowerCase().includes(query) && line.length > 20) {
-                                // Add match
                                 matches.push({
                                     chNum: i,
                                     text: line.replace(/[#*`_]/g, "").trim()
@@ -794,7 +937,6 @@
                 } catch(e){}
             }
             
-            // Render Search results
             if (matches.length === 0) {
                 resultsDiv.innerHTML = `
                     <div style="text-align: center; margin-top: 100px;">
@@ -815,6 +957,14 @@
                 });
                 resultsDiv.innerHTML = html;
             }
+        }
+
+        // Restore user preferences
+        if (localStorage.getItem('visualTheme')) {
+            currentVisualTheme = localStorage.getItem('visualTheme');
+        }
+        if (localStorage.getItem('fontWeight')) {
+            currentFontWeight = parseInt(localStorage.getItem('fontWeight'));
         }
 
         // Initialize App
