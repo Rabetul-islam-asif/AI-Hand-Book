@@ -81,7 +81,11 @@
             height: 100%;
             flex-shrink: 0;
             z-index: 10;
-            transition: transform 0.3s ease;
+            transition: margin-left 0.3s ease, transform 0.3s ease;
+        }
+
+        aside.collapsed {
+            margin-left: calc(-1 * var(--sidebar-width));
         }
 
         .logo-area {
@@ -205,12 +209,24 @@
         }
 
         .menu-btn {
-            display: none;
-            font-size: 20px;
-            cursor: pointer;
             background: none;
-            border: none;
+            border: 1px solid var(--border-color);
             color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13.5px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .menu-btn:hover {
+            border-color: var(--accent-purple);
+            background-color: var(--bg-tertiary);
         }
 
         .header-actions {
@@ -563,9 +579,7 @@
                 left: 0;
             }
 
-            .menu-btn {
-                display: block;
-            }
+            /* Inherits circular desktop style, stays visible */
         }
     </style>
 </head>
@@ -589,11 +603,13 @@
     <!-- MAIN READER INTERFACE -->
     <main>
         <header>
-            <button class="menu-btn" onclick="toggleSidebar()">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            <div id="chapterTitleHeader" style="font-weight: 600; font-size: 16px;">
-                Chapter Loading...
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button class="menu-btn" onclick="toggleSidebar()" title="সাইডবার হাইড/শো করুন">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div id="chapterTitleHeader" style="font-weight: 600; font-size: 16px;">
+                    Chapter Loading...
+                </div>
             </div>
             
             <div class="header-actions">
@@ -758,9 +774,16 @@
             });
         }
 
-        // Toggle Sidebar mobile
+        // Toggle Sidebar for both Desktop and Mobile
         function toggleSidebar() {
-            document.getElementById("sidebar").classList.toggle("open");
+            const sidebar = document.getElementById("sidebar");
+            if (window.innerWidth <= 900) {
+                sidebar.classList.toggle("open");
+                sidebar.classList.remove("collapsed");
+            } else {
+                sidebar.classList.toggle("collapsed");
+                sidebar.classList.remove("open");
+            }
         }
 
         // Toggle Theme Day/Night
