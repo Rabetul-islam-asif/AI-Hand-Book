@@ -823,6 +823,104 @@
 
             /* Inherits circular desktop style, stays visible */
         }
+
+        /* PREMIUM CHAPTER NAVIGATION BUTTONS */
+        .chapter-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 60px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-color);
+            gap: 20px;
+        }
+
+        .nav-prev-btn, .nav-next-btn {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 16px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            max-width: 48%;
+            flex-grow: 1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-next-btn {
+            text-align: right;
+            justify-content: flex-end;
+        }
+
+        .nav-prev-btn:hover {
+            transform: translateX(-4px);
+            border-color: var(--accent-purple);
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.05), transparent);
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1);
+        }
+
+        .nav-next-btn:hover {
+            transform: translateX(4px);
+            border-color: var(--accent-purple);
+            background: linear-gradient(270deg, rgba(139, 92, 246, 0.05), transparent);
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1);
+        }
+
+        .nav-arrow {
+            font-size: 18px;
+            color: var(--accent-purple);
+            transition: transform 0.2s ease;
+        }
+
+        .nav-prev-btn:hover .nav-arrow {
+            transform: scale(1.15);
+        }
+
+        .nav-next-btn:hover .nav-arrow {
+            transform: scale(1.15);
+        }
+
+        .nav-btn-label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .nav-dir-sub {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .nav-chapter-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Responsive Chapter Nav */
+        @media (max-width: 600px) {
+            .chapter-navigation {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .nav-prev-btn, .nav-next-btn {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1306,6 +1404,52 @@
                 
                 // Transform Interview Questions into Interactive Flashcards!
                 setupInteractiveInterviewQuestions();
+                
+                // Append Next & Previous Chapter Navigation Arrows
+                const navDiv = document.createElement("div");
+                navDiv.className = "chapter-navigation";
+                
+                let prevCh = null;
+                let nextCh = null;
+                syllabus.forEach(part => {
+                    part.chapters.forEach(ch => {
+                        if (ch.num === chNum - 1) prevCh = ch;
+                        if (ch.num === chNum + 1) nextCh = ch;
+                    });
+                });
+                
+                let prevBtnHtml = "";
+                if (prevCh) {
+                    prevBtnHtml = `
+                        <button class="nav-prev-btn" onclick="loadChapter(${prevCh.num})">
+                            <span class="nav-arrow"><i class="fa-solid fa-arrow-left"></i></span>
+                            <span class="nav-btn-label">
+                                <span class="nav-dir-sub">পূর্ববর্তী অধ্যায়</span>
+                                <span class="nav-chapter-title">Ch ${prevCh.num}: ${prevCh.title}</span>
+                            </span>
+                        </button>
+                    `;
+                } else {
+                    prevBtnHtml = `<div style="flex-grow: 1; max-width: 48%;"></div>`;
+                }
+                
+                let nextBtnHtml = "";
+                if (nextCh) {
+                    nextBtnHtml = `
+                        <button class="nav-next-btn" onclick="loadChapter(${nextCh.num})">
+                            <span class="nav-btn-label">
+                                <span class="nav-dir-sub">পরবর্তী অধ্যায়</span>
+                                <span class="nav-chapter-title">Ch ${nextCh.num}: ${nextCh.title}</span>
+                            </span>
+                            <span class="nav-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                        </button>
+                    `;
+                } else {
+                    nextBtnHtml = `<div style="flex-grow: 1; max-width: 48%;"></div>`;
+                }
+                
+                navDiv.innerHTML = prevBtnHtml + nextBtnHtml;
+                contentDiv.appendChild(navDiv);
                 
                 // Apply current weights & themes
                 applyFontWeightToPage();
