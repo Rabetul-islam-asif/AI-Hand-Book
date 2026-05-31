@@ -324,12 +324,12 @@
 
         /* Fenced Code Highlights */
         article pre {
-            background-color: #0b0b0f !important;
             padding: 20px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             overflow-x: auto;
             margin: 24px 0;
+            transition: all 0.3s ease;
         }
 
         article code {
@@ -375,7 +375,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* THREE DYNAMIC THEMES FOR VISUAL DIAGRAMS (Matrix, Cyberpunk, Light/Slate) */
+        /* DYNAMIC THEMES FOR VISUAL DIAGRAMS (Matrix, Cyberpunk, Slate) */
         .visual-pre {
             padding: 20px !important;
             border-radius: 10px !important;
@@ -404,7 +404,7 @@
             color: #00F0FF !important; /* Glowing Blue codes on Pink ASCII lines */
         }
 
-        /* Theme 3: Slate High Contrast (Matches site light/dark mode) */
+        /* Theme 3: Slate High Contrast */
         .visual-pre.theme-slate {
             background-color: var(--bg-tertiary) !important;
             color: var(--text-primary) !important;
@@ -412,6 +412,27 @@
         }
         .visual-pre.theme-slate code {
             color: var(--text-primary) !important;
+        }
+
+        /* DYNAMIC BACKGROUND COLOR THEMES FOR CODE BLOCKS (pre tags) */
+        pre.code-theme-black {
+            background-color: #0b0b0f !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        pre.code-theme-brown {
+            background-color: #2D2520 !important; /* Warm Soft Sepia Brown */
+            border-color: rgba(230, 175, 120, 0.15) !important;
+        }
+
+        pre.code-theme-gray {
+            background-color: #22262E !important; /* Classy Slate Gray */
+            border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+
+        pre.code-theme-blue {
+            background-color: #161D28 !important; /* Soft Night Whitish Blue */
+            border-color: rgba(56, 189, 248, 0.15) !important;
         }
 
         /* Horizontal dividers */
@@ -527,6 +548,11 @@
             </div>
             
             <div class="header-actions">
+                <!-- CODE BLOCK THEME SWITCHER -->
+                <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="কোড ব্যাকগ্রাউন্ড থিম (Black, Soft Brown, Gray, Soft Whitish Blue)">
+                    <i class="fa-solid fa-code"></i>
+                </button>
+
                 <!-- BOLD +/- WEIGHT CONTROL GROUP -->
                 <div class="btn-group" title="লেখার গাঢ়তা (Bold Weight) কমান/বাড়ান">
                     <button class="action-btn" style="border:none;" onclick="adjustBold(-1)">
@@ -538,7 +564,7 @@
                 </div>
 
                 <!-- DIAGRAM PALETTE THEME CONTROL -->
-                <button class="action-btn" onclick="cycleVisualTheme()" id="diagramThemeBtn" title="ডায়াগ্রামের থিম টগল (৩টি কালার থিম)">
+                <button class="action-btn" onclick="cycleVisualTheme()" id="diagramThemeBtn" title="ডায়াগ্রামের নিওন থিম টগল (৩টি কালার থিম)">
                     <i class="fa-solid fa-palette"></i>
                 </button>
 
@@ -549,7 +575,7 @@
 
                 <!-- THEME DAY/DARK TOGGLE -->
                 <button class="theme-toggle-btn" onclick="toggleTheme()" title="থিম পরিবর্তন (দিন/রাত)">
-                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    <i class="fa-solid fa-sun" id="themeIcon"></i>
                 </button>
             </div>
         </header>
@@ -659,6 +685,7 @@
         let fontSizeMode = 0; // 0 = standard, 1 = large, 2 = larger
         let currentFontWeight = 400; // 300 (Light), 400 (Normal), 500 (Medium), 600 (Bold)
         let currentVisualTheme = 'matrix'; // matrix, cyberpunk, slate
+        let currentCodeTheme = 'black'; // black, brown, gray, blue
 
         // Populate sidebar
         function populateSidebar() {
@@ -694,7 +721,6 @@
             const icon = document.getElementById("themeIcon");
             icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
             
-            // If diagram theme is 'slate', refresh it to adapt to light/dark variables
             if (currentVisualTheme === 'slate') {
                 applyVisualThemeToPage();
             }
@@ -717,7 +743,6 @@
 
         function applyFontWeightToPage() {
             const article = document.getElementById("markdownContent");
-            // Set for paragraphs and lists specifically
             const selectors = article.querySelectorAll("p, li, th, td");
             selectors.forEach(el => {
                 el.style.fontWeight = currentFontWeight;
@@ -756,6 +781,45 @@
             });
         }
 
+        // Cycle through 4 different code block background themes (Black, Brown, Gray, Whitish Blue)
+        function cycleCodeTheme() {
+            const themes = ['black', 'brown', 'gray', 'blue'];
+            const idx = themes.indexOf(currentCodeTheme);
+            currentCodeTheme = themes[(idx + 1) % themes.length];
+            
+            applyCodeThemeToPage();
+            
+            // Button feedback decoration
+            const btn = document.getElementById("codeThemeBtn");
+            if (currentCodeTheme === 'brown') {
+                btn.style.background = "#2D2520";
+                btn.style.color = "#E6AF78";
+                btn.style.borderColor = "#E6AF78";
+            } else if (currentCodeTheme === 'gray') {
+                btn.style.background = "#22262E";
+                btn.style.color = "#F3F4F6";
+                btn.style.borderColor = "#F3F4F6";
+            } else if (currentCodeTheme === 'blue') {
+                btn.style.background = "#161D28";
+                btn.style.color = "#38BDF8";
+                btn.style.borderColor = "#38BDF8";
+            } else {
+                btn.style.background = "";
+                btn.style.color = "";
+                btn.style.borderColor = "";
+            }
+            
+            localStorage.setItem('codeTheme', currentCodeTheme);
+        }
+
+        function applyCodeThemeToPage() {
+            const preElements = document.querySelectorAll('pre');
+            preElements.forEach(pre => {
+                pre.classList.remove('code-theme-black', 'code-theme-brown', 'code-theme-gray', 'code-theme-blue');
+                pre.classList.add(`code-theme-${currentCodeTheme}`);
+            });
+        }
+
         // Cycle Font Size
         function toggleFontSize() {
             fontSizeMode = (fontSizeMode + 1) % 3;
@@ -774,7 +838,6 @@
             currentChapterNum = chNum;
             populateSidebar();
             
-            // Close mobile sidebar
             document.getElementById("sidebar").classList.remove("open");
             
             const headerTitle = document.getElementById("chapterTitleHeader");
@@ -838,6 +901,7 @@
                 // Apply current weights & themes
                 applyFontWeightToPage();
                 applyVisualThemeToPage();
+                applyCodeThemeToPage();
                 
                 // Scroll to top
                 document.querySelector(".content-container").scrollTop = 0;
@@ -965,6 +1029,27 @@
         }
         if (localStorage.getItem('fontWeight')) {
             currentFontWeight = parseInt(localStorage.getItem('fontWeight'));
+        }
+        if (localStorage.getItem('codeTheme')) {
+            currentCodeTheme = localStorage.getItem('codeTheme');
+            
+            // Set initial button decoration based on restored theme
+            setTimeout(() => {
+                const btn = document.getElementById("codeThemeBtn");
+                if (currentCodeTheme === 'brown') {
+                    btn.style.background = "#2D2520";
+                    btn.style.color = "#E6AF78";
+                    btn.style.borderColor = "#E6AF78";
+                } else if (currentCodeTheme === 'gray') {
+                    btn.style.background = "#22262E";
+                    btn.style.color = "#F3F4F6";
+                    btn.style.borderColor = "#F3F4F6";
+                } else if (currentCodeTheme === 'blue') {
+                    btn.style.background = "#161D28";
+                    btn.style.color = "#38BDF8";
+                    btn.style.borderColor = "#38BDF8";
+                }
+            }, 100);
         }
 
         // Initialize App
