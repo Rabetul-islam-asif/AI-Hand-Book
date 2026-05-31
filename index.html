@@ -531,58 +531,203 @@
         }
 
         /* DYNAMIC BACKGROUND COLOR THEMES FOR CODE BLOCKS (pre tags) */
-        pre.code-theme-black {
+
+        /* 1. BLACK THEME (Deep Dark in Dark Mode, Soft Off-white/Light Gray in Light Mode) */
+        html.dark pre.code-theme-black {
             background-color: #0b0b0f !important;
             border-color: rgba(255, 255, 255, 0.08) !important;
+            color: #e5e7eb !important;
+        }
+        html.dark pre.code-theme-black code {
+            color: #e5e7eb !important;
         }
 
-        /* SAGE GREEN THEME (#ACAEA2) with deep charcoal highly legible text */
+        html.light pre.code-theme-black {
+            background-color: #f3f4f6 !important; /* Premium Off-White/Light Gray card background */
+            border-color: rgba(0, 0, 0, 0.08) !important;
+            color: #1f2937 !important;
+        }
+        html.light pre.code-theme-black code {
+            color: #1f2937 !important;
+        }
+        /* Custom light token color overrides for Black theme in Light Mode */
+        html.light pre.code-theme-black .hljs-keyword,
+        html.light pre.code-theme-black .hljs-built_in,
+        html.light pre.code-theme-black .hljs-selector-tag {
+            color: #4f46e5 !important; /* Premium Vibrant Indigo */
+            font-weight: 700 !important;
+        }
+        html.light pre.code-theme-black .hljs-string,
+        html.light pre.code-theme-black .hljs-attr {
+            color: #059669 !important; /* Rich Emerald Green */
+            font-weight: 600 !important;
+        }
+        html.light pre.code-theme-black .hljs-title,
+        html.light pre.code-theme-black .hljs-section {
+            color: #1d4ed8 !important; /* Royal Blue */
+            font-weight: 700 !important;
+        }
+        html.light pre.code-theme-black .hljs-comment {
+            color: #6b7280 !important; /* Medium Slate Gray */
+            font-style: italic !important;
+        }
+        html.light pre.code-theme-black .hljs-number,
+        html.light pre.code-theme-black .hljs-literal {
+            color: #b91c1c !important; /* Crimson Red */
+            font-weight: 600 !important;
+        }
+
+        /* 2. SAGE GREEN THEME (#ACAEA2) - Keep as signature light Sage Green for both modes */
         pre.code-theme-gray {
             background-color: #ACAEA2 !important;
             border-color: rgba(0, 0, 0, 0.12) !important;
-            color: #1A2421 !important; /* Deep dark slate green text */
+            color: #1A2421 !important; /* Deep dark slate forest green */
         }
         pre.code-theme-gray code {
             color: #1A2421 !important;
         }
-        /* Custom highlight token color overrides for perfect contrast on #ACAEA2 */
         pre.code-theme-gray .hljs-keyword,
         pre.code-theme-gray .hljs-built_in,
         pre.code-theme-gray .hljs-selector-tag {
-            color: #7C2D12 !important; /* Deep warm brown/burnt orange keywords */
+            color: #7C2D12 !important; /* Warm deep orange/brown keywords */
             font-weight: 700 !important;
         }
         pre.code-theme-gray .hljs-string,
         pre.code-theme-gray .hljs-attr {
-            color: #065F46 !important; /* Highly readable dark emerald green for strings */
+            color: #065F46 !important; /* Emerald green for strings */
             font-weight: 600 !important;
         }
         pre.code-theme-gray .hljs-title,
         pre.code-theme-gray .hljs-section {
-            color: #1E3A8A !important; /* Deep navy blue for class/func titles */
+            color: #1E3A8A !important; /* Dark navy blue for class/func titles */
             font-weight: 700 !important;
         }
         pre.code-theme-gray .hljs-comment {
-            color: #4B5563 !important; /* Dark gray comments */
+            color: #4B5563 !important; /* Dark slate comments */
             font-style: italic !important;
         }
         pre.code-theme-gray .hljs-number,
         pre.code-theme-gray .hljs-literal {
-            color: #9D174D !important; /* Deep pink/burgundy for numbers */
+            color: #9D174D !important; /* Burgundy/crimson for numbers */
             font-weight: 600 !important;
         }
 
-        pre.code-theme-brown {
-            background-color: #2D2520 !important; /* Warm Soft Sepia Brown */
+        /* 3. SEPIA BROWN THEME (Soft Charcoal-Brown in Dark Mode, Soft Cream in Light Mode) */
+        html.dark pre.code-theme-brown {
+            background-color: #2D2520 !important;
             border-color: rgba(230, 175, 120, 0.15) !important;
+            color: #f5f5f4 !important;
+        }
+        html.dark pre.code-theme-brown code {
+            color: #f5f5f4 !important;
         }
 
-        pre.code-theme-blue {
-            background-color: #161D28 !important; /* Soft Night Whitish Blue */
+        html.light pre.code-theme-brown {
+            background-color: #faf6f0 !important; /* Warm Cream background */
+            border-color: #e6d8c8 !important;
+            color: #4a3e3d !important; /* Warm Deep Dark Brown text */
+        }
+        html.light pre.code-theme-brown code {
+            color: #4a3e3d !important;
+        }
+        /* Custom light token color overrides for Brown theme in Light Mode */
+        html.light pre.code-theme-brown .hljs-keyword,
+        html.light pre.code-theme-brown .hljs-built_in,
+        html.light pre.code-theme-brown .hljs-selector-tag {
+            color: #b45309 !important; /* Soft Amber Bronze */
+            font-weight: 700 !important;
+        }
+        html.light pre.code-theme-brown .hljs-string,
+        html.light pre.code-theme-brown .hljs-attr {
+            color: #15803d !important; /* Warm Forest Green */
+            font-weight: 600 !important;
+        }
+        html.light pre.code-theme-brown .hljs-title,
+        html.light pre.code-theme-brown .hljs-section {
+            color: #a21caf !important; /* Warm Purple */
+            font-weight: 700 !important;
+        }
+        html.light pre.code-theme-brown .hljs-comment {
+            color: #857a75 !important; /* Soft Warm Gray comments */
+            font-style: italic !important;
+        }
+        html.light pre.code-theme-brown .hljs-number,
+        html.light pre.code-theme-brown .hljs-literal {
+            color: #be123c !important; /* Crimson Red */
+            font-weight: 600 !important;
+        }
+
+        /* 4. SOFT BLUE THEME (Midnight Blue in Dark Mode, Soft Pastel Blue in Light Mode) */
+        html.dark pre.code-theme-blue {
+            background-color: #161D28 !important;
             border-color: rgba(56, 189, 248, 0.15) !important;
+            color: #f0f9ff !important;
+        }
+        html.dark pre.code-theme-blue code {
+            color: #f0f9ff !important;
         }
 
-        /* Removed light mode pre overrides to let individual code block background themes style code blocks */
+        html.light pre.code-theme-blue {
+            background-color: #f0f7ff !important; /* Light sky blue background */
+            border-color: #d0e1fd !important;
+            color: #1e293b !important; /* Dark Slate Blue text */
+        }
+        html.light pre.code-theme-blue code {
+            color: #1e293b !important;
+        }
+        /* Custom light token color overrides for Blue theme in Light Mode */
+        html.light pre.code-theme-blue .hljs-keyword,
+        html.light pre.code-theme-blue .hljs-built_in,
+        html.light pre.code-theme-blue .hljs-selector-tag {
+            color: #0369a1 !important; /* Vibrant Ocean Blue */
+            font-weight: 700 !important;
+        }
+        html.light pre.code-theme-blue .hljs-string,
+        html.light pre.code-theme-blue .hljs-attr {
+            color: #0f766e !important; /* Soft Deep Teal */
+            font-weight: 600 !important;
+        }
+        html.light pre.code-theme-blue .hljs-title,
+        html.light pre.code-theme-blue .hljs-section {
+            color: #6d28d9 !important; /* Royal Purple */
+            font-weight: 700 !important;
+        }
+        html.light pre.code-theme-blue .hljs-comment {
+            color: #64748b !important; /* Medium Slate comments */
+            font-style: italic !important;
+        }
+        html.light pre.code-theme-blue .hljs-number,
+        html.light pre.code-theme-blue .hljs-literal {
+            color: #c2410c !important; /* Burnt Orange */
+            font-weight: 600 !important;
+        }
+
+        /* 5. COPY CODE BUTTON STYLING BY WEBSITE THEME STATE */
+        html.light pre .copy-code-btn {
+            background: rgba(0, 0, 0, 0.04) !important;
+            color: #1f2937 !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+        html.light pre .copy-code-btn:hover {
+            background: var(--accent-purple) !important;
+            color: #fff !important;
+            border-color: var(--accent-purple) !important;
+        }
+
+        html.dark pre.code-theme-black .copy-code-btn,
+        html.dark pre.code-theme-brown .copy-code-btn,
+        html.dark pre.code-theme-blue .copy-code-btn {
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: #e5e7eb !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        html.dark pre.code-theme-black .copy-code-btn:hover,
+        html.dark pre.code-theme-brown .copy-code-btn:hover,
+        html.dark pre.code-theme-blue .copy-code-btn:hover {
+            background: var(--accent-purple) !important;
+            color: #fff !important;
+            border-color: var(--accent-purple) !important;
+        }
 
         /* Horizontal dividers */
         hr {
@@ -911,6 +1056,7 @@
             if (currentVisualTheme === 'slate') {
                 applyVisualThemeToPage();
             }
+            decorateCodeThemeButton();
             localStorage.setItem('themeState', isLight ? 'light' : 'dark');
         }
 
@@ -990,13 +1136,35 @@
                 btn.style.color = "#1A2421";
                 btn.style.borderColor = "#1A2421";
             } else if (currentCodeTheme === 'brown') {
-                btn.style.background = "#2D2520";
-                btn.style.color = "#E6AF78";
-                btn.style.borderColor = "#E6AF78";
+                if (isLight) {
+                    btn.style.background = "#faf6f0";
+                    btn.style.color = "#4a3e3d";
+                    btn.style.borderColor = "#e6d8c8";
+                } else {
+                    btn.style.background = "#2D2520";
+                    btn.style.color = "#E6AF78";
+                    btn.style.borderColor = "#E6AF78";
+                }
             } else if (currentCodeTheme === 'blue') {
-                btn.style.background = "#161D28";
-                btn.style.color = "#38BDF8";
-                btn.style.borderColor = "#38BDF8";
+                if (isLight) {
+                    btn.style.background = "#f0f7ff";
+                    btn.style.color = "#1e293b";
+                    btn.style.borderColor = "#d0e1fd";
+                } else {
+                    btn.style.background = "#161D28";
+                    btn.style.color = "#38BDF8";
+                    btn.style.borderColor = "#38BDF8";
+                }
+            } else if (currentCodeTheme === 'black') {
+                if (isLight) {
+                    btn.style.background = "#f3f4f6";
+                    btn.style.color = "#1f2937";
+                    btn.style.borderColor = "rgba(0, 0, 0, 0.1)";
+                } else {
+                    btn.style.background = "#0b0b0f";
+                    btn.style.color = "#e5e7eb";
+                    btn.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                }
             } else {
                 btn.style.background = "";
                 btn.style.color = "";
