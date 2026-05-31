@@ -519,6 +519,16 @@
         .visual-pre.theme-cyberpunk code {
             color: #00F0FF !important; /* Glowing Blue codes on Pink ASCII lines */
         }
+        
+        /* Premium Light Cyberpunk Theme in Day Mode */
+        html.light .visual-pre.theme-cyberpunk {
+            background-color: #FAF0F4 !important; /* Soft light pinkish-beige background */
+            color: #C026D3 !important; /* Deep magenta for ASCII lines and borders */
+            border: 1px solid rgba(192, 38, 211, 0.25) !important;
+        }
+        html.light .visual-pre.theme-cyberpunk code {
+            color: #0284C7 !important; /* Deep ocean blue for key texts */
+        }
 
         /* Theme 3: Slate High Contrast */
         .visual-pre.theme-slate {
@@ -1065,6 +1075,7 @@
                 applyVisualThemeToPage();
             }
             decorateCodeThemeButton();
+            decorateVisualThemeButton();
             localStorage.setItem('themeState', isLight ? 'light' : 'dark');
         }
 
@@ -1099,21 +1110,33 @@
             currentVisualTheme = themes[(idx + 1) % themes.length];
             
             applyVisualThemeToPage();
+            decorateVisualThemeButton();
             
-            // Show dynamic button styling
+            localStorage.setItem('visualTheme', currentVisualTheme);
+        }
+
+        // Decorate diagram theme switcher button dynamically
+        function decorateVisualThemeButton() {
             const btn = document.getElementById("diagramThemeBtn");
+            if (!btn) return;
             if (currentVisualTheme === 'cyberpunk') {
                 btn.className = "action-btn active-theme";
-                btn.style.background = "linear-gradient(135deg, #FF007F, #00F0FF)";
+                if (isLight) {
+                    btn.style.background = "linear-gradient(135deg, #FF66B2, #33CCFF)"; // Soft pastel cyberpunk gradient
+                } else {
+                    btn.style.background = "linear-gradient(135deg, #FF007F, #00F0FF)"; // Neon gradient
+                }
             } else if (currentVisualTheme === 'slate') {
                 btn.className = "action-btn active-theme";
-                btn.style.background = "linear-gradient(135deg, #6B7280, #374151)";
+                if (isLight) {
+                    btn.style.background = "linear-gradient(135deg, #9CA3AF, #4B5563)"; // Light Slate gradient
+                } else {
+                    btn.style.background = "linear-gradient(135deg, #6B7280, #374151)"; // Dark Slate gradient
+                }
             } else {
                 btn.className = "action-btn";
                 btn.style.background = "";
             }
-            
-            localStorage.setItem('visualTheme', currentVisualTheme);
         }
 
         // Converted default matrix theme to #ACAEA2 background & deep dark text!
@@ -1438,6 +1461,7 @@
         
         setTimeout(() => {
             decorateCodeThemeButton();
+            decorateVisualThemeButton();
             const icon = document.getElementById("themeIcon");
             icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
         }, 100);
