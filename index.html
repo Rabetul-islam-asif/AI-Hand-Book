@@ -235,6 +235,41 @@
             gap: 12px;
         }
 
+        .creator-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(139, 92, 246, 0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+
+        .creator-badge i {
+            font-size: 10px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .creator-badge:hover {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 600px) {
+            .creator-badge {
+                display: none;
+            }
+        }
+
         .btn-group {
             display: flex;
             align-items: center;
@@ -603,12 +638,16 @@
     <!-- MAIN READER INTERFACE -->
     <main>
         <header>
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                 <button class="menu-btn" onclick="toggleSidebar()" title="সাইডবার হাইড/শো করুন">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div id="chapterTitleHeader" style="font-weight: 600; font-size: 16px;">
                     Chapter Loading...
+                </div>
+                <div class="creator-badge" title="Created by Asif Rabetul">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <span>Created by Asif Rabetul</span>
                 </div>
             </div>
             
