@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Engineering Handbook & Documentation Portal</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Marked.js (Markdown parser) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Highlight.js (Code Syntax Highlighting) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    
+    <!-- KaTeX for Premium LaTeX rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0F0F12;
+            --bg-secondary: #16161D;
+            --bg-tertiary: #1E1E26;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --accent-purple: #8B5CF6;
+            --accent-cyan: #06B6D4;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --sidebar-width: 320px;
+            --navbar-height: 70px;
+            --font-main: 'Outfit', 'Noto Sans Bengali', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        /* Light Mode overrides */
+        html.light {
+            --bg-primary: #FAFAFC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #F1F1F6;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --accent-purple: #7C3AED;
+            --accent-cyan: #0891B2;
+            --border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar styling with glassmorphism */
+        aside {
+            width: var(--sidebar-width);
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-area {
+            height: var(--navbar-height);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .search-container {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 14px 10px 38px;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-purple);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 32px;
+            top: 29px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .chapters-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+        }
+
+        .part-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin: 20px 8px 8px 8px;
+            font-weight: 700;
+        }
+
+        .chapter-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13.5px;
+            font-weight: 500;
+            margin-bottom: 3px;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chapter-link:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .chapter-link.active {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+            border-left: 3px solid var(--accent-purple);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding-left: 9px;
+        }
+
+        /* Main Area Layout */
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-primary);
+        }
+
+        /* Nav Header styling */
+        header {
+            height: var(--navbar-height);
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            flex-shrink: 0;
+            z-index: 5;
+        }
+
+        .menu-btn {
+            display: none;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle-btn, .font-size-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle-btn:hover, .font-size-btn:hover {
+            border-color: var(--accent-purple);
+            background-color: var(--bg-tertiary);
+        }
+
+        /* Content Container with reader options */
+        .content-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 48px;
+            display: flex;
+            justify-content: center;
+        }
+
+        article {
+            width: 100%;
+            max-width: 820px;
+            line-height: 1.7;
+            font-size: 16px;
+            position: relative;
+        }
+
+        /* Premium Typography & Markdown styling */
+        article h1 {
+            font-size: 38px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.3;
+        }
+
+        article h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        article h3 {
+            font-size: 19px;
+            font-weight: 600;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            color: var(--accent-cyan);
+        }
+
+        article p {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        article ul, article ol {
+            margin-bottom: 20px;
+            padding-left: 24px;
+            color: var(--text-secondary);
+        }
+
+        article li {
+            margin-bottom: 8px;
+        }
+
+        /* Fenced Code Highlights */
+        article pre {
+            background-color: #0b0b0f !important;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            margin: 24px 0;
+        }
+
+        article code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        article :not(pre) > code {
+            background-color: var(--bg-tertiary);
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: var(--accent-purple);
+            font-weight: 500;
+        }
+
+        /* Callouts / Developer views / Production Reality boxes */
+        .callout-box {
+            padding: 20px 24px;
+            border-radius: 12px;
+            margin: 28px 0;
+            border-left: 4px solid var(--accent-purple);
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.05), transparent);
+        }
+
+        .callout-box.developer {
+            border-left-color: var(--accent-cyan);
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.05), transparent);
+        }
+
+        .callout-box.warning {
+            border-left-color: #EF4444;
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.05), transparent);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Horizontal dividers */
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 40px 0;
+        }
+
+        /* Tables styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 15px;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        /* Interactive Interview Flashcard Widget */
+        .flashcard {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .flashcard:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        .flashcard-q {
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-primary);
+        }
+
+        .flashcard-a {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border-color);
+            color: var(--text-secondary);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Mobile Layouts */
+        @media (max-width: 900px) {
+            aside {
+                position: absolute;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+            }
+
+            aside.open {
+                left: 0;
+            }
+
+            .menu-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR CHAPTER DIRECTORY -->
+    <aside id="sidebar">
+        <div class="logo-area">
+            <i class="fa-solid fa-brain logo-icon"></i>
+            <span class="logo-text">AI Handbook</span>
+        </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="সার্চ কিওয়ার্ড বা প্রশ্ন..." oninput="handleSearch()">
+        </div>
+        <div class="chapters-list" id="chaptersList">
+            <!-- Sidebar links populated dynamically by JavaScript -->
+        </div>
+    </aside>
+
+    <!-- MAIN READER INTERFACE -->
+    <main>
+        <header>
+            <button class="menu-btn" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div id="chapterTitleHeader" style="font-weight: 600; font-size: 16px;">
+                Chapter Loading...
+            </div>
+            <div class="header-actions">
+                <button class="font-size-btn" onclick="toggleFontSize()" title="ফন্ট সাইজ পরিবর্তন">
+                    <i class="fa-solid fa-font"></i>
+                </button>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" title="থিম পরিবর্তন">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </header>
+        
+        <div class="content-container">
+            <article id="markdownContent">
+                <!-- Chapter Content Rendered Dynamically Here -->
+            </article>
+        </div>
+    </main>
+
+    <script>
+        // Chapter indexing matching standard table of contents
+        const syllabus = [
+            {
+                part: "Part 1 — AI Foundations (এআই এর সূচনা)",
+                chapters: [
+                    { num: 1, title: "Paradigm Shift" },
+                    { num: 2, title: "The Core Mechanics" }
+                ]
+            },
+            {
+                part: "Part 2 — Machine Learning (মেশিন লার্নিংয়ের অন্দরমহল)",
+                chapters: [
+                    { num: 3, title: "The Math of Learning" },
+                    { num: 4, title: "Generalization & Sweet Spot" }
+                ]
+            },
+            {
+                part: "Part 3 — Deep Learning & Neural Networks",
+                chapters: [
+                    { num: 5, title: "Artificial Neurons" },
+                    { num: 6, title: "Deep Networks & Backpropagation" }
+                ]
+            },
+            {
+                part: "Part 4 — Modern AI Foundations (আধুনিক ভিত্তি)",
+                chapters: [
+                    { num: 7, title: "Transformers & Attention" },
+                    { num: 8, title: "Tokens, Embeddings & Context" }
+                ]
+            },
+            {
+                part: "Part 5 — LLMs (লার্জ ল্যাঙ্গুয়েজ মডেল)",
+                chapters: [
+                    { num: 9, title: "LLM Ecosystem" },
+                    { num: 10, title: "Reasoning Models (R1 & o3)" }
+                ]
+            },
+            {
+                part: "Part 6 — AI Data Layer (ভেক্টর ডাটা)",
+                chapters: [
+                    { num: 11, title: "Vector & Distance Metrics" },
+                    { num: 12, title: "Vector Databases & Indexing" }
+                ]
+            },
+            {
+                part: "Part 7 — RAG (Retrieval Augmented Generation)",
+                chapters: [
+                    { num: 13, title: "RAG Fundamentals" },
+                    { num: 14, title: "Advanced Retrieval & Hybrid Search" }
+                ]
+            },
+            {
+                part: "Part 8 — Fine-Tuning (মডেল ফাইন-টিউনিং)",
+                chapters: [
+                    { num: 15, title: "SFT & Dataset Template" },
+                    { num: 16, title: "PEFT (LoRA & QLoRA)" },
+                    { num: 17, title: "RLHF, DPO & Safety Tuning" }
+                ]
+            },
+            {
+                part: "Part 9 — Agentic AI & Tool Calling (এজেন্ট)",
+                chapters: [
+                    { num: 18, title: "AI Agents & ReAct" },
+                    { num: 19, title: "Tool Calling Contracts" },
+                    { num: 20, title: "Model Context Protocol (MCP)" }
+                ]
+            },
+            {
+                part: "Part 10 — Production AI (প্রোডাকশন-গ্রেড)",
+                chapters: [
+                    { num: 21, title: "Constitutional Safety Harness" },
+                    { num: 22, title: "Observability & Tracing" },
+                    { num: 23, title: "Cost Optimization & Guardrails" }
+                ]
+            },
+            {
+                part: "Part 11 — Building Real AI Products (বাস্তব ব্লুপ্রিন্ট)",
+                chapters: [
+                    { num: 24, title: "Blueprint 1: Multi-Session Memory" },
+                    { num: 25, title: "Blueprint 2: Enterprise PDF Search" },
+                    { num: 26, title: "Blueprint 3: CLI Agent Auto-Healing" },
+                    { num: 27, title: "Blueprint 4: AI SaaS & Billing" }
+                ]
+            },
+            {
+                part: "Part 12 — AI Career Roadmap (ক্যারিয়ার গাইড)",
+                chapters: [
+                    { num: 28, title: "Transitioning to an AI Architect" }
+                ]
+            }
+        ];
+
+        let currentChapterNum = 1;
+        let isLight = false;
+        let fontSizeMode = 0; // 0 = standard, 1 = large, 2 = larger
+
+        // Render Sidebar
+        function populateSidebar() {
+            const listDiv = document.getElementById("chaptersList");
+            listDiv.innerHTML = "";
+            
+            syllabus.forEach(part => {
+                const header = document.createElement("div");
+                header.className = "part-header";
+                header.innerText = part.part;
+                listDiv.appendChild(header);
+                
+                part.chapters.forEach(ch => {
+                    const link = document.createElement("a");
+                    link.className = `chapter-link ${ch.num === currentChapterNum ? 'active' : ''}`;
+                    link.id = `ch-link-${ch.num}`;
+                    link.innerHTML = `<i class="fa-solid fa-book-open"></i> <span>Ch ${ch.num}: ${ch.title}</span>`;
+                    link.onclick = () => loadChapter(ch.num);
+                    listDiv.appendChild(link);
+                });
+            });
+        }
+
+        // Toggle Sidebar on mobile screens
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        // Toggle Dark/Light Mode
+        function toggleTheme() {
+            isLight = !isLight;
+            document.documentElement.className = isLight ? "light" : "dark";
+            const icon = document.getElementById("themeIcon");
+            icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        }
+
+        // Cycle through Font Sizes for high reading comfort
+        function toggleFontSize() {
+            fontSizeMode = (fontSizeMode + 1) % 3;
+            const article = document.getElementById("markdownContent");
+            if (fontSizeMode === 0) {
+                article.style.fontSize = "16px";
+            } else if (fontSizeMode === 1) {
+                article.style.fontSize = "18px";
+            } else {
+                article.style.fontSize = "20px";
+            }
+        }
+
+        // Fetch and Render Markdown Chapter viamarked.js
+        async function loadChapter(chNum) {
+            currentChapterNum = chNum;
+            populateSidebar();
+            
+            // Close mobile sidebar on selection
+            document.getElementById("sidebar").classList.remove("open");
+            
+            const headerTitle = document.getElementById("chapterTitleHeader");
+            headerTitle.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Chapter ${chNum} Loading...`;
+            
+            try {
+                // Fetch chapter local markdown file
+                const response = await fetch(`/handbook/chapter_${chNum}.md`);
+                if (!response.ok) throw new Error("Chapter file not found");
+                
+                let text = await response.text();
+                
+                // Parse custom visual callouts inside our chapter files
+                text = text.replace(/\[VISUAL\]([\s\S]*?)(?=---|\n\n###)/g, (match, content) => {
+                    return `<div class="callout-box developer">
+                        <div class="callout-title"><i class="fa-solid fa-image"></i> Visual Explanation / Architecture Map</div>
+                        <pre style="margin-top:10px; background:#000 !important; color:#0f0;"><code class="language-plaintext">${content.trim()}</code></pre>
+                    </div>`;
+                });
+                
+                // Convert Developer Views
+                text = text.replace(/💻 Developer View/g, `<div class="callout-box developer"><div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>`);
+                
+                // Convert Production Reality
+                text = text.replace(/🏭 Production Reality/g, `<div class="callout-box"><div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>`);
+                
+                // Convert Common Mistakes
+                text = text.replace(/🔴 Common Mistake/g, `<div class="callout-box warning"><div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>`);
+                
+                // Close divs at double hr or headers
+                text = text.replace(/(\n---)/g, '</div>$1');
+
+                // Render Markdown
+                const contentDiv = document.getElementById("markdownContent");
+                contentDiv.innerHTML = marked.parse(text);
+                
+                // Set Header
+                const mainH1 = contentDiv.querySelector("h1");
+                headerTitle.innerText = mainH1 ? mainH1.innerText : `Chapter ${chNum}`;
+                
+                // Run Syntax Highlighting
+                contentDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+                
+                // Render KaTeX Math equations
+                if (window.renderMathInElement) {
+                    renderMathInElement(contentDiv, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ],
+                        throwOnError: false
+                    });
+                }
+                
+                // Transform Interview Questions into Interactive Flashcards!
+                setupInteractiveInterviewQuestions();
+                
+                // Scroll to top
+                document.querySelector(".content-container").scrollTop = 0;
+                
+            } catch (err) {
+                console.error(err);
+                document.getElementById("markdownContent").innerHTML = `
+                    <div style="text-align: center; margin-top: 100px;">
+                        <i class="fa-solid fa-circle-exclamation" style="font-size: 64px; color: #EF4444; margin-bottom: 20px;"></i>
+                        <h2>চ্যাপ্টার লোড করতে ব্যর্থ হয়েছে</h2>
+                        <p style="margin-top: 10px;">দয়া করে আপনার python server সচল আছে কি না তা চেক করুন।</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Custom parser to transform interview questions to collapsible flashcards
+        function setupInteractiveInterviewQuestions() {
+            const contentDiv = document.getElementById("markdownContent");
+            const headers = contentDiv.querySelectorAll("h4");
+            
+            headers.forEach(h => {
+                if (h.innerText.includes("Beginner") || h.innerText.includes("Intermediate") || h.innerText.includes("Advanced")) {
+                    // This is an interview category header
+                    // Let's look at subsequent elements and group Q&A pairs
+                    let sibling = h.nextElementSibling;
+                    let elementsToRemove = [];
+                    
+                    while (sibling && sibling.tagName !== "H2" && sibling.tagName !== "H1") {
+                        if (sibling.tagName === "OL" || sibling.tagName === "UL") {
+                            const listItems = sibling.querySelectorAll("li");
+                            listItems.forEach(li => {
+                                const text = li.innerHTML;
+                                // Split question and answer at "উত্তর:"
+                                if (text.includes("<strong>প্রশ্ন:</strong>") || text.includes("প্রশ্ন:")) {
+                                    const parts = text.split(/<strong>উত্তর:<\/strong>|উত্তর:/);
+                                    if (parts.length >= 2) {
+                                        const card = document.createElement("div");
+                                        card.className = "flashcard";
+                                        card.onclick = () => {
+                                            const ans = card.querySelector(".flashcard-a");
+                                            ans.style.display = ans.style.display === "block" ? "none" : "block";
+                                        };
+                                        
+                                        card.innerHTML = `
+                                            <div class="flashcard-q">
+                                                <span><i class="fa-solid fa-circle-question" style="color:var(--accent-purple); margin-right:8px;"></i> ${parts[0].replace(/<strong>প্রশ্ন:<\/strong>|প্রশ্ন:/, "").trim()}</span>
+                                                <i class="fa-solid fa-chevron-down"></i>
+                                            </div>
+                                            <div class="flashcard-a">
+                                                <strong><i class="fa-solid fa-circle-check" style="color:var(--accent-cyan);"></i> Answer:</strong>
+                                                <p style="margin-top: 8px; margin-bottom:0;">${parts[1].trim()}</p>
+                                            </div>
+                                        `;
+                                        sibling.parentNode.insertBefore(card, sibling);
+                                    }
+                                }
+                            });
+                            elementsToRemove.push(sibling);
+                        }
+                        sibling = sibling.nextElementSibling;
+                    }
+                    elementsToRemove.forEach(el => el.remove());
+                }
+            });
+        }
+
+        // Search engine scanning all chapters instantly
+        async function handleSearch() {
+            const query = document.getElementById("searchInput").value.toLowerCase().trim();
+            if (!query) {
+                // If empty search, restore current chapter
+                loadChapter(currentChapterNum);
+                return;
+            }
+            
+            const resultsDiv = document.getElementById("markdownContent");
+            resultsDiv.innerHTML = `
+                <div style="text-align: center; margin-top: 50px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px; color: var(--accent-purple);"></i>
+                    <p style="margin-top:12px;">সম্পূর্ণ বই স্ক্যান করা হচ্ছে...</p>
+                </div>
+            `;
+            
+            let matches = [];
+            // Loop and search all 28 chapters dynamically
+            for (let i = 1; i <= 28; i++) {
+                try {
+                    const resp = await fetch(`/handbook/chapter_${i}.md`);
+                    if (resp.ok) {
+                        const text = await resp.text();
+                        // Find paragraphs containing query
+                        const lines = text.split("\n");
+                        lines.forEach(line => {
+                            if (line.toLowerCase().includes(query) && line.length > 20) {
+                                // Add match
+                                matches.push({
+                                    chNum: i,
+                                    text: line.replace(/[#*`_]/g, "").trim()
+                                });
+                            }
+                        });
+                    }
+                } catch(e){}
+            }
+            
+            // Render Search results
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div style="text-align: center; margin-top: 100px;">
+                        <i class="fa-solid fa-face-frown" style="font-size: 64px; color: var(--text-secondary); margin-bottom: 20px;"></i>
+                        <h2>কোনো ম্যাচ পাওয়া যায়নি</h2>
+                        <p style="margin-top: 10px;">দয়া করে অন্য কোনো কিওয়ার্ড দিয়ে সার্চ ট্রাই করুন।</p>
+                    </div>
+                `;
+            } else {
+                let html = `<h1>Search Results for "${query}"</h1><p>${matches.length} matches found across chapters:</p><hr>`;
+                matches.slice(0, 30).forEach(m => {
+                    html += `
+                        <div style="background-color:var(--bg-secondary); border:1px solid var(--border-color); padding:16px; border-radius:8px; margin-bottom:12px; cursor:pointer;" onclick="loadChapter(${m.chNum})">
+                            <span style="font-size:12px; font-weight:700; color:var(--accent-purple); text-transform:uppercase;">Chapter ${m.chNum}</span>
+                            <p style="margin-top:6px; font-size:14.5px; color:var(--text-primary);">${m.text.replace(new RegExp(query, 'gi'), match => `<mark style="background:var(--accent-cyan); color:#000; padding:2px 4px; border-radius:3px;">${match}</mark>`)}</p>
+                        </div>
+                    `;
+                });
+                resultsDiv.innerHTML = html;
+            }
+        }
+
+        // Initialize App
+        populateSidebar();
+        loadChapter(1);
+    </script>
+</body>
+</html>
