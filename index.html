@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn" class="light">
+<html lang="bn" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,16 +41,16 @@
             --font-mono: 'Fira Code', monospace;
         }
 
-        /* PREMIUM LIGHT MODE / DAY MODE (#ACAEA2 Sage Green Theme) */
+        /* PREMIUM LIGHT MODE / DAY MODE (Beautiful Clean Premium White Theme) */
         html.light {
-            --bg-primary: #ACAEA2;       /* Beautiful Sage Green main page background */
-            --bg-secondary: #9FA195;     /* Slightly darker sage green for sidebar & header */
-            --bg-tertiary: #929489;      /* Lighter accent/tertiary sage */
-            --text-primary: #161D1A;     /* Deep dark charcoal forest green for ultra-high contrast */
-            --text-secondary: #3A4440;   /* Highly legible slate green */
-            --accent-purple: #6D28D9;
-            --accent-cyan: #0F766E;
-            --border-color: rgba(0, 0, 0, 0.15);
+            --bg-primary: #F9FAFB;       /* Beautiful Soft Off-White page background */
+            --bg-secondary: #FFFFFF;     /* Pure White for sidebar & header */
+            --bg-tertiary: #F3F4F6;      /* Soft Light Gray for inputs/active elements */
+            --text-primary: #111827;     /* Clean Dark Slate Charcoal for ultra-high contrast and readability */
+            --text-secondary: #4B5563;   /* Premium slate gray for secondary details */
+            --accent-purple: #7C3AED;    /* Vibrant Royal Purple */
+            --accent-cyan: #0D9488;      /* Deep Teal/Cyan */
+            --border-color: rgba(0, 0, 0, 0.08); /* Clean modern soft borders */
         }
 
         * {
@@ -358,8 +358,8 @@
 
         /* ADAPT CARDS BEAUTIFULLY IN LIGHT MODE */
         html.light .callout-box {
-            background: #BDC0B3 !important; /* Sage card matching the rest of the body */
-            border: 1px solid rgba(0, 0, 0, 0.12) !important;
+            background: rgba(124, 58, 237, 0.04) !important; /* Extremely subtle violet tint */
+            border: 1px solid rgba(124, 58, 237, 0.08) !important;
             border-left: 4px solid var(--accent-purple) !important;
         }
 
@@ -369,6 +369,8 @@
         }
 
         html.light .callout-box.developer {
+            background: rgba(13, 148, 136, 0.04) !important; /* Subtle teal/cyan tint */
+            border: 1px solid rgba(13, 148, 136, 0.08) !important;
             border-left-color: var(--accent-cyan) !important;
         }
 
@@ -378,6 +380,8 @@
         }
 
         html.light .callout-box.warning {
+            background: rgba(239, 68, 68, 0.04) !important; /* Subtle red tint */
+            border: 1px solid rgba(239, 68, 68, 0.08) !important;
             border-left-color: #EF4444 !important;
         }
 
@@ -483,20 +487,7 @@
             border-color: rgba(56, 189, 248, 0.15) !important;
         }
 
-        /* AUTO ADAPT PRE BLOCKS FOR LIGHT MODE TO MATCH THE FULL CARD SAGE GREEN #ACAEA2 */
-        html.light pre {
-            background-color: #BDC0B3 !important; /* Full card sage background matching the page! */
-            border-color: rgba(0, 0, 0, 0.12) !important;
-            color: #161D1A !important;
-        }
-        html.light pre code {
-            color: #161D1A !important;
-        }
-        html.light pre .hljs-keyword { color: #7C2D12 !important; font-weight: 700 !important; }
-        html.light pre .hljs-string { color: #065F46 !important; }
-        html.light pre .hljs-title { color: #1E3A8A !important; font-weight: 700 !important; }
-        html.light pre .hljs-comment { color: #4B5563 !important; font-style: italic !important; }
-        html.light pre .hljs-number { color: #9D174D !important; font-weight: 600 !important; }
+        /* Removed light mode pre overrides to let individual code block background themes style code blocks */
 
         /* Horizontal dividers */
         hr {
@@ -633,7 +624,7 @@
 
                 <!-- THEME DAY/DARK TOGGLE -->
                 <button class="theme-toggle-btn" onclick="toggleTheme()" title="থিম পরিবর্তন (দিন/রাত)">
-                    <i class="fa-solid fa-sun" id="themeIcon"></i>
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </button>
             </div>
         </header>
@@ -739,11 +730,11 @@
         ];
 
         let currentChapterNum = 1;
-        let isLight = true; // Set to Light Mode Sage Green by default!
+        let isLight = false; // Restore default Dark Mode (#0F0F12 page background)!
         let fontSizeMode = 0; // 0 = standard, 1 = large, 2 = larger
         let currentFontWeight = 400; // 300 (Light), 400 (Normal), 500 (Medium), 600 (Bold)
         let currentVisualTheme = 'matrix'; // matrix, cyberpunk, slate
-        let currentCodeTheme = 'gray'; // Set to Sage Green #ACAEA2 code blocks by default!
+        let currentCodeTheme = 'gray'; // Keep premium Sage Green #ACAEA2 cards by default!
 
         // Populate sidebar
         function populateSidebar() {
@@ -782,6 +773,7 @@
             if (currentVisualTheme === 'slate') {
                 applyVisualThemeToPage();
             }
+            localStorage.setItem('themeState', isLight ? 'light' : 'dark');
         }
 
         // Adjust Font Boldness Weight step-by-step
@@ -852,6 +844,7 @@
             localStorage.setItem('codeTheme', currentCodeTheme);
         }
 
+        // Sage code theme is default
         function decorateCodeThemeButton() {
             const btn = document.getElementById("codeThemeBtn");
             if (currentCodeTheme === 'gray') {
@@ -1084,7 +1077,7 @@
             }
         }
 
-        // Restore user preferences or set defaults
+        // Restore user preferences
         if (localStorage.getItem('visualTheme')) {
             currentVisualTheme = localStorage.getItem('visualTheme');
         }
@@ -1100,11 +1093,11 @@
             localStorage.setItem('codeTheme', 'gray');
         }
 
-        // Default light theme state
+        // Default Light/White Mode state restored
         if (localStorage.getItem('themeState')) {
             isLight = localStorage.getItem('themeState') === 'light';
         } else {
-            isLight = true; // Default to Light Mode!
+            isLight = true; // Default to premium WHITE/LIGHT MODE!
             localStorage.setItem('themeState', 'light');
         }
 
