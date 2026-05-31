@@ -67,7 +67,7 @@ Purpose: Provide architectural layout of a production-grade enterprise memory pi
 #### ক. Redis Chat History (স্বল্পমেয়াদী সেশন Memory)
 Redis হলো একটি ইন-Memory কী-ভ্যালু Database।
 * **কেন এটি ব্যবহার করবে:** এটি মাইক্রো-সেকেন্ডে রিড/রাইট কমপ্লিট করে। চ্যাটের শেষ কয়েকটি মেসেজ রিড করার জন্য ডিস্ক Database (যেমন Postgres) এ বারবার হিট করা এভয়েড করতে Redis-এর `List` বা `String` স্ট্রাকচার অনন্য।
-* **টাইম টু লিভ (TTL):** আমরা সেশন চ্যাট Memory মাত্র ৩ দিন (TTL = 3 days) ক্যাশ রাখি, যাতে সার্ভারের মেমরি ওয়েস্ট না হয়।
+* **টাইম টু লিভ (TTL):** আমরা সেশন চ্যাট Memory মাত্র ৩ দাও (TTL = 3 days) ক্যাশ রাখি, যাতে সার্ভারের মেমরি ওয়েস্ট না হয়।
 
 #### খ. Mem0 (দীর্ঘমেয়াদী ফ্যাক্ট Memory)
 Mem0 (পূর্বে EmbedChain) হলো একটি AI-নেটিভ Memory ইকোসিস্টেম।

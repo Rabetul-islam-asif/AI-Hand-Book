@@ -76,7 +76,7 @@ Machine Learning (Software 2.0):
 ### ২. Core Concepts: প্যারাডাইম শিফটের অন্দরমহল
 
 #### ক. Software 1.0 vs Software 2.0 (আন্দ্রে কার্পাথির তত্ত্ব)
-টেসলার প্রাক্তন AI ডিরেক্টর আন্দ্রে কার্পাথি (Andrej Karpathy) এই রূপান্তরকে চমৎকারভাবে সংজ্ঞায়িত করেছেন:
+টেসলার প্রাক্তন AI ডিরেক্টর আন্দ্রে কার্পাথি (Andrej Karpathy) এই রূপান্তরকে চমৎকারভাবে সংজ্ঞায়িত করেছো:
 * **Software 1.0 (Human-Written Code):** এখানে মানুষ নিজে বসে Code-এর লজিক ও Algorithm ডিজাইন করে। যেমন: C++, Python, JavaScript। Code রান করার দায়িত্ব Silicon Chip-এর।
 * **Software 2.0 (Data-Driven Optimization):** এখানে Programmer কোনো সরাসরি লজিক লেখে না। Programmer একটি Optimization Space ডিফাইন করে (যেমন একটি Neural Network Architecture) এবং প্রচুর Data ও কাঙ্ক্ষিত Output সাপ্লাই করে। এরপর GPU ও Optimization Loop খুঁজে বের করে কোন লজিক বা Weights সেট করলে সঠিক উত্তর পাওয়া যাবে।
 
