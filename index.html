@@ -420,14 +420,45 @@
             border-color: rgba(255, 255, 255, 0.08) !important;
         }
 
+        /* PREMIUM SAGE GREEN THEME (#ACAEA2) with deep charcoal highly legible text */
+        pre.code-theme-gray {
+            background-color: #ACAEA2 !important;
+            border-color: rgba(0, 0, 0, 0.12) !important;
+            color: #1A2421 !important; /* Deep dark slate green text */
+        }
+        pre.code-theme-gray code {
+            color: #1A2421 !important;
+        }
+        /* Custom highlight token color overrides for perfect contrast on #ACAEA2 */
+        pre.code-theme-gray .hljs-keyword,
+        pre.code-theme-gray .hljs-built_in,
+        pre.code-theme-gray .hljs-selector-tag {
+            color: #7C2D12 !important; /* Deep warm brown/burnt orange keywords */
+            font-weight: 700 !important;
+        }
+        pre.code-theme-gray .hljs-string,
+        pre.code-theme-gray .hljs-attr {
+            color: #065F46 !important; /* Highly readable dark emerald green for strings */
+            font-weight: 600 !important;
+        }
+        pre.code-theme-gray .hljs-title,
+        pre.code-theme-gray .hljs-section {
+            color: #1E3A8A !important; /* Deep navy blue for class/func titles */
+            font-weight: 700 !important;
+        }
+        pre.code-theme-gray .hljs-comment {
+            color: #4B5563 !important; /* Dark gray comments */
+            font-style: italic !important;
+        }
+        pre.code-theme-gray .hljs-number,
+        pre.code-theme-gray .hljs-literal {
+            color: #9D174D !important; /* Deep pink/burgundy for numbers */
+            font-weight: 600 !important;
+        }
+
         pre.code-theme-brown {
             background-color: #2D2520 !important; /* Warm Soft Sepia Brown */
             border-color: rgba(230, 175, 120, 0.15) !important;
-        }
-
-        pre.code-theme-gray {
-            background-color: #22262E !important; /* Classy Slate Gray */
-            border-color: rgba(255, 255, 255, 0.12) !important;
         }
 
         pre.code-theme-blue {
@@ -549,7 +580,7 @@
             
             <div class="header-actions">
                 <!-- CODE BLOCK THEME SWITCHER -->
-                <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="কোড ব্যাকগ্রাউন্ড থিম (Black, Soft Brown, Gray, Soft Whitish Blue)">
+                <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="কোড ব্যাকগ্রাউন্ড থিম (Black, Sage Green #ACAEA2, Soft Brown, Soft Whitish Blue)">
                     <i class="fa-solid fa-code"></i>
                 </button>
 
@@ -685,7 +716,7 @@
         let fontSizeMode = 0; // 0 = standard, 1 = large, 2 = larger
         let currentFontWeight = 400; // 300 (Light), 400 (Normal), 500 (Medium), 600 (Bold)
         let currentVisualTheme = 'matrix'; // matrix, cyberpunk, slate
-        let currentCodeTheme = 'black'; // black, brown, gray, blue
+        let currentCodeTheme = 'black'; // black, gray (sage #ACAEA2), brown, blue
 
         // Populate sidebar
         function populateSidebar() {
@@ -781,24 +812,28 @@
             });
         }
 
-        // Cycle through 4 different code block background themes (Black, Brown, Gray, Whitish Blue)
+        // Cycle through 4 different code block background themes (Black, Sage Green #ACAEA2, Brown, Soft Whitish Blue)
         function cycleCodeTheme() {
-            const themes = ['black', 'brown', 'gray', 'blue'];
+            const themes = ['black', 'gray', 'brown', 'blue'];
             const idx = themes.indexOf(currentCodeTheme);
             currentCodeTheme = themes[(idx + 1) % themes.length];
             
             applyCodeThemeToPage();
+            decorateCodeThemeButton();
             
-            // Button feedback decoration
+            localStorage.setItem('codeTheme', currentCodeTheme);
+        }
+
+        function decorateCodeThemeButton() {
             const btn = document.getElementById("codeThemeBtn");
-            if (currentCodeTheme === 'brown') {
+            if (currentCodeTheme === 'gray') {
+                btn.style.background = "#ACAEA2";
+                btn.style.color = "#1A2421";
+                btn.style.borderColor = "#1A2421";
+            } else if (currentCodeTheme === 'brown') {
                 btn.style.background = "#2D2520";
                 btn.style.color = "#E6AF78";
                 btn.style.borderColor = "#E6AF78";
-            } else if (currentCodeTheme === 'gray') {
-                btn.style.background = "#22262E";
-                btn.style.color = "#F3F4F6";
-                btn.style.borderColor = "#F3F4F6";
             } else if (currentCodeTheme === 'blue') {
                 btn.style.background = "#161D28";
                 btn.style.color = "#38BDF8";
@@ -808,8 +843,6 @@
                 btn.style.color = "";
                 btn.style.borderColor = "";
             }
-            
-            localStorage.setItem('codeTheme', currentCodeTheme);
         }
 
         function applyCodeThemeToPage() {
@@ -1032,24 +1065,7 @@
         }
         if (localStorage.getItem('codeTheme')) {
             currentCodeTheme = localStorage.getItem('codeTheme');
-            
-            // Set initial button decoration based on restored theme
-            setTimeout(() => {
-                const btn = document.getElementById("codeThemeBtn");
-                if (currentCodeTheme === 'brown') {
-                    btn.style.background = "#2D2520";
-                    btn.style.color = "#E6AF78";
-                    btn.style.borderColor = "#E6AF78";
-                } else if (currentCodeTheme === 'gray') {
-                    btn.style.background = "#22262E";
-                    btn.style.color = "#F3F4F6";
-                    btn.style.borderColor = "#F3F4F6";
-                } else if (currentCodeTheme === 'blue') {
-                    btn.style.background = "#161D28";
-                    btn.style.color = "#38BDF8";
-                    btn.style.borderColor = "#38BDF8";
-                }
-            }, 100);
+            setTimeout(decorateCodeThemeButton, 100);
         }
 
         // Initialize App
