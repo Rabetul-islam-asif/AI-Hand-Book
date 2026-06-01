@@ -3,20 +3,20 @@
 ---
 
 ### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো প্রি-ট্রেইনড ল্যাঙ্গুয়েজ মডেলকে নিজের পছন্দমতো নির্দিষ্ট ফরম্যাট বা টোনে কথা বলতে শেখানোর প্রথম ধাপ—অর্থাৎ Supervised Fine-Tuning (Supervised Fine-Tuning / SFT) এর Mechanism এবং তার Dataset Preparation (Dataset Preparation) প্রসেস গভীরভাবে আয়ত্ত করা। তুমি জানতে পারবে কখন Fine-Tuning করতে হবে বনাম কখন আরএজি (RAG) ব্যবহার করা উচিত এবং কীভাবে চ্যাটফরম্যাট ও Instruction Dataset (Instruction Datasets - Alpaca, ShareGPT formats) তৈরি করতে হয়।
+এই চ্যাপ্টারের মূল লক্ষ্য হলো প্রি-ট্রেইনড Language মডেলকে নিজের পছন্দমতো নির্দিষ্ট Format বা টোনে কথা বলতে শেখানোর প্রথম ধাপ— মানে Supervised Fine-Tuning (Supervised Fine-Tuning / SFT) এর Mechanism এবং তার Dataset Preparation (Dataset Preparation) প্রসেস গভীরভাবে আয়ত্ত করা। তুমি জানতে পারবে কখন Fine-Tuning করতে হবে বনাম কখন আরএজি (RAG) ব্যবহার করা উচিত এবং কীভাবে চ্যাটFormat ও Instruction Dataset (Instruction Datasets - Alpaca, ShareGPT formats) তৈরি করতে হয়।
 
 ### Why Should I Care?
-অনেক Developer মনে করো নতুন কোনো নলেজ বা তথ্য শেখানোর জন্য Fine-Tuning করা বেস্ট চয়েস। কিন্তু বাস্তবে নতুন ফ্যাক্টস বা Data মডেলকে ফাইন-টিউনিংয়ের মাধ্যমে শেখাতে গেলে Model তা মুখস্থ না করে হ্যালুসিনেশন বা বিভ্রান্তিকর তথ্য বেশি দেয়। Fine-Tuning হলো মডেলকে **"How to behave"** (কীভাবে কথা বলতে হবে, কী ফরম্যাটে Output দিতে হবে) তা শেখানোর সেরা টুল, এবং আরএজি হলো **"What to say"** (কোন রিয়েল তথ্য বলতে হবে) তার সেরা টুল। এই তফাত না বুঝলে তুমি প্রচুর GPU কস্ট অপ্টিমাইজ করতে পারবে না।
+অনেক Developer মনে করো নতুন কোনো নলেজ বা তথ্য শেখানোর জন্য Fine-Tuning করা বেস্ট চয়েস। কিন্তু বাস্তবে নতুন ফ্যাক্টস বা Data মডেলকে Fine-Tuning-এর মাধ্যমে শেখাতে গেলে Model তা মুখস্থ না করে Hallucination বা ভুল তথ্য বেশি দেয়। Fine-Tuning হলো মডেলকে **"How to behave"** (কীভাবে কথা বলতে হবে, কী Format-এ Output দিতে হবে) তা শেখানোর সেরা টুল, এবং আরএজি হলো **"What to say"** (কোন রিয়েল তথ্য বলতে হবে) তার সেরা টুল। এই তফাত না বুঝলে তুমি প্রচুর GPU কস্ট অপ্টিমাইজ করতে পারবে না।
 
 ### Big Picture
-আগের চ্যাপ্টারগুলোতে আমরা Vector Database এবং আরএজি অপ্টিমাইজেশন শিখেছি। এই চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে **Model Fine-Tuning** এর মহাবিশ্ব। এখানে শেখা Dataset ফরম্যাট এবং এসএফটি (SFT) Training পাইপলাইন আমাদের পরবর্তী চ্যাপ্টারের LoRA/QLoRA অ্যাডাপ্টার এবং আরএলএইচএফ (RLHF) সেফটি টিউনিং বোঝার মূল ভিত্তি।
+আগের চ্যাপ্টারগুলোতে আমরা Vector Database এবং আরএজি অপ্টিমাইজেশন শিখেছি। এই চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে **Model Fine-Tuning** এর world। এখানে শেখা Dataset Format এবং এসএফটি (SFT) Training পাইপলাইন আমাদের পরের chapter-এর LoRA/QLoRA Adapter এবং আরএলএইচএফ (RLHF) সেফটি টিউনিং বোঝার মূল ভিত্তি।
 
 ---
 
 ### ১. Hook: ডাক্তারকে নতুন বই পড়ানো বনাম তার আচরণের প্রেসক্রিপশন পরিবর্তন
 
-কল্পনা করো, তোমার সামনে একজন অত্যন্ত দক্ষ এমবিবিএস ডাক্তার বসে আছেন।
-* **RAG (Open-Book):** ডাক্তার হৃদরোগের নতুন আবিষ্কৃত একটি সার্জারি রুল বা পলিসি জানো না। তুমি তার টেবিলের ওপর সেই নতুন রিসার্চ পেপার বা বই খুলে দিলে। ডাক্তার পেপারের ৩ নম্বর পৃষ্ঠা দেখে নিখুঁত সার্জারি প্রসিডিউরটি বুঝে তোমাকে বুঝিয়ে দিলে। 
+কল্পনা করো, তোমার সামনে একজন খুব দক্ষ এমবিবিএস ডাক্তার বসে আছেন।
+* **RAG (Open-Book):** ডাক্তার হৃদরোগের নতুন আবিষ্কৃত একটি সার্জারি রুল বা পলিসি জানো না। তুমি তার টেবিলের ওপর সেই নতুন রিসার্চ পেপার বা বই খুলে দিলে। ডাক্তার পেপারের ৩ নম্বর পৃষ্ঠা দেখে perfect সার্জারি প্রসিডিউরটি বুঝে তোমাকে বুঝিয়ে দিলে। 
 
 [VISUAL]
 Title: When to use RAG vs. Fine-Tuning
@@ -33,35 +33,35 @@ Fine-Tuning (How to Behave - Modifying Internal weights):
 [LLM Brain] ──► (Modify Internal Weights & Synapses) ──► [ Speaks in customized tone / JSON Format ]
 ```
 
-* **Fine-Tuning (SFT):** ডাক্তার সব মেডিকেল বই জানো, কিন্তু তিনি কথা বলো অত্যন্ত অভদ্র ও কর্কশ ভাষায়। তুমি চাচ্ছেন তিনি যেন সবসময় রোগীদের সাথে নরম বাংলায় ও পোলাইট পারসোনায় কথা বলো। তুমি টেবিলে বই খুলে দিলে তার আচরণ পরিবর্তন হবে না! তার আচরণ পরিবর্তন করতে হলে তোমাকে তাকে কয়েক মাস কাস্টম বিহেভিয়ার ট্রেনিং (Fine-Tuning) দিতে হবে যাতে তার মস্তিষ্কের কথা বলার টোন ও স্টাইল সম্পূর্ণ বদলে যায়।
+* **Fine-Tuning (SFT):** ডাক্তার সব মেডিকেল বই জানো, কিন্তু তিনি কথা বলো খুব অভদ্র ও কর্কশ ভাষায়। তুমি চাচ্ছেন তিনি যেন সবসময় রোগীদের সাথে নরম বাংলায় ও পোলাইট Personaয় কথা বলো। তুমি টেবিলে বই খুলে দিলে তার আচরণ পরিবর্তন হবে না! তার আচরণ পরিবর্তন করতে হলে তোমাকে তাকে কয়েক মাস Custom বিহেভিয়ার ট্রেনিং (Fine-Tuning) দিতে হবে যাতে তার মস্তিষ্কের কথা বলার টোন ও স্টাইল সম্পূর্ণ বদলে যায়।
 
-আরএজি এবং ফাইন-টিউনিংয়ের মূল তফাতটি এখানেই। 
-* মডেলকে কোনো ডায়নামিক বা রিয়েল-টাইম ফ্যাক্টস দিতে হলে **RAG** সেরা।
-* মডেলকে নির্দিষ্ট টোন, স্টাইল বা কাস্টম Output ফরম্যাট (যেমন: JSON/SQL জেনারেট করা) শেখাতে হলে **Fine-Tuning** ই একমাত্র সমাধান।
+আরএজি এবং Fine-Tuning-এর মূল তফাতটি এখানেই। 
+* মডেলকে কোনো Dynamic বা রিয়েল-টাইম ফ্যাক্টস দিতে হলে **RAG** সেরা।
+* মডেলকে নির্দিষ্ট টোন, স্টাইল বা Custom Output Format (যেমন: JSON/SQL জেনারেট করা) শেখাতে হলে **Fine-Tuning** ই একমাত্র সমাধান।
 
 ---
 
 ### ২. Core Concepts: Supervised Fine-Tuning ও Data স্ট্রাকচার
 
 #### ক. When to Fine-Tune vs. RAG (সিদ্ধান্ত গ্রহণ গাইডলাইন)
-আর্কিটেকচারাল ডিসিশন টেবিল:
+Architectural ডিসিশন টেবিল:
 
-| ক্রাইটেরিয়া | RAG (Retrieval-Augmented) | Fine-Tuning (SFT) |
+| Criteria | RAG (Retrieval-Augmented) | Fine-Tuning (SFT) |
 | :--- | :--- | :--- |
-| **মূল লক্ষ্য** | এক্সটার্নাল রিয়েল-টাইম ফ্যাক্টস ও ইনফরমেশন দেওয়া | নির্দিষ্ট টোন, স্টাইল বা ফরম্যাট (JSON/SQL) শেখানো |
-| **Data আপডেট** | তাৎক্ষণিক (Vector ডাটাবেসে File পুশ করলেই হয়) | ধীর (আবার Training রান করতে হয়) |
-| **হ্যালুসিনেশন** | অত্যন্ত কম (সোর্স পেজের রেফারেন্স থাকে) | মাঝারি (Model নিজে বানিয়ে লিখতে পারে) |
-| **কম্পিউট খরচ** | কম (শুধুমাত্র Inference ও Vector Search কস্ট) | উচ্চ (GPU Training কস্ট) |
+| **মূল লক্ষ্য** | External রিয়েল-টাইম ফ্যাক্টস ও ইনফরমেশন দেওয়া | নির্দিষ্ট টোন, স্টাইল বা Format (JSON/SQL) শেখানো |
+| **Data আপডেট** | instant (Vector ডাটাবেসে File পুশ করলেই হয়) | ধীর (আবার Training রান করতে হয়) |
+| **Hallucination** | খুব কম (সোর্স পেজের রেফারেন্স থাকে) | মাঝারি (Model নিজে বানিয়ে লিখতে পারে) |
+| **Compute খরচ** | কম (শুধুমাত্র Inference ও Vector Search কস্ট) | উচ্চ (GPU Training কস্ট) |
 
 #### খ. Supervised Fine-Tuning (SFT)
 SFT হলো মডেলকে প্রচুর পরিমাণে Instruction-Response (Instruction-Response) জোড়া দেখিয়ে ট্রেইন করা।
-* **Mechanism:** মডেলকে আমরা ১ হাজার থেকে ১ লাখ কাস্টম বাংলা কথোপকথনের স্যাম্পল দেখাই: `"User: [Question] -> Assistant: [ Bengali customized answer]"`।
-* **Loss Optimization:** ট্রেনিং লুপে Model যখন কাস্টম উত্তরের সাথে ম্যাচ করতে ভুল Token প্রেডিক্ট করে, Loss ক্যালকুলেট করে ব্যাকপ্রোপাগেশনের মাধ্যমে Model-এর Weights মডিফাই করা হয়।
+* **Mechanism:** মডেলকে আমরা ১ হাজার থেকে ১ লাখ Custom বাংলা কথোপকথনের স্যাম্পল দেখাই: `"User: [Question] -> Assistant: [ Bengali customized answer]"`।
+* **Loss Optimization:** ট্রেনিং লুপে Model যখন Custom উত্তরের সাথে ম্যাচ করতে ভুল Token Predict করে, Loss ক্যালকুলেট করে Backpropagation-এর মাধ্যমে Model-এর Weights Modify করা হয়।
 
-#### গ. Dataset Formats (Dataset ফরম্যাটস)
+#### গ. Dataset Formats (Dataset Formatস)
 
 ##### ১. Alpaca Format (একক Instruction)
-এটি সবচেয়ে কমন ও সরল ফরম্যাট। প্রতিটি Data নোডে ৩টি কিওয়ার্ড থাকে:
+এটি সবচেয়ে কমন ও সরল Format। প্রতিটি Data নোডে ৩টি কিওয়ার্ড থাকে:
 * `instruction`: ইউজার কী টাস্ক দিয়েছে।
 * `input`: টাস্কের সাথে যদি কোনো অতিরিক্ত Context থাকে (অপশনাল)।
 * `output`: AI কী উত্তর দেবে।
@@ -74,7 +74,7 @@ SFT হলো মডেলকে প্রচুর পরিমাণে Instru
 ```
 
 ##### ২. ShareGPT / Messages Format (মাল্টি-টার্ন চ্যাট)
-মডার্ন চ্যাট মডেলগুলোর (যেমন LLaMA-3, GPT-4) জন্য এটি সবচেয়ে জনপ্রিয় ফরম্যাট। এটি ইউজারের সাথে মাল্টি-টার্ন কনভারসেশন সিমুলেট করে:
+মডার্ন চ্যাট মডেলগুলোর (যেমন LLaMA-3, GPT-4) জন্য এটি সবচেয়ে জনপ্রিয় Format। এটি ইউজারের সাথে মাল্টি-টার্ন Conversation Simulate করে:
 ```json
 {
   "conversations": [
@@ -90,9 +90,9 @@ Dataset প্রিপারেশনের সময় সর্বদা **D
 
 ---
 
-### ৩. Visual Explanation: SFT ট্রেনিং ম্যাট্রিক্স Loop
+### ৩. Visual Explanation: SFT ট্রেনিং Matrix Loop
 
-এসএফটি ট্রেনিংয়ের সময় Model কীভাবে শুধু অ্যাসিস্ট্যান্ট Token-এর ওপর Loss ক্যালকুলেট করে তা নিচে ডায়াগ্রামের মাধ্যমে ভিজ্যুয়ালাইজ করো:
+এসএফটি ট্রেনিংয়ের সময় Model কীভাবে শুধু Assistant Token-এর ওপর Loss ক্যালকুলেট করে তা নিচে Diagramের মাধ্যমে ভিজ্যুয়ালাইজ করো:
 
 [VISUAL]
 Title: SFT Target Token Loss Calculation
@@ -109,16 +109,16 @@ Input Tokens (Loss Ignored):           Output Target Tokens (Active Loss 계산)
 [ Loss Masked - No Weights Update ]   [ Loss Active - Weights Updated via Backprop ✓ ]
 ```
 
-* **Loss Masking:** ট্রেনিংয়ের সময় আমরা ইউজারের কোশ্চেনের Token-এর ওপর Loss ক্যালকুলেট করি না (Masked with -100 index)। Model কেবল অ্যাসিস্ট্যান্ট বা জিপিটি-র উত্তর প্রেডিকশনে ভুল করলে গ্রেডিয়েন্ট ব্যাকপ্রোপাগেট হয়।
+* **Loss Masking:** ট্রেনিংয়ের সময় আমরা ইউজারের কোশ্চেনের Token-এর ওপর Loss ক্যালকুলেট করি না (Masked with -100 index)। Model কেবল Assistant বা জিপিটি-র উত্তর Prediction-এ ভুল করলে Gradient Backpropagate হয়।
 
 ---
 
-### ৪. Real World Example: Cursor-এর `.cursorrules` কাস্টম টোন টিউনিং
+### ৪. Real World Example: Cursor-এর `.cursorrules` Custom টোন টিউনিং
 
 Cursor যখন তোমার Project স্পেসিফিক নিয়মে Code লেখে:
 
 1. **System Prompt Alignment:** তারা তাদের ওপেন-সোর্স বেস মডেলকে (যেমন LLaMA) হাজার হাজার Coding কনভেনশন এবং Project রুলস Instruction Dataset দিয়ে Fine-Tuning (SFT) করেছে।
-2. **Behavior Control:** এর ফলে মডেলটি তোমার Project-এর `.cursorrules` File রিড করে ইনস্ট্যান্টলি তোমার টোন ও স্টাইল বুঝতে পারে এবং তোমার স্পেসিফিক ফরম্যাটে Code প্রডিউস করে।
+2. **Behavior Control:** এর ফলে মডেলটি তোমার Project-এর `.cursorrules` File রিড করে Instantly তোমার টোন ও স্টাইল বুঝতে পারে এবং তোমার স্পেসিফিক Format-এ Code Produce করে।
 
 ---
 
@@ -126,7 +126,7 @@ Cursor যখন তোমার Project স্পেসিফিক নিয�
 
 💻 Developer View
 
-Developer হিসেবে পাইথনে `datasets` Library ব্যবহার করে কাস্টম Alpaca ফরম্যাটের Dataset লোড, টোকেনাইজ এবং প্রিপেয়ার করার রিয়েল মেথড:
+Developer হিসেবে পাইথনে `datasets` Library ব্যবহার করে Custom Alpaca Format-এর Dataset লোড, Tokenize এবং প্রিপেয়ার করার রিয়েল মেথড:
 
 ```python
 from datasets import Dataset
@@ -163,14 +163,14 @@ print(tokenized_dataset[0]['text'])
 
 ---
 
-### ৬. Production Perspective: Data অ্যানোনিপাইজেশন (Data Anonymization)
+### ৬. Production Perspective: Data Anonymization (Data Anonymization)
 
 🏭 Production Reality
 
-ফাইন-টিউনিংয়ের Dataset রেডি করার সময় এন্টারপ্রাইজ প্রোডাকশনে সবচেয়ে জটিল সিকিউরিটি অডিট হলো **PII (Personally Identifiable Information) Leakage** রোধ করা।
+Fine-Tuning-এর Dataset রেডি করার সময় এন্টারপ্রাইজ প্রোডাকশনে সবচেয়ে জটিল সিকিউরিটি অডিট হলো **PII (Personally Identifiable Information) Leakage** রোধ করা।
 
-* **The Risk:** কাস্টমার চ্যাটের লাইভ Log থেকে যদি তুমি সরাসরি নাম, ইমেইল, ফোন নাম্বার বা বিকাশ ট্রানজ্যাকশন আইডি দিয়ে Model ট্রেইন করে ফেলেন, তবে Model-এর ভেতরের Weights-এ সেই গোপন Data এনকোড হয়ে যাবে। পরবর্তীতে Prompt হ্যাক বা র্যান্ডম চ্যাটিংয়ে Model সেই গোপন কাস্টমার Data অন্য ইউজারের সামনে ফাস (Leak) করে দেবে।
-* **সমাধান:** প্রোডাকশন Dataset পাইপলাইনে ট্রেইনিংয়ের আগে ডেটাকে কঠোরভাবে **Anonymize** করতে হয় (যেমন: স্পেশাল রেগুলার এক্সপ্রেশন বা পাইথন `presidio` Library ব্যবহার করে ফোন নাম্বারকে `<PHONE>` এবং নামকে `<NAME>` দিয়ে মাস্ক করা)।
+* **The Risk:** Customার চ্যাটের লাইভ Log থেকে যদি তুমি সরাসরি নাম, ইমেইল, ফোন নাম্বার বা বিকাশ ট্রানজ্যাকশন আইডি দিয়ে Model ট্রেইন করে ফেলেন, তবে Model-এর ভেতরের Weights-এ সেই secret Data এনকোড হয়ে যাবে। পরবর্তীতে Prompt হ্যাক বা র্যান্ডম চ্যাটিংয়ে Model সেই secret Customার Data অন্য ইউজারের সামনে ফাস (Leak) করে দেবে।
+* **সমাধান:** প্রোডাকশন Dataset পাইপলাইনে ট্রেইনিংয়ের আগে ডেটাকে strictly **Anonymize** করতে হয় (যেমন: স্পেশাল Regular Expression বা পাইথন `presidio` Library ব্যবহার করে ফোন নাম্বারকে `<PHONE>` এবং নামকে `<NAME>` দিয়ে মাস্ক করা)।
 
 ---
 
@@ -178,9 +178,9 @@ print(tokenized_dataset[0]['text'])
 
 🔴 Common Mistake
 
-**ভুল ধারণা:** ফাইন-টিউনিংয়ের ডেটাসেটে ব্যাকরণ বা তথ্যের ভুল থাকলেও সমস্যা নেই, Model নিজে থেকেই তা ঠিক করে নেবে।
+**ভুল ধারণা:** Fine-Tuning-এর ডেটাসেটে ব্যাকরণ বা তথ্যের ভুল থাকলেও সমস্যা নেই, Model নিজে থেকেই তা ঠিক করে নেবে।
 
-**বাস্তবতা:** Model ফাইন-টিউনিংয়ের সময় তোমার ডেটাসেটে যা পাবে, সে হুবহু সেই স্টাইল ও তথ্যই চরম অন্ধের মতো অনুকরণ করবে। তোমার ডেটাসেটে বানান ভুল থাকলে ফাইন-টিউনড Model-ও প্রোডাকশনে বানান ভুল প্রডিউস করবে। তাই Dataset ক্লিন রাখা ফাইন-টিউনিংয়ের সবচেয়ে গুরুত্বপূর্ণ কাজ।
+**বাস্তবতা:** Model Fine-Tuning-এর সময় তোমার ডেটাসেটে যা পাবে, সে হুবহু সেই স্টাইল ও তথ্যই হুবহু অনুকরণ করবে। তোমার ডেটাসেটে বানান ভুল থাকলে ফাইন-টিউনড Model-ও প্রোডাকশনে বানান ভুল Produce করবে। তাই Dataset ক্লিন রাখা Fine-Tuning-এর সবচেয়ে গুরুত্বপূর্ণ কাজ।
 
 ---
 
@@ -189,15 +189,15 @@ print(tokenized_dataset[0]['text'])
 Fine-Tuning বনাম আরএজি-র মেন্টাল Model:
 
 * **RAG = Memory কার্ড রিডার (External Memory Source):**
-  Model-এর ব্রেইনে নতুন কোনো পরিবর্তন হয় না। তুমি তাকে একটি এক্সটার্নাল Memory ড্রাইভ প্লাগ-ইন করে দিলে, সে কেবল রিড করে Output দিল।
+  Model-এর ব্রেইনে নতুন কোনো পরিবর্তন হয় না। তুমি তাকে একটি External Memory ড্রাইভ প্লাগ-ইন করে দিলে, সে কেবল রিড করে Output দিল।
 * **Fine-Tuning = অ্যাক্টিং স্কুলে ক্যারেক্টার ট্রেনিং (Synaptic change):**
-  তুমি একটি অভিনেতাকে অ্যাক্টিং স্কুলে পাঠালেন। সে সেখানে কোনো নতুন ইতিহাস বা ফ্যাক্টস শিখছে না। সে শিখছে কীভাবে একজন রাগী পুলিশের মতো অভিনয় করতে হয়, বা কীভাবে একজন মিষ্টি ডাক্তারের পারসোনা ধারণ করে কথা বলতে হয়।
+  তুমি একটি অভিনেতাকে অ্যাক্টিং স্কুলে পাঠালেন। সে সেখানে কোনো নতুন ইতিহাস বা ফ্যাক্টস শিখছে না। সে শিখছে কীভাবে একজন রাগী পুলিশের মতো অভিনয় করতে হয়, বা কীভাবে একজন মিষ্টি ডাক্তারের Persona ধারণ করে কথা বলতে হয়।
 
 ---
 
-### ৯. Mini Project: পাইথনে কাস্টম Alpaca Dataset জেনারেটর ও সিকিউরিটি পিআইআই ফিল্টার
+### ৯. Mini Project: পাইথনে Custom Alpaca Dataset জেনারেটর ও সিকিউরিটি পিআইআই ফিল্টার
 
-চলো পাইথনে কাস্টম রেগুলার এক্সপ্রেশন (Regex) ব্যবহার করে কোনো Library ছাড়া একটি প্রোডাকশন-গ্রেড কাস্টমার Data অ্যানোনিমাইজার এবং Fine-Tuning Dataset স্যানিটাইজার Engine স্ক্র্যাচ থেকে আর্কিটেক্ট করি।
+চলো পাইথনে Custom Regular Expression (Regex) ব্যবহার করে কোনো Library ছাড়া একটি প্রোডাকশন-গ্রেড Customার Data Anonymizer এবং Fine-Tuning Dataset Sanitizer Engine স্ক্র্যাচ থেকে Architect করি।
 
 ```python
 import re
@@ -248,9 +248,9 @@ for idx, data in enumerate(sanitized_dataset):
 ```
 
 #### Code Breakdown:
-* **Input:** কাস্টমারদের সিক্রেট ফোন নাম্বার ও ইমেইলসহ র কনভারসেশন হিস্টোরি।
-* **Output:** অ্যানোনিমাইজড নিরাপদ Fine-Tuning Dataset।
-* **Why it works:** কাস্টম রেগুলার এক্সপ্রেশন Pattern নিখুঁতভাবে ফোন ও ইমেইল ডিটেক্ট করে প্লেসহোল্ডার ট্যাগ দিয়ে প্রতিস্থাপন করেছে, যা প্রোডাকশন Data লিক হওয়ার ঝুঁকি ১০০% দূর করে।
+* **Input:** Customারদের সিক্রেট ফোন নাম্বার ও ইমেইলসহ র Conversation হিস্টোরি।
+* **Output:** Anonymized নিরাপদ Fine-Tuning Dataset।
+* **Why it works:** Custom Regular Expression Pattern perfectly ফোন ও ইমেইল ডিটেক্ট করে Placeholder ট্যাগ দিয়ে replace করেছে, যা প্রোডাকশন Data লিক হওয়ার ঝুঁকি ১০০% দূর করে।
 * **When to use:** রিয়েল ইউজার Database থেকে Fine-Tuning Dataset Preparation করার সময়।
 
 ---
@@ -258,29 +258,29 @@ for idx, data in enumerate(sanitized_dataset):
 ### ১০. Interview Questions
 
 #### Beginner
-1. **প্রশ্ন:** কখন আরএজি (RAG) বনাম Fine-Tuning (Fine-Tuning) এর মধ্যে সঠিক আর্কিটেকচারাল সিদ্ধান্ত নিতে হবে?
-   * **উত্তর:** যখন Project-এর লক্ষ্য ডায়নামিক, রিয়েল-টাইম এবং নিখুঁত ফ্যাকচুয়াল তথ্য প্রডিউস করা, তখন RAG সেরা চয়েস। আর যখন লক্ষ্য মডেলকে নির্দিষ্ট টোন, স্টাইল বা কাস্টম Output ফরম্যাট (যেমন: JSON/SQL/Code) জেনারেট করা শেখানো, তখন Fine-Tuning একমাত্র সমাধান।
+1. **প্রশ্ন:** কখন আরএজি (RAG) বনাম Fine-Tuning (Fine-Tuning) এর মধ্যে সঠিক Architectural সিদ্ধান্ত নিতে হবে?
+   * **উত্তর:** যখন Project-এর লক্ষ্য Dynamic, রিয়েল-টাইম এবং perfect Factual তথ্য Produce করা, তখন RAG সেরা চয়েস। আর যখন লক্ষ্য মডেলকে নির্দিষ্ট টোন, স্টাইল বা Custom Output Format (যেমন: JSON/SQL/Code) জেনারেট করা শেখানো, তখন Fine-Tuning একমাত্র সমাধান।
 
 #### Intermediate
 2. **প্রশ্ন:** Fine-Tuning Dataset তৈরির সময় "Personally Identifiable Information (PII) Masking" কেন আবশ্যক?
-   * **উত্তর:** PII মাস্কিং না করলে কাস্টমারের গোপন ফোন নাম্বার, ইমেইল বা আইডি ইনফরমেশন ফাইন-টিউনিংয়ের সময় Model-এর ওয়েটসে চিরতরে সেভ হয়ে যাবে। পরবর্তীতে Prompt হ্যাকিংয়ের মাধ্যমে AI সেই গোপন Data পাবলিকলি ফাস করে দিতে পারে, যা বিশাল সিকিউরিটি লিক ঘটাবে।
+   * **উত্তর:** PII মাস্কিং না করলে Customারের secret ফোন নাম্বার, ইমেইল বা আইডি ইনফরমেশন Fine-Tuning-এর সময় Model-এর ওয়েটসে forever সেভ হয়ে যাবে। পরবর্তীতে Prompt হ্যাকিংয়ের মাধ্যমে AI সেই secret Data পাবলিকলি ফাস করে দিতে পারে, যা বিশাল সিকিউরিটি লিক ঘটাবে।
 
 #### Advanced
 3. **প্রশ্ন:** SFT ট্রেনিংয়ের সময় Loss ক্যালকুলেশনে কেন "Target Prompt Masking (Index -100)" ব্যবহার করা হয়? এর গুরুত্ব কী?
-   * **উত্তর:** এসএফটি (SFT) ট্রেনিংয়ে আমাদের লক্ষ্য মডেলকে ইউজারের প্রশ্নের পর কীভাবে সঠিক উত্তর দিতে হয় তা শেখানো। ইউজার কী প্রশ্ন করবে তার ওপর Model-এর কোনো নিয়ন্ত্রণ নেই, তাই Prompt Token-এর ওপর Loss ক্যালকুলেট করা মেমরি ও গ্রেডিয়েন্ট অপ্টিমাইজেশন ব্যাহত করে। টার্গেট মাস্কিং (-100 ইনডেক্স) চেইন রুলকে শুধুমাত্র অ্যাসিস্ট্যান্ট Response Token-এর ওপর ওয়েটস আপডেট করতে গাইড করে।
+   * **উত্তর:** এসএফটি (SFT) ট্রেনিংয়ে আমাদের লক্ষ্য মডেলকে ইউজারের প্রশ্নের পর কীভাবে সঠিক উত্তর দিতে হয় তা শেখানো। ইউজার কী প্রশ্ন করবে তার ওপর Model-এর কোনো নিয়ন্ত্রণ নেই, তাই Prompt Token-এর ওপর Loss ক্যালকুলেট করা মেমরি ও Gradient অপ্টিমাইজেশন ব্যাহত করে। টার্গেট মাস্কিং (-100 Index) চেইন রুলকে শুধুমাত্র Assistant Response Token-এর ওপর ওয়েটস আপডেট করতে গাইড করে।
 
 ---
 
 ### ১১. Chapter Summary
-* **Supervised Fine-Tuning (SFT)** Model-এর আচরণ ও টোন পরিবর্তনের মূল গাণিতিক পদ্ধতি।
-* **RAG** ফ্যাট ও ডায়নামিক Data সোর্সিংয়ের রাজা, আর **Fine-Tuning** ফরম্যাট ও পারসোনার রাজা।
-* **Alpaca** এবং **ShareGPT** Instruction Dataset-এর প্রধান দুটি গোল্ড স্ট্যান্ডার্ড ফরম্যাট।
-* প্রোডাকশন Dataset প্রিপারেশনে কঠোরভাবে **PII Masking** নিশ্চিত করা ম্যান্ডেটরি।
+* **Supervised Fine-Tuning (SFT)** Model-এর আচরণ ও টোন পরিবর্তনের মূল Mathematical method।
+* **RAG** ফ্যাট ও Dynamic Data সোর্সিংয়ের রাজা, আর **Fine-Tuning** Format ও Personaর রাজা।
+* **Alpaca** এবং **ShareGPT** Instruction Dataset-এর প্রধান দুটি গোল্ড Standard Format।
+* প্রোডাকশন Dataset প্রিপারেশনে strictly **PII Masking** ensure করা must।
 
 ---
 
 ### biographies.md
-দারুণ! আমরা সফলভাবে Supervised ফাইন-টিউনিংয়ের Data প্রিপারেশন ও থিওরি জয় করে ফেলেছি। পরবর্তী চ্যাপ্টারে আমরা এই Fine-Tuning মেমরি ও GPU কম্পিউট কস্ট সাশ্রয় করার জন্য সবচেয়ে বৈপ্লবিক Mechanism নিয়ে আলোচনা করব: **Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)**। লো-র্যাংক অ্যাডাপ্টার (LoRA) এর ম্যাথমেটিক্যাল ইনটুইশন এবং ৪-বিট কোয়ান্টাইজেশন (QLoRA) কীভাবে কনজিউমার ল্যাপটপে এলএলএম ফাইন-টিউন করতে সাহায্য করে, তা আমরা বিস্তারিত শিখব।
+দারুণ! আমরা ভালোভাবে Supervised Fine-Tuning-এর Data প্রিপারেশন ও থিওরি শেষ করে ফেলেছি। পরের chapter-এ আমরা এই Fine-Tuning মেমরি ও GPU Compute কস্ট save করার জন্য সবচেয়ে revolutionary Mechanism নিয়ে আলোচনা করব: **Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)**। Low-Rank Adapter (LoRA) এর Mathematical Intuition এবং ৪-বিট Quantization (QLoRA) কীভাবে কনজিউমার ল্যাপটপে এলএলএম ফাইন-টিউন করতে সাহায্য করে, তা আমরা বিস্তারিত শিখব।
 
 ---
-**Chapter 15 সমাপ্ত।**
+**Chapter 15 শেষ।**

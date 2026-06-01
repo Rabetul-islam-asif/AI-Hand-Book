@@ -3,13 +3,13 @@
 ---
 
 ### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো মডার্ন AI ইঞ্জিনিয়ারিংয়ের সবচেয়ে অ্যাডভান্সড ডোমেইন—অর্থাৎ হারনেস ইঞ্জিনিয়ারিং (Harness Engineering - `Agent = Model + Harness`) এবং তার ইভালুয়েটর সেন্সর (Evaluator Sensors) Mechanism ক্র্যাক করা। তুমি জানতে পারবে কীভাবে Project রুট ফাইলে `AGENTS.md` ব্যবহার করে এজেন্টের কন্সটিটিউশনাল বাউণ্ডারি সেট করা হয় এবং Probabilistic (Probabilistic) ও Deterministic (Deterministic) গার্ডরেইলের টেকনিক্যাল সমন্বয় ঘটিয়ে Enterprise-Grade স্ট্যাবল System আর্কিটেক্ট করতে হয়।
+এই চ্যাপ্টারের মূল লক্ষ্য হলো মডার্ন AI Engineerিংয়ের সবচেয়ে অ্যাডভান্সড ডোমেইন— মানে হারনেস Engineerিং (Harness Engineering - `Agent = Model + Harness`) এবং তার ইভালুয়েটর সেন্সর (Evaluator Sensors) Mechanism ক্র্যাক করা। তুমি জানতে পারবে কীভাবে Project রুট ফাইলে `AGENTS.md` ব্যবহার করে এজেন্টের কন্সটিটিউশনাল বাউণ্ডারি সেট করা হয় এবং Probabilistic (Probabilistic) ও Deterministic (Deterministic) গার্ডরেইলের টেকনিক্যাল সমন্বয় ঘটিয়ে Enterprise-Grade স্ট্যাবল System Architect করতে হয়।
 
 ### Why Should I Care?
 বাস্তবে দেখা গেছে, **৬৫% এন্টারপ্রাইজ AI Project-এর ফেইলিউরের কারণ Model-এর দুর্বলতা নয়; বরং হারনেস ডিফেক্ট (Harness Defect)।** ডেভেলপাররা মনে করো জিপিটি-৫ আসলে তাদের চ্যাটবটের Error ঠিক হবে, কিন্তু তাদের ভেতরের File রিডার বা Code ভ্যালিডেটর সেন্সর ভাঙা থাকার কারণে AI প্রতিনিয়ত ভুল ডিসিশন নেয়। কড়া ইভালুয়েশন ও সেন্সর System ডিজাইন করা তোমার প্রডাক্টকে ১০০% নির্ভরযোগ্য করবে।
 
 ### Big Picture
-আগের চ্যাপ্টারগুলোতে আমরা টুল কলিং ও ইউনিভার্সাল এমসিপি (MCP) স্ট্যান্ডার্ড শিখেছি। এই চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে **Production AI Systems** এর কোর পার্ট। এখানে শেখা হারনেস Architecture আমাদের পরবর্তী চ্যাপ্টারের অবজারভেবিলিটি (Tracing, LangSmith), সিকিউরিটি ও কস্ট অপ্টিমাইজেশন এবং কমপ্লিট প্রডাক্ট ব্লুপ্রিন্ট দাঁড় করানোর মূল ভিত্তি।
+আগের চ্যাপ্টারগুলোতে আমরা টুল কলিং ও ইউনিভার্সাল এমসিপি (MCP) Standard শিখেছি। এই চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে **Production AI Systems** এর কোর পার্ট। এখানে শেখা হারনেস Architecture আমাদের পরের chapter-এর অবজারভেবিলিটি (Tracing, LangSmith), সিকিউরিটি ও কস্ট অপ্টিমাইজেশন এবং কমপ্লিট প্রডাক্ট Blueprint দাঁড় করানোর মূল ভিত্তি।
 
 ---
 
@@ -32,9 +32,9 @@ Agent = Model + Harness (Flagship Safe Racing Car ✓):
 [ Host Client ] ──► [ Guides (AGENTS.md) ] ──► [ Model Engine ] ──► [ Sensors (Evals) ] ──► Safe Response
 ```
 
-* **The Flagship Car (Agent = Model + Harness):** তুমি ইঞ্জিনের চারপাশে শক্তিশালী চেসিস, নিখুঁত স্টিয়ারিং (Guides), ডিস্ক ব্রেক (Sensors), এবং ড্যাশবোর্ড স্ক্রিন (Observability) ফিট করে একটি প্রফেশনাল স্পোর্টস কার তৈরি করলে। 
+* **The Flagship Car (Agent = Model + Harness):** তুমি ইঞ্জিনের চারপাশে শক্তিশালী চেসিস, perfect স্টিয়ারিং (Guides), ডিস্ক ব্রেক (Sensors), এবং ড্যাশবোর্ড স্ক্রিন (Observability) ফিট করে একটি প্রফেশনাল স্পোর্টস কার তৈরি করলে। 
 
-সিনিয়র AI ইঞ্জিনিয়ার ও ইভোলিউশন আর্কিটেক্ট **Mitchell Hashimoto** (Co-founder of HashiCorp) ২০২৬ সালে AI স্পেসে এই নিখুঁত সমীকরণটি প্রতিষ্ঠা করো: **Agent = Model + Harness**। 
+সিনিয়র AI Engineer ও ইভোলিউশন Architect **Mitchell Hashimoto** (Co-founder of HashiCorp) ২০২৬ সালে AI স্পেসে এই perfect Equation-টা প্রতিষ্ঠা করো: **Agent = Model + Harness**। 
 * **Model** হলো স্রেফ Engine (Token in, token out)।
 * **Harness** হলো ওরিজিনাল Code-এর চারপাশের নিরাপত্তা ও কন্ট্রোল বডি, যা তোমার প্রডাক্টটিকে প্রোডাকশন-রেডি করে।
 
@@ -42,7 +42,7 @@ Agent = Model + Harness (Flagship Safe Racing Car ✓):
 
 ### ২. Core Concepts: হারনেস Architecture-এর তিন স্তর
 
-একটি কাস্টম হারনেস Engine মূলত ৩টি নিরাপত্তা স্তরের সমন্বয়ে গঠিত:
+একটি Custom হারনেস Engine মূলত ৩টি নিরাপত্তা স্তরের সমন্বয়ে গঠিত:
 
 [VISUAL]
 Title: 3-Layer Harness Architecture
@@ -72,21 +72,21 @@ Purpose: Define the structural layers of a Harness.
 
 #### ক. Layer 1: Guides (সংবিধান)
 এজেন্টকে গাইড করার জন্য আগে থেকে ডিফাইন করা রুল বুক।
-* **AGENTS.md:** এটি একটি ওপেন ইন্ডাস্ট্রি স্ট্যান্ডার্ড (August 2025)। আমরা Project-এর রুট ফাইলে এই ফাইলটি রাখি। প্রোটোকল Server বা এডিটর (যেমন: Cursor, Claude Code) রান হওয়ার সময় অটো-রিড করে Project-এর Coding কনভেনশন, টেক স্ট্যাক এবং কড়া নিষেধাজ্ঞা (`DO NOT` rules) জেনে নেয়।
+* **AGENTS.md:** এটি একটি ওপেন ইন্ডাস্ট্রি Standard (August 2025)। আমরা Project-এর রুট ফাইলে এই ফাইলটি রাখি। প্রোটোকল Server বা এডিটর (যেমন: Cursor, Claude Code) রান হওয়ার সময় অটো-রিড করে Project-এর Coding কনভেনশন, টেক স্ট্যাক এবং কড়া নিষেধাজ্ঞা (`DO NOT` rules) জেনে নেয়।
 
 #### খ. Layer 2: Context & States (Data সোর্সিং)
-এজেন্ট প্রতি ইটারেশনে কী Data দেখবে তা অপ্টিমাইজ করা। এটি Context রট (Context Rot - পুরনো বা মিসম্যাচড Data) থেকে সিস্টেমকে রক্ষা করে।
+এজেন্ট প্রতি Iteration-এ কী Data দেখবে তা অপ্টিমাইজ করা। এটি Context রট (Context Rot - পুরনো বা মিসম্যাচড Data) থেকে সিস্টেমকে রক্ষা করে।
 
 #### গ. Layer 3: Sensors (প্রতিরক্ষা ব্যবস্থা)
-এজেন্ট যখন কোনো অ্যাকশন বা Code Output প্রডিউস করে, সেটি রিয়েল ইউজারের কাছে যাওয়ার আগে কঠোর Test গেট Validation পার হতে হয়।
+এজেন্ট যখন কোনো অ্যাকশন বা Code Output Produce করে, সেটি রিয়েল ইউজারের কাছে যাওয়ার আগে কঠোর Test গেট Validation পার হতে হয়।
 * **Computational Sensors:** লিন্টার, টাইপ চেকার বা ইউনিট Test। এগুলো **Deterministic** (১০০% পাস অথবা ফেইল, কোনো AI দ্বিধা নেই)।
-* **LLM-as-a-Judge:** চ্যাট টোন, সাবজেক্টিভ মিনিং বা বাংলায় কথার শালীনতা ইভালুয়েশন করার জন্য কাস্টম লাইটওয়েট জাজ Model (যেমন: GPT-4o-mini) ডিক্লেয়ার করা।
+* **LLM-as-a-Judge:** চ্যাট টোন, সাবজেক্টিভ মিনিং বা বাংলায় কথার শালীনতা ইভালুয়েশন করার জন্য Custom লাইটওয়েট জাজ Model (যেমন: GPT-4o-mini) ডিক্লেয়ার করা।
 
 🧠 Remember
 
 **Probabilistic Guide (Constitutional instructions)** = Model রুলস ফলো করার চেষ্টা করে (সাধারণত ৭০% সময়)।  
 **Deterministic Sensor (Linter/Tests/ACL)** = System রুলস মানতে বাধ্য করে (১০০% সময়)।  
-নিরাপত্তা ও Data ইন্টিগ্রিটির জন্য ক্রুশিয়াল রুলস সবসময় **Deterministic Sensor** লেয়ারে ইমপ্লিমেন্ট করা আবশ্যক।
+নিরাপত্তা ও Data ইন্টিগ্রিটির জন্য ক্রুশিয়াল রুলস সবসময় **Deterministic Sensor** লেয়ারে Implement করা আবশ্যক।
 
 ---
 
@@ -116,7 +116,7 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 অ্যানথ্রপিকের ফ্ল্যাগশিপ সিএলআই এডিটর **Claude Code** যেভাবে তোমার কোডবেস প্রোটেক্ট করে:
 
 1. **Constitutional Alignment:** এটি ওপেন হওয়ার সময় তোমার Project-এর `CLAUDE.md` এবং `AGENTS.md` রিড করে।
-2. **Deterministic Safety:** তুমি যখন Code চেঞ্জ করতে বলো, সে Code লিখে সেভ করে এবং ব্যাকগ্রাউন্ডে অটোমেটিক্যালি তোমার Project-এর `pnpm test` বা `npm run lint` সেন্সর রান করে। Test ফেইল করলে সে নিজে থেকেই Error ডিটেক্ট করে Code রি-রাইট করে ফিক্স করে।
+2. **Deterministic Safety:** তুমি যখন Code চেঞ্জ করতে বলো, সে Code লিখে সেভ করে এবং ব্যাকগ্রাউন্ডে Automatically তোমার Project-এর `pnpm test` বা `npm run lint` সেন্সর রান করে। Test ফেইল করলে সে নিজে থেকেই Error ডিটেক্ট করে Code রি-রাইট করে ফিক্স করে।
 
 ---
 
@@ -124,7 +124,7 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 
 💻 Developer View
 
-ইন্ডাস্ট্রি স্ট্যান্ডার্ড কাস্টম `AGENTS.md` টেমপ্লেট File যা তোমার ওএস-এ ডিপ্লয় করতে হবে:
+ইন্ডাস্ট্রি Standard Custom `AGENTS.md` টেমপ্লেট File যা তোমার ওএস-এ Deploy করতে হবে:
 
 ```markdown
 # PocketSchool LMS — Developer Agent Guide
@@ -155,13 +155,13 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 
 🏭 Production Reality
 
-ইনফারেন্সের স্পিড বুস্ট করার জন্য প্রোডাকশন হারনেস ইঞ্জিনে **Sensor Pruning** নিশ্চিত করতে হয়।
+Inference-এর স্পিড বুস্ট করার জন্য প্রোডাকশন হারনেস ইঞ্জিনে **Sensor Pruning** নিশ্চিত করতে হয়।
 
 * **Sensor Order (সস্তা বনাম ব্যয়বহুল):** 
   সব সেন্সর একই সাথে রান করা প্রোডাকশন Latency ও কস্ট বাড়ায়। এর সমাধান হলো **Cascade Flow**:
   1. প্রথমে সবচেয়ে সস্তা এবং ফাস্ট **Computational Sensor** (যেমন: Linter - <১ মিলি-সেকেন্ড) রান করা।
   2. লিন্টার পাস করলে **Unit Tests** (<৫ সেকেন্ড) রান করা।
-  3. সব পাস করলে চূড়ান্ত সাবজেক্টিভ চেক করতে সবচেয়ে দামি ও ধীরগতির **LLM-as-a-Judge** (<১ সেকেন্ড) রান করা।
+  3. সব পাস করলে final সাবজেক্টিভ চেক করতে সবচেয়ে দামি ও ধীরগতির **LLM-as-a-Judge** (<১ সেকেন্ড) রান করা।
   এর ফলে ফাস্ট ফেইলিউর অপ্টিমাইজড থাকে।
 
 ---
@@ -172,13 +172,13 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 
 **ভুল ধারণা:** Prompt-এর ভেতর `"কখনোই পিন Code ডিসক্লোজ করবে না"` লিখে রাখলেই AI প্রোডাকশনে পিন সিকিউর রাখবে।
 
-**বাস্তবতা:** Prompt Instruction হলো **Probabilistic** (প্রায়ই হ্যাকারদের কাস্টম জেইলব্রেক Prompt-এর কাছে এটি হেরে যায়)। সিকিউরিটি-ক্রিটিক্যাল Data প্রটেক্ট করতে হলে Prompt-এর পাশাপাশি ব্যাকএন্ড কোডে **Deterministic Filter/ACL Sensor** দিয়ে রিকোয়েস্ট হার্ড ব্লক করা বাধ্যতামূলক।
+**বাস্তবতা:** Prompt Instruction হলো **Probabilistic** (প্রায়ই হ্যাকারদের Custom জেইলব্রেক Prompt-এর কাছে এটি হেরে যায়)। সিকিউরিটি-ক্রিটিক্যাল Data প্রটেক্ট করতে হলে Prompt-এর পাশাপাশি ব্যাকএন্ড কোডে **Deterministic Filter/ACL Sensor** দিয়ে রিকোয়েস্ট হার্ড ব্লক করা বাধ্যতামূলক।
 
 ---
 
 ### ৮. Mental Model: ফুটবল খেলার রেফারী ও বাউন্ডারি লাইন
 
-হারনেস ও সেন্সর মেকানিজমের মেন্টাল Model:
+হারনেস ও সেন্সর Mechanism-এর মেন্টাল Model:
 
 * **Guides (AGENTS.md) = বাউন্ডারি লাইন ও প্লেয়ার গাইডবুক:**
   প্লেয়াররা জানে বল সীমানার বাইরে গেলে থ্রো-ইন হবে, এবং কীভাবে ফাউল এড়াতে হবে।
@@ -189,7 +189,7 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 
 ### ৯. Mini Project: পাইথনে স্ক্র্যাচ থেকে একটি মাল্টি-স্টেপ ক্যাসকেড সেন্সর পাইপলাইন
 
-চলো পাইথনে কাস্টম পাইপলাইন ব্যবহার করে একটি প্রোডাকশন-গ্রেড ৩-ধাপের ক্যাসকেড সেন্সর (Computational -> Unit -> LLM-as-a-Judge) System ডিজাইন করি।
+চলো পাইথনে Custom পাইপলাইন ব্যবহার করে একটি প্রোডাকশন-গ্রেড ৩-ধাপের ক্যাসকেড সেন্সর (Computational -> Unit -> LLM-as-a-Judge) System ডিজাইন করি।
 
 ```python
 import subprocess
@@ -250,21 +250,21 @@ run_cascade_sensors("print('Success')", "প্রিয় কাস্টম�
 ### ১০. Interview Questions
 
 #### Beginner
-1. **প্রশ্ন:** সিনিয়র AI আর্কিটেক্টদের তৈরি করা "Agent = Model + Harness" সমীকরণের মূল তাৎপর্য কী?
-   * **উত্তর:** লার্জ ল্যাঙ্গুয়েজ Model (LLM) একা শুধুমাত্র একটি স্ট্যাটিস্টিক্যাল Engine (Token Predictor)। এটিকে একটি প্রোডাকশন-রেডি নির্ভরযোগ্য স্বয়ংক্রিয় এজেন্টে রূপান্তর করতে তার চারপাশে Code-এর যে সিকিউরিটি, মেমরি, অবজারভেবিলিটি এবং ডেসিশন গেটওয়ে তৈরি করা হয়, তাকেই **Harness** বলে।
+1. **প্রশ্ন:** সিনিয়র AI Architectদের তৈরি করা "Agent = Model + Harness" Equationের মূল তাৎপর্য কী?
+   * **উত্তর:** লার্জ Language Model (LLM) একা শুধুমাত্র একটি স্ট্যাটিস্টিক্যাল Engine (Token Predictor)। এটিকে একটি প্রোডাকশন-রেডি নির্ভরযোগ্য স্বয়ংক্রিয় এজেন্টে convert করতে তার চারপাশে Code-এর যে সিকিউরিটি, মেমরি, অবজারভেবিলিটি এবং ডেসিশন গেটওয়ে তৈরি করা হয়, তাকেই **Harness** বলে।
 
 #### Intermediate
-2. **প্রশ্ন:** Project রুট ফাইলে `AGENTS.md` রাখার আর্কিটেকচারাল সুবিধা কী কী?
-   * **উত্তর:** এটি Project-এর টেক স্ট্যাক, Coding কনভেনশন এবং নিষেধাজ্ঞাগুলো ওয়ান-প্লেসে ডিক্লেয়ার করে। Cursor বা Claude Code এর মতো মডার্ন এজেন্টগুলো রান হওয়ার সময় এই File অটো-রিড করে কোনো ওওএম বা হ্যালুসিনেশন ফাটল ছাড়াই কোম্পানির নির্দিষ্ট Coding স্ট্যান্ডার্ড মেনে অটো-Code জেনারেট করতে পারে।
+2. **প্রশ্ন:** Project রুট ফাইলে `AGENTS.md` রাখার Architectural সুবিধা কী কী?
+   * **উত্তর:** এটি Project-এর টেক স্ট্যাক, Coding কনভেনশন এবং নিষেধাজ্ঞাগুলো ওয়ান-প্লেসে ডিক্লেয়ার করে। Cursor বা Claude Code এর মতো মডার্ন এজেন্টগুলো রান হওয়ার সময় এই File অটো-রিড করে কোনো ওওএম বা Hallucination ফাটল ছাড়াই Companyর নির্দিষ্ট Coding Standard মেনে অটো-Code জেনারেট করতে পারে।
 
 #### Advanced
-3. **প্রশ্ন:** প্রোডাকশনে Latency এবং কম্পিউট কস্ট অপ্টিমাইজ করতে ইভালুয়েশন সেন্সরগুলোর অর্ডারিং বা "Cascade Flow" কীভাবে ডিজাইন করা উচিত?
+3. **প্রশ্ন:** প্রোডাকশনে Latency এবং Compute কস্ট অপ্টিমাইজ করতে ইভালুয়েশন সেন্সরগুলোর অর্ডারিং বা "Cascade Flow" কীভাবে ডিজাইন করা উচিত?
    * **উত্তর:** ক্যাসকেড ফ্লো-তে প্রথমে সবচেয়ে দ্রুত এবং সস্তা **Computational Sensor** (যেমন: Linter, Regex - <১ মিলি-সেকেন্ড) রান করতে হবে। সেটি পাস করলে সেকেন্ডারি **Unit Tests/tsc** (<৫ সেকেন্ড) এবং সবশেষে ডমিন্যান্ট চেক করতে সবচেয়ে দামি ও ধীরগতির **LLM-as-a-Judge** (<১ সেকেন্ড) রান করা উচিত। এতে শুরুর কোনো ধাপে Error ডিটেক্ট হলে দামি API কল এড়িয়ে ইনস্ট্যান্ট ফাস্ট ফেইলিউর অপ্টিমাইজড থাকে।
 
 ---
 
 ### ১১. Chapter Summary
-* **Harness Engineering** প্রোডাকশনে AI প্রডাক্টের নিরাপত্তা ও স্থায়িত্বের গোল্ড স্ট্যান্ডার্ড।
+* **Harness Engineering** প্রোডাকশনে AI প্রডাক্টের নিরাপত্তা ও স্থায়িত্বের গোল্ড Standard।
 * **AGENTS.md** Project-এর কন্সটিটিউশনাল রুলস ও কনভেনশন ডিক্লেয়ার করার ইউনিভার্সাল File।
 * **Cascade Sensors** সস্তা থেকে দামি ক্রমানুসারে AI Output স্ক্যান করে Latency বাঁচায়।
 * প্রোডাকশন এন্টারপ্রাইজে ৬৫% AI ফেইলিউর স্রেফ **Harness Defect**-এর কারণে ঘটে।
@@ -272,7 +272,7 @@ run_cascade_sensors("print('Success')", "প্রিয় কাস্টম�
 ---
 
 ### ১২. What's Next
-দারুণ! আমরা সফলভাবে হারনেস ইঞ্জিনিয়ারিং ও নিরাপত্তা সেন্সরের কোর Architecture জয় করে ফেলেছি। পরবর্তী চ্যাপ্টারে আমরা এই প্রোডাকশন সিস্টেমের Window বা চোখের Mechanism নিয়ে আলোচনা করব: **Chapter 22: AI Observability & Monitoring**। ল্যাংস্মিথ (LangSmith), ফিনিক্স এবং ওপেন-টেলিমেন্ট্রি কীভাবে এজেন্টিক Loop-এর প্রতি মিলি-সেকেন্ডের API খরচ ও Latency ট্র্যাক করে, তা আমরা বিস্তারিত শিখব।
+দারুণ! আমরা ভালোভাবে হারনেস Engineerিং ও নিরাপত্তা সেন্সরের কোর Architecture শেষ করে ফেলেছি। পরের chapter-এ আমরা এই প্রোডাকশন সিস্টেমের Window বা চোখের Mechanism নিয়ে আলোচনা করব: **Chapter 22: AI Observability & Monitoring**। ল্যাংস্মিথ (LangSmith), ফিনিক্স এবং ওপেন-টেলিমেন্ট্রি কীভাবে Agentic Loop-এর প্রতি মিলি-সেকেন্ডের API খরচ ও Latency ট্র্যাক করে, তা আমরা বিস্তারিত শিখব।
 
 ---
-**Chapter 21 সমাপ্ত।**
+**Chapter 21 শেষ।**
