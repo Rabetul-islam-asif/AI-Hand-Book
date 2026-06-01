@@ -2,14 +2,9 @@
 
 ---
 
-### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো আর্টিফিশিয়াল ইন্টেলিজেন্সের তিনটি প্রধান স্তম্ভ—Machine Learning (Machine Learning), Deep Learning (Deep Learning) এবং কৃত্রিম Neural Network (Artificial Neural Networks) এর মধ্যকার একে অন্যের সম্পর্ক এবং তাদের ভেতরের Mechanics বোঝা। এছাড়াও আমরা শিখবো Supervised, Unsupervised এবং Reinforcement Learning-এর Practical পার্থক্য ও তাদের বাস্তব প্রয়োগ।
+তুমি কি কখনো ভেবেছো — ক্রেডিট কার্ডের ফ্রড ট্রানজেকশন ধরা আর সেলফ-ড্রাইভিং কার চালানো, এই দুটি সম্পূর্ণ ভিন্ন কাজ কীভাবে AI করে? উত্তর হলো, AI-এর আলাদা আলাদা হাতিয়ার আছে। কাস্টমারদের ভাগ করা (Customer Segmentation), ছবি দেখে মুখ চেনা (Face Recognition) কিংবা গেম খেলা — সব কাজের জন্য একই টেকনিক খাটানো বোকামি। ভুল জায়গায় ভুল হাতিয়ার ব্যবহার করলে তোমার প্রজেক্টের কস্ট আর রিসোর্স পুরোটাই নষ্ট হবে।
 
-### Why Should I Care?
-সব AI Project একভাবে হ্যান্ডেল করা যায় না। Customার চিলড্রেন Segmentation, ক্রেডিট কার্ড ফ্রড ডিটেকশন আর সেলফ-ড্রাইভিং কার—তিনটির Architecture সম্পূর্ণ ভিন্ন। কোনটি Machine Learning দিয়ে সলভ করবে আর কোনটির জন্য কোটি টাকার Deep Learning Model বানাবে, এই সিদ্ধান্ত নিতে না পারলে AI Engineer হিসেবে তোমার Project Cost & Resource Management Trash-এ চলে যাবে।
-
-### Big Picture
-আগের চ্যাপ্টারে আমরা Classical Coding ও AI এর মধ্যকার গ্যাপ বা Software 2.0 Paradigm Shift দেখেছি। এই চ্যাপ্টারে আমরা দেখবো কীভাবে এই Software ২.০ Ecosystem বিভিন্ন সাব-Category-তে বিভক্ত এবং কীভাবে তারা মানুষের ব্রেইনের মতো করে কাজ করে।
+তো চলো এই চ্যাপ্টারে AI-এর মূল তিনটা স্তম্ভ — Machine Learning, Deep Learning আর Neural Network-এর ভেতরের Mechanics খুব সহজে বুঝে নিই। আমরা দেখবো Supervised, Unsupervised আর Reinforcement Learning-এর বাস্তব উদাহরণ এবং এদের আসল পার্থক্য। চলো শুরু করা যাক!
 
 ---
 

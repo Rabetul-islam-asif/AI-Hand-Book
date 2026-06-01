@@ -2,14 +2,11 @@
 
 ---
 
-### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো মডার্ন AI Engineerিংয়ের সবচেয়ে অ্যাডভান্সড ডোমেইন— মানে হারনেস Engineerিং (Harness Engineering - `Agent = Model + Harness`) এবং তার ইভালুয়েটর সেন্সর (Evaluator Sensors) Mechanism ক্র্যাক করা। তুমি জানতে পারবে কীভাবে Project রুট ফাইলে `AGENTS.md` ব্যবহার করে এজেন্টের কন্সটিটিউশনাল বাউণ্ডারি সেট করা হয় এবং Probabilistic (Probabilistic) ও Deterministic (Deterministic) গার্ডরেইলের টেকনিক্যাল সমন্বয় ঘটিয়ে Enterprise-Grade স্ট্যাবল System Architect করতে হয়।
+তোমার কাছে দুনিয়ার সবচেয়ে শক্তিশালী Engine আছে। কিন্তু সেই Engine-কে চাকার ওপর বসিয়ে ব্রেক ছাড়া, স্টিয়ারিং ছাড়া হাইওয়েতে ছেড়ে দিলে কী হবে? ক্র্যাশ। AI-এর ক্ষেত্রেও ঠিক তাই। মজার ব্যাপার হলো— ৬৫% এন্টারপ্রাইজ AI Project ফেইল করে Model-এর দোষে না, বরং তার চারপাশের Harness ভাঙা থাকায়।
 
-### Why Should I Care?
-বাস্তবে দেখা গেছে, **৬৫% এন্টারপ্রাইজ AI Project-এর ফেইলিউরের কারণ Model-এর দুর্বলতা নয়; বরং হারনেস ডিফেক্ট (Harness Defect)।** ডেভেলপাররা মনে করো জিপিটি-৫ আসলে তাদের চ্যাটবটের Error ঠিক হবে, কিন্তু তাদের ভেতরের File রিডার বা Code ভ্যালিডেটর সেন্সর ভাঙা থাকার কারণে AI প্রতিনিয়ত ভুল ডিসিশন নেয়। কড়া ইভালুয়েশন ও সেন্সর System ডিজাইন করা তোমার প্রডাক্টকে ১০০% নির্ভরযোগ্য করবে।
+সহজ কথায়, **Agent = Model + Harness**। Model হলো Engine, আর Harness হলো স্টিয়ারিং, ব্রেক, সিটবেল্ট— মানে `AGENTS.md` দিয়ে Constitutional Guide সেট করা, Linter আর Unit Test দিয়ে Deterministic Sensor বসানো, আর LLM-as-a-Judge দিয়ে সাবজেক্টিভ টোন চেক করা। এগুলো ছাড়া তোমার AI এজেন্ট প্রোডাকশনে গিয়ে Server ক্র্যাশ করবে, ওয়ালেট ড্রেইন করবে।
 
-### Big Picture
-আগের চ্যাপ্টারগুলোতে আমরা টুল কলিং ও ইউনিভার্সাল এমসিপি (MCP) Standard শিখেছি। এই চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে **Production AI Systems** এর কোর পার্ট। এখানে শেখা হারনেস Architecture আমাদের পরের chapter-এর অবজারভেবিলিটি (Tracing, LangSmith), সিকিউরিটি ও কস্ট অপ্টিমাইজেশন এবং কমপ্লিট প্রডাক্ট Blueprint দাঁড় করানোর মূল ভিত্তি।
+তো চলো দেখি কীভাবে `AGENTS.md` কনফিগার করতে হয়, Probabilistic বনাম Deterministic গার্ডরেইলের তফাত কী, আর Cascade Sensor Pipeline কীভাবে ডিজাইন করতে হয়। এটা বুঝলে পরের চ্যাপ্টারের Observability, Tracing আর প্রোডাকশন Blueprint সব ক্লিয়ার হয়ে যাবে।
 
 ---
 

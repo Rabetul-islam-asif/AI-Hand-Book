@@ -2,14 +2,11 @@
 
 ---
 
-### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো AI টুল এবং Resource Integrationের সবচেয়ে আধুনিক ও revolutionary ওপেন-Standard— মানে Model Context প্রোটোকল (Model Context Protocol / MCP) এর Mechanism এবং তার Coding Architecture সম্পূর্ণ আয়ত্ত করা। তুমি জানতে পারবে কীভাবে অ্যানথ্রপিক (Anthropic) এর তৈরি করা এই ইউনিভার্সাল প্রোটোকল AI হোস্ট (যেমন: Claude, Cursor) এবং বিভিন্ন Data সোর্সের মধ্যে একটি কমন কানেকশন ব্রিজ তৈরি করে এবং কীভাবে নিজের Custom **MCP Server** ডেভেলপ ও Deploy করতে হয়।
+নোকিয়ার চার্জার দিয়ে কি স্যামসাং চার্জ হতো? হতো না। প্রতিটা ফোনের জন্য আলাদা চার্জার। AI-এর টুল কলিংয়েও ঠিক একই সমস্যা ছিল— Claude-এর জন্য লেখা টুল OpenAI-তে চলে না, Gemini-তে আবার আলাদা Format! প্রতিবার নতুন করে Code লেখো। বিশৃঙ্খলা!
 
-### Why Should I Care?
-আগের চ্যাপ্টারে আমরা Custom টুল কলিং শিখেছি। কিন্তু প্রথাগত টুল কলিংয়ের সবচেয়ে বড় সমস্যা হলো এটি Model-স্পেসিফিক (Model-specific)। তুমি যদি Claude (Claude) এর জন্য টুল ডিফাইন করো, সেটি ওপেনএআই (OpenAI) বা Gemini (Gemini)-তে কাজ করবে না। তোমাকে প্রতিটির জন্য আলাদা API Format ও Code লিখতে হবে। **MCP হলো AI-এর জন্য USB-C ক্যাবলের মতো।** তুমি একবার একটি Custom MCP Server তৈরি করলে, যেকোনো AI হোস্ট বা Model সেই একই Server কানেক্ট করে ডাইরেক্ট টুলস ও Resource রিড করতে পারবে। এটি বর্তমান গ্লোবাল AI ইনফ্রাস্ট্রাকচারের সবচেয়ে মডার্ন Architectural Pattern।
+এই বিশৃঙ্খলার সমাধান হলো MCP (Model Context Protocol)— AI-এর USB-C ক্যাবল। অ্যানথ্রপিক এটা তৈরি করেছে, কিন্তু এটা সম্পূর্ণ ওপেন Standard। তুমি একবার একটা MCP Server বানাও, আর যেকোনো AI হোস্ট— Claude, Cursor, Gemini— সবাই সেটা ডিরেক্ট কানেক্ট করে টুলস আর Resources রিড করতে পারবে। কোনো আলাদা Integration Code লাগবে না।
 
-### Big Picture
-আগের চ্যাপ্টারে আমরা Custom টুলস কনট্র্যাক্ট ও JSON স্কিমা Implementation শিখেছি। এই চ্যাপ্টারে আমরা সেই টুল লজিককে একটি বৈশ্বিক প্রোটোকলে convert করব। এটি আমাদের পরের chapter-এর এন্টারপ্রাইজ হারনেস Engineerিং (Harness Engineering), অবজারভেবিলিটি এবং রিয়েল প্রডাক্ট Blueprint দাঁড় করানোর সবচেয়ে আধুনিক ভিত্তি।
+তো চলো দেখি MCP-র তিনটা পিলার (Resources, Prompts, Tools) কী, JSON-RPC 2.0 কীভাবে কাজ করে, আর কীভাবে নিজের Custom MCP Server ডিজাইন করতে হয়। এটা জানলে পরের চ্যাপ্টারের Harness Engineering আর Production Architecture বুঝতে একদম সুবিধা হবে।
 
 ---
 

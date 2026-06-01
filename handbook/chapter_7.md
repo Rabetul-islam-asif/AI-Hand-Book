@@ -2,14 +2,9 @@
 
 ---
 
-### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো আধুনিক AI বা Generative AI বিপ্লবের ভিত্তি— মানে Transformer Architecture পুরোপুরি ডিকোড করা। আমরা জানবো কীভাবে পুরোনো RNN ও LSTM-এর Sequential প্রসেসিংয়ের সীমাবদ্ধতা বা বোতলনাক ভেঙে সেলফ-Attention (Self-Attention) Mechanism এবং মাল্টি-হেড Attention (Multi-Head Attention) আমাদের গ্লোবাল Context Parallel প্রসেসিংয়ের স্বাধীনতা দিয়েছে।
+তুমি কি কখনো ভেবেছো — আজকে তুমি যে ChatGPT, Claude, Llama বা Midjourney ব্যবহার করছো, এদের সবার পেছনে কোন ম্যাজিক কাজ করছে? উত্তর হলো, "Transformer"। ২০১৭ সালে গুগলের রিসার্চ পেপার *"Attention Is All You Need"* বের হওয়ার পর পুরো AI দুনিয়া ওলট-পালট হয়ে গেছে। এই আর্কিটেকচারটা যদি তুমি না বোঝো, তবে আধুনিক Generative AI-এর আসল শক্তির রহস্যটা তোমার কাছে সবসময়ই একটা রহস্য থেকে যাবে।
 
-### Why Should I Care?
-আজকে তুমি যে ChatGPT, Claude, Llama বা Midjourney ব্যবহার করছো, তাদের সবার পেছনের মূল Architectural ম্যাজিক হলো এই "Transformer"। ২০১৭ সালে গুগলের রিসার্চ পেপার *"Attention Is All You Need"* বের হওয়ার পর পুরো AI ওয়ার্ল্ড বদলে যায়। একজন AI Engineer হিসেবে Attention Matrix-এর ভেতরের $Q$, $K$, $V$ Dynamic্স না বুঝলে তুমি বড় বড় Model-এর Context Window এবং Architectural লিমিটেশনস কোনোদিনও ফিল করতে পারবে না।
-
-### Big Picture
-আমরা আগের চ্যাপ্টারে গভীর ফিডফরোয়ার্ড নেটওয়ার্কের Backpropagation থিওরি শেষ করেছি। এই চ্যাপ্টারটি আমাদের হ্যান্ডবুকের সবচেয়ে গুরুত্বপূর্ণ স্তম্ভ—এখানে আমাদের প্রবেশ ঘটছে **Part 4 — Modern AI Foundations** এর আধুনিক AI ইঞ্জিনিয়ারিংয়ের মূল মূল অংশে।
+তো চলো এই চ্যাপ্টারে আধুনিক AI বিপ্লবের মূল ভিত্তি Transformer-এর মূল অংশটা একদম ডিকোড করে ফেলি। আমরা দেখবো কীভাবে পুরনো RNN বা LSTM-এর একটার পর একটা (Sequential) প্রসেস করার ঝামেলা ভেঙে সেলফ-অ্যাটেনশন (Self-Attention) আর মাল্টি-হেড অ্যাটেনশন (Multi-Head Attention) আমাদের সমান্তরালে বা Parallel প্রসেস করার স্বাধীনতা দিয়েছে। চলো একজন সাধারণ পাঠক বনাম একজন স্পিড রিডারের গল্প দিয়ে শুরু করা যাক!
 
 ---
 

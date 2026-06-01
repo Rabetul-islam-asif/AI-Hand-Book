@@ -2,14 +2,9 @@
 
 ---
 
-### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো লার্জ Language Model (LLM) এবং আধুনিক Generative AI Ecosystem-এর পুরো ভাগ করা ম্যাপ করা। আমরা জানবো কীভাবে Encoder-অনলি (Encoder-only: BERT), Decoder-অনলি (Decoder-only: GPT/Llama) এবং Encoder-Decoder (Encoder-Decoder: T5) Architecture কাজ করে, কেন Decoderের বাজারে একক দাপট এবং একই সাথে Multi-modal ভিশন (VLM), Image জেনারেশন (Diffusion - Flux, SD) এবং অডিও Model-এর ভেতরের মূল Mechanism ভেঙে দেখবো।
+ধরো তোমার ই-কমার্স সাইটে Customারদের কমেন্ট Positive না Negative সেটা বুঝতে হবে। তুমি কি এই কাজে GPT-4 API কল করবে? সেটা করলে প্রতি মাসে হাজার ডলার বিল আসবে। অথচ একটা ছোট্ট BERT Model একদম ফ্রিতে, ১ মিলি-সেকেন্ডে এই কাজটা করে দিতে পারে! সহজ কথায় — সব কাজের জন্য একই Model ব্যবহার করা চরম অপচয়।
 
-### Why Should I Care?
-Developer হিসেবে সব কাজের জন্য জিপিটি-৪ বা Claude-৩ কল করা একটি অপচয় এবং চরম Architectural অজ্ঞতা। টেক্সট Classification বা সেন্টিমেন্ট Analysis-এর জন্য একটি মাত্র ১০০ ডলারের BERT Model যা করতে পারে, তার জন্য ৩০০ গুণ বড় জিপিটি Model কল করার কোনো প্রয়োজন নেই। এই চ্যাপ্টারটি পড়লে তুমি AI ল্যান্ডস্কেপের প্রতিটি Categoryর শক্তি ও সীমাবদ্ধতা বুঝতে পারা করতে পারবে এবং Project-এর রিকোয়ারমেন্ট অনুযায়ী perfect Model সিলেক্ট করতে পারবে।
-
-### Big Picture
-এটি আমাদের প্রথম ৮টি তাত্ত্বিক ও Math-এর চ্যাপ্টারের মূল সমাপনী অধ্যায়। এর পর থেকে আমরা সরাসরি Vector Database, আরএজি (RAG), Fine-Tuning এবং প্রোডাকশন এজেন্ট Blueprint গড়ার কাজ শুরু করবো। এই চ্যাপ্টারটি তোমার AI Architect হওয়ার জার্নিতে Ecosystem-এর ফাইনাল ম্যাপ হিসেবে কাজ করবে।
+তো চলো দেখি AI-এর তিন ধরনের Architecture কীভাবে কাজ করে — Encoder-only (BERT) যে ইনফরমেশন খুঁজে বের করে, Decoder-only (GPT/Llama) যে গল্প লেখে, আর Encoder-Decoder (T5) যে অনুবাদ করে। সাথে দেখব Vision Model, Diffusion Model আর Audio Model-এর ভেতরের Mechanism। এটা আমাদের প্রথম ৮টি তাত্ত্বিক চ্যাপ্টারের ফাইনাল ম্যাপ — এরপর থেকে সরাসরি Vector Database, RAG, Fine-Tuning আর প্রোডাকশন Blueprint-এর কাজ শুরু!
 
 ---
 

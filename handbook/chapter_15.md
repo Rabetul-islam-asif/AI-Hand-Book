@@ -2,14 +2,11 @@
 
 ---
 
-### Chapter Goal
-এই চ্যাপ্টারের মূল লক্ষ্য হলো প্রি-ট্রেইনড Language মডেলকে নিজের পছন্দমতো নির্দিষ্ট Format বা টোনে কথা বলতে শেখানোর প্রথম ধাপ— মানে Supervised Fine-Tuning (Supervised Fine-Tuning / SFT) এর Mechanism এবং তার Dataset Preparation (Dataset Preparation) প্রসেস গভীরভাবে আয়ত্ত করা। তুমি জানতে পারবে কখন Fine-Tuning করতে হবে বনাম কখন আরএজি (RAG) ব্যবহার করা উচিত এবং কীভাবে চ্যাটFormat ও Instruction Dataset (Instruction Datasets - Alpaca, ShareGPT formats) তৈরি করতে হয়।
+ধরো, তোমার হাতে একটা বেস Model আছে। সে অনেক কিছু জানে, কিন্তু কথা বলে একদম নিজের মতো করে। তুমি চাচ্ছো সে তোমার কাস্টমারদের সাথে মিষ্টি বাংলায় কথা বলুক, বা JSON Format-এ Output দিক। সেটা শেখাবে কীভাবে? সেটাই হলো Supervised Fine-Tuning (SFT)।
 
-### Why Should I Care?
-অনেক Developer মনে করো নতুন কোনো নলেজ বা তথ্য শেখানোর জন্য Fine-Tuning করা বেস্ট চয়েস। কিন্তু বাস্তবে নতুন ফ্যাক্টস বা Data মডেলকে Fine-Tuning-এর মাধ্যমে শেখাতে গেলে Model তা মুখস্থ না করে Hallucination বা ভুল তথ্য বেশি দেয়। Fine-Tuning হলো মডেলকে **"How to behave"** (কীভাবে কথা বলতে হবে, কী Format-এ Output দিতে হবে) তা শেখানোর সেরা টুল, এবং আরএজি হলো **"What to say"** (কোন রিয়েল তথ্য বলতে হবে) তার সেরা টুল। এই তফাত না বুঝলে তুমি প্রচুর GPU কস্ট অপ্টিমাইজ করতে পারবে না।
+মজার ব্যাপার হলো— অনেকে ভাবে Fine-Tuning মানে মডেলকে নতুন তথ্য শেখানো। ভুল! নতুন ফ্যাক্টস শেখাতে চাইলে RAG ব্যবহার করো। Fine-Tuning হলো মডেলকে **"কীভাবে কথা বলবে"** সেটা শেখানোর জন্য। এই তফাতটা না বুঝলে তুমি শুধু শুধু GPU কস্ট পুড়িয়ে ফেলবে।
 
-### Big Picture
-আগের চ্যাপ্টারগুলোতে আমরা Vector Database এবং আরএজি অপ্টিমাইজেশন শিখেছি। এই চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে **Model Fine-Tuning** এর world। এখানে শেখা Dataset Format এবং এসএফটি (SFT) Training পাইপলাইন আমাদের পরের chapter-এর LoRA/QLoRA Adapter এবং আরএলএইচএফ (RLHF) সেফটি টিউনিং বোঝার মূল ভিত্তি।
+তো চলো দেখি কীভাবে Instruction Dataset (Alpaca, ShareGPT formats) তৈরি করতে হয়, কখন RAG বনাম Fine-Tuning বেছে নিতে হয়, আর SFT Training Pipeline কীভাবে কাজ করে। এটা বুঝলে পরের চ্যাপ্টারের LoRA/QLoRA আর RLHF সব পানির মতো সহজ লাগবে। Deal?
 
 ---
 
