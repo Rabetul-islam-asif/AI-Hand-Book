@@ -1,442 +1,456 @@
-# Chapter 26: Blueprint 3 — Agentic CLI Code Writer with Auto-Test Healing
+# Chapter 26: Blueprint 1 — Multi-Session Chatbot with Fact Memory (Redis + Mem0)
 
 ---
 
-তুমি কি কখনো ভেবেছো — সায়েন্স-ফিকশন সিনেমার মতো এমন একটা AI Agent বানানো কি সত্যিই সম্ভব?
+তুমি কি কখনো খেয়াল করেছ?
 
-যে নিজে নিজে Code লিখবে, নিজে নিজেই সেটা Terminal-এ Run করে Test করবে।
+ChatGPT-তে গতকাল হয়তো বললে, "আমি রহিম, Laravel পছন্দ করি।"
 
-আর যদি কোনো ভুল বা Bug থাকে, তবে নিজেই সেই Error Log পড়ে Code ঠিক করে নেবে!
+আজকে নতুন একটা চ্যাট খুলতেই AI সব ভুলে গেল!
 
-শুনে অবিশ্বাস্য মনে হলেও, এটাই সত্যি।
+মনে হচ্ছে সে তোমাকে চেনেই না!
 
-Devin বা Cursor Agent-এর মতো আধুনিক AI Tool-গুলোর আসল ম্যাজিক কিন্তু এখানেই। একে আমরা বলি Self-Testing এবং Auto-Healing Loop।
+বিষয়টা সত্যিই বিরক্তিকর, তাই না?
 
-তো চলো, এই চ্যাপ্টারে আমরা এমনই একটা রোমাঞ্চকর Pattern নিজের হাতে ডিজাইন করে ফেলি!
+আসল প্রোডাকশন চ্যাটবটে এমন হলে কাস্টমার তো পালাবেই!
 
-আমরা ব্যবহার করবো ReAct এবং Auto-Test Healing।
+তো চলো, আজ এই সমস্যাটা আমরা নিজের হাতে সমাধান করি।
 
-আমরা দেখবো কীভাবে ইউজার থেকে কমান্ড নিয়ে ফাইল তৈরি করা যায়, লোকাল কম্পিউটারে pytest দিয়ে টেস্ট করা যায়, আর টেস্ট ফেইল করলে ভুল শুধরে নেওয়া যায়।
+এই চ্যাপ্টারে আমরা Redis দিয়ে সেশনের চ্যাট হিস্টোরি ক্যাশ করব।
 
-চলো, শুরু করা যাক! Deal?
+আর Mem0 দিয়ে ইউজারের সারাজীবনের ফ্যাক্ট বা তথ্য Vector Database-এ চিরকালের জন্য সেভ রাখব।
 
+সেশন চেঞ্জ হোক বা ট্যাব ক্লোজ হোক—তোমার চ্যাটবট সব মনে রাখবে।
 
-### ১. আসল সমস্যাটা কোথায়?
+এটা আমাদের রিয়েল প্রডাক্ট Blueprint সিরিজের প্রথম মাইলফলক।
 
-ধরো, একটা সাধারণ AI-কে তুমি কোড লিখতে বললে। 
+আগের চ্যাপ্টারগুলোর থিওরি এবার আমরা সরাসরি কোডে রূপ দেব!
 
-সে হয়তো এমন একটা কোড বানিয়ে দিল:
+### ১. সমস্যা: চ্যাটবটের ভুলে যাওয়া আর API বিলের চাপ
+
+সাধারণ চ্যাটবট ডিজাইনে আমরা চ্যাট হিস্টোরি Model-এর Context উইন্ডোতে পুশ করি:
 
 ```python
-# AI Generated code
-import request  # Oops! It should be 'requests' with an 's'
+messages = [
+    {"role": "user", "content": "আমার নাম রহিম, আমি Laravel পছন্দ করি।"},
+    {"role": "assistant", "content": "হ্যালো রহিম! তোমার Laravel প্রোজেক্টে স্বাগতম।"}
+]
 ```
 
-কিন্তু রান করার সাথে সাথে স্ক্রিনে বড় বড় লাল অক্ষরে একটা Error চলে এলো:
+এই ডিজাইনে বড় দুটি সমস্যা আছে।
 
-`ModuleNotFoundError: No module named 'request'`
+প্রথম সমস্যা হলো Token Inflation।
 
-এখন তুমি কী করবে?
+আমরা যখন প্রতিবার নতুন মেসেজ পাঠাই, তখন পুরোনো সব মেসেজ আবার মডেলে পাঠাতে হয়।
 
-নিশ্চয়ই সেই Error কপি করে আবার AI-এর চ্যাটে পেস্ট করবে। 
+১০টা মেসেজ পরেই দেখবে তোমার API বিল আর Latency অনেক বেড়ে গেছে!
 
-AI সেটা দেখে কোড ঠিক করে দেবে। তুমি আবার রান করবে।
+দ্বিতীয় সমস্যা হলো Session End Tragedy।
 
-এই যে বারবার কপি-পেস্ট করা, এটা কি বিরক্তিকর নয়? 
+ইউজার লগআউট করলে বা ট্যাব ক্লোজ করলে নতুন সেশনে AI আর কিছুই মনে রাখতে পারে না।
 
-আমাদের মূল্যবান সময় নষ্ট করার জন্য এটাই যথেষ্ট।
+সে ভুলেই যায় ইউজারের নাম রহিম, আর সে Laravel পছন্দ করে!
 
-তাহলে এর সমাধান কী?
+তাহলে এর আসল সমাধান কী?
 
-এখানেই আসে ReAct Agent Loop এবং Auto-Healing।
+এর সমাধান হলো Hybrid Memory Architecture!
 
-আমাদের এই সেলফ-হিলিং সিস্টেমটি মূলত চারটি ধাপে একটা লুপের মতো কাজ করে:
+এখানে আমরা মেমরিকে দুটি ভাগে ভাগ করি।
 
-প্রথম ধাপ হলো **Think**। 
+প্রথম ভাগটি হলো Short-term Session Memory।
 
-এখানে LLM প্রথমে চিন্তা করে সিদ্ধান্ত নেয় যে তাকে ঠিক কী করতে হবে। কোন লাইব্রেরি বা কোড লিখতে হবে।
+এর জন্য আমরা Redis ব্যবহার করি।
 
-দ্বিতীয় ধাপ হলো **Write**। 
+চ্যাটের শেষ ১০টি মেসেজ খুব দ্রুত ক্যাশ করে রাখার কাজ করে এটি।
 
-সিদ্ধান্ত নেওয়ার পর এজেন্ট তার নিজস্ব টুল ব্যবহার করে কম্পিউটারে `app.py` এবং `test_app.py` ফাইল তৈরি করে।
+আর দ্বিতীয় ভাগটি হলো Long-term Fact Memory।
 
-তৃতীয় ধাপ হলো **Execute Test**। 
+এর জন্য আমরা Mem0 ব্যবহার করি।
 
-কোড লেখা শেষ হলে এজেন্ট টার্মিনালে `pytest test_app.py` কমান্ডটি রান করে।
+চ্যাটের ভেতরের সব হাবিজাবি কথা বাদ দিয়ে এটি শুধু দরকারি তথ্যগুলো ফিল্টার করে।
 
-চতুর্থ ধাপ হলো **Self-Heal**। 
+যেমন: `{"name": "Rahim", "preference": "Laravel"}`।
 
-যদি টেস্ট ফেইল করে, এজেন্ট কিন্তু থেমে যায় না। 
+তারপর এগুলো Vector Database আর Graph Architecture-এ সেভ করে রাখে।
 
-সে টেস্টের আউটপুট আর লাল Error লগ সরাসরি রিড করে নিজের ব্রেইনে নিয়ে নেয়। 
-
-এরপর ভুলগুলো ঠিক করে কোডটি আবার নতুন করে লেখে। 
-
-আর টেস্ট ১০০% পাস না হওয়া পর্যন্ত এই লুপ চলতেই থাকে! 
-
-দারুণ না?
+সেশন বদলে গেলেও এই তথ্যগুলো ব্যাকগ্রাউন্ডে ইনজেক্ট করা হয়।
 
 [VISUAL]
-Title: Agentic Self-Healing Loop Flowchart
-Illustration: Loop cycle between LLM Generator, Write File, Run Subprocess pytest, Catch Failure, Feedback Error, and rewrite
+Title: Hybrid Memory Architecture (Redis + Mem0)
+Illustration: User input split into Redis (short term stream) and Mem0 (long term vector fact storage) pipelines feeding to LLM
 Placement: After Hook Section
-Purpose: Provide architectural mapping of the self-correcting agent loop.
+Purpose: Provide architectural layout of a production-grade enterprise memory pipeline.
 
 ```
-          ┌────────────────────────────────────────┐
-          ▼                                        │
-    ┌───────────┐       ┌────────────┐             │
-    │  Think     │ ────►│ Act:       │             │
-    │   (LLM)   │       │ Write Code │             │
-    └───────────┘       └────────────┘             │ (If test fails,
-          ▲                    │                   │  feed error back)
-          │                    ▼                   │
-          │             ┌────────────┐             │
-          │             │  Run       │             │
-          │             │ Pytest     │             │
-          │             └────────────┘             │
-          │                    │                   │
-          │                    ▼                   │
-          │             /────────────\             │
-          │            /   Does it    \            │
-          └───────────┤    Pass?       ├───────────┘
-                       \              /
-                        \────────────/
-                               │ Yes
-                               ▼
-                        [ Done & Saved! ]
-```
-
-
-### ২. মূল কনসেপ্টগুলো কী কী?
-
-এই চমৎকার সিস্টেমটি বানাতে আমাদের কিছু বেসিক জিনিস বুঝতে হবে।
-
-প্রথমেই জানা দরকার, **ReAct Framework** আসলে কী?
-
-সহজ কথায়, এটা হলো এজেন্টের চিন্তা ও কাজ করার একটা ফ্রেমওয়ার্ক। 
-
-যেমন ধরো, এজেন্টের মাথায় প্রথমে আসবে একটি **Thought** বা চিন্তা: 
-
-"আমি একটি যোগ করার ফাংশন লিখতে চাই। প্রথমে আমার ফাইল তৈরি করা দরকার।"
-
-চিন্তা করার পর আসবে **Action** বা কাজ:
-
-সে কোড লেখার জন্য `write_file_to_disk` নামের ফাংশনটি কল করবে।
-
-কাজ শেষ হলে আসবে **Observation** বা পর্যবেক্ষণ:
-
-সে দেখবে টেস্ট রান করার পর কী রেজাল্ট এলো। টেস্ট পাস করলে সে সিদ্ধান্ত নেবে, "আমার কাজ সফল হয়েছে, এবার লুপ শেষ করা যাক।"
-
-তাহলে এজেন্ট লোকাল কমান্ড কীভাবে রান করে?
-
-পাইথনের `subprocess` মডিউল ব্যবহার করে এজেন্ট এই কমান্ডগুলো রান করার ক্ষমতা পায়।
-
-কিন্তু একটা বড়সড় বিপদের কথা মাথায় রাখতে হবে।
-
-লোকাল কম্পিউটারে সরাসরি এজেন্টের কোড রান করা কি নিরাপদ?
-
-একেবারেই না! এটা চরম বিপজ্জনক হতে পারে।
-
-ধরো, কোনো কারণে এজেন্ট ভুল করে বা কোনো ক্ষতিকর প্রম্পটের কারণে পুরো হার্ডডিস্ক ডিলিট করার কমান্ড দিয়ে বসলো!
-
-যেমন: `rm -rf /` বা `rd /s /q c:\`।
-
-তাহলে তো সর্বনাশ হয়ে যাবে!
-
-এই জন্য প্রোডাকশনে কাজ করার সময় সবসময় কোড রান করার জন্য একটি ডকার কন্টেইনার বা Docker Sandbox ব্যবহার করা উচিত।
-
-এতে এজেন্টের কোড একটি আলাদা সুরক্ষিত জায়গায় রান হবে এবং তোমার আসল সিস্টেম থাকবে একদম নিরাপদ।
-
-
-### ৩. ডকার স্যান্ডবক্সের কাজ
-
-চলো দেখি প্রোডাকশনে কীভাবে এটা কাজ করে:
-
-```
-[ ইউজার Prompt ] ──► [ AI Agent Engine (LLM) ]
+                  ┌──────────────────────┐
+                  │      User Input      │
+                  └──────────────────────┘
                              │
-                             ▼ (Restricted Execution API)
-                ┌───────────────────────────────────┐
-                │       DOCKER SANDBOX ENGINE       │
-                │  - No Network Access              │
-                │  - Locked Directory               │
-                │  - Auto-terminate in 10 seconds   │
-                │                                   │
-                │  [ app.py ] ──► [ Run Pytest ]    │
-                └───────────────────────────────────┘
+            ┌────────────────┴────────────────┐
+            ▼                                 ▼
+┌──────────────────────┐           ┌──────────────────────┐
+│  Redis Cache (RAM)   │           │   Mem0 Engine (AI)   │
+│  - Latest 10 Chat    │           │  - Extracts Facts    │
+│    Messages          │           │  - Stores in Vector  │
+└──────────────────────┘           └──────────────────────┘
+            │                                 │
+            └────────────────┬────────────────┘
+                             ▼
+                    ┌─────────────────┐
+                    │ Prompt Ingest   │
+                    │ + Global Facts  │
+                    └─────────────────┘
+                             │
+                             ▼
+                     [ LLM Engine ] ───► Response
 ```
 
+### ২. মূল আইডিয়া: Memory কীভাবে কাজ করে?
 
-### ৪. বাস্তব জীবনের উদাহরণ
+মেমরির মূল ভিত্তি বোঝার জন্য চলো দুইটা জিনিস খুব ভালো করে জেনে নিই।
 
-ধরো, একটি বড় সফটওয়্যার কোম্পানির সিস্টেমে একটি সিকিউরিটি বাগ পাওয়া গেল।
+প্রথমটি হলো Redis Chat History।
 
-তখন AI এজেন্ট কীভাবে কাজ করবে?
+প্রশ্ন হতে পারে, Redis আসলে কী?
 
-প্রথমে এজেন্ট নিজে থেকেই Source Code ফাইলটি রিড করবে এবং ডকার স্যান্ডবক্সে কোড প্যাচ করে নেবে।
+এটি হলো একটি সুপার ফাস্ট In-Memory Key-Value Database।
 
-কোড প্যাচ করার পর সে তার সিকিউরিটি Regression Test রান করবে। 
+কিন্তু এটি আমরা কেন ব্যবহার করব?
 
-উদ্দেশ্য হলো, এই পরিবর্তনের ফলে অন্য কোনো sistem বা সিস্টেম ডাউন হয়েছে কি না তা পরীক্ষা করা।
+কারণ এটি মাইক্রো-সেকেন্ডের মধ্যে ডেটা রিড আর রাইট করতে পারে।
 
-যদি টেস্টে দেখা যায় ইউজার লগইন ফেইল করছে, তাহলে এজেন্ট কিন্তু থেমে থাকবে না।
+চ্যাটের শেষ কয়েকটি মেসেজ পাওয়ার জন্য আমাদের ডিস্ক ডেটাবেজে বারবার হিট করার কোনো দরকার নেই।
 
-সে সাথে সাথে কোডটি আবার Modify করে টেস্ট পাস করাবে।
+Redis-এর List বা String স্ট্রাকচার এ কাজের জন্য একদম পারফেক্ট।
 
-আর সব শেষে নিমিষেই গিটহাবে একটি Pull Request সাবমিট করে দেবে!
+তাহলে এই ডেটা কতদিন থাকবে?
 
-পুরো কাজটাই হবে অটোমেটিকভাবে।
+এর জন্য আমরা ব্যবহার করি TTL বা Time to Live।
 
+আমরা সেশনের চ্যাট হিস্টোরি মাত্র ৩ দিনের জন্য ক্যাশ করে রাখি।
 
-### ৫. চলো কোড লিখে ফেলি!
+এতে সার্ভারের মেমরি নষ্ট হয় না।
+
+এবার আসি দ্বিতীয় বিষয়ে—যা হলো Mem0।
+
+প্রশ্ন হলো, Mem0 আসলে কী জিনিস?
+
+এটি হলো একটি AI-Native Memory Ecosystem।
+
+এটি কীভাবে কাজ করে?
+
+তুমি যখনই চ্যাট করবে, Mem0 ব্যাকগ্রাউন্ডে একটি ছোট রিজনার রান করবে।
+
+সে পুরো চ্যাট থেকে শুধু তোমার পার্সোনাল ইনফরমেশন বা দরকারি ফ্যাক্ট আলাদা করে নেবে।
+
+যেমন ধরো, তুমি বললে, "কাল আমার পরীক্ষা, তাই কফি খেয়ে সারারাত পড়তে হবে।"
+
+Mem0 এখান থেকে কী বের করবে?
+
+সে বের করবে: `{"fact": "Prepares for exams", "habit": "Drinks coffee at night"}`।
+
+মজার ব্যাপার হলো, সে কিন্তু তোমার পুরো চ্যাট মুখস্থ করে না!
+
+তাহলে নতুন সেশনে সে কীভাবে মনে রাখে?
+
+সেশন নতুন হলেও Mem0 তোমার প্রশ্নের সাথে মিল রেখে রিলেভেন্ট ফ্যাক্টগুলো খুঁজে বের করে。
+
+তারপর সেগুলো Prompt-এর সাথে জুড়ে দেয়।
+
+যেমন: *"You are talking to Rahim who loves Laravel and drinks coffee at night."*
+
+### ৩. Fact কীভাবে সেভ হয়?
+
+Mem0 ব্যাকগ্রাউন্ডে কীভাবে ফ্যাক্ট বের করে আর আপডেট করে, চলো তা দেখে নিই:
+
+```
+[ User: "আমি সম্প্রতি নেক্সট জেএস দিয়ে কাজ করছি, লারাভেল আর ভাল্লাগেনা।" ]
+                        │
+                        ▼
+                [ Mem0 Engine ]
+                        │
+                        ├─► 🔎 Detect conflict: User used to love Laravel
+                        ├─► ✂️ Delete/Deprecate fact: Loves Laravel
+                        └─► ➕ Insert new fact: Prefers Next.js
+                                │
+                                ▼
+                   [ Vector Database Memory ]
+```
+
+### ৪. একটা বাস্তব উদাহরণ
+
+চলো একটি AI ট্যুর গাইড অ্যাপের কথা চিন্তা করি।
+
+সেশন ১-এ ইউজার বলল, "আমি থাইল্যান্ড ট্রিপের জন্য হোটেল খুঁজছি। আর হ্যাঁ, আমার সী-فوড অ্যালার্জি আছে।"
+
+এর ঠিক ১ মাস পর সেশন ২ শুরু হলো।
+
+ইউজার এবার ট্যাব ওপেন করে বলল, "আমি কক্সবাজার যাচ্ছি, কিছু ভালো রেস্টুরেন্ট সাজেস্ট করো।"
+
+এখানেই আসল ম্যাজিক!
+
+চ্যাটবট যখন কক্সবাজারের রেস্টুরেন্ট সাজেস্ট করবে, তখন সে সী-ফুড অপশনগুলো নিজে থেকেই বাদ দিয়ে দেবে।
+
+সে ইউজারকে মনে করিয়ে দেবে, "যেহেতু তোমার সী-ফুড অ্যালার্জি আছে, তাই এই রেস্টুরেন্টের মাটন চপ ট্রাই করতে পারো।"
+
+একেবারেই চমৎকার একটি ইউজার এক্সপেরিয়েন্স, তাই না?
+
+### ৫. চলো কোড করি!
 
 💻 Developer View
 
-চলো, পাইথনে একটি সম্পূর্ণ রানিং সেলফ-হিলিং এজেন্ট লুপ স্ক্র্যাচ থেকে তৈরি করি। 
-
-এটি ফেইল করা টেস্ট কেসগুলো নিজে নিজেই সমাধান করে ফেলবে!
+চলো পাইথনে একটি সম্পূর্ণ রানিং, প্রোডাকশন-গ্রেড Multi-Session Memory পাইপলাইন স্ক্র্যাচ থেকে Code করি।
 
 ```python
 import os
-import subprocess
-import time
+import redis
+import json
+from mem0 import Memory
 from openai import OpenAI
 
 # ১. এনভায়রনমেন্ট ও ক্লায়েন্ট সেটআপ
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 client = OpenAI()
 
-# টার্গেট Code File-এর পাথ
-TARGET_FILE = "calculator.py"
-TEST_FILE = "test_calculator.py"
+# Redis Setup (Windows/Local host running Redis default port 6379)
+r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
-# ২. কাস্টম পাইটেস্ট File প্রিপারেশন
-# আমরা এজেন্টের কাজ Test করার জন্য কড়া Test ফাইলটি আগেই লিখে রাখছি
-TEST_CODE = """
-import pytest
-from calculator import add
+# Mem0 Setup (Local Vector Database Memory)
+mem0_config = {
+    "vector_store": {
+        "provider": "qdrant",
+        "config": {"host": "localhost", "port": 6333}
+    }
+}
+# We use simple local memory storage for mock validation
+memory = Memory()
 
-def test_add_positive():
-    assert add(2, 3) == 5
+# ২. চ্যাট হিস্টোরি রিড/রাইট হেল্পারস (Redis Layer)
+def save_chat_to_redis(session_id, role, content):
+    key = f"chat_session:{session_id}"
+    message = json.dumps({"role": role, "content": content})
+    r.rpush(key, message)
+    r.expire(key, 86400 * 3) # TTL set to 3 days
 
-def test_add_negative():
-    assert add(-1, -1) == -2
+def get_chat_from_redis(session_id, limit=6):
+    key = f"chat_session:{session_id}"
+    raw_messages = r.lrange(key, -limit, -1)
+    return [json.loads(msg) for msg in raw_messages]
 
-def test_add_string_handling():
-    # এটি হলো এজেন্টের জন্য একটি ফাঁদ বা এজ কেস!
-    # এজেন্টকে স্ট্রিং Input আসলে ValueError থ্রো করতে হবে
-    with pytest.raises(ValueError):
-        add("2", 3)
-"""
-
-with open(TEST_FILE, "w", encoding="utf-8") as f:
-    f.write(TEST_CODE)
-
-# ৩. লোকাল পাইটেস্ট সাব-প্রসেস এক্সিকিউটর টুল
-def run_pytest():
-    print("[💻 Terminal] Executing: pytest test_calculator.py ...")
-    # Run pytest and capture standard output & errors
-    result = subprocess.run(["pytest", TEST_FILE], capture_output=True, text=True)
-    return result.returncode == 0, result.stdout
-
-# ৪. এজেন্ট ব্রেইন Loop উইথ Auto-Healing
-def run_self_healing_agent():
-    print("\n--- Starting Agentic Auto-Test Healing Loop ---")
+# ৩. হাইব্রিড Memory চ্যাট Engine
+def run_chatbot_session(user_id, session_id, user_message):
+    print(f"\n--- Processing Message for User {user_id} in Session {session_id} ---")
     
-    # এজেন্টের জন্য ট্র্যাকিং Prompt
+    # Step A: Long-term memory query (Mem0)
+    # ইউজারের সাথে রিলেভেন্ট ফ্যাক্টগুলো খুঁজে আনুন
+    print("Retrieving long-term facts from Mem0...")
+    user_facts = memory.get_all(user_id=user_id)
+    fact_context = ""
+    if user_facts:
+        facts_list = [f["text"] for f in user_facts]
+        fact_context = "User Profile Facts:\n- " + "\n- ".join(facts_list)
+        print("Facts retrieved:\n", fact_context)
+    
+    # Step B: Short-term memory query (Redis)
+    print("Retrieving latest session chat history from Redis...")
+    latest_history = get_chat_from_redis(session_id)
+    
+    # Step C: Mem0 ব্যাকগ্রাউন্ডে নতুন ফ্যাক্ট সেভ করো
+    memory.add(user_message, user_id=user_id)
+    
+    # Step D: Prompt ইনজেকশন ও এলএলএম কল
     system_prompt = f"""
-    You are an expert python developer who writes clean code.
-    Your goal is to write code in a file named '{TARGET_FILE}' to make all tests in '{TEST_FILE}' pass.
+    You are a helpful personal assistant. Use the following long-term user profile facts if relevant:
+    {fact_context}
     
-    You must ONLY return the raw, clean python code. Do not include markdown wraps or explanations.
+    Answer the user warmly, respecting their history.
     """
     
-    conversation_history = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": f"Please write the 'add' function in {TARGET_FILE} to handle simple additions and raise ValueError if inputs are not numeric."}
-    ]
+    messages = [{"role": "system", "content": system_prompt}]
+    for msg in latest_history:
+        messages.append(msg)
+    messages.append({"role": "user", "content": user_message})
     
-    max_iterations = 4
-    for iteration in range(1, max_iterations + 1):
-        print(f"\n[🔄 Iteration {iteration}/{max_iterations}] Agent is thinking...")
-        
-        # এলএলএম কল
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=conversation_history,
-            temperature=0.2 # low temperature for deterministic code
-        )
-        agent_code = response.choices[0].message.content.strip()
-        
-        # মার্কডাউন Code ব্লক ট্রিম করো যদি এলএলএম ভুল করে দিয়ে দেয়
-        if agent_code.startswith("```python"):
-            agent_code = agent_code[9:-3].strip()
-        elif agent_code.startswith("```"):
-            agent_code = agent_code[3:-3].strip()
-            
-        print(f"[ Action] Writing generated code to {TARGET_FILE}...")
-        with open(TARGET_FILE, "w", encoding="utf-8") as f:
-            f.write(agent_code)
-            
-        # Test রান ও পর্যবেক্ষণ
-        test_passed, test_log = run_pytest()
-        
-        if test_passed:
-            print("\n[ SUCCESS] All tests passed! Agent has successfully healed and written the perfect code!")
-            print("--- FINAL CODE ---")
-            print(agent_code)
-            break
-        else:
-            print(f"\n[🔴 FAILURE] Test failed in iteration {iteration}!")
-            # Error লগটি কনভারসেশন হিস্টোরিতে ফিড করো অটো-হিলিংয়ের জন্য
-            feedback = f"""
-            The code you wrote failed the tests. Here is the pytest execution log and traceback:
-            
-            {test_log}
-            
-            Analyze the traceback, find the bugs (syntax errors or missing constraints), fix them, and rewrite the code.
-            """
-            print("Feeding error log back to AI brain for self-correction...")
-            conversation_history.append({"role": "assistant", "content": agent_code})
-            conversation_history.append({"role": "user", "content": feedback})
-            
-            # হালকা রিফ্রেশ টাইম
-            time.sleep(2)
-            
-    else:
-        print("\n[🛑 ABORTED] Agent reached maximum iteration limit without passing tests.")
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        temperature=0.7
+    )
+    assistant_reply = response.choices[0].message.content
+    
+    # Step E: Redis সেশন ক্যাশে চ্যাট সেভ করো
+    save_chat_to_redis(session_id, "user", user_message)
+    save_chat_to_redis(session_id, "assistant", assistant_reply)
+    
+    return assistant_reply
 
-# --- ৫. RUN THE AGENT ---
-# Ensure pytest is installed in your python environment before running: pip install pytest
-# run_self_healing_agent()
+# --- ৪. MOCK VALIDATION TEST RUN ---
+# সেশন ১: রহিম তার Project-এর কথা জানালো
+user_id = "user_rahim_123"
+session_1 = "session_mon_9am"
+reply1 = run_chatbot_session(user_id, session_1, "হ্যালো AI! আমি রহিম। আমি এখন নেক্সট জেএস দিয়ে কাজ করছি।")
+print("AI Reply 1:", reply1)
+
+# সেশন ২: রহিম সম্পূর্ণ নতুন সেশন ও দিন শুরু করলো, সে কিন্তু নেক্সট জেএস এর কথা আর মুখে আনবে না!
+session_2 = "session_wed_10pm"
+reply2 = run_chatbot_session(user_id, session_2, "হ্যালো! আমার কারেন্ট Project-এর জন্য সেরা ইউআই Library সাজেস্ট করো তো।")
+print("AI Reply 2:", reply2)
 ```
 
+### ৬. প্রোডাকশনে ব্যবহারের নিয়ম
 
-### ৬. প্রোডাকশন ও সিকিউরিটি পলিসি
+🏭 Production Reality
 
- Production Reality
+যখন তুমি প্রোডাকশন গ্রেড চ্যাটবট হোস্ট করবে, তখন কিছু বিষয় মাথায় রাখতে হবে।
 
-প্রোডাকশন লেভেলে যখন তুমি ইউজারদের জন্য কোড এডিটিং সিস্টেম ডেপ্লয় করবে, তখন কিছু গুরুত্বপূর্ণ সিকিউরিটি পলিসি মেনে চলা দরকার।
+যেমন, একই সাথে কয়েক জায়গায় রাইট করার সময় কনফ্লিক্ট হতে পারে।
 
-যেমন ধরো, **Resource Limiting** বা রিসোর্স লিমিট করা কেন জরুরি?
+এই সমস্যাগুলো এড়াতে চলো কিছু জিনিস জেনে নিই।
 
-কোনো ইউজার যদি প্রম্পটে একটি ইনফিনিটি লুপ কোড লিখে তোমার সার্ভারে রান করায়, তবে কিন্তু তোমার CPU ক্র্যাশ করবে। 
+প্রথমটি হলো Redis Fail-safe।
 
-তাই প্রতিটি সাব-প্রসেস রান করার সময় অবশ্যই `timeout=10.0` প্যারামিটার ব্যবহার করতে হবে। 
+যদি কোনো কারণে Redis ডাউন হয়ে যায়, তাহলে কী হবে?
 
-এতে ১০ সেকেন্ডের বেশি কোড চললে তা সাথে সাথে বন্ধ হয়ে যাবে।
+চ্যাট যেন কোনোভাবেই ক্র্যাশ না করে!
 
-আরেকটি বিষয় হলো **Read-only Filesystem**।
+এর জন্য আমাদের কোড ব্লকটি একটি `try-except` ব্লকে রাখতে হবে।
 
-এজেন্টের স্যান্ডবক্স ডিরেক্টরি ছাড়া অন্য কোনো ফোল্ডারে যেন সে রিড বা রাইট করতে না পারে, সেটা নিশ্চিত করতে হবে।
+এতে কোনো সমস্যা হলে ব্যাকআপ মেমরি বা লুপ রান করানো যাবে।
 
+দ্বিতীয়টি হলো Mem0 Delay।
+
+Mem0-তে ফ্যাক্ট সেভ করার কাজটা বেশ ভারী বা Compute Intensive।
+
+তাই এটি মূল API Response লুপে রাখা একদমই ঠিক নয়।
+
+তাহলে উপায় কী?
+
+এজন্য Asynchronous Background Task হিসেবে Celery বা Redis Queue ব্যবহার করা সবচেয়ে ভালো।
 
 ### ৭. সাধারণ কিছু ভুল
 
 🔴 Common Mistake
 
-**ভুল ধারণা:** এজেন্টের সোর্স কোডে `eval()` বা `exec()` ফাংশন ব্যবহার করে রানিং পাইথনের ভেতর ডাইনামিকালি কোড রান করা ঠিক আছে।
+অনেকেরই একটা ভুল ধারণা থাকে।
 
-**বাস্তবতা:** এটি পাইথনের সবচেয়ে বড় সিকিউরিটি লিক! 
+তারা মনে করে, ইউজারের চ্যাটের প্রতিটি মেসেজকেই ফ্যাক্ট হিসেবে Mem0-তে পুশ করতে হবে।
 
-এর ফলে তোমার রানিং পাইথন প্রসেসের সম্পূর্ণ মেমোরি হ্যাক হয়ে যেতে পারে। 
+কিন্তু ভেবে দেখো, ইউজার যদি বলে "হ্যালো", "কেমন আছো?" বা "আজ বৃষ্টি হচ্ছে"—এগুলো কি কোনো কাজের তথ্য?
 
-তাই বুদ্ধিমানের কাজ হলো কোড সবসময় আলাদা ফাইলে সেভ করে সাব-প্রসেস হিসেবে রান করানো।
+একদমই নয়!
 
+এগুলো মেমোরিতে পুশ করলে তোমার Vector Database আবর্জনায় ভরে যাবে।
 
-### ৮. একটি সহজ তুলনা
+তাহলে কী করা উচিত?
 
-আমাদের সেলফ-হিলিং এজেন্টকে তুমি একজন পাইপ ফিটার বা মিস্ত্রির সাথে তুলনা করতে পারো। 
+Mem0 Configuration-এ অবশ্যই একটি ফিল্টার সেট করে রাখতে হবে।
 
-আর টেস্ট রানার হলো তার সেই খিটখিটে অ্যাসিস্ট্যান্ট, যে পাইপের ভেতরে জল ঢেলে লিক খোঁজে। 
+এটি ইউজার মেসেজের সেন্টিমেন্ট আর ইনফরমেশন চেক করবে।
 
-যখনই লিক পাওয়া যায়, অ্যাসিস্ট্যান্ট চেঁচিয়ে বলে লিকটা ঠিক কোথায় হয়েছে।
+এতে করে সব হাবিজাবি তথ্য নিজে থেকেই বাদ চলে যাবে।
 
-আর মিস্ত্রি সাথে সাথে ওয়েল্ডিং করে পাইপ একদম পারফেক্ট করে দেয়!
+### ৮. মনে রাখার সহজ উপায়
 
+চলো এই পুরো সিস্টেমটা সহজে মনে রাখার একটা উপায় বা Mental Model দেখে নিই।
 
-### ৯. একটি মিনি প্রজেক্ট
+"Redis হলো তোমার ডেস্কের ফাইলবক্স বা Short-term Memory।
 
-চলো, পাইথনে প্র্যাক্টিক্যালি কোড করে দেখি কীভাবে কোনো ইনফিনিটি লুপে আটকে যাওয়া স্ক্রিপ্টকে টাইমার দিয়ে কিল করতে হয়।
+এটি শুধু আজকের রানিং প্রোজেক্টের পৃষ্ঠাগুলো ক্যাশ করে রাখে।
+
+আর Mem0 হলো তোমার ঘরের আলমারির ডায়েরি বা Long-term Memory।
+
+যেখানে তোমার সারাজীবনের গুরুত্বপূর্ণ কন্টাক্ট আর অভ্যাসগুলো চিরকালের জন্য রেকর্ড হয়ে থাকে।"
+
+### ৯. মিনি প্রজেক্ট: Sliding Window Buffer
+
+চলো পাইথনে কোনো লাইব্রেরি ছাড়া একটি Sliding Window Buffer তৈরি করি।
+
+সেশন হিস্টোরি বড় হয়ে গেলে এটি প্রথম দিকের মেসেজগুলো নিজে থেকেই ডিলিট বা স্লাইড করে দেয়।
 
 ```python
-import subprocess
+class SlidingWindowHistory:
+    def __init__(self, max_buffer=3):
+        self.max_buffer = max_buffer
+        self.history = []
+        
+    def add_message(self, role, content):
+        if len(self.history) >= self.max_buffer * 2: # ১ সেশন = ১ ইউজার + ১ অ্যাসিস্ট্যান্ট
+            # স্লাইড আউট ওল্ডেস্ট কিউ
+            self.history.pop(0)
+            self.history.pop(0)
+        self.history.append({"role": role, "content": content})
+        
+    def get_history(self):
+        return self.history
 
-# ১. কাল্পনিক ইনফিনিটি Loop স্ক্রিপ্ট যা CPU খেয়ে ফেলবে
-infinite_loop_code = """
-import time
-print("Starting infinite computation loop...")
-while True:
-    time.sleep(0.5)
-"""
+# Test স্লাইডিং
+buffer = SlidingWindowHistory(max_buffer=2)
+buffer.add_message("user", "Msg 1")
+buffer.add_message("assistant", "Ans 1")
+buffer.add_message("user", "Msg 2")
+buffer.add_message("assistant", "Ans 2")
+buffer.add_message("user", "Msg 3")  # This will slide out Msg 1 / Ans 1
+buffer.add_message("assistant", "Ans 3")
 
-with open("infinite_trap.py", "w", encoding="utf-8") as f:
-    f.write(infinite_loop_code)
-
-# ২. টাইমআউট দিয়ে সাব-প্রসেস ট্র্যাপ ও কিল Mechanism
-try:
-    print("Running process with 3-second timeout trap...")
-    # Timeout strictly locked at 3 seconds
-    result = subprocess.run(["python", "infinite_trap.py"], capture_output=True, text=True, timeout=3.0)
-except subprocess.TimeoutExpired:
-    print("\n[ SECURED] Process took more than 3 seconds. TimeoutExpired triggered!")
-    print("The infinite loop was successfully KILLED to save CPU resources!")
+print("Sliding Window Active Cache:")
+for msg in buffer.get_history():
+    print(f"{msg['role']}: {msg['content']}")
 ```
 
+### ১০. ইন্টারভিউ প্রশ্ন
 
-### ১০. ইন্টারভিউতে কেমন প্রশ্ন হতে পারে?
+#### Beginner
 
-#### Beginner Level
+**প্রশ্ন:** চ্যাটবটে Short-term Memory আর Long-term Memory-র আসল পার্থক্য কী?
 
-**প্রশ্ন:** ReAct Loop বলতে কী বোঝায়?
+**উত্তর:** Short-term Memory (যেমন Redis) চ্যাটের একদম শেষের মেসেজগুলো মনে রাখে।
 
-**উত্তর:** এটি এজেন্টের কাজ করার একটি বিশেষ ফ্রেমওয়ার্ক। 
+এতে করে ইউজারের সাথে কথা বলার সময় তার ফ্লো ঠিক থাকে।
 
-এখানে সে প্রথমে চিন্তা বা পরিকল্পনা করে (Reasoning), তারপর সেই অনুযায়ী কাজ করে (Acting)। 
+আর Long-term Memory (যেমন Mem0) ফালতু কথা বাদ দিয়ে শুধু দরকারি তথ্যগুলো Vector Database-এ চিরকালের জন্য সেভ করে।
 
-সবশেষে কাজের ফলাফল দেখে সিদ্ধান্ত নেয় পরবর্তী পদক্ষেপ কী হবে।
+যা সেশন শেষ হওয়ার পরও খুব সহজে ব্যবহার করা যায়।
 
-#### Intermediate Level
+#### Intermediate
 
-**প্রশ্ন:** সেলফ-হিলিং এজেন্টে `timeout` প্যারামিটার দেওয়া কেন জরুরি?
+**প্রশ্ন:** Redis চ্যাট ক্যাশে TTL বা Time-to-Live সেট করা কেন এত দরকারি?
 
-**উত্তর:** AI অনেক সময় ভুল কোড লিখে ইনফিনিটি লুপ তৈরি করে ফেলতে পারে। 
+**উত্তর:** এটি না করলে কোটি কোটি ইউজারের আর্বেজ চ্যাট ডেটাবেজের মেমরি চিরতরে ব্লক করে ফেলবে।
 
-সেটি টার্মিনালে চললে পুরো সার্ভার ক্র্যাশ করতে পারে। 
+যার ফলে ডেটাবেজ স্টোরেজ কস্ট এবং Latency অনেক বেড়ে যাবে।
 
-`timeout` দিলে নির্দিষ্ট সময় পর প্রসেসটি নিজে থেকেই বন্ধ হয়ে যায়, যা সার্ভারকে রক্ষা করে।
+তাই ৩ থেকে ৭ দিনের TTL সেট করে রাখলে পুরোনো চ্যাট নিজে থেকেই ডিলিট হয়ে যায়।
 
-#### Advanced Level
+এতে সিস্টেম সবসময় ফাস্ট আর হালকা থাকে।
 
-**প্রশ্ন:** ডকার স্যান্ডবক্স ব্যবহারের প্রয়োজনীয়তা কী?
+#### Advanced
 
-**উত্তর:** AI যদি লোকাল অপারেটিং সিস্টেমে সরাসরি অ্যাক্সেস পায়, তবে সে যেকোনো পার্সোনাল ফাইল রিড করতে পারে বা ক্ষতিকর কমান্ড রান করে ডাটাবেস মুছে দিতে পারে। 
+**প্রশ্ন:** নতুন তথ্যের সাথে পুরোনো তথ্যের অমিল বা Memory Conflict হলে Mem0 কীভাবে তা সামলায়?
 
-ডকার স্যান্ডবক্স একটি আলাদা ভার্চুয়াল সিস্টেম তৈরি করে, যার সাথে লোকাল মেমোরি বা নেটওয়ার্কের কোনো যোগাযোগ থাকে না। 
+**উত্তর:** Mem0 তার Vector Store-এ নতুন কোনো ফ্যাক্ট আসার পর একটি সেলф-আপডেট লুপ চালায়।
 
-এর ফলে এজেন্ট কোনো ক্ষতি করলেও কন্টেইনারটি বন্ধ করলেই সবকিছু আবার আগের মতো ফ্রেশ স্টেটে ফিরে আসে, যা লোকাল সিস্টেমকে ১০০% সিকিউর রাখে।
+যদি নতুন ফ্যাক্ট আগের মেমরির উল্টো হয়, তবে সে আগের রেকর্ডটি এডিট করে বা বাদ দিয়ে নতুন ভ্যালু আপডেট করে নেয়।
 
+### ১১. আমরা যা শিখলাম
 
-### ১১. চ্যাপ্টার সামারি
+চলো চট করে দেখে নিই এই চ্যাপ্টারে আমরা কী কী শিখলাম।
 
-এই চ্যাপ্টারে আমরা চমৎকার কিছু জিনিস শিখলাম:
+প্রথমত, Hybrid Memory হলো প্রোডাকশন চ্যাটবট ডিজাইনের জন্য একদম লাইফ সেভার একটি টেকনিক।
 
-প্রথমত, ReAct Framework কীভাবে এজেন্টকে মানুষের মতো ধাপে ধাপে চিন্তা করার ক্ষমতা দেয়।
+দ্বিতীয়ত, Redis সেশনের চ্যাট খুব দ্রুত রিড করতে সাহায্য করে।
 
-দ্বিতীয়ত, Auto-Test Healing কীভাবে এরর লগ দেখে নিজে নিজেই কোডের বাগ ঠিক করতে পারে।
+আর Mem0 ইউজারের লাইфটাইম ফ্যাক্ট বা তথ্য Vector Database-এ সেভ রাখে।
 
-এবং সবশেষে জানলাম, কেন প্রোডাকশন লেভেলে সিকিউরিটির জন্য ডকার স্যান্ডবক্স ব্যবহার করা উচিত।
+সবশেষে, প্রোডাকশনে Latency আর কনফ্লিক্ট এড়াতে Asynchronous ব্যাকগ্রাউন্ড টাস্ক ব্যবহার করা উচিত।
 
+### ১২. সামনে কী আসছে?
 
-### ১২. এরপরে কী?
+আমরা সফলভাবে আমাদের প্রথম চ্যাটবট Memory Architecture তৈরি করে ফেলেছি!
 
-অভিনন্দন! আমরা চমৎকার একটি এজেন্ট লুপ আর্কিটেকচার সফলভাবে শেষ করেছি। 
+পরের চ্যাপ্টারে আমরা বানাবো একটি Enterprise PDF Search Engine।
 
-পরের চ্যাপ্টারে আমরা আমাদের শেষ প্রোজেক্ট ব্লুপ্রিন্ট তৈরি করতে যাচ্ছি।
+সেখানে শিখবো কীভাবে হাজার পৃষ্ঠার পিডিএফ ফাইল ভেঙে Semantic Chunking করা হয়।
 
-সেখানে আমরা দেখবো কীভাবে একটি AI SaaS অ্যাপ্লিকেশনে রেট-লিমিটিং এবং স্ট্রাইপ বিলিং ইন্টিগ্রেট করা যায়।
-
-দেখা হচ্ছে পরের চ্যাপ্টারে! 
+সবশেষে, pgvector ডেটাবেজ দিয়ে কীভাবে কয়েক সেকেন্ডে সঠিক ফাইল খুঁজে বের করা যায়, তাও কোডসহ দেখবো।
 
 **Chapter 26 শেষ।**

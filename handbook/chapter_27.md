@@ -1,432 +1,510 @@
-# Chapter 27: Blueprint 4 — Production AI SaaS with Rate Limiting & Usage Billing
+# Chapter 27: Blueprint 2 — Enterprise PDF Search Engine (pgvector + Semantic Chunking)
 
----
+তুমি কি কখনো ভেবেছো—
 
-তুমি কি কখনো ভেবেছ — তোমার বানানো দারুণ একটা AI Product যদি হুট করে ভাইরাল হয়ে যায়, তাহলে কী হবে?
+একটি Enterprise-grade PDF Search Engine বা RAG বানানোর সময় সবচেয়ে বড় ভুলটা কোথায় হয়?
 
-যদি সেখানে কোনো Rate Limiting বা সাবস্ক্রিপশন চার্জ না থাকে, তবে একটা বড় বিপদ হতে পারে।
+বেশিরভাগ Developer যখন PDF Search Engine বানান, তখন একটা কাজ করেন।
 
-কোনো দুষ্টু হ্যাকার হয়তো বট দিয়ে প্রতি সেকেন্ডে লাখ লাখ Token-এর কুয়েরি পাঠাবে।
+তারা পুরো Text-কে প্রতি ৫০০ Character পর পর Randomly কেটে ফেলেন।
 
-আর মাত্র এক দিনেই তোমার হাজার হাজার ডলারের API বিল তুলে তোমাকে একবারে দেউলিয়া বানিয়ে দেবে!
+তারপর সেগুলো Vector Database-এ Save করে দেন।
 
-AI-এর দুনিয়ায় এটা কিন্তু আসলেই একটা বড় দুঃস্বপ্ন।
+এর ফলে কী হয় জানো?
 
-তো চলো, এই চ্যাপ্টারে আমরা এই সমস্যার সমাধান খুঁজি।
+বাক্যের মূল অর্থ বা জরুরি কোনো Information মাঝখান থেকে কেটে দুই টুকরো হয়ে যায়।
 
-আমরা এমন একটা সিস্টেম ডিজাইন করব, যা তোমার AI কোডকে বাঁচাবে আর এটাকে একটা সত্যিকারের বিজনেসে রূপ দেবে।
+সেগুলো চলে যায় আলাদা আলাদা Chunk-এ।
 
-আমরা দেখব কীভাবে Redis ব্যবহার করে Token Bucket Rate Limiting করা যায়।
+আর ঠিক এই কারণে AI Model বিভ্রান্ত হয়ে যায়。
 
-আর কীভাবে Stripe Metered Billing দিয়ে ইউজারের ব্যবহার অনুযায়ী বিলিং সেট করা যায়।
+সে তখন ভুলভাল বা অর্ধেক উত্তর দিতে শুরু করে।
 
-চলো, খুব সহজে পুরো ব্যাপারটা ধাপে ধাপে বুঝে নিই। Deal?
+তো চলো, এই চ্যাপ্টারে আমরা নিজের হাতে একটা Enterprise-grade High-performance PDF Document Search Engine ডিজাইন করে ফেলি。
+
+আমরা দেখবো কীভাবে অন্ধের মতো Character কাটার বদলে বুদ্ধিমত্তার সাথে Semantic Chunking করা যায়।
+
+কীভাবে Relational Database Postgres-এর Extension pgvector ব্যবহার করে Vector Search-কে Optimize করা যায়।
+
+আর কীভাবে Re-ranking Pipeline দিয়ে খুব দ্রুত নির্ভুল উত্তর জেনারেট করা যায়।
+
+তাহলে চলো, Random Splitting-এর এক মারাত্মক ট্র্যাজেডি দিয়ে শুরু করা যাক!
 
 
-## ১. কুয়েরি বোমার আসল সমস্যা
+## ১. Random Splitting-এর ট্র্যাজেডি আর Hallucination
 
-সাধারণ সফটওয়্যারে আমরা কীভাবে Rate Limit হিসেব করি?
+চলো একটা Real-world Company-র Policy Document-এর উদাহরণ দেখি।
 
-খুব সহজ, হয়তো মিনিটে ৬০টি Request-এর লিমিট দিয়ে দিলাম।
+ধরো সেখানে লেখা আছে:
 
-কিন্তু AI-এর দুনিয়ায় কি এটা কাজ করবে?
+*"Company-র নিয়ম অনুযায়ী, যদি কোনো Developer পর পর ৩ দিন অফিসে লেট করে ঢোকে, **[৫০০ Character Limit শেষ! ঠিক এখানে কেটে গেল]** তবে তার ওই মাসের Bonus থেকে ১০% জরিমানা কাটা হবে।"*
 
-একেবারেই না!
+তুমি যদি Fixed Character Splitter যেমন `RecursiveCharacterTextSplitter` ব্যবহার করো, তাহলে কী ঘটবে?
 
-ধরো, একজন ইউজার মিনিটে মাত্র ১টি মেসেজ পাঠাল। কিন্তু সেই মেসেজে সে এক লাখ Token-এর বিশাল কোড ফাইল দিয়ে দিল। এতে তোমার খরচ হতে পারে $০.৫০$।
+আমাদের Chunk-গুলো দেখতে এমন হবে:
 
-আবার আরেকজন ইউজার একই মিনিটে ৬০টি ছোট ছোট মেসেজ পাঠাল। কিন্তু তার সব মেসেজ মিলিয়ে Token খরচ হলো মাত্র ২০০টি, যার দাম হয়তো মাত্র $০.০০০১$।
+**Chunk 1:** *"Company-র নিয়ম অনুযায়ী, যদি কোনো Developer পর পর ৩ দিন অফিসে লেট করে ঢোকে..."* (কিন্তু এখানে কোনো শাস্তির কথা নেই!)
 
-তাহলে দেখছ তো? শুধু রিকোয়েস্টের সংখ্যা দিয়ে AI-তে লিমিট করা সম্ভব না।
+**Chunk 2:** *"তবে তার ওই মাসের Bonus থেকে ১০% জরিমানা কাটা হবে।"* (এখানে আবার কেন জরিমানা কাটা হচ্ছে, সেই কারণটাই নেই!)
 
-তাহলে উপায় কী?
+এবার ভাবো, User যদি জিজ্ঞেস করে—
 
-এই জন্য AI প্রোডাকশনে আমরা দুই ধরনের রেট লিমিট ব্যবহার করি।
+*"অফিসে লেট করলে কী Penalty দেওয়া হয়?"*
 
-প্রথমটি হলো RPM বা Requests Per Minute। এটা কী কাজ করে? এটি মূলত স্প্যামিং ঠেকায়।
+তখন কী হবে?
 
-আর দ্বিতীয়টি হলো TPM বা Tokens Per Minute। এটার কাজ কী? এটি মেমরি আর অতিরিক্ত API Cost-এর বোমা ব্লক করে।
+Model এই দুটি Chunk-কে একসাথে মেলাতে পারবে না।
 
-আমরা এই সমস্যার সমাধান করব দুইটা লেয়ার বা ধাপে।
+সে তখন উত্তর দেবে:
 
-প্রথম ধাপ হলো Redis Token Bucket। এটা কীভাবে কাজ করে?
+*"অফিসে লেট করার কোনো নির্দিষ্ট Penalty খুঁজে পাওয়া যায়নি।"*
 
-আমরা Redis ব্যবহার করে একটি ডাইনামিক বাকেট বানাব। প্রতিবার ইউজার রিকোয়েস্ট পাঠালে বাকেট থেকে Token কমতে থাকবে।
+একে আমরা বলি Context Fragmenting বা RAG-এর এক বড় বিপর্যয়!
 
-আবার প্রতি সেকেন্ডে সেখানে অটোমেটিক নতুন Token রিফিল হবে। বাকেট খালি হয়ে গেলেই ইউজার `HTTP 429 Too Many Requests` এরর পাবে।
+তাহলে এর সমাধান কী?
 
-দ্বিতীয় ধাপ হলো Stripe Usage Billing। এটা কী?
+এখানেই আসে Semantic Chunking!
 
-ইউজারকে আগে থেকে রিচার্জ করতে হবে না। সে পুরো মাসে যতটুকু ব্যবহার করবে, মাস শেষে ঠিক ততটুকুর বিল দেবে।
+আচ্ছা, Semantic Chunking জিনিসটা আসলে কী?
 
-যেমন প্রতি ১০০০ Token ব্যবহারের জন্য $০.০০৫$।
+সহজ কথায়, এটা কোনো নির্দিষ্ট Length-এর উপর নির্ভর করে না।
+
+তাহলে এটি কীভাবে কাজ করে?
+
+এটি প্রথমে আমাদের সব বাক্যকে আলাদা করে ফেলে।
+
+তারপর প্রতিটি পাশাপাশি বাক্যের Embedding Vector-এর দূরত্ব বা Cosine Distance মেপে দেখে।
+
+দূরত্ব মেপে ও কী বোঝে?
+
+যদি দেখা যায় বাক্য ৩ এবং বাক্য ৪-এর মধ্যে অর্থের অনেক বড় পরিবর্তন ঘটেছে, যেমন Cosine Distance অনেক কমে গেছে—
+
+তখন System বুঝে নেয় যে এখানে আলোচনার বিষয় বদলে গেছে।
+
+সে সাথে সাথে সেখানে একটা Dynamic Slice বা সীমানা তৈরি করে দেয়।
+
+এর ফলে প্রতিটি Chunk একদম স্বাধীন এবং অর্থপূর্ণ থাকে।
 
 [VISUAL]
-Title: Usage Billing & Rate Limiting Pipeline
-Illustration: User request passing through Redis Token Bucket validator, getting logged for OpenAI token usage, and reporting usage event to Stripe Billing
+Title: Character Splitter vs. Semantic Chunking
+Illustration: Rigid fixed-character slice lines vs. dynamic gap threshold slicing based on similarity vectors
 Placement: After Hook Section
-Purpose: Show business-grade SaaS billing architecture.
+Purpose: Show why Semantic Chunking provides 100% complete contexts.
 
 ```
-                  ┌──────────────────────┐
-                  │    User Request      │
-                  └──────────────────────┘
-                             │
-                             ▼
-┌────────────────────────────────────────────────────────┐
-│  1. REDIS RATE LIMITER (Token Bucket RPM/TPM Check)     │
-│  - If bucket empty ──► Return HTTP 429 Too Many Requests│
-└────────────────────────────────────────────────────────┘
-                             │ (Allowed)
-                             ▼
-                  [ Run AI Generation ] ──► Compute Tokens Used
-                             │
-                             ▼
-┌────────────────────────────────────────────────────────┐
-│  2. USAGE BILLING TRACKER (Stripe API integration)     │
-│  - Log tokens to DB                                    │
-│  - Send metered usage event to Stripe: 'token_used'    │
-└────────────────────────────────────────────────────────┘
+Fixed-Character Splitter (Rigid & blind):
+"We love AI engineering. [--- Slice ---] It is very fun and robust." (Splits mid-context)
+
+Semantic Chunking (Dynamic & intelligent):
+Sentence 1: "We love AI engineering."
+                                         ◄─── Cosine Sim = 0.94 (Keep together)
+Sentence 2: "It is very fun and robust."
+                                         ◄─── Cosine Sim = 0.12 (SHARP DROP! Dynamic Slice Here ──✂──)
+Sentence 3: "Postgres is a SQL database."
 ```
 
+## ২. RAG Data Layer-এর মূল চাবিকাঠি
 
-## ২. মূল আইডিয়াগুলো কী কী?
+চলো এবার RAG-এর মূল শক্তিগুলো নিয়ে কথা বলি।
 
-প্রথমেই জানা যাক Token Bucket Algorithm সম্পর্কে।
+প্রথমে জানা যাক Postgres pgvector নিয়ে।
 
-প্রশ্ন হলো, এটা কীভাবে কাজ করে?
+এই pgvector আসলে কী?
 
-ধরো, আমাদের একটা বাকেট বা বালতি আছে। এর একটা সর্বোচ্চ ধারণক্ষমতা আছে, যাকে আমরা $B$ বলতে পারি।
+সহজ কথায়, এটি হলো একটি Open-source Extension।
 
-প্রতি সেকেন্ডে এই বাকেটে $R$ হারে নতুন Token রিফিল হতে থাকে।
+এটি আমাদের Postgres Database-কে সরাসরি High-dimensional Vector Embeddings Store এবং Query করার ক্ষমতা দেয়।
 
-ইউজার যখনই কোনো API কল করে, বাকেট থেকে $N$ সংখ্যক Token তুলে নেওয়া হয়।
+কিন্তু আমরা কেন অন্য কোনো Vector Database ব্যবহার না করে এটি ব্যবহার করবো?
 
-যদি বাকেটে পর্যাপ্ত Token না থাকে বা রিকোয়েস্টের সাইজ বাকেটের চেয়ে বড় হয়, তবে সেই কল ব্লক হয়ে যায়।
+কারণ হলো, তোমাকে আলাদা করে কোনো নতুন Vector Database যেমন Pinecone বা Chroma সেটআপ করতে হবে না।
 
-সহজ না?
+তোমার User Data এবং Document-এর Vector Data একই Postgres Database-এ একদম নিরাপদে থাকবে।
 
-এবার আসি Stripe Metered Billing-এর কথায়。
+তাছাড়া তুমি Metadata ব্যবহার করে খুব দ্রুত SQL Query চালাতে পারবে।
 
-গ্রাহকের ব্যবহার অনুযায়ী বিল নেওয়ার সুবিধা দেয় এই সিস্টেম।
+আচ্ছা, pgvector-এ Indexing কীভাবে কাজ করে?
 
-এখানে ইউজারকে স্বাধীনভাবে ব্যবহার করতে দেওয়া হয়। আর মাস শেষে সে যতটুকু ব্যবহার করেছে, তার ক্রেডিট কার্ড থেকে ঠিক ততটুকু চার্জ কাটা হয়।
+pgvector মূলত দুটি Indexing Support করে।
 
-প্রশ্ন হলো, Stripe কীভাবে জানবে ইউজার কতটুকু ব্যবহার করেছে?
+প্রথমটি হলো IVFFlat।
 
-এর জন্য প্রতিবার AI Response শেষ হলে ব্যাকগ্রাউন্ডে আমরা একটা Stripe Usage Event পাঠাই।
+এটি দ্রুত Search করার জন্য Clustering Loop তৈরি করে।
 
-যেমন: `stripe.SubscriptionItem.create_usage_record(subscription_item_id, quantity=1500, timestamp=now)`।
+আর দ্বিতীয়টি হলো HNSW。
+
+এটি একটি আধুনিক Graph-based Indexing।
+
+মজার ব্যাপার হলো, এটি IVFFlat-এর চেয়ে ৩ গুণ বেশি দ্রুত কাজ করে।
+
+আর Production-এ একদম সঠিক Document খুঁজে পাওয়ার হার প্রায় ১০০% নিশ্চিত করে।
+
+এবার চলো জানা যাক Hybrid Search সম্পর্কে।
+
+Hybrid Search আমাদের কেন প্রয়োজন?
+
+মাঝে মাঝে শুধু Vector Embeddings Search নির্দিষ্ট কোনো Brand Name বা Serial Number খুঁজে পেতে ভুল করে।
+
+ঠিক এই কারণেই Production-এ আমরা Hybrid Search ব্যবহার করি।
+
+এটি কীভাবে কাজ করে?
+
+এটি মূলত দুটি পদ্ধতির মেলবন্ধন:
+
+প্রথমটি হলো Dense Retrieval।
+
+এটি Vector Similarity দিয়ে মূলত বাক্যের মূল অর্থটা বোঝার চেষ্টা করে।
+
+আর দ্বিতীয়টি হলো Sparse Retrieval।
+
+এটি Classical BM25 বা Postgres-এর `tsvector` দিয়ে একদম নির্দিষ্ট Keyword যেমন "X-230 Pro" match করায়।
+
+কিন্তু এই দুটির রেজাল্টকে আমরা মেলাবো কীভাবে?
+
+সেখানেই কাজ করে RRF বা Reciprocal Rank Fusion।
+
+এটি এই দুই ধরণের Search-এর Output Score মিলিয়ে আমাদের সামনে সেরা ৫টি নিখুঁত Document তুলে আনে।
 
 
-## ৩. ছবিতে বাকেটের রিফিল সিস্টেম
+## ৩. HNSW Graph-এর কাজের ধরন
 
-Token বাকেটের Math-এর রিফিল Mechanism ভিজুয়ালি দেখো:
+HNSW Index কীভাবে কাজ করে, তা নিচের এই Diagram-এ দেখে নাও:
 
 ```
-    Refill Water Drops (R = 5 Tokens/Sec)  ──────►  [  *  *  *  ]  (Refills to Max Bucket Capacity B = 100)
-                                                    [  *  *  *  ]
-                                                    [  *  *  *  ]
-                                                          │
-                                                          ▼ (User consumes N tokens on Request)
-                                                    [ HTTP 200 OK ]
+    [ Layer 2 (Express Nodes) ] ───────► [ Jump Node A ] ──────────┐
+                                               │                   │
+                                               ▼                   ▼
+    [ Layer 1 (Medium Density) ] ───────► [ Node B1 ] ─────────► [ Node B2 ]
+                                               │                   │
+                                               ▼                   ▼
+    [ Layer 0 (Dense Vector Space) ] ───► [ Local Neighbor ] ──► [ Destination Vector ]
 ```
 
-যদি কোনো ইউজার ১ সেকেন্ডে একসাথে ২০০ Token নিতে চায়, তবে কী হবে?
+সহজ কথায়, HNSW মূলত Multi-layer Highway বা Expressway-এর মতো কাজ করে।
 
-বাকেটের সর্বোচ্চ সাইজ তো ১০০। তাই আমাদের গেট সাথে সাথে বন্ধ হয়ে যাবে এবং সেই রিকোয়েস্ট ব্লক করে দেবে।
+এটি প্রথমে বড় বড় Jump দিয়ে আমাদের কাঙ্ক্ষিত Vector-এর কাছাকাছি জায়গায় পৌঁছায়।
 
+তারপর একদম শেষের Layer-এ এসে কাছাকাছি থাকা Node-গুলো খুঁজে বের করে।
 
-## ৪. Midjourney কীভাবে কাজ করে?
-
-তুমি কি কখনো Midjourney বা Runway ব্যবহার করেছ?
-
-সেখানে সাবস্ক্রিপশন নেওয়ার পর কী হয়?
-
-ধরো, তুমি শুরুতেই ২৫টি ফাস্ট ক্রেডিট পেলে।
-
-তুমি যখন নতুন ছবি তৈরি করতে থাকবে, তখন তোমার ফাস্ট ক্রেডিট কমতে থাকবে।
-
-ক্রেডিট শূন্য হয়ে গেলে AI তোমাকে স্লো লাইনে পাঠিয়ে দেবে।
-
-মজার ব্যাপার হলো, এই পুরো ক্রেডিট কমানো এবং ফাস্ট ও স্লো ট্র্যাফিক কন্ট্রোল করার কাজটি কিন্তু ব্যাকগ্রাউন্ডে Redis দিয়ে করা হয়।
-
-Redis-এর মেমরি key-value কমানোর সিস্টেম ব্যবহার করে খুব সহজেই এই পুরো প্রসেস হ্যান্ডেল করা যায়।
+এভাবে মাত্র কয়েক Millisecond-এর মধ্যে একদম নিখুঁত Vector ম্যাচ করে ফেলে।
 
 
-## ৫. চলো কোড লিখে ফেলি!
+## ৪. Loan Policy Search-এর বাস্তব উদাহরণ
+
+ধরো, একজন Loan Officer ব্যাংকের একটি ফাইল থেকে কোনো তথ্য খুঁজছেন।
+
+সেখানে লেখা আছে:
+
+*"গ্রাহকের বয়স ৬০ এর বেশি হলে, সুদের হার ১% বেশি হবে এবং ৫ লাখের বেশি লোনে অবশ্যই নোটারি বন্ড লাগবে।"*
+
+এখন ভুল Chunking-এর কারণে কী সমস্যা হতে পারে?
+
+Officer যখন Search করলেন—
+
+*"৬০ বছর বয়সীদের Loan Policy কী?"*
+
+তখন Chunk মাঝখান থেকে কেটে যাওয়ার কারণে System শুধু সুদের হারের তথ্যটি খুঁজে পেলো।
+
+কিন্তু নোটারি বন্ডের প্রয়োজনীয় অংশটি একদম হারিয়ে গেল।
+
+তাহলে Semantic Chunking কীভাবে এই সমস্যার সমাধান করে?
+
+এটি পুরো Paragraph-টিকে একটি সম্পূর্ণ Chunk হিসেবে জমিয়ে রাখে।
+
+এর ফলে Officer যখন কুয়েরি করেন, তখন সে সুদের হার এবং নোটারি বন্ড—দুটি তথ্যই একসাথে পেয়ে যান।
+
+খুবই চমৎকার, তাই না?
+
+
+## ৫. Python দিয়ে Postgres pgvector এবং Semantic Chunking Implementation
 
 💻 Developer View
 
-চলো, পাইথনে একটি রানিং, প্রোডাকশন-গ্রেড AI SaaS ব্যাকঅ্যান্ড লজিক ডিজাইন করি।
+চলো এবার সরাসরি Code-এ হাত দেওয়া যাক!
 
-এটি একই সাথে Redis দিয়ে TPM এবং RPM চেক করবে।
+আমরা Python দিয়ে একটি Real-world Semantic Chunking Loop তৈরি করবো।
 
-আবার একই সাথে Token ব্যবহার সরাসরি Stripe API-তে পুশ করে দেবে।
+একই সাথে pgvector Indexing ব্যবহার করার সম্পূর্ণ Pipeline তৈরি করে ফেলবো।
 
 ```python
 import os
-import time
-import redis
-import stripe
+import numpy as np
+import psycopg2
+from psycopg2.extras import register_vector
 from openai import OpenAI
+from sklearn.metrics.pairwise import cosine_similarity
 
 # ১. এনভায়রনমেন্ট ও ক্লায়েন্ট সেটআপ
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
-stripe.api_key = "your-stripe-secret-key"
 client = OpenAI()
 
-# Redis Setup (Windows/Local running Redis)
-r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+# ২. ডাইনামিক Semantic চাঙ্কার (Semantic Chunking Library)
+def semantic_chunk_text(text, threshold=0.85):
+    # বাক্য স্প্লিট
+    sentences = [s.strip() + "." for s in text.split(".") if len(s.strip()) > 5]
+    if len(sentences) < 2:
+        return sentences
+        
+    # প্রতিটি বাক্যের এম্বেডিংস জেনারেট করো
+    print(f"Generating embeddings for {len(sentences)} sentences...")
+    resp = client.embeddings.create(input=sentences, model="text-embedding-3-small")
+    embeddings = [e.embedding for e in resp.data]
+    
+    # পাশাপাশি বাক্যের কোসাইন সিমিলারিটি বের করো
+    chunks = []
+    current_chunk = sentences[0]
+    
+    for i in range(len(sentences) - 1):
+        vec1 = np.array(embeddings[i]).reshape(1, -1)
+        vec2 = np.array(embeddings[i+1]).reshape(1, -1)
+        sim = cosine_similarity(vec1, vec2)[0][0]
+        
+        # যদি সিমিলারিটি থ্রেশহোল্ডের নিচে ড্রপ করে, নতুন চাঙ্ক করো
+        if sim < threshold:
+            chunks.append(current_chunk)
+            current_chunk = sentences[i+1]
+        else:
+            current_chunk += " " + sentences[i+1]
+            
+    chunks.append(current_chunk)
+    return chunks
 
-# ২. Redis Token Bucket Rate Limiter (RPM & TPM Checker)
-def check_rate_limit(user_id, token_cost, max_tokens=10000, refill_rate=50):
-    key_tokens = f"rate_limit:{user_id}:tokens"
-    key_last_update = f"rate_limit:{user_id}:last_update"
-    
-    now = time.time()
-    
-    # বাকেটের ওল্ড Data রিড করো
-    last_update = r.get(key_last_update)
-    current_tokens = r.get(key_tokens)
-    
-    if last_update is None or current_tokens is None:
-        # ফার্স্ট টাইম ইউজার: ফুল বাকেট এলোকেট করো
-        r.set(key_tokens, max_tokens)
-        r.set(key_last_update, now)
-        current_tokens = max_tokens
-    else:
-        last_update = float(last_update)
-        current_tokens = float(current_tokens)
-        
-        # রিফিল Calculation: সময় ব্যবধান * রিফিল রেট
-        elapsed = now - last_update
-        refilled = elapsed * refill_rate
-        current_tokens = min(max_tokens, current_tokens + refilled)
-        
-        r.set(key_tokens, current_tokens)
-        r.set(key_last_update, now)
-        
-    # রেট লিমিট Validation
-    if current_tokens >= token_cost:
-        # Token কেটে নিয়ে অ্যাক্সেস গ্র্যান্ট করো
-        r.set(key_tokens, current_tokens - token_cost)
-        return True, current_tokens - token_cost
-    else:
-        return False, current_tokens
-
-# ৩. স্ট্রাইপ মিটারড বিলিং রিপোর্টার
-def report_usage_to_stripe(stripe_sub_item_id, tokens_used):
-    print(f"[💳 Stripe API] Reporting {tokens_used} tokens used for subscription item {stripe_sub_item_id}...")
-    try:
-        # মিটারড ইভেন্ট রেকর্ড সাবমিট
-        stripe.SubscriptionItem.create_usage_record(
-            stripe_sub_item_id,
-            quantity=tokens_used,
-            timestamp=int(time.time()),
-            action="increment"
-        )
-        print("[ Stripe API] Usage reported successfully!")
-    except Exception as e:
-        print("[ Stripe Error] Failed to report usage:", e)
-
-# ৪. প্রোডাকশন SaaS API রিকোয়েস্ট হ্যান্ডলার Loop
-def process_saas_ai_request(user_id, stripe_sub_item_id, user_prompt):
-    # কাল্পনিক এস্টিমেটেড Token কস্ট (যেমন Prompt সাইজ)
-    estimated_cost = len(user_prompt.split()) * 3 # ৩ Token পার শব্দ গড়ে
-    
-    # Step A: Rate Limit Check
-    allowed, remaining = check_rate_limit(user_id, token_cost=estimated_cost)
-    
-    if not allowed:
-        print(f"\n[🛑 HTTP 429 Too Many Requests] User {user_id} is rate limited! Remaining tokens in bucket: {remaining:.2f}")
-        return "Error: Rate Limit Exceeded. Please slow down."
-        
-    print(f"\n[🟢 Request Allowed] Processing AI query for {user_id}. Tokens Remaining: {remaining:.2f}")
-    
-    # Step B: Run AI Generation
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": user_prompt}]
+# ৩. Postgres pgvector Database ইন্টিগ্রেশন
+def store_and_search_chunks(chunks, query_text):
+    # Postgres কানেকশন
+    conn = psycopg2.connect(
+        host="localhost",
+        database="enterprise_rag",
+        user="postgres",
+        password="yourpassword",
+        port="5432"
     )
+    cur = conn.cursor()
     
-    reply = response.choices[0].message.content
+    # pgvector এক্সটেনশন এনাবল ও Vector রেজিস্টার
+    cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    conn.commit()
+    register_vector(conn)
     
-    # Step C: Real Token Count Calculation
-    prompt_tokens = response.usage.prompt_tokens
-    completion_tokens = response.usage.completion_tokens
-    total_tokens = response.usage.total_tokens
-    print(f"[ Token Log] Prompt: {prompt_tokens}, Completion: {completion_tokens}, Total: {total_tokens}")
+    # টেবিল তৈরি (Dimension = 1536 for text-embedding-3-small)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS doc_chunks (
+            id serial PRIMARY KEY,
+            content text,
+            embedding vector(1536)
+        );
+    """)
+    conn.commit()
     
-    # Step D: Report to Stripe Billing
-    report_usage_to_stripe(stripe_sub_item_id, total_tokens)
+    # Data ইনসার্ট Loop
+    print(f"Storing {len(chunks)} semantic chunks into Postgres pgvector...")
+    for chunk in chunks:
+        # Generate chunk embedding
+        resp = client.embeddings.create(input=chunk, model="text-embedding-3-small")
+        emb = resp.data[0].embedding
+        
+        cur.execute("INSERT INTO doc_chunks (content, embedding) VALUES (%s, %s);", (chunk, emb))
+    conn.commit()
     
-    return reply
+    # HNSW ইনডেক্স তৈরি (For fast production cosine search)
+    cur.execute("CREATE INDEX IF NOT EXISTS doc_hnsw_idx ON doc_chunks USING hnsw (embedding vector_cosine_ops);")
+    conn.commit()
+    
+    # ৪. সিমিলারিটি কোসাইন কুয়েরি রান করো (RAG Retrieval)
+    print(f"\nSearching for query: '{query_text}'")
+    query_resp = client.embeddings.create(input=query_text, model="text-embedding-3-small")
+    query_emb = query_resp.data[0].embedding
+    
+    # Cosine distance operator '<=>' ব্যবহার করে টপ ৩টি রিলেভেন্ট চাঙ্ক রিট্রিভ
+    cur.execute("SELECT content, 1 - (embedding <=> %s) AS similarity FROM doc_chunks ORDER BY embedding <=> %s LIMIT 3;", (query_emb, query_emb))
+    results = cur.fetchall()
+    
+    print("\n--- RAG SEARCH RESULTS ---")
+    for idx, row in enumerate(results):
+        print(f"Match {idx+1} [Similarity: {row[1]:.4f}]:\n{row[0]}\n")
+        
+    cur.close()
+    conn.close()
 
 # --- ৫. MOCK VALIDATION RUN ---
-user_id = "cus_rahim_99"
-stripe_sub_item = "si_12345_mock" # Mock Stripe Subscription Item ID
+raw_pdf_text = "আমাদের কোম্পানি পলিসি অনুযায়ী প্রতি বছর জানুয়ারি মাসে এমপ্লয়ীদের পারফরম্যান্স বোনাস রিলিজ করা হয়। তবে যদি কোনো Developer পর পর ৩ দিন অফিসে লেট করে ঢোকে, তবে তার ওই মাসের বোনাস থেকে ১০% জরিমানা কাটা হবে। অন্যদিকে সেলস টিমের ক্ষেত্রে টার্গেট ফিলাপ না হলে বেসিক স্যালারি থেকে ৫% ডিডাকশন করা হয়।"
 
-# ১ম রিকোয়েস্ট: সাকসেসফুলি রান হবে
-reply1 = process_saas_ai_request(user_id, stripe_sub_item, "আমাদের কোম্পানির জন্য একটি রেট লিমিটিং প্রোটোকল লিখে দাও।")
-print("SaaS AI Response:", reply1)
+# Semantic Chunking রান
+semantic_chunks = semantic_chunk_text(raw_pdf_text, threshold=0.82)
+print("Generated Semantic Chunks:\n", semantic_chunks)
 
-# ২য় রিকোয়েস্ট (তাত্ক্ষণিকভাবে): বাকেটে Token রিফিলের টাইম না পাওয়ায় রেট লিমিট ট্র্যাপ হবে
-reply2 = process_saas_ai_request(user_id, stripe_sub_item, "বাকি ডিটেইলস আরও ৩০০ শব্দে বুঝিয়ে দাও তো প্লিজ।" * 20)
-print("SaaS AI Response:", reply2)
+# Database স্টোর ও কুয়েরি Test
+# (Postgres locally running default state validation)
+# store_and_search_chunks(semantic_chunks, "লেট করলে এমপ্লয়ীদের কী জরিমানা কাটা হয়?")
 ```
 
 
-## ۶. প্রোডাকশনে ক্যাশ ও ডাটাবেস ডিজাইন
+## ۶. Production-এ pgvector Optimize আর Memory Scaling
 
-🏭 Production Reality
+ Production Reality
 
-যখন তুমি বড় স্কেলে তোমার AI SaaS ডেপ্লয় করবে, তখন তোমাকে ক্যাশ ডিজাইন নিয়ে একটু ভাবতে হবে।
+Production Level-এ যখন তুমি কোটি কোটি Chunk নিয়ে কাজ করবে, তখন GPU বা CPU-এর Memory ক্র্যাশ করতে পারে।
 
-প্রশ্ন হলো, কী কী বিষয় আমাদের মাথায় রাখতে হবে?
+এই সমস্যা এড়াতে আমাদের কিছু জরুরি বিষয় মাথায় রাখতে হবে।
 
-প্রথমত, Redis Cluster Replication নিয়ে কাজ করতে হবে।
+যেমন RAM এবং Vector Storage-এর হিসাব।
 
-যদি রেট লিমিটের ডাটা হঠাৎ হারিয়ে যায়, তবে তোমার পুরো সার্ভিস ডাউন হয়ে যেতে পারে।
+HNSW Indexing-এর সময় পুরো Graph Network-টি RAM-এর ওপর জমা থাকে।
 
-তাই প্রোডাকশনে Redis মেমরি ক্লাস্টার মাস্টার-স্ল্যাভ সিস্টেমে রান করানো দরকার।
+সেখানেই সব Computation চলে।
 
-দ্বিতীয়ত, Stripe Idempotency Key ব্যবহার করতে হবে।
+তাই তোমার Database Server-এর RAM সাইজ অবশ্যই টোটাল Vector Memory-র চেয়ে অন্তত ১.৫ গুণ বেশি হতে হবে।
 
-প্রশ্ন হলো, এটা কী কাজ করে?
+তাড়াও আর কীভাবে আমরা Performance বাড়াতে পারি?
 
-অনেক সময় নেটওয়ার্কের সমস্যার কারণে স্ট্রাইপে একই বিলিং ডাটা ভুল করে দুই বার চলে যেতে পারে।
+আমরা Dimension Reduction করতে পারি।
 
-এটি ঠেকানোর জন্য প্রতি রিকোয়েস্টে Stripe API-তে অবশ্যই একটি ইউনিক Idempotency-Key হেডার হিসেবে পাঠাতে হবে।
+API-এর খরচ এবং Query Latency কমানোর জন্য `text-embedding-3-small` Model-এর `dimensions` Parameter ব্যবহার করা যায়।
+
+এর মাধ্যমে আমরা ১৫৩৬ Dimension-কে কমিয়ে ২৫৬ বা ৫১২-তে নিয়ে আসতে পারি।
+
+এতে Accuracy-র কোনো ক্ষতি ছাড়াই Query-র গতি প্রায় ৪ গুণ বেড়ে যায়!
 
 
-## ৭. কিছু সাধারণ ভুল ধারণা
+## ৭. কিছু কমন ভুল
 
 🔴 Common Mistake
 
-যেমন অনেকে মনে করেন, রেট লিমিটিং অ্যালগরিদম Postgres বা MongoDB-এর মতো Database দিয়ে তৈরি করা যায়।
+অনেকেরই একটা ভুল ধারণা থাকে।
 
-কিন্তু বাস্তবতা কী?
+তারা মনে করেন, RAG System-এ যত বেশি Document খুঁজে Model-এর Prompt-এ পাঠানো যাবে, AI তত ভালো উত্তর দেবে।
 
-রিলেশনাল ডাটাবেসগুলো ডিস্ক স্টোরেজ বা ফাইল রিড-রাইট স্পিডে চলে।
+কিন্তু আসলে কি তাই?
 
-যদি প্রতি মিলিসেকেন্ডে প্রতি রিকোয়েস্টের জন্য ডাটাবেসে রিড-রাইট হিট পড়ে, তবে ডাটাবেস লক হয়ে যাবে।
+একেবারেই না!
 
-আর তোমার পুরো ওয়েবসাইট ডাউন হয়ে যাবে!
+একে আমরা বলি Lost in the Context Window Clutter।
 
-তাই রেট লিমিটের মান ক্যাশ করার জন্য সবসময় মাইক্রো-সেকেন্ড গতির ইন-মেমরি Redis ব্যবহার করাই বুদ্ধিমানের কাজ।
+Prompt-এর ভেতর ফালতু এবং অতিরিক্ত Duplicate Text দিলে Model কনফিউজড হয়ে যায়।
 
+একই সাথে কাজের গতি বা Latency-ও অনেক বেড়ে যায়।
 
-## ৮. বোঝার সহজ উপায়
-
-চল, মিটারড বিলিং আর রেট লিমিট বোঝার জন্য একটা সুন্দর উদাহরণ দেখি।
-
-> **"রেট লিমিট হলো পার্কিং লটের এন্ট্রি গেট, যেখানে একটা বাকেটে নির্দিষ্ট সময় পরপর নতুন Token জমা হয়। তোমার কাছে যথেষ্ট Token থাকলে গেট খুলে যায় আর তুমি ঢুকতে পারো।"**
-
-> **"আর মিটারড বিলিং হলো ট্যাক্সির মিটারের মতো—তুমি যতটুকু পথ চলবে, ঠিক ততটুকুর জন্য মাসের শেষে বিল কাটা হবে।"**
+তাই Production-এ সবসময় সেরা ৩ থেকে ৫টি একদম নিখুঁত Semantic Chunk পাঠানোই সবচেয়ে বুদ্ধিমানের কাজ।
 
 
-## ৯. চলো বানাই Token Bucket
+## ৮. Mental Model: সুনিপুণ কাঁচি বনাম অন্ধ কুড়াল
 
-কোনো Database ছাড়াই পাইথনে একটি সম্পূর্ণ বাকেট রিফিল ক্লাস কোড করে ফেলি।
+চলো বিষয়টাকে একটা সহজ উদাহরণ দিয়ে বোঝার চেষ্টা করি।
 
-আমরা সেকেন্ডের ব্যবধানে বাকেটের ডাইনামিক রিফিল রেট টেস্ট করে সরাসরি দেখব।
+আগের Character Chunking ছিল অন্ধের মতো কুড়াল দিয়ে কাগজ কাটার মতো।
+
+যা বাক্যের ঠিক মাঝখান থেকেও কেটে টুকরো টুকরো করে ফেলতো।
+
+আর আমাদের আজকের Semantic Chunking হলো একটি সুনিপুণ কাঁচি।
+
+যা কেবল Paragraph বা বাক্য শেষ হওয়ার সুন্দর ও অর্থপূর্ণ জায়গায় নিখুঁত কাট দেয়।
+
+
+## ৯. Mini Project: স্ক্র্যাচ থেকে Cosine Similarity বের করা
+
+চলো এবার NumPy ব্যবহার করে দুটি Embedding Vector-এর ভেতরের জ্যামিতিক দূরত্ব আর Cosine Similarity স্ক্র্যাচ থেকে হিসাব করি।
+
+পেছনের ব্যাকগ্রাউন্ডে pgvector মূলত এই কাজটিই করে থাকে।
 
 ```python
-import time
+import numpy as np
 
-class TokenBucket:
-    def __init__(self, capacity, refill_rate):
-        self.capacity = capacity
-        self.refill_rate = refill_rate # Tokens per second
-        self.tokens = capacity
-        self.last_update = time.time()
-        
-    def consume(self, amount):
-        now = time.time()
-        elapsed = now - self.last_update
-        
-        # রিফিল Token যোগ
-        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
-        self.last_update = now
-        
-        if self.tokens >= amount:
-            self.tokens -= amount
-            return True
-        return False
+# দুটি ৩ডি এম্বেডিংস Vector
+vec_chunk = np.array([0.25, 0.88, 0.05])
+vec_query = np.array([0.28, 0.85, 0.12])
 
-# Test রান
-bucket = TokenBucket(capacity=10, refill_rate=2)
-print("Consuming 8 tokens...", bucket.consume(8)) # True
-print("Consuming 5 tokens...", bucket.consume(5)) # False (only 2 left)
-print("Waiting 2 seconds for refill...")
-time.sleep(2)
-print("Consuming 5 tokens...", bucket.consume(5)) # True (refilled 4 tokens)
+# ১. ডট প্রোডাক্ট
+dot_product = np.dot(vec_chunk, vec_query)
+
+# ২. Vector-এর ম্যাগনিটিউড (দৈর্ঘ্য)
+norm_chunk = np.linalg.norm(vec_chunk)
+norm_query = np.linalg.norm(vec_query)
+
+# ৩. কোসাইন সিমিলারিটি
+cosine_sim = dot_product / (norm_chunk * norm_query)
+
+# ৪. pgvector Cosine Distance (1 - Cosine Similarity)
+cosine_dist = 1 - cosine_sim
+
+print(f"Cosine Similarity (Closer to 1.0 is better): {cosine_sim:.4f}")
+print(f"pgvector Cosine Distance (Closer to 0.0 is better): {cosine_dist:.4f}")
 ```
 
 
-## ১০. ইন্টারভিউতে যেসব প্রশ্ন আসতে পারে
+## ১০. ইন্টারভিউতে কেমন প্রশ্ন হতে পারে?
 
 ### Beginner Level
 
-**প্রশ্ন:** প্রথাগত সফটওয়্যারের চেয়ে AI SaaS-এ রেট লিমিটিং কেন অন্যভাবে ডিজাইন করতে হয়?
+**প্রশ্ন:** RAG System-এ Fixed-size Chunking-এর চেয়ে Semantic Chunking কেন বেশি কাজের?
 
-**উত্তর:** প্রথাগত সফটওয়্যারে শুধু রিকোয়েস্টের সংখ্যা বা RPM হিসাব করলেই চলে।
+**উত্তর:** 
 
-কিন্তু AI-এর বেলায় প্রতিটি রিকোয়েস্টের সাইজ ভিন্ন হতে পারে।
+Fixed-size Chunking মূলত Character বা Token-এর দৈর্ঘ্য মেপে Randomly কাটাছেঁড়া করে।
 
-তাই খরচ নিয়ন্ত্রণে রাখতে RPM-এর পাশাপাশি TPM বা Token পার মিনিট রেট লিমিটিং ডিজাইন করা খুব জরুরি।
+এর ফলে বাক্যের মূল অর্থ মাঝখান থেকে কেটে দুই ভাগ হয়ে যায়।
+
+কিন্তু Semantic Chunking পাশাপাশি থাকা বাক্যের অর্থগত মিল পরীক্ষা করে।
+
+সে কেবল তখনই কাটে, যখন বিষয়ের পরিবর্তন ঘটে।
+
+তাই প্রতিটি Chunk সম্পূর্ণ থাকে এবং ভুল উত্তর বা Hallucination-এর ঝুঁকি কমে।
 
 
 ### Intermediate Level
 
-**প্রশ্ন:** Token Bucket Algorithm কীভাবে কাজ করে আর এর সুবিধা কী?
+**প্রশ্ন:** Postgres-এর pgvector-এ IVFFlat-এর চেয়ে HNSW Index কেন বেশি ব্যবহার করা হয়?
 
-**উত্তর:** এই অ্যালগরিদমে একটা বাকেট থাকে, যা সর্বোচ্চ ক্ষমতা পর্যন্ত Token জমা রাখতে পারে।
+**উত্তর:** 
 
-এটি নির্দিষ্ট সময় পরপর অটোমেটিক রিফিল হয়।
+IVFFlat Index তৈরি করতে মেমরি কম লাগলেও Vector-এর সংখ্যা বাড়লে Query গতি কমে যায়।
 
-এর বড় সুবিধা হলো—এটি ট্র্যাফিকের হঠাৎ বেড়ে যাওয়া চাপ সামলাতে পারে।
+তাছাড়া ভালো ফলের জন্য একে বারবার Re-train করতে হয়।
 
-আর স্প্যামিং বন্ধ করতে রিফিল রেট অনুযায়ী স্পিড কন্ট্রোল করতে পারে।
+অন্যদিকে, HNSW হলো Graph-based Multi-layer Indexing।
+
+এটি খুব দ্রুত এবং নিখুঁতভাবে সবচেয়ে কাছের Vector খুঁজে বের করতে পারে।
+
+ভবিষ্যতে কোটি কোটি Data থাকলেও এর গতি বা নির্ভুলতা কমে না।
 
 
 ### Advanced Level
 
-**প্রশ্ন:** Stripe Metered Billing-এ Idempotency Key ব্যবহার না করলে কী বিপদ হতে পারে?
+**প্রশ্ন:** Reciprocal Rank Fusion বা RRF কীভাবে Hybrid Search-এর ফলাফলকে নিখুঁত করে?
 
-**উত্তর:** ধরো, AI Response সফল হওয়ার পর বিলিং ডাটা পাঠানোর সময় নেটওয়ার্কের সমস্যা হলো।
+**উত্তর:** 
 
-রেকর্ডটি ড্রপ করল এবং ব্যাকঅ্যান্ড আবার ট্রাই করল।
+RRF হলো এমন একটি Algorithm যা Dense Vector Search and Sparse Keyword Search-এর র‍্যাঙ্কিং পজিশনকে মিলিয়ে দেয়।
 
-যদি Idempotency Key না থাকে, তবে Stripe ভাববে এটি দুটি আলাদা রিকোয়েস্ট।
+এর জন্য এটি তাদের র‍্যাঙ্কের ব্যস্তানুপাতিক Sum:
 
-এর ফলে গ্রাহকের একই ব্যবহারের জন্য দুই বার বা ডবল বিল চার্জ হয়ে যাবে!
+$Score = \sum \frac{1}{k + r}$
 
-যা বিজনেস এবং কাস্টমারের বিশ্বাসের জন্য বড় একটা বিপর্যয় ডেকে জানবে।
+এই Formula ব্যবহার করে নতুন Rank নির্ধারণ করে।
 
+এর ফলে যদি কোনো Document বা Keyword দুটি সার্চেই ভালো পজিশনে থাকে, তবে সে সবার উপরে চলে আসে।
 
-## ১১. পুরো চ্যাপ্টারের সারসংক্ষেপ
-
-তো এই চ্যাপ্টার থেকে আমরা কী শিখলাম?
-
-সহজ কথায়:
-
-RPM আর TPM হলো আমাদের AI SaaS প্ল্যাটফর্মের পাহারাদার। এরা প্ল্যাটফর্মকে আর্থিকভাবে নিরাপদ রাখে।
-
-Redis Token Bucket দিয়ে খুব সহজেই স্প্যামিং বন্ধ করা যায় আর ট্র্যাফিক কন্ট্রোল করা যায়।
-
-আর Stripe Metered Billing দিয়ে ইউজারের সঠিক ব্যবহার ট্র্যাক করে গ্লোবাল পেমেন্ট সিস্টেম সেটআপ করা যায়।
+এটি যেকোনো একটি সার্চ ব্যবহারের চেয়ে দ্বিগুণ নিখুঁত ফলাফল দেয়।
 
 
-## १२. এরপরে কী?
+## ১১. আমরা কী শিখলাম?
 
-অভিনন্দন! আমরা সব এডভান্সড কমার্শিয়াল AI Project Blueprint সাফল্যের সাথে শেষ করে ফেলেছি।
+আজকে আমরা বেশ কিছু গুরুত্বপূর্ণ জিনিস শিখে ফেললাম।
 
-এখন আমাদের সামনে কেবল শেষ এবং সবচেয়ে গুরুত্বপূর্ণ চ্যাপ্টার: **Chapter 28: Transitioning to an AI Engineer / AI Architect**।
+প্রথমত, Semantic Chunking হলো বাক্যের অর্থের মিল দেখে বুদ্ধিমানের সাথে Dynamic Slice করার এক দারুণ পদ্ধতি।
 
-সেখানে আমরা দেখব কীভাবে একজন ট্র্যাডিশনাল ডেভেলপার তার আগের সব স্কিল নিয়ে AI ওয়ার্ল্ডে পা রাখতে পারে।
+দ্বিতীয়ত, pgvector এবং HNSW Indexing আমাদের চেনা Postgres Database-কে সরাসরি AI-native Vector Database বানিয়ে দেয়।
 
-চলো, এক ক্লিকে সরাসরি ক্যারিয়ার গাইডলাইন ম্যাপটা আমরা নিজের হাতে আনলক করে ফেলি!
+আর শেষ কথা হলো, খরচ এবং Quality ঠিক রাখার জন্য Hybrid Search আর Dimension Optimization করা খুবই জরুরি।
 
-**চ্যাপ্টার ২৭ শেষ!**
+
+## ১২. What's Next?
+
+পরের Chapter-এ আমরা বানাবো এক রোমাঞ্চকর Project!
+
+সেখানে আমরা শিখবো কীভাবে একটি Agentic CLI Code Writer তৈরি করা যায়।
+
+যে নিজে Code লিখবে, Test করবে এবং Error আসলে নিজেই তা ঠিক বা Heal করবে।
+
+দারুণ হবে না বিষয়টা? চলো পরের চ্যাপ্টারে যাই!
+
+**Chapter 27 শেষ।**

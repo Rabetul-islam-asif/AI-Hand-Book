@@ -1,394 +1,442 @@
-# Chapter 28: Transitioning to an AI Engineer / AI Architect
+# Chapter 28: Blueprint 3 — Agentic CLI Code Writer with Auto-Test Healing
 
-দারুণ ব্যাপার! তুমি আমাদের AI Engineering হ্যান্ডবুকের একদম শেষ চ্যাপ্টারে চলে এসেছ।
+---
 
-পার্ট ১-এর AI সূচনা থেকে শুরু করে পার্ট ১১-এর প্রোডাকশন ব্লুপ্রিন্ট— এক বিশাল জার্নি শেষ করলে তুমি।
+তুমি কি কখনো ভেবেছো — সায়েন্স-ফিকশন সিনেমার মতো এমন একটা AI Agent বানানো কি সত্যিই সম্ভব?
 
-এই চ্যাপ্টারটি তোমার এই রোমাঞ্চকর জার্নির ফিনিশিং লাইন।
+যে নিজে নিজে Code লিখবে, নিজে নিজেই সেটা Terminal-এ Run করে Test করবে।
 
-এখানে আমরা এমন একটা রোডম্যাপ নিয়ে কথা বলবো, যা তোমাকে সাধারণ AI API কলারদের ভিড় থেকে আলাদা করবে।
+আর যদি কোনো ভুল বা Bug থাকে, তবে নিজেই সেই Error Log পড়ে Code ঠিক করে নেবে!
 
-আর তোমাকে তৈরি করবে একজন হাই-পেইড লিডার এবং AI Architect হিসেবে।
+শুনে অবিশ্বাস্য মনে হলেও, এটাই সত্যি।
 
-তো চলো, তোমার অর্জিত সমস্ত জ্ঞানকে এক সূত্রে বেঁধে ক্যারিয়ারের একটা জাদুকরী রোডম্যাপ বানিয়ে ফেলি।
+Devin বা Cursor Agent-এর মতো আধুনিক AI Tool-গুলোর আসল ম্যাজিক কিন্তু এখানেই। একে আমরা বলি Self-Testing এবং Auto-Healing Loop।
 
-আমরা দেখবো কীভাবে একজন সাধারণ Developer তার ব্যাকএন্ড বা ফ্রন্টএন্ড স্কিল ধরে রেখেই AI জগতে পা রাখবে।
+তো চলো, এই চ্যাপ্টারে আমরা এমনই একটা রোমাঞ্চকর Pattern নিজের হাতে ডিজাইন করে ফেলি!
 
-কোন কোন কী-স্কিল বেশি প্রয়োজন?
+আমরা ব্যবহার করবো ReAct এবং Auto-Test Healing।
 
-কীভাবেই বা ইন্টারভিউ বোর্ডে একজন প্রো-এর মতো আর্কিটেকচারাল সিদ্ধান্ত নেবে?
+আমরা দেখবো কীভাবে ইউজার থেকে কমান্ড নিয়ে ফাইল তৈরি করা যায়, লোকাল কম্পিউটারে pytest দিয়ে টেস্ট করা যায়, আর টেস্ট ফেইল করলে ভুল শুধরে নেওয়া যায়।
 
-চলো, AI গোল্ড রাশ আর বেলচা বিক্রেতার এক মজার গল্প দিয়ে শুরু করা যাক!
+চলো, শুরু করা যাক! Deal?
 
 
-## ১. AI গোল্ড রাশ এবং বেলচা বিক্রেতার গল্প
+### ১. আসল সমস্যাটা কোথায়?
 
-১৮৪৯ সালের ক্যালিফোর্নিয়ার বিখ্যাত Gold Rush-এর কথা ভাবো।
+ধরো, একটা সাধারণ AI-কে তুমি কোড লিখতে বললে। 
 
-হাজার হাজার মানুষ দলে দলে পাহাড়ের দিকে ছুটেছিল Gold খোঁজার আশায়।
+সে হয়তো এমন একটা কোড বানিয়ে দিল:
 
-কিন্তু এদের মধ্যে খুব কম মানুষই আসলে Gold পেয়ে বড়লোক হতে পেরেছিল।
+```python
+# AI Generated code
+import request  # Oops! It should be 'requests' with an 's'
+```
 
-তাহলে কারা সবচেয়ে বেশি আর নিশ্চিত ধনী হয়েছিল?
+কিন্তু রান করার সাথে সাথে স্ক্রিনে বড় বড় লাল অক্ষরে একটা Error চলে এলো:
 
-মজার ব্যাপার হলো, তারা সোনা খুঁজতে যায়নি।
+`ModuleNotFoundError: No module named 'request'`
 
-তারা পাহাড়ের নিচে দোকান খুলে খনি খুঁড়তে যাওয়া মানুষদের কাছে Shovel, কোদাল আর তাঁবু বিক্রি করেছিল!
+এখন তুমি কী করবে?
 
-আজকের Generative AI বিপ্লবেও ঠিক একই ঘটনা ঘটছে।
+নিশ্চয়ই সেই Error কপি করে আবার AI-এর চ্যাটে পেস্ট করবে। 
 
-এখানে দুই ধরণের মানুষ আছেন।
+AI সেটা দেখে কোড ঠিক করে দেবে। তুমি আবার রান করবে।
 
-প্রথম দল হলেন Gold অন্বেষণকারী।
+এই যে বারবার কপি-পেস্ট করা, এটা কি বিরক্তিকর নয়? 
 
-এরা কারা?
+আমাদের মূল্যবান সময় নষ্ট করার জন্য এটাই যথেষ্ট।
 
-এরা হলেন তারা, যারা শুধু চ্যাটিং বা Prompt দিয়ে ফানি AI Tool বানাচ্ছেন।
+তাহলে এর সমাধান কী?
 
-আর দ্বিতীয় দল?
+এখানেই আসে ReAct Agent Loop এবং Auto-Healing।
 
-তারা হলেন Shovel বিক্রেতা!
+আমাদের এই সেলফ-হিলিং সিস্টেমটি মূলত চারটি ধাপে একটা লুপের মতো কাজ করে:
 
-সহজ কথায়, এরাই হলেন AI Engineer বা AI Architect.
+প্রথম ধাপ হলো **Think**। 
 
-এরাই বড় বড় এন্টারপ্রাইজের জন্য Infrastructure তৈরি করছেন।
+এখানে LLM প্রথমে চিন্তা করে সিদ্ধান্ত নেয় যে তাকে ঠিক কী করতে হবে। কোন লাইব্রেরি বা কোড লিখতে হবে।
 
-Postgres pgvector সেটআপ করছেন, vLLM Server Optimize করছেন।
+দ্বিতীয় ধাপ হলো **Write**। 
 
-পাশাপাশি AI-এর Cost আর Latency কন্ট্রোল করছেন।
+সিদ্ধান্ত নেওয়ার পর এজেন্ট তার নিজস্ব টুল ব্যবহার করে কম্পিউটারে `app.py` এবং `test_app.py` ফাইল তৈরি করে।
 
-একজন AI Engineer হিসেবে তোমার লক্ষ্য হওয়া উচিত সেই Shovel বিক্রেতা হওয়া।
+তৃতীয় ধাপ হলো **Execute Test**। 
 
-কারণ পুরো AI Industry কিন্তু এই Shovel বিক্রেতাদের ওপর ভরসা করেই টিকে থাকবে।
+কোড লেখা শেষ হলে এজেন্ট টার্মিনালে `pytest test_app.py` কমান্ডটি রান করে।
+
+চতুর্থ ধাপ হলো **Self-Heal**। 
+
+যদি টেস্ট ফেইল করে, এজেন্ট কিন্তু থেমে যায় না। 
+
+সে টেস্টের আউটপুট আর লাল Error লগ সরাসরি রিড করে নিজের ব্রেইনে নিয়ে নেয়। 
+
+এরপর ভুলগুলো ঠিক করে কোডটি আবার নতুন করে লেখে। 
+
+আর টেস্ট ১০০% পাস না হওয়া পর্যন্ত এই লুপ চলতেই থাকে! 
+
+দারুণ না?
 
 [VISUAL]
-Title: AI Engineering Skill Quadrant
-Illustration: Four quadrants mapping the essential skills for an AI Architect: Core DL/ML, Systems Engineering, Data Architect, and Business/Cost Optimization
+Title: Agentic Self-Healing Loop Flowchart
+Illustration: Loop cycle between LLM Generator, Write File, Run Subprocess pytest, Catch Failure, Feedback Error, and rewrite
 Placement: After Hook Section
-Purpose: Provide visual layout of the multidisciplinary skills required in the market.
+Purpose: Provide architectural mapping of the self-correcting agent loop.
 
 ```
-       ▲  [ Systems Engineering ]             [ Core DL/ML Foundations ]
-       │  - Docker Sandboxing                 - Transformer Mechanics
-       │  - Redis/vLLM Serving                - Weights & Backpropagation
-       │  - FastAPI APIs                      - SFT & PEFT (LoRA)
- ───────┼──────────────────────────────────────┼─────────────────────────►
-       │  [ Data Layer Architect ]            [ Business & Safety ]
-       │  - pgvector / Postgres               - Cost Compaction
-       │  - Semantic Chunking                 - Constitutional Safety
-       │  - HNSW Graph Indexing               - API Latency Balancing
-       ▼
-```
-
-
-## ২. AI Architect-এর স্কিল Matrix
-
-একজন জুনিয়র AI কলার এবং একজন AI Architect-এর মধ্যে একটা বড় স্কিল গ্যাপ আছে।
-
-চলো, এই রোডম্যাপের মেইন স্কিলগুলো সহজ Q&A ফ্লোতে বুঝে নেওয়া যাক।
-
-### Systems & Ingestion Layer (Data Layer)
-
-**প্রশ্ন:** Semantic Chunking জিনিসটা আসলে কী?
-
-**উত্তর:** এটি হলো কোনো Document-এর অর্থ ঠিক রেখে বুদ্ধিমানের মতো ছোট ছোট টুকরো বা Data Split করা।
-
-**প্রশ্ন:** Vector Indexing কেন ব্যবহার করবো?
-
-**উত্তর:** HNSW বা IVFFlat গ্রাফ Indexing ব্যবহার করে মেমরি ম্যাপ করা, যাতে খুব দ্রুত Search করা যায়।
-
-**প্রশ্ন:** Hybrid Search কীভাবে কাজ করে?
-
-**উত্তর:** এটি হলো BM25 Keyword Matching এবং Dense Embeddings Similarity-কে একসাথে মিশিয়ে RRF Fusion করা। 
-
-### Serving & Serving Infrastructure (Infrastructure Layer)
-
-**প্রশ্ন:** vLLM আর PagedAttention-এর কাজ কী?
-
-**উত্তর:** GPU KV-Cache অপ্টিমাইজ করে Compute Speed প্রায় ১০ গুণ বাড়িয়ে দেওয়া।
-
-**প্রশ্ন:** Quantization কেন প্রয়োজন?
-
-**উত্তর:** বড় FP16 মডেলগুলোকে GGUF, GPTQ বা AWQ দিয়ে ৪-বিট বা ৮-বিটে নিয়ে আসা। 
-
-এর ফলে সস্তা GPU বা CPU-তেও Model রান করানো যায়।
-
-### Fine-Tuning & Alignment (Model Layer)
-
-**প্রশ্ন:** LoRA এবং QLoRA কী সাহায্য করে?
-
-**উত্তর:** সব Parameter ট্রেইন না করে কেবল Linear Adapter দিয়ে কম মেমরিতে Model Fine-Tune করতে সাহায্য করে।
-
-**প্রশ্ন:** DPO বা Direct Preference Optimization কী?
-
-**উত্তর:** মডেলকে মানুষের পছন্দ এবং Safety অনুযায়ী সুন্দরভাবে সাজানো।
-
-### Harness & Evaluation (Security & Eval Layer)
-
-**প্রশ্ন:** Constitutional Guides-এর গুরুত্ব কী?
-
-**উত্তর:** `AGENTS.md` বা কাস্টম গাইডের মাধ্যমে এজেন্টের কাজের লিমিট একদম লক করে রাখা।
-
-**প্রশ্ন:** Automated Lint Sensors কীভাবে কাজ করে?
-
-**উত্তর:** এজেন্টের কাজকে একটি Deterministic Test Loop দিয়ে চেক করা, যাতে কোনো ভুল না থাকে।
-
-
-## ৩. AI System ডিজাইনের গোল্ডেন রুলস
-
-```
-                  [ নতুন AI Project রিকোয়ারমেন্ট ]
-                                │
-          ┌─────────────────────┴─────────────────────┐
-          ▼ (Tabular Data?)          ▼ (Text Extraction?)      ▼ (Reasoning?)
-    [ Linear Regression / ]    [ BERT / DeBERTa ]        [ DeepSeek R1 / ]
-    [ XGBoost on CPU      ]    [ Local Serving  ]        [ System 2 APIs ]
-    (Cheap, Fast)              (Safe, Local)             (Smartest, Heavy)
+          ┌────────────────────────────────────────┐
+          ▼                                        │
+    ┌───────────┐       ┌────────────┐             │
+    │  Think     │ ────►│ Act:       │             │
+    │   (LLM)   │       │ Write Code │             │
+    └───────────┘       └────────────┘             │ (If test fails,
+          ▲                    │                   │  feed error back)
+          │                    ▼                   │
+          │             ┌────────────┐             │
+          │             │  Run       │             │
+          │             │ Pytest     │             │
+          │             └────────────┘             │
+          │                    │                   │
+          │                    ▼                   │
+          │             /────────────\             │
+          │            /   Does it    \            │
+          └───────────┤    Pass?       ├───────────┘
+                       \              /
+                        \────────────/
+                               │ Yes
+                               ▼
+                        [ Done & Saved! ]
 ```
 
 
-## ৪. ব্যাংকিং RAG Architecture ডিজাইন ইন্টারভিউ
+### ২. মূল কনসেপ্টগুলো কী কী?
 
-ধরো, একটি নামকরা ব্যাংকের ইন্টারভিউ দিতে গেছো।
+এই চমৎকার সিস্টেমটি বানাতে আমাদের কিছু বেসিক জিনিস বুঝতে হবে।
 
-সেখানে তোমাকে একটা জটিল প্রশ্ন করা হলো।
+প্রথমেই জানা দরকার, **ReAct Framework** আসলে কী?
 
-"আমাদের ১ লাখ কাস্টমারের Database আর ১০ হাজার পেজের পলিসি PDF আছে।"
+সহজ কথায়, এটা হলো এজেন্টের চিন্তা ও কাজ করার একটা ফ্রেমওয়ার্ক। 
 
-"আমরা এমন একটা চ্যাটবট বানাতে চাই, যা কাস্টমারদের একাউন্ট আর ব্যাংক পলিসি নিয়ে সাহায্য করবে।"
+যেমন ধরো, এজেন্টের মাথায় প্রথমে আসবে একটি **Thought** বা চিন্তা: 
 
-"তুমি এটাকে কীভাবে Architect করবে?"
+"আমি একটি যোগ করার ফাংশন লিখতে চাই। প্রথমে আমার ফাইল তৈরি করা দরকার।"
 
-একটা ভুল উত্তর কেমন হতে পারে?
+চিন্তা করার পর আসবে **Action** বা কাজ:
 
-"আমি সব PDF একটা সাধারণ Vector Database-এ রেখে দেবো।"
+সে কোড লেখার জন্য `write_file_to_disk` নামের ফাংশনটি কল করবে।
 
-"আর প্রতিবার ইউজার কিছু জিজ্ঞেস করলেই সব হিস্টোরি আর পলিসি GPT-4 API-তে পাঠিয়ে দেবো।"
+কাজ শেষ হলে আসবে **Observation** বা পর্যবেক্ষণ:
 
-শুনতে সহজ মনে হলেও, এটা কিন্তু একটা মস্ত বড় ভুল!
+সে দেখবে টেস্ট রান করার পর কী রেজাল্ট এলো। টেস্ট পাস করলে সে সিদ্ধান্ত নেবে, "আমার কাজ সফল হয়েছে, এবার লুপ শেষ করা যাক।"
 
-এতে ব্যাংকের লাখ লাখ টাকা খরচ হবে আর সিকিউরিটির দফারফা হয়ে যাবে।
+তাহলে এজেন্ট লোকাল কমান্ড কীভাবে রান করে?
 
-তাহলে একজন প্রো Architect-এর পারফেক্ট উত্তর কী হবে?
+পাইথনের `subprocess` মডিউল ব্যবহার করে এজেন্ট এই কমান্ডগুলো রান করার ক্ষমতা পায়।
 
-চল এক নজরে দেখে নিই:
+কিন্তু একটা বড়সড় বিপদের কথা মাথায় রাখতে হবে।
 
-প্রথমত, Data Separation করতে হবে।
+লোকাল কম্পিউটারে সরাসরি এজেন্টের কোড রান করা কি নিরাপদ?
 
-ইউজারের একাউন্ট ব্যালেন্স থাকবে সম্পূর্ণ আলাদা Postgres SQL Database-এ।
+একেবারেই না! এটা চরম বিপজ্জনক হতে পারে।
 
-আর পলিসি টেক্সট জমা থাকবে pgvector-এ।
+ধরো, কোনো কারণে এজেন্ট ভুল করে বা কোনো ক্ষতিকর প্রম্পটের কারণে পুরো হার্ডডিস্ক ডিলিট করার কমান্ড দিয়ে বসলো!
 
-দ্বিতীয়ত, Hybrid Memory ব্যবহার করতে হবে।
+যেমন: `rm -rf /` বা `rd /s /q c:\`।
 
-সেশন চ্যাট ট্র্যাক করার জন্য Redis আর আজীবনের জন্য কাস্টমার Persona মনে রাখতে Mem0 ব্যবহার করবো।
+তাহলে তো সর্বনাশ হয়ে যাবে!
 
- my_third_point:
-তৃতীয়ত, Semantic Injection করতে হবে।
+এই জন্য প্রোডাকশনে কাজ করার সময় সবসময় কোড রান করার জন্য একটি ডকার কন্টেইনার বা Docker Sandbox ব্যবহার করা উচিত।
 
-পিডিএফ ফাইলগুলোকে Semantic Chunking আর HNSW Indexing দিয়ে Postgres-এ সেভ রাখবো।
-
-চতুর্থত, Security Harness বসাতে হবে।
-
-API Gateway-তে Redis Token Bucket রেট লিমিটিং রাখতে হবে।
-
-আর কাস্টমারের Output Validation-এর জন্য লিন্টার Loop ব্যবহার করবো।
-
-এতে কোনো কাস্টমার Prompt Injection দিয়ে অন্য কারও পার্সোনাল ইনফরমেশন চুরি করতে পারবে না।
+এতে এজেন্টের কোড একটি আলাদা সুরক্ষিত জায়গায় রান হবে এবং তোমার আসল সিস্টেম থাকবে একদম নিরাপদ।
 
 
-## ৫. ক্যারিয়ার পোর্টফোলিও গড়ার সহজ গাইডলাইন
+### ৩. ডকার স্যান্ডবক্সের কাজ
+
+চলো দেখি প্রোডাকশনে কীভাবে এটা কাজ করে:
+
+```
+[ ইউজার Prompt ] ──► [ AI Agent Engine (LLM) ]
+                             │
+                             ▼ (Restricted Execution API)
+                ┌───────────────────────────────────┐
+                │       DOCKER SANDBOX ENGINE       │
+                │  - No Network Access              │
+                │  - Locked Directory               │
+                │  - Auto-terminate in 10 seconds   │
+                │                                   │
+                │  [ app.py ] ──► [ Run Pytest ]    │
+                └───────────────────────────────────┘
+```
+
+
+### ৪. বাস্তব জীবনের উদাহরণ
+
+ধরো, একটি বড় সফটওয়্যার কোম্পানির সিস্টেমে একটি সিকিউরিটি বাগ পাওয়া গেল।
+
+তখন AI এজেন্ট কীভাবে কাজ করবে?
+
+প্রথমে এজেন্ট নিজে থেকেই Source Code ফাইলটি রিড করবে এবং ডকার স্যান্ডবক্সে কোড প্যাচ করে নেবে।
+
+কোড প্যাচ করার পর সে তার সিকিউরিটি Regression Test রান করবে। 
+
+উদ্দেশ্য হলো, এই পরিবর্তনের ফলে অন্য কোনো sistem বা সিস্টেম ডাউন হয়েছে কি না তা পরীক্ষা করা।
+
+যদি টেস্টে দেখা যায় ইউজার লগইন ফেইল করছে, তাহলে এজেন্ট কিন্তু থেমে থাকবে না।
+
+সে সাথে সাথে কোডটি আবার Modify করে টেস্ট পাস করাবে।
+
+আর সব শেষে নিমিষেই গিটহাবে একটি Pull Request সাবমিট করে দেবে!
+
+পুরো কাজটাই হবে অটোমেটিকভাবে।
+
+
+### ৫. চলো কোড লিখে ফেলি!
 
 💻 Developer View
 
-একজন Developer হিসেবে শুধু সাধারণ চ্যাটবট বানিয়ে ভিড়ের মধ্যে হারিয়ে যেয়ো না।
+চলো, পাইথনে একটি সম্পূর্ণ রানিং সেলফ-হিলিং এজেন্ট লুপ স্ক্র্যাচ থেকে তৈরি করি। 
 
-নিজের পোর্টফোলিওকে সবার চেয়ে আলাদা করতে আজই নিচের ৩টি Project তৈরি করে ফেলো।
+এটি ফেইল করা টেস্ট কেসগুলো নিজে নিজেই সমাধান করে ফেলবে!
 
-এগুলো তোমার Resume-এর মান অনেক বাড়িয়ে দেবে:
+```python
+import os
+import subprocess
+import time
+from openai import OpenAI
 
-```markdown
-# Flagship AI Engineering Projects for Resume:
+# ১. এনভায়রনমেন্ট ও ক্লায়েন্ট সেটআপ
+os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
+client = OpenAI()
 
-1. **Enterprise PDF RAG Engine with Postgres (pgvector + HNSW + Semantic Chunking)**
-   * *প্রযুক্তি:* Python, Postgres (pgvector), PyPDF, scikit-learn, OpenAI.
-   * *Feature:* র পিডিএফ আপলোড করে সেমান্টিকালি বাউন্ডারি কেটে ডাইনামিক চাঙ্ক করা এবং HNSW ইনডেক্স দিয়ে সেকেন্ডে Query করা।
+# টার্গেট Code File-এর পাথ
+TARGET_FILE = "calculator.py"
+TEST_FILE = "test_calculator.py"
 
-2. **Self-Healing Agentic Code Writer with Docker Sandbox**
-   * *প্রযুক্তি:* FastAPI, Docker API, Pytest, Python Subprocess, Claude/GPT API.
-   * *Feature:* একটি কাস্টম রিঅ্যাক্ট এজেন্ট যা ডকার কন্টেইনারের সিকিউর আইসোলেটেড স্যান্ডবক্সে Test রান করে এবং পাইটেস্ট Error ট্র্যাপ করে Code হিল করে।
+# ২. কাস্টম পাইটেস্ট File প্রিপারেশন
+# আমরা এজেন্টের কাজ Test করার জন্য কড়া Test ফাইলটি আগেই লিখে রাখছি
+TEST_CODE = """
+import pytest
+from calculator import add
 
-3. **High-Throughput AI SaaS Boilerplate with Redis Rate Limiting & Stripe metered Billing**
-   * *প্রযুক্তি:* Next.js, Redis, Stripe, python-dotenv, Stripe Webhooks.
-   * *Feature:* Redis দিয়ে TPM/RPM লিমিট করা এবং স্ট্রাইপ মেটা ইভেন্ট সাবমিট করে অটো ইউসেজ বিলিং করা।
+def test_add_positive():
+    assert add(2, 3) == 5
+
+def test_add_negative():
+    assert add(-1, -1) == -2
+
+def test_add_string_handling():
+    # এটি হলো এজেন্টের জন্য একটি ফাঁদ বা এজ কেস!
+    # এজেন্টকে স্ট্রিং Input আসলে ValueError থ্রো করতে হবে
+    with pytest.raises(ValueError):
+        add("2", 3)
+"""
+
+with open(TEST_FILE, "w", encoding="utf-8") as f:
+    f.write(TEST_CODE)
+
+# ৩. লোকাল পাইটেস্ট সাব-প্রসেস এক্সিকিউটর টুল
+def run_pytest():
+    print("[💻 Terminal] Executing: pytest test_calculator.py ...")
+    # Run pytest and capture standard output & errors
+    result = subprocess.run(["pytest", TEST_FILE], capture_output=True, text=True)
+    return result.returncode == 0, result.stdout
+
+# ৪. এজেন্ট ব্রেইন Loop উইথ Auto-Healing
+def run_self_healing_agent():
+    print("\n--- Starting Agentic Auto-Test Healing Loop ---")
+    
+    # এজেন্টের জন্য ট্র্যাকিং Prompt
+    system_prompt = f"""
+    You are an expert python developer who writes clean code.
+    Your goal is to write code in a file named '{TARGET_FILE}' to make all tests in '{TEST_FILE}' pass.
+    
+    You must ONLY return the raw, clean python code. Do not include markdown wraps or explanations.
+    """
+    
+    conversation_history = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"Please write the 'add' function in {TARGET_FILE} to handle simple additions and raise ValueError if inputs are not numeric."}
+    ]
+    
+    max_iterations = 4
+    for iteration in range(1, max_iterations + 1):
+        print(f"\n[🔄 Iteration {iteration}/{max_iterations}] Agent is thinking...")
+        
+        # এলএলএম কল
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=conversation_history,
+            temperature=0.2 # low temperature for deterministic code
+        )
+        agent_code = response.choices[0].message.content.strip()
+        
+        # মার্কডাউন Code ব্লক ট্রিম করো যদি এলএলএম ভুল করে দিয়ে দেয়
+        if agent_code.startswith("```python"):
+            agent_code = agent_code[9:-3].strip()
+        elif agent_code.startswith("```"):
+            agent_code = agent_code[3:-3].strip()
+            
+        print(f"[ Action] Writing generated code to {TARGET_FILE}...")
+        with open(TARGET_FILE, "w", encoding="utf-8") as f:
+            f.write(agent_code)
+            
+        # Test রান ও পর্যবেক্ষণ
+        test_passed, test_log = run_pytest()
+        
+        if test_passed:
+            print("\n[ SUCCESS] All tests passed! Agent has successfully healed and written the perfect code!")
+            print("--- FINAL CODE ---")
+            print(agent_code)
+            break
+        else:
+            print(f"\n[🔴 FAILURE] Test failed in iteration {iteration}!")
+            # Error লগটি কনভারসেশন হিস্টোরিতে ফিড করো অটো-হিলিংয়ের জন্য
+            feedback = f"""
+            The code you wrote failed the tests. Here is the pytest execution log and traceback:
+            
+            {test_log}
+            
+            Analyze the traceback, find the bugs (syntax errors or missing constraints), fix them, and rewrite the code.
+            """
+            print("Feeding error log back to AI brain for self-correction...")
+            conversation_history.append({"role": "assistant", "content": agent_code})
+            conversation_history.append({"role": "user", "content": feedback})
+            
+            # হালকা রিফ্রেশ টাইম
+            time.sleep(2)
+            
+    else:
+        print("\n[🛑 ABORTED] Agent reached maximum iteration limit without passing tests.")
+
+# --- ৫. RUN THE AGENT ---
+# Ensure pytest is installed in your python environment before running: pip install pytest
+# run_self_healing_agent()
 ```
 
 
-## ৬. লাইফ-লং লার্নিং ও AI ট্র্যাকিং
+### ৬. প্রোডাকশন ও সিকিউরিটি পলিসি
 
-🏭 Production Reality
+ Production Reality
 
-AI-এর দুনিয়া কিন্তু রকেটের গতিতে পাল্টাচ্ছে।
+প্রোডাকশন লেভেলে যখন তুমি ইউজারদের জন্য কোড এডিটিং সিস্টেম ডেপ্লয় করবে, তখন কিছু গুরুত্বপূর্ণ সিকিউরিটি পলিসি মেনে চলা দরকার।
 
-গত মাসে যে লাইব্রেরিটা দারুণ কাজ করতো, আজ হয়তো সেটা পুরোনো হয়ে গেছে।
+যেমন ধরো, **Resource Limiting** বা রিসোর্স লিমিট করা কেন জরুরি?
 
-একজন সফল AI Architect হিসেবে নিজেকে সবসময় আপডেট রাখবে কীভাবে?
+কোনো ইউজার যদি প্রম্পটে একটি ইনফিনিটি লুপ কোড লিখে তোমার সার্ভারে রান করায়, তবে কিন্তু তোমার CPU ক্র্যাশ করবে। 
 
-চলো, কিছু চমৎকার রিসোর্সের কথা জেনে নিই:
+তাই প্রতিটি সাব-প্রসেস রান করার সময় অবশ্যই `timeout=10.0` প্যারামিটার ব্যবহার করতে হবে। 
 
-**রিসোর্স ১:** Hugging Face Daily Papers
+এতে ১০ সেকেন্ডের বেশি কোড চললে তা সাথে সাথে বন্ধ হয়ে যাবে।
 
-এখানে প্রতিদিনের সবচেয়ে জনপ্রিয় আর ট্রেন্ডিং AI রিসার্চ পেপারগুলো এক নজর দেখে নেওয়া যায়।
+আরেকটি বিষয় হলো **Read-only Filesystem**।
 
-**রিসোর্স ২:** arXiv Sanity Preserver
-
-বিখ্যাত ডেভেলপার আন্দ্রে কার্পাথির তৈরি করা এই পোর্টালে কঠিন কঠিন সব রিসার্চ পেপার খুব সহজে ক্যাটাগরি অনুযায়ী সাজানো থাকে।
-
-**রিসোর্স ৩:** GitHub Trending (Python section)
-
-এখানে চোখ রাখলে নতুন আর কাজের সব AI রিপোজিটরি আর ফ্রেমওয়ার্কের খোঁজ সবার আগে পেয়ে যাবে।
+এজেন্টের স্যান্ডবক্স ডিরেক্টরি ছাড়া অন্য কোনো ফোল্ডারে যেন সে রিড বা রাইট করতে না পারে, সেটা নিশ্চিত করতে হবে।
 
 
-## ৭. কিছু কমন ভুল ধারণা
+### ৭. সাধারণ কিছু ভুল
 
 🔴 Common Mistake
 
-**ভুল ধারণা:** AI Engineer হতে গেলে মনে হয় PhD লেভেলের জটিল Calculus, রৈখিক বীজগণিত বা TensorFlow Equation মুখস্থ রাখতে হবে!
+**ভুল ধারণা:** এজেন্টের সোর্স কোডে `eval()` বা `exec()` ফাংশন ব্যবহার করে রানিং পাইথনের ভেতর ডাইনামিকালি কোড রান করা ঠিক আছে।
 
-**বাস্তবতা:** একদমই না!
+**বাস্তবতা:** এটি পাইথনের সবচেয়ে বড় সিকিউরিটি লিক! 
 
-PhD লেভেলের গণিত মূলত নতুন কোনো AI Architecture বা বেস Model প্রথম থেকে তৈরি করার সময় লাগে।
+এর ফলে তোমার রানিং পাইথন প্রসেসের সম্পূর্ণ মেমোরি হ্যাক হয়ে যেতে পারে। 
 
-কিন্তু একজন AI Engineer বা AI Architect হিসেবে তোমার মূল কাজ কী?
-
-তোমার কাজ হলো বাজারে থাকা সেরা মডেলগুলোকে একসাথে জুড়ে দিয়ে দারুণ সব প্রোডাক্ট বা Business Solutions তৈরি করা।
-
-System Design আর Integration স্কিলই এখানে আসল।
-
-কঠিন কঠিন ইকুয়েশন মুখস্থ করার কোনো প্রয়োজনই নেই!
+তাই বুদ্ধিমানের কাজ হলো কোড সবসময় আলাদা ফাইলে সেভ করে সাব-প্রসেস হিসেবে রান করানো।
 
 
-## ৮. ব্রিজ Architect বা সেতু নির্মাতা
+### ৮. একটি সহজ তুলনা
 
-চলো, একজন AI Architect-এর মেন্টাল Model কেমন হওয়া উচিত তা বুঝে নেওয়া যাক।
+আমাদের সেলফ-হিলিং এজেন্টকে তুমি একজন পাইপ ফিটার বা মিস্ত্রির সাথে তুলনা করতে পারো। 
 
-সহজ কথায়, একজন AI Architect হলেন একজন Bridge Builder বা সেতু নির্মাতা।
+আর টেস্ট রানার হলো তার সেই খিটখিটে অ্যাসিস্ট্যান্ট, যে পাইপের ভেতরে জল ঢেলে লিক খোঁজে। 
 
-যিনি কঠিন সব গাণিতিক থিওরি আর রিসার্চ পেপারের সাথে বাস্তব কমার্শিয়াল Software Engineering-এর গ্যাপটা পূরণ করেন।
+যখনই লিক পাওয়া যায়, অ্যাসিস্ট্যান্ট চেঁচিয়ে বলে লিকটা ঠিক কোথায় হয়েছে।
 
-এ দুটোর মাঝখানে তিনি তৈরি করেন একটি মজবুত সেতু।
+আর মিস্ত্রি সাথে সাথে ওয়েল্ডিং করে পাইপ একদম পারফেক্ট করে দেয়!
 
 
-## ৯. Mini Project: AI System কস্ট এবং Latency ক্যালকুলেটর
+### ৯. একটি মিনি প্রজেক্ট
 
-চলো, Python দিয়ে একটি রিয়েল-টাইম কস্ট ক্যালকুলেটর তৈরি করি।
-
-তোমার AI Project-এর টোটাল ইউজার আর Prompt সাইজ Input দিলে এটি হিসাব করে দেবে প্রতি মাসে কত API বিল আসতে পারে।
+চলো, পাইথনে প্র্যাক্টিক্যালি কোড করে দেখি কীভাবে কোনো ইনফিনিটি লুপে আটকে যাওয়া স্ক্রিপ্টকে টাইমার দিয়ে কিল করতে হয়।
 
 ```python
-def estimate_monthly_api_cost(daily_active_users, requests_per_user, avg_prompt_tokens, avg_completion_tokens):
-    # GPT-4o-mini API Pricing (Per 1 Million tokens as of current market standard)
-    input_price_per_million = 0.150  # $0.150 / 1M tokens
-    output_price_per_million = 0.600  # $0.600 / 1M tokens
-    
-    # দৈনিক টোটাল Input ও Output Token
-    daily_requests = daily_active_users * requests_per_user
-    daily_input_tokens = daily_requests * avg_prompt_tokens
-    daily_output_tokens = daily_requests * avg_completion_tokens
-    
-    # মাসিক টোটাল Token
-    monthly_input_tokens = daily_input_tokens * 30
-    monthly_output_tokens = daily_output_tokens * 30
-    
-    # কস্ট Calculation
-    input_cost = (monthly_input_tokens / 1_000_000) * input_price_per_million
-    output_cost = (monthly_output_tokens / 1_000_000) * output_price_per_million
-    total_monthly_cost = input_cost + output_cost
-    
-    print("--- AI Project Monthly Cost Estimate ---")
-    print(f"Daily Active Requests: {daily_requests:,}")
-    print(f"Monthly Input Cost: ${input_cost:.2f}")
-    print(f"Monthly Output Cost: ${output_cost:.2f}")
-    print(f"Total Projected Monthly API Bill: ${total_monthly_cost:.2f}")
-    
-    return total_monthly_cost
+import subprocess
 
-# Test Calculation: ১০০০ একটিভ ইউজার যারা দিনে ৫টি করে প্রশ্ন করে
-estimate_monthly_api_cost(
-    daily_active_users=1000,
-    requests_per_user=5,
-    avg_prompt_tokens=1500, # 1500 tokens input (with context)
-    avg_completion_tokens=400 # 400 tokens output answer
-)
+# ১. কাল্পনিক ইনফিনিটি Loop স্ক্রিপ্ট যা CPU খেয়ে ফেলবে
+infinite_loop_code = """
+import time
+print("Starting infinite computation loop...")
+while True:
+    time.sleep(0.5)
+"""
+
+with open("infinite_trap.py", "w", encoding="utf-8") as f:
+    f.write(infinite_loop_code)
+
+# ২. টাইমআউট দিয়ে সাব-প্রসেস ট্র্যাপ ও কিল Mechanism
+try:
+    print("Running process with 3-second timeout trap...")
+    # Timeout strictly locked at 3 seconds
+    result = subprocess.run(["python", "infinite_trap.py"], capture_output=True, text=True, timeout=3.0)
+except subprocess.TimeoutExpired:
+    print("\n[ SECURED] Process took more than 3 seconds. TimeoutExpired triggered!")
+    print("The infinite loop was successfully KILLED to save CPU resources!")
 ```
 
 
-## ১০. কিছু ইন্টারভিউ প্রশ্নোত্তর
+### ১০. ইন্টারভিউতে কেমন প্রশ্ন হতে পারে?
 
-ইন্টারভিউতে কেমন প্রশ্ন আসতে পারে?
+#### Beginner Level
 
-চলো, ৩টি লেভেলের ইন্টারভিউ প্রশ্ন আর উত্তর দেখে নিই।
+**প্রশ্ন:** ReAct Loop বলতে কী বোঝায়?
 
-### Beginner Level
+**উত্তর:** এটি এজেন্টের কাজ করার একটি বিশেষ ফ্রেমওয়ার্ক। 
 
-**প্রশ্ন:** একজন সাধারণ Software Engineer আর AI Engineer-এর মধ্যে আসল পার্থক্য কী?
+এখানে সে প্রথমে চিন্তা বা পরিকল্পনা করে (Reasoning), তারপর সেই অনুযায়ী কাজ করে (Acting)। 
 
-**উত্তর:** সাধারণ Software Engineer মূলত Code-এর লজিক আর Deterministic Conditional Flow নিয়ে কাজ করেন।
+সবশেষে কাজের ফলাফল দেখে সিদ্ধান্ত নেয় পরবর্তী পদক্ষেপ কী হবে।
 
-তারা Database আর User Interface ম্যানেজ করেন।
+#### Intermediate Level
 
-অন্য দিকে, AI Engineer কাজ করেন Probabilistic AI Model, Data Vectorization আর Hybrid Caching নিয়ে।
+**প্রশ্ন:** সেলফ-হিলিং এজেন্টে `timeout` প্যারামিটার দেওয়া কেন জরুরি?
 
-তারা Self-healing Agent Loop ডিজাইন করে Software 2.0 Infrastructure-এর কাজ করেন।
+**উত্তর:** AI অনেক সময় ভুল কোড লিখে ইনফিনিটি লুপ তৈরি করে ফেলতে পারে। 
 
-### Intermediate Level
+সেটি টার্মিনালে চললে পুরো সার্ভার ক্র্যাশ করতে পারে। 
 
-**প্রশ্ন:** RAG সিস্টেমে "Lost in the Middle" সমস্যা দূর করতে কী করা উচিত?
+`timeout` দিলে নির্দিষ্ট সময় পর প্রসেসটি নিজে থেকেই বন্ধ হয়ে যায়, যা সার্ভারকে রক্ষা করে।
 
-**উত্তর:** এই প্রবলেম এড়াতে প্রথমত আমরা অপ্রয়োজনীয় Chunk প্রম্পটে পাঠাবো না।
+#### Advanced Level
 
-দ্বিতীয়ত, আমরা Cohere Rerank বা BGE-Rerank-এর মতো Cross-Encoder Re-ranking Model ব্যবহার করতে পারি।
+**প্রশ্ন:** ডকার স্যান্ডবক্স ব্যবহারের প্রয়োজনীয়তা কী?
 
-এতে সেরা ৩ বা ৫টি মোস্ট রিলেভেন্ট Document-কে Prompt-এর একদম শুরুতে আর শেষে সাজিয়ে পাঠানো যায়।
+**উত্তর:** AI যদি লোকাল অপারেটিং সিস্টেমে সরাসরি অ্যাক্সেস পায়, তবে সে যেকোনো পার্সোনাল ফাইল রিড করতে পারে বা ক্ষতিকর কমান্ড রান করে ডাটাবেস মুছে দিতে পারে। 
 
-### Advanced Level
+ডকার স্যান্ডবক্স একটি আলাদা ভার্চুয়াল সিস্টেম তৈরি করে, যার সাথে লোকাল মেমোরি বা নেটওয়ার্কের কোনো যোগাযোগ থাকে না। 
 
-**প্রশ্ন:** AI এজেন্টের টুল কলিং লুপে "Constitutional safety harness definition" কেন দরকার? এর আর্কিটেকচার কেমন হয়?
-
-**উত্তর:** এজেন্ট যখন নিজে নিজে কোড লিখে রান করে, তখন সে ভুলবশত সিস্টেমের ফাইল ডিলিট বা ড্যামেজ করে ফেলতে পারে।
-
-Safety Harness হলো এজেন্টের Tool Run করার ঠিক আগের একটি ফিল্টার (যেমন `AGENTS.md` ভ্যালিডেটর)।
-
-এজেন্ট কোনো Tool ব্যবহার করতে গেলেই এই ফিল্টারটি চেক চালায়।
-
-যদি কোনো ক্ষতিকর কমান্ড বা ডাইরেক্ট OS Query দেখা যায়, এটি সাথে সাথে কলটি ব্লক করে দেয়।
-
-এর পর সেই Error মেসেজটি এজেন্টের কাছে পাঠিয়ে রোলব্যাক করতে বাধ্য করে।
-
-এভাবে পুরো সিস্টেম সুরক্ষিত থাকে।
+এর ফলে এজেন্ট কোনো ক্ষতি করলেও কন্টেইনারটি বন্ধ করলেই সবকিছু আবার আগের মতো ফ্রেশ স্টেটে ফিরে আসে, যা লোকাল সিস্টেমকে ১০০% সিকিউর রাখে।
 
 
-## ১১. অধ্যায়ের সারসংক্ষেপ
+### ১১. চ্যাপ্টার সামারি
 
-তো এই অধ্যায়ে আমরা মূলত কী কী শিখলাম?
+এই চ্যাপ্টারে আমরা চমৎকার কিছু জিনিস শিখলাম:
 
-মজার ব্যাপার হলো, আমরা ৩টি প্রধান পয়েন্ট শিখেছি:
+প্রথমত, ReAct Framework কীভাবে এজেন্টকে মানুষের মতো ধাপে ধাপে চিন্তা করার ক্ষমতা দেয়।
 
-১. AI Architect-রা হলেন মূলত থিওরি আর প্র্যাকটিক্যালের মেলবন্ধন তৈরি করার এক একজন সফল কারিগর।
+দ্বিতীয়ত, Auto-Test Healing কীভাবে এরর লগ দেখে নিজে নিজেই কোডের বাগ ঠিক করতে পারে।
 
-২. শুধু এক লাইনের API কল করলেই হবে না, ক্যারিয়ারে ভালো করতে হলে Systems এবং Optimization স্কিলে দক্ষ হতে হবে।
-
-৩. GitHub-এ নিজের Custom pgvector RAG, Docker Sandbox Agent বা Redis SaaS Project যোগ করা অত্যন্ত দরকারি।
-
-এগুলোই হবে তোমার Resume-এর সবচেয়ে বড় অলঙ্কার।
+এবং সবশেষে জানলাম, কেন প্রোডাকশন লেভেলে সিকিউরিটির জন্য ডকার স্যান্ডবক্স ব্যবহার করা উচিত।
 
 
-## ১২. শুভ বিদায় ও শুভ যাত্রা!
+### ১২. এরপরে কী?
 
-অভিনন্দন! তুমি সফলভাবে পুরো AI Engineering হ্যান্ডবুক শেষ করে ফেলেছো।
+অভিনন্দন! আমরা চমৎকার একটি এজেন্ট লুপ আর্কিটেকচার সফলভাবে শেষ করেছি। 
 
-আজ থেকে শুরু হলো একজন সফল AI Architect এবং AI Engineer হিসেবে তোমার রাজকীয় জার্নি।
+পরের চ্যাপ্টারে আমরা আমাদের শেষ প্রোজেক্ট ব্লুপ্রিন্ট তৈরি করতে যাচ্ছি।
 
-নতুন নতুন AI Infrastructure আর অসাধারণ সব প্রোডাক্ট তৈরি করতে থাকো।
+সেখানে আমরা দেখবো কীভাবে একটি AI SaaS অ্যাপ্লিকেশনে রেট-লিমিটিং এবং স্ট্রাইপ বিলিং ইন্টিগ্রেট করা যায়।
 
-তোমার এই সুন্দর পথচলায় রইলো অনেক অনেক শুভকামনা!
+দেখা হচ্ছে পরের চ্যাপ্টারে! 
+
+**Chapter 28 শেষ।**

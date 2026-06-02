@@ -1,433 +1,447 @@
-# Chapter 22: AI Observability & Monitoring
+# Chapter 22: Model Context Protocol (MCP) — The USB-C of AI
 
 ---
 
-ধরো, তোমার AI চ্যাটবট ল্যাবে দারুণ চলছে।
+নোকিয়ার চার্জার দিয়ে কি স্যামসাং চার্জ হতো?
 
-কিন্তু প্রোডাকশনে দেওয়ার পর হঠাৎ CFO এসে বলল, "মাত্র ১০০টা রিকোয়েস্টে ৫০০ ডলার বিল কীভাবে?"
+হতো না! প্রতিটা ফোনের জন্য ছিল আলাদা চার্জার।
 
-অথবা Customer রেগে গিয়ে বলল, "চ্যাটবট লোড হতে ১০ সেকেন্ড লাগে কেন?"
+AI-এর Tool Calling-এও ঠিক একই সমস্যা ছিল।
 
-কিন্তু তুমি কিছুই বুঝতে পারছো না।
+Claude-এর জন্য লেখা Tool ওদিকে OpenAI-তে চলে না, আবার Gemini-তে গিয়ে হয় অন্য Format!
 
-কারণ তোমার কাছে কোনো ড্যাশবোর্ড নেই।
+প্রতিবার নতুন করে Code লেখো। কী এক বিশৃঙ্খলা!
 
-কোন টুলে Latency বাড়ছে, কোথায় Token নষ্ট হচ্ছে—সব অন্ধকার!
+মজার ব্যাপার হলো, এই বিশৃঙ্খলার সমাধানই হলো MCP!
 
-তো চলো, এই চ্যাপ্টারে আমরা সেই অন্ধকার দূর করি।
+সহজ কথায়, এটা হলো AI-এর USB-C ক্যাবল।
 
-এখানে আমরা AI Observability, LangSmith দিয়ে Tracing, Cost ও Latency Tracking, আর Ragas দিয়ে RAG Evaluation—এই পুরো মনিটরিং পাইপলাইন নিজের হাতে তৈরি করব।
+Anthropic এটা তৈরি করেছে ঠিকই, কিন্তু এটা সম্পূর্ণ open standard।
 
-আগের চ্যাপ্টারে আমরা Safety Harness শিখেছি।
+তুমি একবার একটা MCP Server বানিয়ে ফেলো, ব্যস!
 
-এবার আমরা সেই Architecture-এর জন্য একটা হাই-ডেফিনিশন ক্যামেরা লাগাবো।
+যেকোনো AI Host— যেমন Claude, Cursor বা Gemini— সবাই সেটা সরাসরি কানেক্ট করতে পারবে।
 
-যাতে প্রতিটা Token খরচ আর Error তুমি রিয়েল-টাইমে দেখতে পাও।
+সহজেই তোমার Tools আর Resources রিড করে ফেলবে। কোনো আলাদা Integration Code লেখাই লাগবে না।
 
-Deal?
+তো চলো দেখি MCP-র তিনটা পিলার Resources, Prompts আর Tools কী, JSON-RPC 2.0 কীভাবে কাজ করে, আর কীভাবে নিজের custom MCP Server ডিজাইন করতে হয়।
+
+কী, শুরু করা যাক? Deal?
 
 
-## ১. Hook: ব্ল্যাকবক্সের ভেতরের ক্যামেরা
+### ১. চার্জারের ঝামেলা বনাম এক ক্যাবল
 
-ধরো, তুমি একটি অন্ধকার গুহার ভেতর একটা গোলকধাঁধা তৈরি করলে।
+একটু পেছনের কথা ভাবো তো।
 
-তারপর সেখানে একটা ছোট ইঁদুর বা AI Agent ছেড়ে দিলে।
+আগেকার দিনে নোকিয়া, স্যামসাং বা সনি এরিকসন ফোনের কথা মনে আছে?
 
-ইঁদুরটি গুহা থেকে একটা হিরে খুঁজে নিয়ে আসলো।
+প্রতিটা ফোনের জন্য আলাদা আলাদা চার্জার লাগতো!
 
-এখন প্রশ্ন হলো, গুহার ভেতরে কী ঘটেছিল?
+কারো চিকন পিন, কারো মোটা পিন, আবার কারো চ্যাপ্টা পিন।
 
-যদি কোনো Observability না থাকে, তাহলে তুমি গুহার বাইরে বসে থাকবে।
+একটার চার্জার দিয়ে অন্য ফোনে কোনোভাবেই চার্জ দেওয়া যেতো না।
 
-ইঁদুরটি ভেতরে গিয়ে কী করল, কোথায় হোঁচট খেল, কোন রাস্তায় ঘুরল—তার কিছুই তুমি জানতে পারবে না।
-
-Log দেখলেও শুধু দেখবে যে সে ৫ মিনিট পর হিরেটি নিয়ে এসেছে।
-
-কিন্তু কেন ৫ মিনিট লাগলো? এই প্রশ্নের উত্তর তোমার কাছে নেই।
+Developer হিসেবে প্রতিটি AI Model-এ আলাদা করে Custom Coding করে Tool Calling জোড়া দেওয়াও ঠিক এই রকম ঝামেলার ছিল।
 
 [VISUAL]
-Title: Standard Single LLM call vs. Nested Trace Tree in Agents
-Illustration: Linear timeline vs. hierarchical call tree mapping subprocess logs, tokens, and latency
+Title: Proprietary Tool Connectors vs. Unified MCP USB-C Standard
+Illustration: Complex point-to-point lines versus a centralized standard USB-C bridge
 Placement: After Hook Section
-Purpose: Show why traditional logging fails for multi-step AI agents.
+Purpose: Show the core architectural simplification of MCP.
 
 ```
-Traditional Logging (Linear & Flat):
-[10:01:05] API Request Sent ──► [10:01:15] API Response Received (Total: 10s) - (No details!)
+Proprietary Integration (The Old Mess):
+Tool A ──► Claude API Format ──► Claude
+Tool A ──► OpenAI API Format ──► ChatGPT
+Tool A ──► Gemini API Format ──► Gemini
 
-Nested Agentic Tracing Tree (High Definition Observability ✓):
-User Query: "Check account balance TRX999" (Total: 1.2s, Cost: $0.003)
-├── Step 1: Query Embedding (45ms, 15 tokens)
-├── Step 2: HNSW Vector Retrieve (12ms, Score: 0.92)
-└── Step 3: LLM Decision Loop (1.1s, 234 tokens)
-     └── Tool Call: check_balance(trx_id="TRX999") (120ms, Success)
+MCP Standard Integration (The USB-C Era ✓):
+Tool A ──┐
+Tool B ──┼─► [ MCP Server (Standard JSON-RPC) ] ◄──► [ Any LLM Host / Client ]
+Tool C ──┘
 ```
 
-কিন্তু কেমন হতো যদি তুমি ইঁদুরের মাথায় একটা ক্যামেরা আর GPS ট্র্যাকার লাগিয়ে দিতে পারতে?
+আর এখন?
 
-হ্যাঁ, একেই বলে Tracing!
+এখন এসেছে USB-C ক্যাবল।
 
-এখন তুমি স্ক্রিনে পরিষ্কার দেখতে পাবে ইঁদুরটি কোন বাঁকে আটকে গিয়েছিল, আর কোথায় খাবার খেয়ে সঠিক রাস্তায় লাফ দিয়েছিল।
+তুমি ল্যাপটপ, ফোন বা ট্যাবলেট—যেকোনো কিছুতেই এই একটা ক্যাবল গুজে দিয়ে চার্জ করতে পারো।
 
-আমাদের AI Observability হলো ঠিক তেমনই একটা ড্যাশবোর্ড ক্যামেরা।
+এমনকি Data-ও শেয়ার করতে পারো।
 
-এটি সিস্টেমের ভেতরের প্রতিটা Token আর Tool Call-এর ফ্লো রিয়েল-টাইমে তোমার চোখের সামনে তুলে ধরে।
+MCP হলো AI জগতের সেই USB-C Standard।
+
+এটি একবার Data আর Tools-কে সবার সামনে তুলে ধরে।
+
+আর যেকোনো LLM Host ও Client সেই Data অনায়াসে রিড আর প্রসেস করতে পারে।
 
 
-## ২. Tracing, Metrics আর Evaluation
+### ২. MCP-র মূল তিনটি পিলার
 
-একটি প্রোডাকশন লেভেলের AI Observability মূলত ৩টি জিনিস নিয়ে কাজ করে।
+MCP মূলত Client-Server Architecture-এর ওপর দাঁড়িয়ে কাজ করে।
 
-চলো সহজ ভাষায় এই ৩টি জিনিস বুঝে নেওয়া যাক।
+সহজ কথায়, এর মূল স্তম্ভ বা পিলার তিনটি।
 
-### Distributed Tracing কী?
+চলো প্রশ্ন-উত্তরের মাধ্যমে সহজে বুঝে নিই এগুলো আসলে কী।
 
-একটি সিঙ্গেল ইউজার মেসেজের উত্তর দিতে গিয়ে AI Agent হয়তো ভেতরে ৫টি API Call এবং ৩টি Tool রান করেছে।
+**প্রশ্ন:** MCP Host বা Client কী?
 
-Tracing এই পুরো ফ্লো-কে একটি ফ্যামিলি ট্রির মতো সাজিয়ে রেকর্ড করে রাখে।
+**উত্তর:** এটা হলো যেকোনো AI Application বা Editor যা এই প্রোটোকল সাপোর্ট করে।
 
-একে টেকনিক্যাল ভাষায় Span বলা হয়।
+যেমন ধরো Cursor, Claude Desktop App বা তোমার নিজের বানানো কোনো LLM App।
 
-তাহলে এই Tracing কীভাবে কাজ করে?
+এই Client সরাসরি Server-কে বলে, "তোমার কাছে কী কী Tool আর Resource আছে, চলো তার একটা লিস্ট দাও তো!"
 
-এর জন্য LangSmith বা Phoenix-এর মতো বিশেষ কিছু হাব ব্যবহার করা হয়।
+**প্রশ্ন:** তাহলে MCP Server কী?
 
-এরা তোমার ব্যাকএন্ড Code-এর সাথে যুক্ত হয়ে অটোমেটিক্যালি Input, Output, Token সংখ্যা এবং ভেতরের ফ্লো ড্যাশবোর্ডে পাঠিয়ে দেয়।
+**উত্তর:** এটি তোমার লোকাল Computer বা ক্লাউড সার্ভারে চলতে থাকা একটি ছোট Process।
 
-### Performance Metrics কেন প্রয়োজন?
+এর কাজ হলো Data আর Tool-কে সবার সামনে তুলে ধরা।
 
-সিস্টেমের পারফরম্যান্স ঠিক রাখার জন্য আমাদের কিছু গুরুত্বপূর্ণ Metrics দেখতে হয়।
+এটি Client-এর সাথে JSON-RPC 2.0 ব্যবহার করে দারুণ উপায়ে কথা বলে।
 
-যেমন, প্রথম প্রশ্ন হলো—প্রতিটি স্টেপে কত সময় লাগছে?
+এই কথা বলার মাধ্যম হতে পারে `stdio` अथवा `Server-Sent Events - SSE`।
 
-একে আমরা বলি Latency per Step। এর মাধ্যমে আমরা বুঝতে পারি কোন নির্দিষ্ট Tool বা API Call সবচেয়ে বেশি সময় নষ্ট করছে।
+**প্রশ্ন:** MCP-র মূল তিনটি Resource টাইপ কী কী?
 
-দ্বিতীয় প্রশ্ন—কত খরচ হচ্ছে?
+**উত্তর:** চলো একে একে জেনে নিই:
 
-এখানে আমরা Token Usage আর Cost হিসাব করি। অর্থাৎ, Input এবং Output Token-এর অনুপাত দেখে ডলারের আসল খরচ বের করা হয়।
+প্রথমটি হলো **Resources**।
 
-তৃতীয় প্রশ্ন—সঠিক Tool কাজ করছে তো?
+এটি হলো যেকোনো Data, যা AI পড়তে পারে।
 
-এজন্য আমরা Tool Accuracy চেক করি। এটি নিশ্চিত করে যে সঠিক প্রশ্নের জন্য সঠিক Tool রান হচ্ছে কি না।
+যেমন ধরো তোমার Docker File, Postgres Database-এর টেবিল অথবা কোনো কাস্টম ওয়েব পেজের কনটেন্ট।
 
-চতুর্থ প্রশ্ন—সিস্টেম কতটা দ্রুত কাজ করছে?
+দ্বিতীয়টি হলো **Prompts**।
 
-এর জন্য রয়েছে Token-to-Latency Ratio। অর্থাৎ, প্রতি সেকেন্ডে Model কতগুলো Token তৈরি করতে পারছে।
+সহজ কথায়, এটি আগে থেকে তৈরি করে রাখা System Prompt বা ইউজার গাইড।
 
-### RAG Evaluation কীভাবে করবে?
+আর তৃতীয়টি হলো **Tools**।
 
-একটি RAG পাইপলাইনের কোয়ালিটি মাপার জন্য সাধারণ কোনো নিয়ম খাটবে না।
+এটি হলো কাস্টম Code, যা AI চালাতে পারে।
 
-এজন্য আমরা ব্যবহার করি Ragas নামের একটি বিশেষ ফ্রেমওয়ার্ক।
-
-এটি মূলত ৪টি স্কোরের ওপর ভিত্তি করে সিস্টেমকে পরীক্ষা করে।
+যেমন File Writer, Bash Runner বা Database Query করার Tool।
 
 [VISUAL]
-Title: Ragas Evaluation Quadrant
-Illustration: Matrix showing Context Relevance, Faithfulness, Answer Relevance, and Aspect Critic
-Placement: Under Ragas section
-Purpose: Define the metrics of RAG evaluation.
+Title: Internals of an MCP Connection
+Illustration: Bidirectional JSON-RPC messages passing through stdio pipe
+Placement: Under Core Concepts section
+Purpose: Visually demonstrate the clean JSON-RPC handshake of MCP.
 
 ```
-┌───────────────────────────────────────┬───────────────────────────────────────┐
-│     Context Relevance (0 to 1)        │        Faithfulness (0 to 1)          │
-│   (রিট্রাইভড ডক কি কুয়্যারির সাথে মিলে?)  │  (উত্তর কি সোর্স ডক থেকেই এসেছে নাকি?) │
-├───────────────────────────────────────┼───────────────────────────────────────┤
-│      Answer Relevance (0 to 1)        │        Aspect Critic (Safety)         │
-│     (উত্তর কি কোশ্চেনের সঠিক জবাব?)    │   (উত্তর কি সেফ ও নীতি-অনুমোদিত?)     │
-└───────────────────────────────────────┴───────────────────────────────────────┘
+Host (Client: Cursor / Claude Desktop)
+       │
+       ├─► Request:  {"jsonrpc": "2.0", "method": "tools/list", "id": 1} ──┐
+       │                                                                   │ (stdio / SSE Pipe)
+       │                                                                   ▼
+       └◄─ Response: {"jsonrpc": "2.0", "result": {"tools": [...]}, "id": 1} ◄── MCP Server
 ```
 
-> **Faithfulness = Hallucination Detector!**
-> 
-> Ragas-এর Faithfulness স্কোর ০ হওয়ার মানে হলো Model সোর্স ডকুমেন্ট বাদ দিয়ে নিজের মতো বানিয়ে মিথ্যা বা ভুল উত্তর দিয়েছে।
-> 
-> আর স্কোর ১ হওয়ার মানে হলো উত্তরটি ১০০% সোর্সের তথ্যের ওপর ভিত্তি করে তৈরি।
+ Remember
+
+**MCP কিন্তু সম্পূর্ণ Open Source!**
+
+Anthropic এটি তৈরি করলেও এটি সবার জন্য উন্মুক্ত।
+
+Gemini বা GPT-এর ডেভেলপাররাও চাইলে এই একই ফ্রেমওয়ার্ক ব্যবহার করতে পারবে।
+
+নিজেদের কাস্টম RAG আর Agent Code-এর সাথে সহজেই কানেক্ট করা যাবে।
 
 
-## ৩. Bottleneck খুঁজে বের করা
+### ৩. বাস্তবে এর একটা উদাহরণ দেখি
 
-ট্রেসিং ড্যাশবোর্ডে কীভাবে একটি স্লো রিকোয়েস্টের আসল কারণ খুঁজে পাওয়া যায়, চলো এই Diagram-এ দেখে নিই:
+ধরো, তুমি Cursor বা Claude Desktop-এ কাস্টম উপায়ে কোনো File Search করতে চাও।
 
-[VISUAL]
-Title: Visualizing Latency Bottleneck via Tracing Tree
-Illustration: Timeline chart exposing that Vector Database Search took 80% of the request lifetime
-Placement: After Latency section
-Purpose: Ground how tracing isolates latency issues.
+তখন ব্যাকগ্রাউন্ডে ঠিক কী ঘটে?
 
-```
-Request Lifetime: 10.0 seconds (High Latency!)
-┌────────────────────────────────────────────────────────────────────────┐
-│ [API Gateway]: 10.0s                                                   │
-├──────────────────────────────────┬─────────────────────────────────────┤
-│ [LangChain Chain]: 9.9s          │                                     │
-├──────────────────────────────────┴───────────────────────┬─────────────┤
-│ [Vector DB Retrieval]: 8.0s (🔴 BOTTLENECK DETECTED!)    │ [LLM]: 1.8s │
-└──────────────────────────────────────────────────────────┴─────────────┘
-```
+চলো গল্পটা জেনে নিই।
 
-ড্যাশবোর্ডের এই টাইমলাইন চার্ট দেখলেই তুমি এক নজরে বুঝে যাবে সমস্যার আসল কারণ কী।
+প্রথমে Cursor ব্যাকগ্রাউন্ডে তোমার Computer-এ আগে থেকে রেজিস্টার করা `filesystem-mcp-server` ফাইলে কানেক্ট করে।
 
-এখানে কিন্তু LLM কোনো অপরাধ করেনি!
+কানেক্ট করার পর, MCP Server তোমার ওএস-এর পাথ রিড করে।
 
-আসল অপরাধী হলো কোনো Index ছাড়া অলস বসে থাকা Vector Database Search, যা একাই ৮ সেকেন্ড খেয়ে ফেলেছে।
+তারপর সেই Resource-এর ম্যাপ AI Host-কে পাঠিয়ে দেয়।
+
+সবশেষে, AI Host সেই Resource দেখে সরাসরি তোমার কম্পিউটারের ফাইলে Code পরিবর্তন করতে পারে।
+
+এমনকি Bash Test-ও রান করতে পারে!
+
+ভাবা যায়? আগে প্রতিটা মডেলে আলাদা স্ক্রিপ্ট ছাড়া এই কাজ করা অসম্ভব ছিল!
 
 
-## ৪. Perplexity কীভাবে মনিটর করে?
+### ৪. পাইথনে নিজের Custom MCP Server বানানো
 
-ভাবো তো, Perplexity বা Cursor যখন কোটি কোটি রিকোয়েস্ট হ্যান্ডেল করে, তখন তারা কীভাবে সব মনিটর করে?
+💻 Developer View
 
-মজার ব্যাপার হলো, তারা মূলত দুটি কাজ করে।
+পাইথনে Anthropic-এর অফিশিয়াল `mcp` SDK ব্যবহার করে কীভাবে একটি কাস্টম MCP Server তৈরি করা যায়?
 
-প্রথমত, তারা ব্যবহার করে Auto Tracing।
-
-প্রতি সেকেন্ডে চলা প্রতিটি কোডের ভেতরের কাজগুলো OpenTelemetry দিয়ে লাইভ ড্যাশবোর্ডে রেকর্ড করা হয়।
-
-দ্বিতীয়ত, তাদের সিস্টেমে বসানো থাকে Anomaly Alert।
-
-যদি কোনো ইউজারের বিল মাত্র ১ মিনিটে ১০ ডলার পার হয়ে যায়, অমনি সিস্টেম অ্যালার্ট দিয়ে তার সেশন লক করে দেয়।
-
-
-## ৫. নিজের হাতে Custom Logger বানানো
-
-Developer হিসেবে তুমি চাইলে কোনো পেইড লাইব্রেরি ছাড়াই পাইথনে একটি কাস্টম লগার বানিয়ে ফেলতে পারো।
-
-চলো দেখি কীভাবে কোনো ঝামেলা ছাড়াই এই কাস্টম ট্রেসিং লগার তৈরি করা যায়:
+চলো একটা প্রোডাকশন গ্রেড Code দেখে নিই:
 
 ```python
-import time
+# Custom MCP Server using Python SDK
+# Prerequisites: pip install mcp
+from mcp.server.fastmcp import FastMCP
+
+# ১. MCP Server অবজেক্ট তৈরি করো
+mcp_server = FastMCP("WhatsMonk-Database-MCP")
+
+# ২. কাস্টম এমসিপি টুল রেজিস্টার করো (Decorators make it easy!)
+@mcp_server.tool()
+def get_user_status(user_id: str) -> str:
+    """গ্রাহকের স্ট্যাটাস Database থেকে চেক করো।
+    
+    Args:
+        user_id: গ্রাহকের ইউনিক আইডি, যেমন: 'user_123'
+    """
+    # মক Database Data
+    db = {"user_123": "Active / Gold VIP", "user_999": "Suspended"}
+    return db.get(user_id, "User not found")
+
+# ৩. কাস্টম এমসিপি Resource রেজিস্টার করো (Static Data/Logs)
+@mcp_server.resource("logs://app.log")
+def get_app_logs() -> str:
+    """System Error লগের শেষ ৫টি লাইন রিড করো।"""
+    return "Error 404 on /payment\nDatabase connection timeout\n"
+
+# ৪. Server রান করো (Over stdio standard)
+if __name__ == "__main__":
+    mcp_server.run()
+```
+
+
+### ۵. Security এবং Production টিপস
+
+ Production Reality
+
+প্রোডাকশন সিস্টেমে MCP Server ডেপ্লয় করার সময় আমাদের সিকিউরিটির দিকে কড়া নজর রাখতে হবে।
+
+এখানে সবচেয়ে গুরুত্বপূর্ণ বিষয় হলো Host Process Isolation।
+
+চলো একটা সহজ প্রশ্ন-উত্তরের মাধ্যমে ঝুঁকি আর এর সমাধানটা বুঝে নিই।
+
+**প্রশ্ন:** এখানে সিকিউরিটির মূল ভয়টা আসলে কী?
+
+**উত্তর:** সাধারণত MCP Server আমাদের `stdio` পাইপ ব্যবহার করে কাজ করে।
+
+এর মানে হলো এটি হোস্টের রুট পারমিশন নিয়ে ওএস-এর ভেতরে কমান্ড রান করতে পারে।
+
+এখন কোনো ক্ষতিকর Prompt যদি AI-কে জেইলব্রেক বা হ্যাক করে ফেলে, তবে সে সরাসরি ওএস-এর বারোটা বাজিয়ে দিতে পারে!
+
+**প্রশ্ন:** তাহলে এর সমাধান কী?
+
+**উত্তর:** সমাধান খুব সহজ।
+
+প্রোডাকশনে সরাসরি লোকাল হোস্টে এটি রান না করে সবসময় isolated Docker Container ব্যবহার করতে হবে।
+
+সেখানে শুধুমাত্র প্রয়োজনীয় ডিরেক্টরির পারমিশন ভলিউম মাউন্ট করে এক্সেস দিতে হবে।
+
+এতে ওএস-এর নিরাপত্তা একশভাগ নিশ্চিত করা সম্ভব।
+
+
+### ৬. কিছু সাধারণ ভুল ধারণা
+
+🔴 Common Mistake
+
+**ভুল ধারণা:**
+
+MCP Server বানানোর পর প্রতিবার AI Model চেঞ্জ করার সময় কি সার্ভারের কোডও নতুন করে মডেলে রেজিস্টার করতে হবে?
+
+**বাস্তবতা:**
+
+একেবারেই না! MCP Server সম্পূর্ণ আলাদাভাবে নিজের মতো চলে।
+
+তোমার Cursor বা Claude-এর মতো Host এডিটরগুলো যখন ওএস-এর `mcpConfig.json` রিড করে চালু হয়, তখন সে নিজে থেকেই সার্ভারের কাছে জানতে চায় কী কী Tool আছে।
+
+অর্থাৎ, সে নিজেই অটো-ডিসকভার করে নেয়।
+
+তোমাকে ম্যানুয়ালি কোনো কোড লিখে জোড়াতালি দিতে হবে না।
+
+
+### ৭. মনের ভেতর ছবি এঁকে নেওয়া
+
+চলো বোঝার সুবিধার্থে একটা সহজ তুলনা করি।
+
+**"MCP Server = একটি USB Hub"**
+
+[VISUAL]
+Title: USB Hub analogy of MCP architecture
+Illustration: Visual representation of multiple accessories plugging into one USB Hub connected to a PC
+Placement: Under Mental Model section
+Purpose: Create an intuitive map for MCP dynamic discovery.
+
+```
+  [ Keyboard ] ──┐
+  [ Mouse    ] ──┼─► [ USB Hub (MCP Server) ] ◄──► [ PC/Host (Any LLM Client) ]
+  [ Printer  ] ──┘
+```
+
+ধরে নাও তোমার কম্পিউটারটি হলো AI Host (যেমন Claude বা Cursor)।
+
+তুমি তো আর কম্পিউটারে প্রতিটা ডিভাইসের জন্য আলাদা আলাদা পোর্ট বানাতে যাবে না, তাই না?
+
+তুমি শুধু একটি সাধারণ USB Hub (অর্থাৎ MCP Server) কম্পিউটারে কানেক্ট করে দিলে।
+
+এবার তুমি সেই হাবে মাউস, কিবোর্ড বা প্রিন্টার যা-ই লাগাও না কেন, কম্পিউটার নিজে থেকেই তা চিনে নেবে।
+
+তোমাকে কম্পিউটারের ভেতরের মাদারবোর্ড নিয়ে একটুও মাথা ঘামাতে হবে না!
+
+
+### ৮. ছোট প্রজেক্ট: JSON-RPC ২.০ সিমুলেশন
+
+চলো পাইথনে কোনো কাস্টম লাইব্রেরি ছাড়াই একদম শুরু থেকে একটি MCP সার্ভারের ভেতরের `stdio JSON-RPC` প্রোটোকল হ্যান্ডশেক ও টুল এক্সেকিউশন সিমুলেট করি।
+
+```python
 import json
 
-class HighDefinitionLogger:
-    def __init__(self):
-        self.trace = {
-            "request_id": "req_999",
-            "spans": []
-        }
+# ১. লোকাল এমসিপি টুলস রেজিস্ট্রি
+mcp_tools_registry = {
+    "list_dir": {
+        "name": "list_dir",
+        "description": "লিস্ট ডিরেক্টরি Files।"
+    }
+}
+
+# ২. কাস্টম JSON-RPC ২.০ প্রোটোকল পার্সার
+def handle_mcp_json_rpc(request_json):
+    try:
+        req = json.loads(request_json)
         
-    def start_span(self, name):
-        return {"name": name, "start_time": time.time()}
+        # JSON-RPC standard validations
+        if "jsonrpc" not in req or req["jsonrpc"] != "2.0":
+            return json.dumps({"jsonrpc": "2.0", "error": {"code": -32600, "message": "Invalid Request"}, "id": None})
+            
+        method = req["method"]
+        req_id = req.get("id")
         
-    def end_span(self, span_obj, input_tokens=0, output_tokens=0, cost=0.0):
-        span_obj["end_time"] = time.time()
-        span_obj["latency_ms"] = (span_obj["end_time"] - span_obj["start_time"]) * 1000
-        span_obj["input_tokens"] = input_tokens
-        span_obj["output_tokens"] = output_tokens
-        span_obj["cost_usd"] = cost
-        self.trace["spans"].append(span_obj)
+        # ৩. list_tools মেথড হ্যান্ডলার (Discovery Phase)
+        if method == "tools/list":
+            result = {"tools": list(mcp_tools_registry.values())}
+            return json.dumps({"jsonrpc": "2.0", "result": result, "id": req_id})
+            
+        # ৪. call_tool মেথড হ্যান্ডলার (Execution Phase)
+        elif method == "tools/call":
+            tool_name = req["params"]["name"]
+            if tool_name == "list_dir":
+                # মক রেজাল্ট
+                res = {"status": "success", "files": ["app.py", "package.json"]}
+                return json.dumps({"jsonrpc": "2.0", "result": res, "id": req_id})
+                
+        return json.dumps({"jsonrpc": "2.0", "error": {"code": -32601, "message": "Method not found"}, "id": req_id})
+        
+    except Exception as e:
+        return json.dumps({"jsonrpc": "2.0", "error": {"code": -32700, "message": f"Parse error: {str(e)}"}, "id": None})
 
-# ২. কাস্টম লগার অবজেক্ট ইনিশিয়ালাইজ করো
-logger = HighDefinitionLogger()
+# ৫. মক Test হ্যান্ডশেক (Discovery & Call Simulation)
+print("--- STAGE 1: Host requests Tools List (Discovery) ---")
+req_list = '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
+res_list = handle_mcp_json_rpc(req_list)
+print(res_list)
 
-# ৩. মক ও প্রোডাকশন গ্রেড ট্রেসিং সিমুলেশন
-print("Executing Agent Tasks...")
-
-# ধাপ ১: এম্বেডিংস রিট্রিভাল ট্রেস
-span_retrieve = logger.start_span("Vector_Retrieval")
-time.sleep(0.05) # সিমুলেটেড ৫২ মিলি-সেকেন্ড Latency
-logger.end_span(span_retrieve, input_tokens=15, cost=0.0001)
-
-# ধাপ ২: এলএলএম Loop ও জেনারেশন ট্রেস
-span_llm = logger.start_span("LLM_Generation")
-time.sleep(0.8) # সিমুলেটেড ৮০০ মিলি-সেকেন্ড Latency
-logger.end_span(span_llm, input_tokens=234, output_tokens=120, cost=0.0025)
-
-# ৪. ট্রেন্সড ড্যাশবোর্ড ভিউ প্রিন্ট করো
-print("\n--- FLAGSHIP OBSERVABILITY TRACING JSON ---")
-print(json.dumps(logger.trace, indent=2))
+print("\n--- STAGE 2: Host executes 'list_dir' Tool ---")
+req_call = '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "list_dir"}, "id": 2}'
+res_call = handle_mcp_json_rpc(req_call)
+print(res_call)
 ```
 
+চলো কোডের খুঁটিনাটি বিষয়গুলো সহজ প্রশ্ন-উত্তরের মাধ্যমে জেনে নিই।
 
-#### Code Breakdown:
+**প্রশ্ন:** এই কোডে Input আর Output হিসেবে কী ব্যবহার করা হয়েছে?
 
-এই কোডটি কীভাবে কাজ করছে, চলো সহজে বুঝে নিই:
+**উত্তর:** Input হলো AI Host-এর পাঠানো একদম সাধারণ JSON-RPC 2.0 টেক্সট রিকোয়েস্ট।
 
-প্রথমত, আমাদের Input হিসেবে ৩-ডাইমেনশনাল Vector এম্বেডিংস দেওয়া হয়েছে।
+আর Output হলো প্রোটোকল মেনে জেনারেট হওয়া সঠিক MCP Response।
 
-দ্বিতীয়ত, Output হিসেবে আমরা পাচ্ছি একটি কোসাইন প্রজেকশন স্কোর, যা Faithfulness রিফ্লেক্ট করে।
+**প্রশ্ন:** এই পুরো সিস্টেমটা কীভাবে নিখুঁতভাবে কাজ করছে?
 
-মজার ব্যাপার হলো, Answer B এর স্কোর এসেছে খুবই কম (মাত্র ০.০৮৯)।
+**উত্তর:** কারণ এটি JSON-RPC Standard মেনে চলছে।
 
-কারণ এর জ্যামিতিক কোণ সোর্স ভেক্টরের সম্পূর্ণ বিপরীত দিকে ছিল, যা দিয়ে সহজেই আমরা Hallucination ধরে ফেলেছি।
+এর ফলে মেথড আর আইডি বাইন্ডিং খুব সুন্দরভাবে প্রোটোকল সিমুলেট করতে পেরেছে।
 
-তাহলে এটি আমরা কখন ব্যবহার করব?
+**প্রশ্ন:** এটি আমরা কখন এবং কেন ব্যবহার করবো?
 
-যখন ব্যাকঅ্যান্ডে কাস্টম RAG ইভালুয়েশন পাইপলাইন আর ট্র্যাকিং অটোমেট করার প্রয়োজন হবে।
+**উত্তর:** যখন তুমি নিজের কোনো MCP প্রোটোকল স্ক্র্যাচ থেকে বানাতে চাও, তখন এটি খুব কাজে দেবে।
 
+বিশেষ করে লাইনের ভেতর কী ঘটছে তা Debug করার জন্য এটি অসাধারণ এক উপায়।
 
-## ৬. PII Masking: সিকিউরিটি যখন সবার আগে
 
-LangSmith-এর মতো অটোমেটিক লাইব্রেরিগুলো যখন ড্যাশবোর্ডে ডেটা পাঠায়, তখন একটা বড় ভয়ের ব্যাপার থাকে।
+### ৯. ইন্টারভিউতে যেসব প্রশ্ন আসতে পারে
 
-একে আমরা বলি PII Leakage।
+চলো ইন্টারভিউতে সচরাচর জিজ্ঞেস করা কিছু গুরুত্বপূর্ণ প্রশ্ন দেখে নিই।
 
-ভয়টা আসলে কোথায়?
+#### Beginner লেভেল
 
-ধরো, কোনো ইউজার ভুল করে চ্যাটে তার ক্রেডিট কার্ড বা পাসওয়ার্ড লিখে দিল।
+**প্রশ্ন:**
 
-তোমার Tracing Logger যদি হুবহু সেই ডেটা ক্লাউড ড্যাশবোর্ডে পাঠিয়ে দেয়, তবে কিন্তু সিকিউরিটি ভেঙে পড়বে!
+আগের সাধারণ Tool Calling-এর চেয়ে MCP-র মূল সুবিধা কী?
 
-এর সমাধান কী?
+**উত্তর:**
 
-খুব সহজ! ক্লাউডে ডেটা পাঠানোর আগে একটি কাস্টম Data Sanitization Middleware ব্যবহার করতে হবে।
+আগে প্রতিটা Model-এর জন্য আলাদা আলাদা কোড লিখতে হতো। যেমন Claude-এর কোড GPT-তে চলতো না।
 
-এটি সেনসিটিভ ডেটাগুলোকে ড্যাশবোর্ডে সেভ করার আগেই স্বয়ংক্রিয়ভাবে ফিল্টার বা মাস্ক করে দেয়।
+কিন্তু MCP হলো একটি Universal প্রোটোকল।
 
+একবার Server বানিয়ে ফেললে যেকোনো AI Host (যেমন Claude Desktop বা Cursor) সরাসরি তা ব্যবহার করতে পারে।
 
-## ७. Common Mistakes
+#### Intermediate লেভেল
 
-ভুল ধারণা:
-সিস্টেমে Observability সচল রাখলে স্পিড আরও বেড়ে যায়।
+**প্রশ্ন:**
 
-বাস্তবতা:
-আসলে তা নয়! ট্র্যাকিং বা ট্রেসিং করার সময় ব্যাকঅ্যান্ডে অনবরত Log ক্লাউডে পাঠানো হয়।
+MCP-র তিনটি প্রধান পিলার কী কী এবং এগুলো কী কাজ করে?
 
-এর ফলে মেমরি আর প্রসেসরের ওপর কিছুটা চাপ পড়ে, যা Latency একটু বাড়িয়ে দিতে পারে।
+**উত্তর:**
 
-তাহলে উপায়?
+প্রথমটি হলো **Resources**, যা রিড-অনলি ডেটা হিসেবে কাজ করে (যেমন কোনো ফাইল বা ডেটাবেস)।
 
-সবচেয়ে ভালো বুদ্ধি হলো Asynchronous Trace Exporter ব্যবহার করা।
+দ্বিতীয়টি হলো **Prompts**, যা আগে থেকে লিখে রাখা System Prompt টেমপ্লেট।
 
-এটি ব্যাকগ্রাউন্ডে কাজ করে বলে তোমার মূল সিস্টেমের স্পিডে কোনো প্রভাব ফেলে না।
+আর তৃতীয়টি হলো **Tools**, যা AI হোস্ট সরাসরি রান করতে পারে (যেমন কোনো স্ক্রিপ্ট বা ডেটাবেস কোয়েরি)।
 
+#### Advanced লেভেল
 
-## ৮. Air Traffic Control টাওয়ারের গল্প
+**প্রশ্ন:**
 
-চলো বিষয়টাকে একটি বাস্তব উদাহরণের সাথে মিলিয়ে দেখি।
+stdio-ভিত্তিক MCP Server চালানোর সময় সিকিউরিটির সবচেয়ে বড় ঝুঁকি কী এবং কীভাবে তা এড়ানো যায়?
 
-"AI Observability হলো একটি এয়ারপোর্টের রানওয়ের Air Traffic Control টাওয়ারের মতো।"
+**উত্তর:**
 
-[VISUAL]
-Title: Air Traffic Control Room analogy of Observability
-Illustration: Visual radar scanning multiple planes (tasks) landing with flight numbers, coordinates, and delay metrics
-Placement: After Mental Model section
-Purpose: Ground the intuitive dashboard control space.
+সবচেয়ে বড় ভয় হলো Prompt Injection অ্যাটাক।
 
-```
-       [ ATC Radar Observability Dashboard ]
-   ✈ Flight 101 (Embedding)  ──► Latency: 45ms  ──► Status: Safe Landing ✓
-   ✈ Flight 202 (Vector DB)  ──► Latency: 8.0s ──► Status: ALERT! Ground Hold 
-   ✈ Flight 303 (LLM Gener.) ──► Latency: 1.1s  ──► Status: Safe Landing ✓
-```
+হ্যাকাররা চাইলে ক্ষতিকর Prompt দিয়ে stdio পাইপের মাধ্যমে ওএস-এর রুট কমান্ড রান করিয়ে নিতে পারে।
 
-একতু ভাবো, রাতের অন্ধকারে আকাশে শত শত প্লেন উড়ছে।
+এর সমাধান হলো, সরাসরি ওএস-এ সার্ভার রান না করে Isolated Docker Sandbox ব্যবহার করা।
 
-তুমি যদি কন্ট্রোল টাওয়ারের রাডার বা Tracing অন না রাখো, তাহলে তো বড় দুর্ঘটনা ঘটে যেতে পারে!
+সেখানে শুধুমাত্র রিড-অনলি ভলিউম মাউন্ট করে অ্যাক্সেস দিতে হবে।
 
-কোন প্লেন কোথায় ঘুরছে, আর কোথায় রানওয়ে জ্যাম হয়ে আছে—তার কিছুই তুমি দেখতে পাবে না।
 
-কিন্তু রাডার স্ক্রিন চালু থাকলে তুমি রিয়েল-টাইমে প্রতিটি ফ্লাইটের স্পিড আর ফুয়েল খরচ ট্র্যাক করতে পারবে।
+### ১০. সংক্ষেপে চ্যাপ্টারের মূল কথা
 
-সহজ কথায়, এটিই হলো অবজারভেবিলিটির ম্যাজিক!
+চলো পুরো চ্যাপ্টারটা এক নজরে ঝালিয়ে নেওয়া যাক।
 
+**প্রশ্ন:** সংক্ষেপে MCP জিনিসটা আসলে কী?
 
-## ৯. Mini Project: নিজের RAG Evaluator
+**উত্তর:** এটি হলো AI Tool আর Data কানেক্ট করার একদম সহজ এক Universal চার্জার।
 
-চলো এবার NumPy ব্যবহার করে কোনো এক্সটার্নাল লাইব্রেরি ছাড়াই একটি RAG Faithfulness ইভালুয়েশন ইঞ্জিন স্ক্র্যাচ থেকে বানিয়ে ফেলি।
+**প্রশ্ন:** MCP কানেকশনের মূল ভিত্তি কী?
 
-```python
-import numpy as np
+**উত্তর:** এর মূল তিনটি শক্তি হলো Resources, Prompts আর Tools।
 
-# ১. মক Vector এম্বেডিংস ডিকশনারি (৩-ডাইমেনশন)
-# [ফ্যাক্ট ১: NID required, ফ্যাক্ট ২: dial *247#, ফ্যাক্ট ৩: unrelated metadata]
+**প্রশ্ন:** হোস্ট আর সার্ভার একে অপরের সাথে কথা বলে কীভাবে?
 
-# Source Document: "dial *247# to reset your PIN with NID"
-source_embedding = np.array([0.9, 0.9, 0.0])
+**উত্তর:** তারা JSON-RPC 2.0 প্রোটোকল আর stdio পাইপ ব্যবহার করে নিজেদের ভেতর Handshake করে।
 
-# ২. মক উত্তর এ (Faithful Answer): "dial *247# with NID"
-answer_A_embedding = np.array([0.85, 0.85, 0.0])
+**প্রশ্ন:** প্রোডাকশনে কাজ করার সময় কোন বিষয়টিতে সবচেয়ে বেশি জোর দিতে হবে?
 
-# ৩. মক উত্তর বি (Hallucinated Answer): "visit standard bank branch"
-answer_B_embedding = np.array([0.0, 0.1, 0.95])
+**উত্তর:** ডেটার নিরাপত্তা নিশ্চিত করতে অবশ্যই Docker Isolation ব্যবহার করতে হবে।
 
-# ৪. কোসাইন ভ্যালু হিসাব করে Faithfulness পরিমাপ
-def calculate_faithfulness(answer_vec, source_vec):
-    dot = np.dot(answer_vec, source_vec)
-    norm_a = np.linalg.norm(answer_vec)
-    # প্রজেকশন ভ্যালু
-    return dot / (norm_a * np.linalg.norm(source_vec))
 
-# ৫. Test রান করো
-score_A = calculate_faithfulness(answer_A_embedding, source_embedding)
-score_B = calculate_faithfulness(answer_B_embedding, source_embedding)
+### ১১. সামনে কী আসছে?
 
-print("--- RAGAS FAITHFULNESS (HALLUCINATION CHECK) ---")
-print(f"Answer A Faithfulness Score: {score_A:.4f} (100% Faithful / Correct ✓)")
-print(f"Answer B Faithfulness Score: {score_B:.4f} (Hallucination Detected! )")
-```
+পরবর্তী চ্যাপ্টারেই আমরা প্রবেশ করছি AI প্রোডাকশন সিস্টেমের দারুণ এক জগতে!
 
+সেখানে আমরা শিখবো Harness Engineering, Constitutional Guides আর Validation Sensors-এর মতো সব দারুণ জিনিস।
 
-#### Code Breakdown:
+আমরা দেখবো কীভাবে AI এজেন্টের চারপাশ নিরাপদ রাখতে কড়া লিন্টার আর ভ্যালিডেশন সেন্সর আর্কিটেক্ট করতে হয়।
 
-এই কোডটি কীভাবে কাজ করছে, চলো সহজে বুঝে নিই:
-
-প্রথমত, আমাদের Input হিসেবে ৩-ডাইমেনশনাল Vector এম্বেডিংস দেওয়া হয়েছে।
-
-দ্বিতীয়ত, Output হিসেবে আমরা পাচ্ছি একটি কোসাইন প্রজেকশন স্কোর, যা Faithfulness রিф্লেক্ট করে।
-
-মজার ব্যাপার হলো, Answer B এর স্কোর এসেছে খুবই কম (মাত্র ০.০৮৯)।
-
-কারণ এর জ্যামিতিক কোণ সোর্স ভেক্টরের সম্পূর্ণ বিপরীত দিকে ছিল, যা দিয়ে সহজেই আমরা Hallucination ধরে ফেলেছি।
-
-তাহলে এটি আমরা কখন ব্যবহার করব?
-
-যখন ব্যাকঅ্যান্ডে কাস্টম RAG ইভালুয়েশন পাইপলাইন আর ট্র্যাকিং অটোমেট করার প্রয়োজন হবে।
-
-
-## ১০. Interview Questions
-
-### Beginner Level
-
-**প্রশ্ন:** প্রথাগত লিনিয়ার লগার ফাইলের চেয়ে Distributed Tracing কেন AI এজেন্টের জন্য বেশি জরুরি?
-
-**উত্তর:** সাধারণ লগার শুধু এক লাইনে ফ্ল্যাট মেসেজ লেখে।
-
-কিন্তু AI Agent একটা রিকোয়েস্টের পেছনে ভেতরে অনেকগুলো কাজ করে। যেমন Embedding তৈরি, Vector Search বা Tool Run করা।
-
-Distributed Tracing এই পুরো ফ্যামিলি ট্রি-কে কস্ট আর Latency সহ চোখের সামনে তুলে ধরে, যা ডিবাগিংয়ের জন্য অত্যন্ত দরকারি।
-
----
-
-### Intermediate Level
-
-**প্রশ্ন:** Ragas ইভালুয়েশনে Faithfulness আর Answer Relevance-এর মধ্যে পার্থক্য কী?
-
-**উত্তর:** Faithfulness দেখে উত্তরটি সোর্স ডকুমেন্টের তথ্যের ওপর ভিত্তি করে তৈরি কি না। অর্থাৎ এটি Hallucination চেক করে।
-
-আর Answer Relevance দেখে উত্তরটি ইউজারের মূল প্রশ্নের সঠিক জবাব দিচ্ছে কি না।
-
----
-
-### Advanced Level
-
-**প্রশ্ন:** প্রোডাকশনে অবজারভেবিলিটি মনিটর করার সময় PII Leakage ঠেকানোর উপায় কী?
-
-**উত্তর:** এজন্য আমাদের ব্যাকঅ্যান্ডে PII Sanitizer Middleware ব্যবহার করতে হয়।
-
-এটি ড্যাশবোর্ডে লগ পাঠানোর ঠিক আগেই ফোন নম্বর, ইমেইল বা ক্রেডিট কার্ডের মতো ব্যক্তিগত তথ্যগুলো মাস্ক বা হাইড করে দেয়।
-
-
-## ১১. Chapter Summary
-
-এই চ্যাপ্টারে আমরা কী কী শিখলাম?
-
-প্রথমত, AI Observability হলো প্রোডাকশন AI এজেন্টের কাজ মনিটর করার একটি ম্যাজিক ড্যাশবোর্ড।
-
-দ্বিতীয়ত, Tracing-এর মাধ্যমে প্রতিটি রিকোয়েস্টকে ফ্যামিলি ট্রির মতো সুন্দর গ্রাফ আকারে দেখা যায়।
-
-তৃতীয়ত, Ragas দিয়ে আমরা উত্তর কতটা সঠিক বা প্রাসঙ্গিক তা স্কোরিং করে মেপে ফেলি।
-
-সবশেষে, সুরক্ষার জন্য Trace লগে সর্বদা PII Masking নিশ্চিত করা জরুরি।
-
-
-## ১২. What's Next?
-
-দারুণ! আমরা মনিটরিং আর Tracing ভালোভাবে শিখে ফেলেছি।
-
-পরের চ্যাপ্টারে আমরা কথা বলব সবচেয়ে বড় দুটি বিষয় নিয়ে: বাজেট আর সিকিউরিটি!
-
-হ্যাঁ, Chapter 23-এ থাকছে Cost Optimization ও Guardrails।
-
-কীভাবে AI প্রজেক্টের খরচ বাঁচাবে আর একে সুরক্ষিত রাখবে, চলো পরের চ্যাপ্টারে তা দেখে নিই!
+তো চলো, পরের চ্যাপ্টারে চলে যাই!
 
 **Chapter 22 শেষ।**

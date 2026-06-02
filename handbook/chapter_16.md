@@ -1,436 +1,451 @@
-# Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)
+# Chapter 16: Advanced Retrieval, Hybrid Search & Re-ranking
 
-তুমি কি জানো, একটা ৭ Billion Parameter-এর Model-কে পুরোপুরি Fine-Tuning করতে কতগুলো GPU লাগে?
+---
 
-কমপক্ষে ৪টা A100 GPU! মানে প্রায় ১৬০ GB VRAM!
+তুমি কি কখনো ভেবেছ — শুধু সাধারণ `Cosine Similarity` বা `Vector Search` ব্যবহার করলে `RAG` পাইপলাইনের `Accuracy` কেন অনেক সময় কমে যায়?
 
-আমাদের মতো সাধারণ মানুষের পক্ষে এত দামি সেটআপের খরচ চালানো একেবারেই অসম্ভব, তাই না?
+ধরো, কোনো কাস্টমার বানানে ভুল করল।
 
-কিন্তু কেমন হতো, যদি তুমি তোমার নিজের ল্যাপটপে বা একটা সাধারণ RTX 3090 বা 4090 GPU দিয়েই এই কাজটা করে ফেলতে পারতে?
+কিংবা কোনো স্পেশাল আইডি বা পার্ট নাম্বার লিখে সার্চ করল (যেমন: `bKash-1234`)।
 
-মজার ব্যাপার হলো, ঠিক এই অসম্ভব কাজটাই সম্ভব করেছে LoRA আর QLoRA!
+তখন `Vector Search` কিন্তু এর আসল অর্থ বুঝতে না পেরে গুলিয়ে ফেলবে।
 
-সহজ কথায়, LoRA হলো এক অদ্ভুত ম্যাজিক। 
+আর তার ফল কী হবে?
 
-এখানে আমরা বিলিয়ন বিলিয়ন Parameter-কে একদম না ছুয়ে, পাশে ছোট্ট দুটো Matrix ট্রেইন করি। ব্যস, তাতেই মেমরি বেঁচে যায় প্রায় ৯৫%! 
+কাস্টমার ভুল তথ্য পাবে, আর তোমার সাধের প্রজেক্ট একদম মুখ থুবড়ে পড়বে!
 
-আর QLoRA? সে তো আরেক কাঠি সরেস! 
+তো চলো, এই চ্যাপ্টারে আমরা `Search` এর `Accuracy` ৯০% থেকে একলাফে ৯৯%-এ নিয়ে যাওয়ার চমৎকার কিছু উপায় শিখে ফেলি।
 
-সে বেস Model-কে মাত্র ৪-বিটে কম্প্রেস করে সাধারণ ল্যাপটপেই Fine-Tuning-এর দরজা খুলে দেয়।
+আমরা দেখব কীভাবে `Hybrid Search` আর `Re-ranking` কাজ করে।
 
-তো চলো দেখি, কীভাবে এই PEFT, LoRA আর QLoRA কাজ করে। 
+সেই সাথে `Parent-Document Retrieval` আর `HyDE` এর মতো সব আধুনিক টেকনিকগুলোও সহজ করে বুঝব।
 
-আজ আমরা এই মিলিয়ন ডলারের প্রযুক্তিকে একদম সহজ করে আমাদের নিজের আয়ত্তে নিয়ে আসবো। Deal?
+তাহলে আর দেরি কেন?
+
+চলো, লাইব্রেরিয়ান আর একটি বইয়ের দারুণ গল্প দিয়ে শুরু করা যাক!
 
 
-## ১. দেয়াল ভাঙা বনাম স্টিকার লাগানো
+## ১. Hook: লাইব্রেরিয়ান আর পুরো বইয়ের গল্প
 
-ধরে নাও, তুমি তোমার ঘরের একটা বিশাল দেয়ালের ডিজাইন বদলাতে চাও।
+কল্পনা করো, তুমি লাইব্রেরিতে গিয়ে লাইব্রেরিয়ানকে জিজ্ঞেস করলে, **"বিকাশের Dynamic পিন ব্লক কেন হয়?"**
 
-এখন তোমার কাছে দুটো উপায় আছে।
+এখানে দুইভাবে খোঁজাখুঁজি হতে পারে।
 
-প্রথম উপায়টা কী?
+প্রথমটা হলো **Basic RAG** বা সাধারণ **Vector Search**।
 
-তুমি পুরো দেয়ালের প্লাস্টার ভেঙে ফেললে। 
+এতে লাইব্রেরিয়ান বই ঘেঁটে এমন একটা লাইন বা প্যারাগ্রাফ খুঁজে বের করলেন, যেটা তোমার প্রশ্নের সাথে মিলে যায়।
 
-এরপর নতুন করে বালি, সিমেন্ট আর কোটি টাকার রং কিনে এনে একদম শুরু থেকে নতুন ডিজাইন আঁকলে।
+কিন্তু মুশকিল হলো, সেই প্যারাগ্রাফে লেখা আছে: *"অনুচ্ছেদ ৪ এর নিয়ম অনুসারে এটি লক হবে।"*
 
- his-কে আমরা বলতে পারি Full Parameter Fine-Tuning।
+এখন এই "অনুচ্ছেদ ৪" জিনিসটা কী?
 
-এতে কাজটা খুব নিখুঁত হলেও, তোমার প্রচুর সময় আর টাকা নষ্ট হবে, তাই না? 
+সেটা কিন্তু লাইব্রেরিয়ান জানেন না!
 
-ঠিক তেমনি, AI-এর সব Parameter আপডেট করতে গেলে অনেক বেশি Compute Power আর VRAM লাগে।
+এর ফলে AI মডেল অর্ধেক বা ভুল উত্তর দিয়ে বসে থাকবে।
 
 [VISUAL]
-Title: Full-Parameter Tuning vs. LoRA Adapter Tuning
-Illustration: Heavy weight matrix update versus frozen base weights alongside two small low-rank matrices
+Title: Basic RAG vs. Parent-Document Retrieval
+Illustration: Small chunk vector matching to index vs. fetching the larger parent document context
 Placement: After Hook Section
-Purpose: Show the mathematical memory saving of Low-Rank Adaptation.
+Purpose: Show how advanced retrieval solves the context bottleneck.
 
 ```
-Full-Parameter Tuning (Updates all 7 Billion weights):
-[ Frozen Base Weights (W) ]  ◄── (Modifies and updates every single connection weight)
+Basic Vector RAG (Incomplete Context):
+[Query] ──► [Matches Small Chunk A] ──► "According to rule 4, lock PIN" (Confused LLM: What is rule 4?)
 
-LoRA Adapter Tuning (Only updates A and B matrices - 99% Memory Saved!):
-[ Frozen Base Weights (W) ]  ───► (No Changes / Fixed)
-       ▲
-       └─► [ Small Matrix A (d x r) ] ──*──► [ Small Matrix B (r x d) ] ──► (Updates only A & B)
+Parent-Document Retrieval (Complete Context ✓):
+[Query] ──► [Matches Small Chunk A] ──► [Fetch Parent Doc of Chunk A] ──► "Rule 4: If 3 wrong PINs are typed, lock PIN"
 ```
 
-তাহলে দ্বিতীয় উপায়টা কী?
+আর দ্বিতীয় পদ্ধতিটা হলো **Parent-Document Retrieval**।
 
-খুব সহজ! 
+এখানে লাইব্রেরিয়ান আগের মতোই প্রথমে ছোট একটা অংশ খুঁজে নিলেন।
 
-তুমি দেয়ালের আসল প্লাস্টার বা রঙে একদম হাত দিলে না। 
+কিন্তু তিনি সেটা সরাসরি তোমাকে না দিয়ে, তার আসল উৎস বা পুরো "অনুচ্ছেদ ৪" এর সবটুকু লেখা একসাথে নিয়ে আসলেন।
 
-শুধু দেয়ালের ওপর একটা পাতলা সুন্দর স্টিকার বা ফ্রেম ঝুলিয়ে দিলে।
+একে আমরা বলি `Parent Document`।
 
-এই ফ্রেম বা স্টিকারটাই হলো Adapter।
+এর ফলে AI মডেল পুরো ব্যাকগ্রাউন্ড জানতে পারে এবং একদম সঠিক উত্তর দেয়।
 
-এটা তৈরি করা খুবই সহজ, সস্তা এবং যখন ইচ্ছা সেকেন্ডের মধ্যে খুলেও ফেলা যায়।
+আমাদের `Advanced Retrieval` ঠিক এই স্মার্ট লাইব্রেরিয়ানের মতোই কাজ করে।
 
-LoRA ঠিক এই কাজটাই করে।
+এটি সার্চ করার জন্য ছোট `Vector` ব্যবহার করে গতি বাড়ায়।
 
-সে Model-এর আসল বিলিয়ন বিলিয়ন Weight লক বা Freeze করে রাখে।
-
-আর পাশে দুটো ছোট্ট Matrix জুড়ে দিয়ে শুধু সেগুলোর মান আপডেট করে। 
-
-এতে আমাদের কাজের খরচ আর মেমরি দুটোই নাটকীয়ভাবে কমে যায়।
+আবার `Decoder`-এ পাঠানোর সময় পুরো চ্যাপ্টারটি পাঠিয়ে কাজের মানও দারুণ করে তোলে।
 
 
-## ২. আসল রহস্যটা কী?
+## ২. Hybrid Search আর Re-ranking
 
-### LoRA কীভাবে কাজ করে?
+অনেক বড় বড় সার্চ সিস্টেমে একদম নিখুঁত রেজাল্ট পাওয়ার জন্য ৩টি আধুনিক টেকনিক ব্যবহার করা হয়।
 
-আমরা জানি, Neural Network যখন শিখতে থাকে, তখন তার ভেতরের ওজনের যে পরিবর্তন হয় তাকে আমরা $\Delta W$ বা Delta W বলি।
+চলো এগুলো একে একে জেনে নিই।
 
-ধরো, একটা Linear Layer-এর ডাইমেনশন হলো $4096 \times 4096$। 
+### Hybrid Search
 
-তার মানে এখানে প্রায় ১৬.৭ Million Parameters আছে! 
+**প্রশ্ন:** Hybrid Search আসলে কী?
 
-এখন Full Fine-Tuning করতে গেলে এই বিশাল ১৬.৭ Million Parameter মেমোরিতে লোড করে Backpropagation চালাতে হতো।
+**উত্তর:** এটি হলো কিওয়ার্ড ম্যাচিং আর অর্থভিত্তিক সার্চের এক দারুণ কম্বিনেশন।
 
-কিন্তু LoRA এখানে একটা দারুণ বুদ্ধি খাটায়। 
-
-সে বলে, এই বিশাল $\Delta W$ Matrix-এর আসল ইনফরমেশন বা Rank আসলে খুব ছোট। 
-
-তাই আমরা চাইলে এই বড় Matrix-কে ভেঙে দুটো ছোট Matrix $A$ আর $B$-এর গুণফল হিসেবে লিখতে পারি।
-
-যেমন:
-$$\Delta W = B \times A$$
-
-এখানে $A$-এর ডাইমেনশন হলো $d \times r$ এবং $B$-এর ডাইমেনশন হলো $r \times d$।
-
-এখন আমরা যদি Rank $r$ এর মান খুব ছোট, ধরো ৪ বা ৮ ধরি, তাহলে কী হবে?
-
-তাহলে আমাদের Parameters লাগবে মাত্র $4096 \times 8 \times 2 = 65,536$ টি!
+এতে দুই ধরনের সার্চ ইঞ্জিন একসাথে কাজ করে।
 
 [VISUAL]
-Title: Mathematical Dimension Reduction of LoRA
-Illustration: Visual representation of a large 4096x4096 matrix being computed as a product of 4096x8 and 8x4096 matrices
-Placement: Under Math Intuition section
-Purpose: Visually demonstrate the parameters reduction from 16M to 65K.
+Title: Hybrid Search (Sparse + Dense) Pipeline
+Illustration: Block diagram showing Sparse (BM25) and Dense (Vectors) results merging via RRF
+Placement: After Core Concepts section
+Purpose: Visually demonstrate the dual-engine integration of Hybrid Search.
 
 ```
-Original Weight Update Matrix (ΔW):       LoRA Matrix Factorization (B x A):
-       ┌──────────────┐                             ┌───┐
-       │              │                             │   │
-       │  4096 x 4096 │              =              │ B │ (4096 x 8)
-       │              │                             │   │
-       └──────────────┘                             └───┘
-                                                      *
-                                                    ┌───────────────┐
-                                                    │  A (8 x 4096) │
-                                                    └───────────────┘
-  (Total: 16.7 Million Weights)               (Total: Only 65,536 Weights!)
+                  ┌───────────────────────────────┐
+                  │          User Query           │
+                  └──────────────┬────────────────┘
+                                 │
+                   ┌─────────────┴─────────────┐
+         ┌─────────▼─────────┐       ┌─────────▼─────────┐
+         │   Sparse Search   │       │   Dense Search    │
+         │ (BM25 Keywords)   │       │(Semantic Vectors) │
+         └─────────┬─────────┘       └─────────┬─────────┘
+                   │                               │
+                   └─────────────┬─────────────────┘
+                                 ▼
+                  ┌───────────────────────────────┐
+                  │    Reciprocal Rank Fusion     │
+                  │         (RRF Merge)           │
+                  └──────────────┬────────────────┘
+                                 ▼
+                  ┌───────────────────────────────┐
+                  │     Reranker Model (BGE)      │
+                  └──────────────┬────────────────┘
+                                 ▼
+                       [ Top 3 Perfect Docs ]
 ```
 
-ভাবো একবার, ১৬.৭ Million Parameters-এর জায়গায় আমরা ট্রেইন করছি মাত্র ৬৫ হাজার Parameters! 
+**প্রশ্ন:** Sparse Search বা BM25 কী?
 
-এর মানে প্রায় ৯৯.৬% Parameter বেঁচে গেল!
+**উত্তর:** এটি খুব দ্রুত শব্দের বানান বা কিওয়ার্ড খুঁজে বের করে।
 
-### QLoRA কী?
+যেমন, কাস্টমার যদি কোনো পার্ট নাম্বার `"bKash-1234"` লিখে সার্চ করে, তবে ভেক্টর সার্চ হয়তো এর মানে বুঝতে না পেরে ভুল করতে পারে।
 
-LoRA তো না হয় মেমরি কমালো, কিন্তু আসল ৭ Billion ওজনের বেস Model-কে তো আগে GPU-তে লোড করতে হবে, তাই না? 
+কিন্তু `BM25` হুবহু কিওয়ার্ড মিলিয়ে সঠিক তথ্যটি বের করে আনে।
 
-শুধুমাত্র এই বেস Model-কে লোড করতেই প্রায় ১৬ GB VRAM লেগে যায়। 
+**প্রশ্ন:** Dense Search বা Vector Search কী?
 
-তাহলে সাধারণ ল্যাপটপে কীভাবে চালাবে?
+**উত্তর:** এটি শব্দের অর্থ বা ভাবার্থ দেখে সার্চ করে।
 
-ঠিক এই সমস্যার সমাধান করতেই এলো QLoRA!
+যেমন, "টাকা পাঠানো" আর "মানি ট্রান্সফার" যে একই কথা, সেটা এই সার্চ সহজেই ধরে ফেলে।
 
-QLoRA কীভাবে কাজ করে?
+**প্রশ্ন:** RRF কী?
 
-চল একে একে জেনে নিই। 
+**উত্তর:** এর পুরো নাম হলো Reciprocal Rank Fusion।
 
-প্রথমত, সে ব্যবহার করে NF4 নামের একটি বিশেষ ৪-বিট Data Type। 
+এটি একটি বিশেষ অ্যালগরিদম।
 
-এটি বেস Model-এর আসল ১৬-বিট ওজনকে কম্প্রেস করে মাত্র ৪-বিটে নিয়ে আসে। 
+এর কাজ হলো `Sparse Search` আর `Dense Search` এর ফলাফলগুলোকে মিলিয়ে একটি একক স্কোর তৈরি করা।
 
-এর ফলে ৭ Billion Model-এর সাইজ ১৪ GB থেকে কমে মাত্র ৫ GB হয়ে যায়!
+### Re-ranking
 
-দ্বিতীয়ত, এতে আছে Double Quantization। 
+**প্রশ্ন:** Re-ranking আসলে কেন লাগে?
 
-এটি Quantization-এর ভেতরের Scaling Parameters গুলোকেও আবার কোয়ান্টাইজ করে আরও বেশি মেমরি বাঁচায়।
+**উত্তর:** ভেক্টর ডাটাবেস থেকে আমরা হয়তো প্রথম ধাপে সেরা ১০টি ডকুমেন্ট খুঁজে পাই।
 
-সবশেষে আছে Paged Optimizers। 
+কিন্তু তাদের সিরিয়াল বা র‌্যাঙ্কিং সবসময় নিখুঁত হয় না।
 
-GPU মেমরি যদি হঠাৎ বেশি লেগে ও উপচে পড়ে, তবে সে ঘাবড়ে গিয়ে OOM Error দেয় না। 
+তাই একে আরও নির্ভুল করতে আমরা একটি বিশেষ মডেল ব্যবহার করি, যাকে বলা হয় `Cross-Encoder Reranker`।
 
-বরং অতিরিক্ত মেমরি সাময়িকভাবে CPU RAM-এ পাঠিয়ে দিয়ে Training সচল রাখে।
+যেমন, `Cohere Rerank` বা `BGE-Reranker`।
 
-মনে রাখার সহজ উপায়:
+এটি ইউজারের প্রশ্ন এবং ওই ১০টি ডকুমেন্টের প্রতিটি জোড়া আলাদাভাবে খুব গভীরভাবে স্ক্যান করে।
 
-LoRA হলো বেস Model ফ্রিজ রেখে দুটো ছোট Matrix ট্রেইন করে মেমরি বাঁচানোর উপায়।
+তারপর একদম নিখুঁত স্কোর দিয়ে সেরা ৩টি ডকুমেন্টকে বাছাই করে আমাদের প্রম্পটে পাঠায়।
 
-আর QLoRA হলো বেস Model-কে ৪-বিটে কম্প্রেস করে তার ওপর LoRA Adapter বসিয়ে সবচেয়ে বেশি মেমরি বাঁচানোর উপায়।
+এতে ভুল উত্তর দেওয়ার বা `Hallucination` এর ভয় প্রায় ৯০% কমে যায়।
+
+### HyDE
+
+**প্রশ্ন:** HyDE কী আর এটি কীভাবে সাহায্য করে?
+
+**উত্তর:** অনেক সময় ইউজাররা খুব ছোট বা ভাঙা ভাষায় প্রশ্ন লেখে, যেমন: `"PIN blocked bKash"`।
+
+এমন ছোট প্রশ্নে সাধারণ সার্চ ইঞ্জিনগুলো ঠিকমতো কাজ করতে পারে না।
+
+তখন আমরা `HyDE` ব্যবহার করি।
+
+এর কাজ হলো প্রশ্নটি আসামাত্র প্রথমে একটি ছোট LLM দিয়ে একটি কাল্পনিক উত্তর লিখিয়ে নেওয়া।
+
+তারপর সেই কাল্পনিক উত্তরটিকে এম্বেড করে ভেক্টর ডাটাবেসে সার্চ করা হয়।
+
+যেহেতু কাল্পনিক উত্তরের লেখার ধরন আর ডাটাবেসের ডকুমেন্টের ধরন মিলে যায়, তাই সার্চের মান অনেক বেড়ে যায়।
 
 
-## ৩. বাস্তব জীবনের উদাহরণ
+## 🧠 Remember
 
-ধরে নাও, তুমি Cursor বা অন্য কোনো AI Coding Assistant ব্যবহার করছো। 
+`BM25` খুঁজে বের করে শব্দের বানান আর নির্দিষ্ট কিওয়ার্ড।
 
-এদের ব্যাকঅ্যান্ডে কিন্তু একটা দারুণ ব্যাপার ঘটে। 
+`Semantic Search` খুঁজে বের করে শব্দের আসল অর্থ।
 
-প্রথমত, এদের মেইন বড় Coding Model-এর বেস Weights সার্ভারে একদম লক বা Freeze করা থাকে।
-
-দ্বিতীয়ত, তুমি যখন পাইথনের কোনো Project ওপেন করো, তখন তারা পাইথনের জন্য তৈরি Custom LoRA Adapter মিলি-সেকেন্ডের মধ্যে লোড করে বেস Model-এর সাথে জুড়ে দেয়।
-
-আবার যখন তুমি জাভাস্ক্রিপ্ট Project ওপেন করো, তখন তারা মূল Model-এর কোনো পরিবর্তন না করেই পাইথন Adapter খুলে ফেলে জাভাস্ক্রিপ্ট Adapter লাগিয়ে দেয়!
-
-কত জোস, তাই না? 
-
-এর ফলে একটা মাত্র GPU Cluster ব্যবহার করেই হাজার হাজার মানুষকে আলাদা আলাদা ভাষার সাপোর্ট দেওয়া যায়।
+আর `Reranker` এই দুইয়ের ফলাফল ছেঁকে একদম সেরা হিরের টুকরোটি আমাদের হাতে তুলে দেয়।
 
 
-## ৪. Code লিখে দেখা যাক
+## ৩. Cross-Encoder কীভাবে কাজ করে?
 
-ডেভেলপার হিসেবে পাইথনে `peft` লাইব্রেরি দিয়ে কীভাবে LoRA সেটআপ করবে?
+নিচের ডায়াগ্রামটি দেখলে খুব সহজে বুঝতে পারবে কীভাবে এটি কাজ করে:
 
-চলো দেখে নিই প্রডাকশন লেভেলের আসল কোড কেমন হয়:
+[VISUAL]
+Title: Bi-Encoder vs. Cross-Encoder (Reranker) Architecture
+Illustration: Comparison of separate embedding dot product versus direct deep joint attention
+Placement: Under Reranker section
+Purpose: Visually explain why Cross-Encoders are far more accurate but computationally heavier than Bi-Encoders.
+
+```
+Bi-Encoder (Standard Vector Search - Fast & Approximated):
+Query Vector ──┐
+               ├─► [ Simple Dot Product ] ──► Score (Approximated)
+Doc Vector ────┘
+
+Cross-Encoder (Reranker - Slow & Ultra-Accurate):
+[ Query + Document Text ] ──► [ Deep Transformer Joint Attention ] ──► Absolute Relevance Score (0 to 1)
+```
+
+সাধারণ ভেক্টর সার্চের সময় প্রতিটি ভেক্টর আলাদাভাবে প্রসেস করে ডট প্রোডাক্ট করা হয়, যাকে বলে `Bi-Encoder`।
+
+কিন্তু `Reranker` ইউজার কুয়্যারি আর ডকুমেন্টের টেক্সট একসাথে জোড়া লাগিয়ে দেয়।
+
+তারপর ট্রান্সফরমার লেয়ারে গভীরভাবে অ্যাটেনশন রান করে এদের সম্পর্ক খুঁজে বের করে।
+
+এর ফলে আমরা একদম নিখুঁত স্কোর পেয়ে যাই।
+
+
+## ৪. Real World Example: Perplexity কীভাবে কাজ করে?
+
+চলো আমরা `Perplexity` এর উদাহরণ দিয়ে পুরো ব্যাপারটা বুঝি।
+
+যখন তুমি `Perplexity` এ কিছু লিখে সার্চ করো, তখন ব্যাকএন্ডে কী ঘটে?
+
+প্রথমেই, তারা কোটি কোটি ওয়েবসাইটকে `BM25` কিওয়ার্ড ইনডেক্স এবং `HNSW Vector Space` দুই জায়গাতেই জমা রাখে।
+
+এর পরের ধাপে, তোমার প্রশ্নের ওপর ভিত্তি করে তারা খুব দ্রুত একটি হাইব্রিড সার্চ চালায়।
+
+সেখান থেকে প্রথম ধাপে ১০০টি সম্ভাব্য পেজ খুঁজে বের করা হয়।
+
+সবশেষে আসে রির‍্যাঙ্কিংয়ের পালা।
+
+এখানে মাত্র ৩ মিলি-সেকেন্ডে ওই ১০০টি পেজ স্ক্যান করে সেরা ৫টি পেজ প্রম্পটে পাঠিয়ে দেওয়া হয়।
+
+এর ফলে তুমি চোখের পলকে একদম সঠিক ও নির্ভরযোগ্য তথ্য পেয়ে যাও।
+
+
+## ৫. PyTorch & Cohere দিয়ে Re-ranking Code
+
+তুমি যদি একজন ডেভেলপার হও, তবে ব্যাকএন্ডে কীভাবে এই `Reranker Model` রান করবে?
+
+চলো পাইথনের একটি বাস্তব কোড দেখে নিই:
 
 ```python
-from peft import LoraConfig, get_peft_model
-import torch.nn as nn
+# Cohere Rerank API Integration in Backend
+import cohere
 
-# ১. বেস Neural Network লিনিয়ার লেয়ার (মক ওরিজিনাল Model)
-class ToyModel(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.q_proj = nn.Linear(4096, 4096)
-        
-    def forward(self, x):
-        return self.q_proj(x)
+# ১. Cohere Client ইনিশিয়ালাইজ করো
+co = cohere.Client("your-api-key")
 
-base_model = ToyModel()
+# ২. ইউজার কুয়্যারি এবং হাইব্রিড সার্চের টপ ৫টি সম্ভাব্য ডক
+query = "bKash PIN blocked reset timeline?"
+documents = [
+    "To reset PIN, visit Customer Care with NID.",
+    "PIN reset takes 24 hours after verification.", # Best Match for timeline
+    "Keep your password and PIN safe. Do not share.",
+    "bKash offer: get cashback on utility bill payment.",
+    "If verification fails, contact support center."
+]
 
-# ২. LoRA Config সেটআপ
-peft_config = LoraConfig(
-    r=8,                  # লো-র‍্যাংক বটলনেক ডাইমেনশন (Rank)
-    lora_alpha=32,        # Scaling ফ্যাক্টর (Higher = Stronger Adapter weight)
-    target_modules=["q_proj"], # কোন কোন লেয়ারে অ্যাডাপ্টার জোড়া দেব
-    lora_dropout=0.05,    # ওভারফিটিং রোধে ড্রপআউট
-    bias="none",
-    task_type="CAUSAL_LM"
+# ৩. Rerank API কল করো
+print("রানিং ক্রস-এনকোডার রির‍্যাঙ্কিং...")
+response = co.rerank(
+    model="rerank-english-v3.0",
+    query=query,
+    documents=documents,
+    top_n=2
 )
 
-# ৩. বেস মডেলকে LoRA মডেলে রূপান্তর করো
-lora_model = get_peft_model(base_model, peft_config)
-
-# ৪. ট্রেইনেবল Parameter রেশিও চেক করো
-lora_model.print_trainable_parameters()
-# Output: trainable params: 65,536 || all params: 16,842,752 || trainable%: 0.389%
+# ৪. রির‍্যাঙ্কড Output প্রিন্ট করো
+for idx, result in enumerate(response.results):
+    doc_index = result.index
+    score = result.relevance_score
+    print(f"Rank {idx+1}: Score = {score:.4f} -> '{documents[doc_index]}'")
 ```
 
 
-## ৫. Production-এ কীভাবে কাজ করে?
+## ৬. Two-Stage Retrieval কেন দরকার?
 
-পড়াশোনা বা ট্রেনিংয়ের সময় LoRA দারুণ কাজ করে।
+বাস্তব প্রোডাকশন লাইফে ক্রস-এনকোডার মডেলগুলো অনেক ভারী এবং কিছুটা ধীরগতির হয়।
 
-কিন্তু যখন তুমি রিয়েল-টাইমে Inference চালাতে যাবে, তখন একটা সমস্যা হতে পারে।
+তাই খরচ কমাতে আর গতি বাড়াতে আমরা **Two-Stage Retrieval** ব্যবহার করি।
 
-যদি তুমি LoRA Adapter সরাসরি রান করো, তবে GPU-তে Latency বেড়ে যাবে। 
+প্রথমে **Stage 1** এ আমরা দ্রুত একটি ভেক্টর ডাটাবেস সার্চ চালাই।
 
-কারণ সিগন্যালকে বেস Model আর Adapter—উভয় Matrix-এর ভেতর দিয়ে আলাদা আলাদাভাবে পার হতে হয়।
+এর কাজ হলো লাখ লাখ ডকুমেন্টের মধ্য থেকে সেরা ৫০টি ডকুমেন্ট ছেঁকে আনা।
 
-তাহলে এর সমাধান কী?
+এতে সময় লাগে ৫ মিলি-সেকেন্ডেরও কম!
 
-খুব সহজ! 
+এরপর **Stage 2** এ আমরা ওই ৫০টি ডকুমেন্টের ওপর রির‍্যাঙ্কার মডেল চালাই।
 
-ট্রেনিং শেষ হওয়ার পর প্রোডাকশনে নিয়ে যাওয়ার আগে আমরা একটা ছোট্ট ট্রিক খাটাবো।
+সেখান থেকে একদম সেরা ৩টি ডকুমেন্ট বেছে নিয়ে প্রম্পটে পাঠানো হয়।
 
-আমরা Adapter Weights-কে সরাসরি বেস Model-এর ওজনের সাথে গাণিতিকভাবে যোগ করে মার্জ করে দেব:
+এতে সময় লাগে মাত্র ৫০ মিলি-সেকেন্ডের মতো।
 
-$$W_{\text{final}} = W_{\text{base}} + (B \times A)$$
-
-পাইটর্চে এর জন্য আমাদের শুধু `model.merge_and_unload()` কল করতে হয়। 
-
-ব্যস! এর ফলে আলাদাভাবে হিসাব করার কোনো ঝামেলাই থাকে না। 
-
-আমাদের Inference স্পিডও হয়ে যায় একদম ওরিজিনাল Model-এর মতোই আল্ট্রা-ফাস্ট!
+এই পুরো সিস্টেমটি আমাদের সার্চের গতি এবং নিখুঁত হওয়ার মধ্যে এক দারুণ ব্যালেন্স এনে দেয়।
 
 
-## ৬. সাধারণ কিছু ভুল
+## Common Mistake
 
-অনেকের মনে একটা ভুল ধারণা থাকে।
+ভুল ধারণা:
 
-তারা ভাবেন, LoRA-র Rank যত বড় সেট করা যাবে, Model তত বেশি ভালো শিখবে। 
+রির‍্যাঙ্কার মডেল যেহেতু অনেক বেশি নিখুঁত, তাই ডাটাবেসের লাখ লাখ ডকুমেন্টের ওপর সরাসরি এটি রান করা ভালো।
 
-যেমন ১২৮ বা ২৫৬ সেট করার কথা ভাবেন।
+বাস্তবতা:
 
-কিন্তু বাস্তবে কী ঘটে?
+লাখ লাখ লেখার ওপর সরাসরি রির‍্যাঙ্ক রান করলে একটা সার্চ শেষ হতে কয়েক মিনিট লেগে যাবে!
 
-Rank অতিরিক্ত বড় সেট করলে মেমরি আর কস্টিং তো বাড়বেই।
+এমনকি তোমার সার্ভারও ক্র্যাশ করতে পারে।
 
-সেই সাথে সবচেয়ে বড় সমস্যা হলো, Model নতুন ডেটাসেটে খুব সহজেই Overfit করে ফেলে।
-
-বিভিন্ন পেপারের বেঞ্চমার্ক আমাদের দেখিয়েছে, $r=8$ বা $r=16$ হলো একদম সুইট স্পট। 
-
-এটি সবচেয়ে ভালো আর স্ট্যাবল রেজাল্ট দেয়।
+তাই মনে রাখবে, রির‍্যাঙ্কার সবসময় প্রথম স্টেজের ফিল্টার করা অল্প কিছু ডকুমেন্টের ওপর চালাতে হয়।
 
 
-## ७. অর্কেস্ট্রা অ্যানালজি
+## ৮. Mental Model: ইন্টারভিউ বোর্ড
 
-চল, LoRA-র ভেতরের বিষয়টাকে একটা সহজ উদাহরণের মাধ্যমে মাথায় গেঁথে নিই। 
+পুরো বিষয়টি মাথায় গেঁথে নেওয়ার জন্য চলো একটি সহজ তুলনা দেখি।
 
-**"LoRA মানে হলো একটা বিশাল অর্কেস্ট্রার তালের সাথে পাশে বসে বাঁশি বাজানো।"**
+ধরে নাও, আমাদের পুরো পাইপলাইনটি হলো একটি চাকরির নিয়োগ পরীক্ষা।
 
-[VISUAL]
-Title: Orchestra vs. Solo Flute analogy of LoRA tuning
-Illustration: Visual representation of a huge orchestra block alongside a tiny flute player syncing notes
-Placement: After Mental Model section
-Purpose: Ground the mathematical intuition of frozen base weights vs. tiny parameter tuning.
+**Hybrid Search হলো প্রিলিমিনারি পরীক্ষা:**
 
-```
-  [ Massive Orchestra: 7 Billion Players ]  ──► (Sound output locked / Frozen)
-                      ▲
-                      │ (Perfect Sync)
-  [ Solo Flute Player: A & B Matrices ] ──────► (Only tunes their small flute)
-```
+১ লাখ চাকরিপ্রার্থীর মধ্য থেকে নির্দিষ্ট কিওয়ার্ড আর যোগ্যতা দেখে প্রিলিমিনারি পরীক্ষার মাধ্যমে দ্রুত ১০০০ জনকে বেছে নেওয়া হলো।
 
-একবার ভাবো, তোমার সামনে একটা বিশাল অর্কেস্ট্রা দল দাঁড়িয়ে গান পরিবেশন করছে।
+**Reranker হলো ফাইনাল ভাইভা বোর্ড:**
 
-তুমি তাদের মূল সুরে কোনো পরিবর্তন করতে পারবে না, কারণ তাদের সুর একদম লক বা Frozen করা।
+এই ১০০০ জনের মধ্যে থেকে সেরা ১০ জনকে ভাইভা বোর্ডে মুখোমুখি ডাকা হলো।
 
-কিন্তু তুমি চাচ্ছ ব্যাকগ্রাউন্ডে একটু মিষ্টি বাঁশির সুর যোগ করতে।
+সেখানে গভীরভাবে প্রশ্ন করে যাচাই করার পর ফাইনাল সেরা ৩ জনকে চাকরি দেওয়া হলো।
 
-এর জন্য কি পুরো অর্কেস্ট্রা ভেঙে নতুন সব প্লেয়ার আনার কোনো দরকার আছে?
-
-একেবারেই না!
-
-তুমি জাস্ট তাদের পাশে একজন ছোট্ট বাঁশি বাদককে দাঁড় করিয়ে দিলে। 
-
-সে অর্কেস্ট্রার মূল তালের সাথে মিলিয়ে একটা মিষ্টি সুর বাজাতে শুরু করল। 
-
-এখানে এই বাঁশি বাদকই হলো আমাদের LoRA Adapter!
+কী, সহজ না?
 
 
-## ৮. Mini Project
+## ৯. Mini Project: Custom Hybrid Search
 
-চলো, এবার পাইথনে NumPy ব্যবহার করে কোনো ML Framework ছাড়াই একটা মজার কাজ করে ফেলি। 
-
-আমরা একটা ১৬.৭ Million Parameter-এর বড় আপডেটকে মাত্র ৬৫ হাজার Parameter-এর দুটো ছোট Matrix-এ রূপান্তর করব। 
-
-তারপর দেখব, আমাদের কতটা মেমরি আর স্টোরেজ সাশ্রয় হচ্ছে!
+চলো আমরা পাইথনে কোনো লাইব্রেরি ছাড়াই একদম নিজেরা একটি মিনি হাইব্রিড সার্চ এবং রির‍্যাঙ্কিং সিস্টেম তৈরি করে ফেলি।
 
 ```python
 import numpy as np
 
-# ১. ডাইমেনশন ডিফাইন করো (d = 4096, rank = 8)
-d = 4096
-r = 8
+# ১. Database-এর ৩টি ডকের মক টেক্সট ও Vector
+docs = {
+    0: {"text": "bKash credit limit and PIN reset policy center.", "vector": np.array([0.9, 0.1])},
+    1: {"text": "PIN lock issue is resolved within 24 hours timeline.", "vector": np.array([0.8, 0.4])},
+    2: {"text": "Earn cashback on credit card bill payment.", "vector": np.array([0.2, 0.9])}
+}
 
-# ২. মক ওরিজিনাল আপডেট ম্যাট্রিক্স ডেল্টা ডব্লিউ (ΔW) - 4096 x 4096
-# স্টোরেজ কস্ট: 4096 * 4096 * 4 bytes (FP32) = 67.1 MB
-delta_W = np.random.randn(d, d)
+# ২. ইউজার কুয়্যারি
+query_text = "PIN reset timeline"
+query_vector = np.array([0.85, 0.3])
 
-# ৩. LoRA ম্যাট্রিক্স A এবং B ইনিশিয়ালাইজ করো
-# A: 8 x 4096, B: 4096 x 8
-# স্টোরেজ কস্ট: (4096 * 8 * 2) * 4 bytes = 262 KB!
-A = np.random.randn(r, d)
-B = np.random.randn(d, r)
+# ৩. কাস্টম BM25 (Sparse) কিওয়ার্ড ম্যাচ স্কোরার
+def get_sparse_score(query, doc_text):
+    words = query.lower().split()
+    score = 0
+    for word in words:
+        if word in doc_text.lower():
+            score += 1.0
+    return score
 
-# ৪. LoRA ডট প্রোডাক্ট আপডেট সিমুলেশন
-lora_update = np.dot(B, A)
+# ৪. কোসাইন ডেন্স সিমিলারিটি
+def get_dense_score(v1, v2):
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
-# ৫. Parameter ও মেমরি সেভিং Calculation
-original_params = d * d
-lora_params = (d * r) + (r * d)
-saving_ratio = (1 - (lora_params / original_params)) * 100
+# ৫. হাইব্রিড Search এগ্রিগেশন (RRF Simulation)
+print("Running Hybrid Search Pipeline...\n")
+hybrid_results = []
 
-print(f"Original Weight Parameters: {original_params:,}")
-print(f"LoRA Adapter Parameters:    {lora_params:,}")
-print(f"Parameter সাশ্রয়:          {saving_ratio:.4f}% (Ultra Saving ✓)")
+for idx, doc in docs.items():
+    sparse = get_sparse_score(query_text, doc["text"])
+    dense = get_dense_score(query_vector, doc["vector"])
+    
+    # হাইব্রিড কম্বাইন্ড স্কোর (৫০% স্পার্স + ৫০% ডেন্স)
+    combined_score = (0.5 * sparse) + (0.5 * dense)
+    hybrid_results.append((combined_score, doc["text"]))
+    print(f"Doc {idx+1}: Sparse={sparse:.2f}, Dense={dense:.4f} -> Hybrid Score = {combined_score:.4f}")
+
+# শর্টলিস্ট টপ ডক
+hybrid_results.sort(reverse=True, key=lambda x: x[0])
+print(f"\n[BEST MATCH RETRIEVED] '{hybrid_results[0][1]}' with Score {hybrid_results[0][0]:.4f}")
 ```
 
-তাহলে কোডটা আসলে কীভাবে কাজ করল?
+**কোডটি কীভাবে কাজ করছে?**
 
-চল, এর সহজ বিশ্লেষণটি দেখে নিই।
+১. আমরা প্রথমে কিওয়ার্ড আর ছোট ভেক্টর ডাটাবেস নিয়েছি।
 
-আমরা কী ইনপুট দিয়েছিলাম?
+২. এরপর স্পার্স আর ডেন্স স্কোর মিলিয়ে ফাইনাল স্কোর তৈরি করা হয়েছে।
 
-আমরা ডাইমেনশন দিয়েছিলাম $4096$ আর র‍্যাংক দিয়েছিলাম $8$।
+৩. এখানে `"PIN lock issue..."` ডকটি কিওয়ার্ড আর অর্থ দুই দিক থেকেই এগিয়ে থাকায় সেরা স্কোর পেয়েছে।
 
-এর ফলে আউটপুট কী পেলাম?
-
-আমরা দেখতে পেলাম, আমাদের ওরিজিনাল ও LoRA Parameter সংখ্যার বিশাল পার্থক্য। 
-
-এবং ওরিজিনাল ওজনের তুলনায় প্রায় $৯৯.৬১\%$ মেমরি সাশ্রয় হয়েছে!
-
-কিন্তু এটা কীভাবে সম্ভব হলো?
-
-আসলে Linear Algebra-র লো-র‍্যাংক প্রজেকশনের মাধ্যমে মাত্র ৬৫ হাজার ওজনের ছোট দুটো Matrix এই বিশাল ১৬.৭ Million ওজনের জায়গা পূরণ করে ফেলেছে।
-
-তুমি এটা কখন ব্যবহার করবে?
-
-যখন ব্যাকঅ্যান্ডে মেমরি অপ্টিমাইজেশন আর মেমরি ম্যাপিং বিশ্লেষণ করার প্রয়োজন পড়বে, তখন এই ট্রিক দারুণ কাজে দেবে।
+৪. ব্যাকএন্ডে কাস্টম সার্চ সিস্টেম তৈরি করার সময় আমরা এই টেকনিক ব্যবহার করতে পারি।
 
 
-## ৯. ইন্টারভিউ প্রশ্নোত্তর
+## Interview Questions
 
-চল, এবার এই চ্যাপ্টারের কিছু গুরুত্বপূর্ণ ইন্টারভিউয়ের প্রশ্ন ও উত্তর দেখে নেওয়া যাক।
+### Beginner level
 
-### Beginner Level
-**প্রশ্ন:** Full Parameter Fine-Tuning-এর তুলনায় LoRA ব্যবহারের প্রধান সুবিধাগুলো কী কী?
+**প্রশ্ন:** RAG প্রজেক্টে Hybrid Search কেন প্রয়োজন?
 
-**উত্তর:** 
+**উত্তর:** এটি কিওয়ার্ড আর অর্থ ভিত্তিক সার্চ— দুটি টেকনিক একসাথে মিলিয়ে কাজ করে।
 
-প্রথমত, LoRA মূল Model-এর ৯৯% Parameter ফ্রিজ রেখে শুধুমাত্র ছোট Adapter ট্রেইন করে। 
+এর ফলে নামের বানান ভুল হলে বা কোনো স্পেশাল আইডি দিয়ে সার্চ করলেও একদম সঠিক তথ্য খুঁজে পাওয়া যায়।
 
-এতে GPU VRAM ডিমান্ড আর ট্রেনিং খরচ প্রায় ৯০% কমে যায়। 
+---
 
-দ্বিতীয়ত, ট্রেনিং শেষে এই Adapter ফাইলের সাইজ মাত্র কয়েক মেগাবাইট হয়। 
+### Intermediate level
 
-তাই এটি খুব সহজে ডেপ্লয় ও শেয়ার করা সম্ভব।
+**প্রশ্ন:** Two-Stage Retrieval কীভাবে সার্চের গতি বাড়াতে সাহায্য করে?
 
-### Intermediate Level
-**প্রশ্ন:** QLoRA কীভাবে ওরিজিনাল Model-কে ৪-বিটে কম্প্রেস করার পরেও Fine-Tuning-এর এক্যুরেসি ধরে রাখে?
+**উত্তর:** প্রথম ধাপে এটি দ্রুত ভেক্টর সার্চ করে লাখ লাখ লেখা থেকে মাত্র ৫০টি লেখা বাছাই করে।
 
-**উত্তর:** 
+দ্বিতীয় ধাপে শুধু ওই ৫০টি লেখার ওপর ভারী রির‍্যাঙ্কার চালানো হয়।
 
-QLoRA একটি বিশেষ ৪-বিট Data Type ব্যবহার করে, যার নাম NormalFloat 4 বা NF4। 
+এতে সার্চের গতি ও নিখুঁত হওয়ার মধ্যে দারুণ ব্যালেন্স তৈরি হয়।
 
-এটি মডেলের ওজনের ডিস্ট্রিবিউশন গাণিতিকভাবে মেপে ইনফরমেশন লস ছাড়াই ওজনকে কোয়ান্টাইজ করে। 
+---
 
-এর সাথে Double Quantization যোগ করে সে মেমরি কস্ট অনেক কমিয়েও এক্যুরেসি একদম FP16-এর সমান ধরে রাখে।
+### Advanced level
 
-### Advanced Level
-**প্রশ্ন:** কেন প্রোডাকশন ডেপ্লয়মেন্টের সময় LoRA মডেলকে সরাসরি সার্ভিস না করে `merge_and_unload()` করা প্রয়োজন?
+**প্রশ্ন:** HyDE কীভাবে কাজ করে আর কখন এটি ব্যবহার করা বিপজ্জনক হতে পারে?
 
-**উত্তর:** 
+**উত্তর:** `HyDE` ইউজারের প্রশ্নের ওপর ভিত্তি করে প্রথমে একটি কাল্পনিক উত্তর তৈরি করে নেয়।
 
-যদি সরাসরি সার্ভিস করা হয়, তবে Inference-এর সময় Input সিগন্যালকে বেস Model এবং লোর‍্যাংক Adapter উভয় Matrix-এর ভেতর দিয়ে প্যারালালি পার হতে হয়। 
+তারপর সেটি দিয়ে ডাটাবেসে সার্চ করে।
 
-এতে কাজের গতি কমে যায় এবং Latency বেড়ে যায়। 
+যেহেতু কাল্পনিক উত্তর ও ডাটাবেসের লেখার স্টাইল মিলে যায়, তাই সার্চের কোয়ালিটি অনেক বাড়ে।
 
-কিন্তু `merge_and_unload()` করলে Adapter-এর ওজনকে সরাসরি বেস Model-এর সাথে ব্লেন্ড করে দেওয়া হয়। 
-
-ফলে অতিরিক্ত মেমরি খরচ জিরো হয়ে যায় এবং Model হুবহু ওরিজিনাল স্পিডে চলতে পারে।"
+তবে প্রজেক্টটি যদি সবসময় রিয়েল-টাইম ডেটার ওপর নির্ভর করে, তবে কাল্পনিক ডেটা সার্চকে সম্পূর্ণ ভুল দিকে নিয়ে যেতে পারে।
 
 
-## ১০. এই চ্যাপ্টারের সারসংক্ষেপ
+## Chapter Summary
 
-এই চ্যাপ্টারে আমরা কী কী শিখলাম?
+চলো সংক্ষেপে পুরো চ্যাপ্টারের মূল কথাগুলো আর একবার দেখে নিই:
 
-চল, ঝটপট এক নজরে দেখে নেওয়া যাক।
+১. `Advanced Retrieval` আমাদের RAG সিস্টেমকে প্রোডাকশন লেভেলের জন্য একদম নিখুঁত করে তোলে।
 
-আমরা জানলাম কীভাবে PEFT আর LoRA ব্যবহার করে Model Training-এর খরচ এবং GPU VRAM-এর চাহিদা কমানো যায়।
+২. `Hybrid Search` শব্দের বানান আর অর্থ— এই দুটোর ফলাফল মিলিয়ে সার্চের মান অনেক বাড়িয়ে দেয়।
 
-আরও দেখলাম, কীভাবে Matrix Factorization-এর মাধ্যমে একটা বিশাল আপডেটকে মাত্র ৬৫ হাজার ছোট Parameter-এ সংকুচিত করা সম্ভব।
+৩. `Re-ranking` এর কাজ হলো প্রথম ধাপে পাওয়া লেখাগুলোর মধ্য থেকে একদম সেরা অংশটি বেছে নেওয়া।
 
-এরপর শিখলাম QLoRA-র কথা। 
-
-এটি ৪-বিট NF4 Quantization-এর সাহায্যে মাত্র ১৬ GB VRAM কার্ডেই বিলিয়ন স্কেলের Model ফাইন-টিউন করতে সাহায্য করে।
-
-সবশেষে আমরা জানলাম, প্রোডাকশন লেভেলে আল্ট্রা-ফাস্ট স্পিড পেতে Inference Adapter Merging করা কতটা জরুরি।
+৪. প্রোডাকশনে সার্চের গতি ঠিক রাখতে আমাদের অবশ্যই `Two-Stage Retrieval` ব্যবহার করতে হবে।
 
 
 ## What's Next?
 
-পরের চ্যাপ্টারে আমরা আমাদের ট্রেইনড মডেলকে মানুষের নৈতিকতা আর সেফটি রুলস শেখাবো।
+দারুণ! আমরা RAG এর সব অ্যাডভান্সড টেকনিক শিখে ফেলেছি।
 
-আমরা দেখবো কীভাবে RLHF আর DPO পদ্ধতি ব্যবহার করে AI-কে ক্ষতিকর কথা বলা থেকে বিরত রাখা যায়।
+পরের চ্যাপ্টার থেকে শুরু হচ্ছে AI মডেলকে নিজের মতো করে পোষ মানানোর গল্প।
 
-তো চলো, পরের চ্যাপ্টার **Chapter 17: Alignment — RLHF, DPO & Safety Tuning**-এ ঝাঁপ দেওয়া যাক!
+আমরা দেখব কীভাবে `Fine-Tuning` আর কাস্টম `Dataset` তৈরি করতে হয়।
+
+তো চলো, পরের ধাপে পা বাড়ানো যাক!
 
 **Chapter 16 শেষ।**

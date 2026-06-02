@@ -1,402 +1,426 @@
-# Chapter 17: Alignment — RLHF, DPO & Safety Tuning
+# Chapter 17: Supervised Fine-Tuning (SFT) & Dataset Preparation
 
 ---
 
-তুমি তোমার Model-কে Fine-Tune করেছো।
+ধরো, তোমার হাতে একটা বেস Model আছে।
 
-সে এখন দারুণ গুছিয়ে কথা বলতে পারে।
+সে অনেক কিছু জানে, কিন্তু কথা বলে একদম নিজের মতো করে।
 
-কিন্তু ধরো, কেউ তাকে জিজ্ঞেস করল— 'কীভাবে বোমা বানাব?'
+তুমি চাচ্ছো সে তোমার কাস্টমারদের সাথে মিষ্টি বাংলায় কথা বলুক, বা JSON Format-এ Output দিক।
 
-সে কি তখন চুপ থাকবে? নাকি খুব হাসিমুখে বোমা বানানোর রেসিপি দিয়ে দেবে?
+সেটা শেখাবে কীভাবে?
 
-ঠিক এই জায়গাতেই প্রয়োজন Alignment।
+সেটাই হলো Supervised Fine-Tuning (SFT)।
 
-সহজ টাকায়, Alignment হলো তোমার AI-কে একটা লক্ষ্মী ছেলের মতো গড়ে তোলা। 
+মজার ব্যাপার হলো— অনেকে ভাবে Fine-Tuning মানে মডেলকে নতুন তথ্য শেখানো। ভুল!
 
-যাতে সে মানুষের ক্ষতি না করে, নিরাপদ থাকে আর কাজের কথা বলে।
+নতুন ফ্যাক্টস শেখাতে চাইলে RAG ব্যবহার করো।
 
-এর জন্য ক্লাসিক্যাল পথ হলো RLHF।
+Fine-Tuning হলো মডেলকে **"কীভাবে কথা বলবে"** সেটা শেখানোর জন্য।
 
-কিন্তু সেটা বেশ জটিল।
+এই তফাতটা না বুঝলে তুমি শুধু শুধু GPU কস্ট পুড়িয়ে ফেলবে।
 
-Engineers এবং Researchers-দের জন্য এটি বেশ ঝামেলার।
+तो চলো দেখি কীভাবে Instruction Dataset (Alpaca, ShareGPT formats) তৈরি করতে হয়, কখন RAG বনাম Fine-Tuning বেছে নিতে হয়, আর SFT Training Pipeline কীভাবে কাজ করে।
 
-তাই গবেষকরা নিয়ে এলেন অনেক সহজ ও স্ট্যাবল এক পদ্ধতি— DPO।
-
-তো চলো, আজ আমরা এই মজার ব্যাপারগুলোই খুব সহজ ভাষায় শিখব। Deal?
+এটা বুঝলে পরের চ্যাপ্টারের LoRA/QLoRA আর RLHF সব পানির মতো সহজ লাগবে। Deal?
 
 
-## ১. বন্য ঘোড়াকে পোষ মানানো
+## ১. ডাক্তার বনাম তার আচরণ
 
-ধরো, তুমি জঙ্গল থেকে একটা অসম্ভব শক্তিশালী বন্য ঘোড়া ধরে আনলে।
+কল্পনা করো, তোমার সামনে একজন খুব দক্ষ ডাক্তার বসে আছেন।
 
-এখন একে কাজে লাগাবে কীভাবে?
+ধরো, তিনি হৃদরোগের নতুন আবিষ্কৃত একটি সার্জারি রুল বা পলিসি জানেন না।
 
-প্রথম ধাপ হলো Pre-training। 
+এখন তুমি কী করবে?
 
-এখানে ঘোড়াটা বন্য। সে অনেক জোরে দৌড়াতে পারে, কিন্তু কোন দিকে যাবে তা জানে না। 
+খুব সহজ! তুমি তার টেবিলের ওপর সেই নতুন রিসার্চ পেপার বা বই খুলে দিলে।
 
-এর পরের ধাপ হলো SFT।
+ডাক্তার পেপারের ৩ নম্বর পৃষ্ঠা দেখে নিখুঁত সার্জারি প্রসিডিউরটি বুঝে তোমাকে বুঝিয়ে দিলেন।
 
-এখানে তুমি তাকে রশি দিয়ে বেঁধে নির্দিষ্ট রাস্তায় সোজা হাঁটা শেখালে। সে এখন কিছুটা বাধ্য।
+এটাই হলো RAG। অনেকটা Open-Book পরীক্ষার মতো।
 
 [VISUAL]
-Title: Alignment Progression: SFT vs. RLHF/DPO
-Illustration: Directed lane walking vs. learning ethics / safety boundaries (pit avoidance)
+Title: When to use RAG vs. Fine-Tuning
+Illustration: Dynamic document drawer (RAG) vs. modifying brain synapses/tone (Fine-Tuning)
 Placement: After Hook Section
-Purpose: Show why alignment is needed after SFT.
+Purpose: Show the core architectural distinction between RAG and Fine-Tuning.
 
 ```
-Supervised Fine-Tuning (Lane Walking - Copies prompts):
-[ Road Target ] ◄── (SFT Model blindly copies exact text patterns)
+RAG (What to Say - External Database Library):
+[LLM Brain] ◄───► [ Document Drawer (Dynamic Facts) ]
+(Model reads fresh documents on the fly)
 
-Safety Alignment (RLHF / DPO - Ethical Boundary & Self-Correction):
-[ Safe Zone ]  ◄── (Model evaluates ethical safety before responding)
-     ▲
-     │ (Avoids dangerous cliffs/hallucinations)
-[ Danger Pit (PII Leak/Hacks) ] (Hard Blocked )
+Fine-Tuning (How to Behave - Modifying Internal weights):
+[LLM Brain] ──► (Modify Internal Weights & Synapses) ──► [ Speaks in customized tone / JSON Format ]
 ```
 
-কিন্তু ঘোড়াটার সামনে যদি হঠাৎ একটা গভীর খাদ পড়ে?
+কিন্তু এবার ধরো অন্য একটা পরিস্থিতি।
 
-সে কি নিজে থেকে থামবে? 
+ডাক্তার সব মেডিকেল বই জানেন, কিন্তু তিনি কথা বলেন খুব অভদ্র ও কর্কশ ভাষায়।
 
-না, সে হয়তো সোজা লাফ দিয়ে নিচে পড়ে যাবে। কারণ সে জানে না কোনটা বিপদ আর কোনটা নিরাপদ।
+তুমি চাও তিনি যেন রোগীদের সাথে নরম বাংলায় ও পোলাইট Persona-য় কথা বলেন।
 
-তাকে এই খাদের বিপদ এড়ানো শেখাতে হলে কী করতে হবে?
+এখন টেবিলে নতুন বই খুলে দিলে কি তার আচরণ পরিবর্তন হবে?
 
-তোমাকে তাকে পুরস্কার আর শাস্তি দিয়ে ট্রেন করতে হবে। 
+একদমই না!
 
-সহজ টাকায়, এটাই হলো Alignment।
+তার আচরণ বদলাতে হলে তাকে কয়েক মাস Custom বিহেভিয়ার ট্রেনিং দিতে হবে।
 
-SFT মডেলকে শুধু কপি করা শেখায়।
+যাতে তার মস্তিষ্কের কথা বলার টোন ও স্টাইল সম্পূর্ণ বদলে যায়।
 
-আর Alignment তাকে মানুষের নৈতিকতা ও নিরাপত্তা বজায় রেখে সিদ্ধান্ত নিতে শেখায়।
+এই ট্রেনিংটাই হলো Fine-Tuning বা SFT।
+
+RAG এবং Fine-Tuning-এর মূল তফাতটি ঠিক এখানেই।
+
+সহজ কথায়, মডেলকে কোনো Dynamic বা রিয়েল-টাইম ডাটা দিতে হলে RAG ব্যবহার করবে।
+
+আর মডেলকে নির্দিষ্ট টোন, স্টাইল বা Custom Output Format যেমন JSON বা SQL শেখাতে হলে Fine-Tuning-ই একমাত্র পথ। Deal?
 
 
-## ২. মানুষের পছন্দ-অপছন্দ ও Alignment
+## ২. Supervised Fine-Tuning এবং Data স্ট্রাকচার
 
-Alignment করার জন্য সাধারণত দুটি জনপ্রিয় পদ্ধতি ব্যবহার করা হয়।
+### কখন Fine-Tune করবে আর কখন RAG?
 
-প্রথমটি হলো RLHF। 
+চলো সিদ্ধান্ত নেওয়ার জন্য একটি Decision Table দেখে নিই:
 
-ChatGPT কিন্তু এই পদ্ধতিতেই তৈরি হয়েছে। 
+| Criteria | RAG (Retrieval-Augmented) | Fine-Tuning (SFT) |
+| :--- | :--- | :--- |
+| **মূল লক্ষ্য** | External রিয়েল-টাইম ফ্যাক্টস ও ইনফরমেশন দেওয়া | নির্দিষ্ট টোন, স্টাইল বা Format (JSON/SQL) শেখানো |
+| **Data আপডেট** | instant (Vector ডাটাবেসে File পুশ করলেই হয়) | ধীর (আবার Training রান করতে হয়) |
+| **Hallucination** | খুব কম (সোর্স পেজের রেফারেন্স থাকে) | মাঝারি (Model নিজে বানিয়ে লিখতে পারে) |
+| **Compute খরচ** | কম (শুধুমাত্র Inference ও Vector Search কস্ট) | উচ্চ (GPU Training কস্ট) |
 
-এটি মূলত তিনটি ধাপে কাজ করে।
+### Supervised Fine-Tuning কী?
+
+SFT আসলে কী?
+
+সহজ কথায়, এটি হলো মডেলকে প্রচুর পরিমাণে Instruction-Response জোড়া দেখিয়ে ট্রেইন করা।
+
+এর Mechanism কী?
+
+মডেলকে আমরা ১ হাজার থেকে ১ লাখ কাস্টম বাংলা কথোপকথনের স্যাম্পল দেখাই।
+
+যেমন: `User: [Question] -> Assistant: [Bengali customized answer]`।
+
+ট্রেনিংয়ের সময় Loss Optimization কীভাবে হয়?
+
+মডেল যখন কাস্টম উত্তরের সাথে ম্যাচ করতে ভুল Token Predict করে, তখন Loss Calculate করা হয়।
+
+তারপর Backpropagation-এর মাধ্যমে Model-এর Weights পরিবর্তন বা Modify করা হয়।
+
+### Dataset Format
+
+#### Alpaca Format
+
+এটি সবচেয়ে সহজ এবং সরল Format।
+
+এখানে প্রতিটি Data নোডে ৩টি কিওয়ার্ড থাকে।
+
+কী কী সেগুলো?
+
+প্রথমটি হলো `instruction`, অর্থাৎ ইউজার কী টাস্ক দিয়েছে।
+
+দ্বিতীয়টি `input`, যা টাস্কের সাথে কোনো অতিরিক্ত Context দিতে ব্যবহার করা হয়। এটি অপশনাল।
+
+আর শেষটি হলো `output`, অর্থাৎ AI কী উত্তর দেবে।
+
+```json
+{
+  "instruction": "নিচের বাক্যটি বাংলায় অনুবাদ করো।",
+  "input": "I love AI engineering.",
+  "output": "আমি AI ইঞ্জিনিয়ারিং ভালোবাসি।"
+}
+```
+
+#### ShareGPT Format
+
+মডার্ন চ্যাট মডেলগুলোর জন্য এটি সবচেয়ে জনপ্রিয় Format।
+
+এটি ইউজারের সাথে মাল্টি-টার্ন Conversation তৈরি করে।
+
+```json
+{
+  "conversations": [
+    {"from": "human", "value": "বিকাশ পিন লক হলে কী করব?"},
+    {"from": "gpt", "value": "তোমার পিন লক হলে দয়া করে *247# ডায়াল করে সেলফ-রিসেট করো।"}
+  ]
+}
+```
+
+🧠 Remember
+
+Dataset তৈরি করার সময় সর্বদা Data Quality-কে Data Quantity-এর চেয়ে বেশি গুরুত্ব দেবে।
+
+১০ হাজার আজেবাজে Data-এর চেয়ে ১ হাজার হাই-Quality নির্ভুল Data মডেলকে অনেক ভালো বানাতে পারে।
+
+একেই বলে "Less is More" রুল।
+
+
+## ৩. SFT Training Loop
+
+এসএফটি ট্রেনিংয়ের সময় Model কীভাবে শুধু Assistant Token-এর ওপর Loss Calculate করে, চলো নিচে তা দেখে নিই:
 
 [VISUAL]
-Title: Classical RLHF Ingestion Pipeline
-Illustration: Multi-step flowchart from Human Preference to Reward Model tuning, leading to PPO Optimizer
-Placement: After Core Concepts section
-Purpose: Visually demonstrate the 3-stage complexity of RLHF.
+Title: SFT Target Token Loss Calculation
+Illustration: Visual breakdown of prompt tokens (ignored loss) and response tokens (active loss calculation)
+Placement: After SFT section
+Purpose: Visually demonstrate the mathematical formatting of causal language modeling during tuning.
 
 ```
-Step 1: SFT Model ──► Generate Multiple Answers
-                               │
-                               ▼
-Step 2: Humans Label Answers ──► [ Train Reward Model ] (লার্নিং মানুষের ভালোলাগা)
-                               │
-                               ▼
-Step 3: PPO Optimizer ──► [ Update LLM Weights ] ──► (Ensures high reward score)
+Input Tokens (Loss Ignored):           Output Target Tokens (Active Loss 계산):
+┌──────┬──────┬──────┬──────┐         ┌──────┬──────┬──────┬──────┐
+│ User │ :    │ PIN  │ Lock │  ──►   │ Pls  │ dial │ *    │ 247  │
+└──────┴──────┴──────┴──────┘         └──────┴──────┴──────┴──────┘
+   │      │      │      │                │      │      │      │
+[ Loss Masked - No Weights Update ]   [ Loss Active - Weights Updated via Backprop ✓ ]
 ```
 
-ধাপগুলো কেমন চলো দেখি।
+ট্রেনিংয়ের সময় আমরা কিন্তু ইউজারের প্রশ্নের Token-এর ওপর Loss Calculate করি না।
 
-প্রথম ধাপ হলো Preference Dataset তৈরি করা। 
+একে -100 index দিয়ে Mask করা হয়।
 
-এখানে Model-কে একটা প্রশ্ন বা Prompt দেওয়া হয়। সে তখন কয়েকটা ভিন্ন উত্তর তৈরি করে।
-
-এরপর মানুষ এসে দেখে বলে দেয়— কোন উত্তরটা সবচেয়ে ভালো আর কোনটা ক্ষতিকর।
-
-দ্বিতীয় ধাপ হলো Reward Model তৈরি করা। 
-
-মানুষের এই পছন্দ-অপছন্দের Data দিয়ে আমরা একটা আলাদা Reward Model ট্রেইন করি। 
-
-এটি যেকোনো উত্তরের মান দেখে তাকে ১ থেকে ১০ এর মধ্যে রেটিং দিতে পারে।
-
-তৃতীয় ধাপ হলো PPO। 
-
-এই Algorithm-টি মূলত Reward Model-এর রেটিং অনুযায়ী আমাদের আসল Model-এর Parameter আপডেট করে দেয়।
-
-কিন্তু RLHF যতই শক্তিশালী হোক না কেন, এর ভেতরের Architecture কিন্তু বেশ জটিল।
-
-একসাথে তিন-তিনটি Model ওরিজিনাল GPU-তে লোড রাখতে হয়!
-
-এটি যেমন ব্যয়বহুল, তেমনি আনস্ট্যাবল।
-
-তাহলে এর সহজ সমাধান কী?
-
-এর সমাধান হলো DPO। ২০২৩ সালে স্ট্যানফোর্ড ইউনিভার্সিটি এটি আবিষ্কার করে।
-
-এখানে কোনো আলাদা Reward Model বা জটিল PPO অ্যালগরিদম লাগে না। 
-
-এটি সরাসরি Single-Step Optimization ব্যবহার করে। 
-
-খুব সহজ সমীকরণের মাধ্যমে এটি মানুষের পছন্দের এবং অপছন্দের উত্তরের রেশিও টিউন করে দেয়।
-
-##### The DPO Loss Equation:
-$$L_{\text{DPO}}(\theta; \pi_{\text{ref}}) = -E_{(x, y_w, y_l)} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_w | x)}{\pi_{\text{ref}}(y_w | x)} - \beta \log \frac{\pi_\theta(y_l | x)}{\pi_{\text{ref}}(y_l | x)} \right) \right]$$
-
-এখানে প্রতীকগুলো দিয়ে কী বোঝানো হচ্ছে?
-
-সহজ করে বলি:
-
-$y_w$ হলো Winner বা মানুষের পছন্দের উত্তর।
-
-$y_l$ হলো Loser বা মানুষের অপছন্দের উত্তর।
-
-$\pi_\theta$ হলো আমাদের মূল Model, যাকে আমরা ট্রেন করছি।
-
-আর $\pi_{\text{ref}}$ হলো রেফারেন্স Model, যা ট্রেইনিংকে সঠিক ট্র্যাকে রাখে।
-
-> **Remember**
-> 
-> **RLHF:** ৩টি আলাদা Model ও জটিল Loop লাগে।  
-> **DPO:** সরাসরি এক স্টেপেই Alignment শেষ করে দেয়।
+মডেল কেবল Assistant-এর উত্তর Prediction-এ ভুল করলে Weights আপডেট হয়।
 
 
-## ৩. ডিপিও লুপের সিঙ্গেল-স্টেপ Alignment
+## ৪. Real World Example: Cursor ও .cursorrules
 
-ডিপিও লুপে কীভাবে পছন্দের Token-এর সম্ভাবনা বাড়ানো হয় আর অপছন্দের Token ব্লক করা হয়?
+Cursor যখন তোমার Project-এর স্পেসিফিক নিয়মে Code লেখে, তখন আসলে কী ঘটে?
 
-চলো নিচের ডায়াগ্রাম থেকে তা সহজে বুঝে নিই।
+প্রথমত, তারা তাদের ওপেন-সোর্স বেস মডেলকে হাজার হাজার Coding কনভেনশন এবং Project রুলস দিয়ে Fine-Tuning করেছে।
 
-[VISUAL]
-Title: DPO Single-Step Weight Update Flow
-Illustration: Visual representation of shifting weight vectors toward the preferred target space while pushing away from the rejected space
-Placement: After DPO Equation section
-Purpose: Ground the mathematical gradient attraction and repulsion of DPO.
+একে বলে System Prompt Alignment।
 
-```
-       DPO Latent Space Shifts
-                    ┌────────────────────────┐
-                    │      Active Model      │
-                    └───────────┬────────────┘
-         ┌──────────────────────┴──────────────────────┐
- ┌───────▼───────┐                             ┌───────▼───────┐
- │   Winner Yw   │                             │   Loser Yl    │
- │ (Preferred)   │                             │  (Rejected)   │
- └───────┬───────┘                             └───────┬───────┘
-         │                                             │
-   Gradient Pull ◄── (Attraction)                Gradient Push ──► (Repulsion)
- (Boost Probability)                           (Suppress Probability)
-```
+দ্বিতীয়ত, এর ফলে মডেলটি তোমার প্রজেক্টের `.cursorrules` ফাইলটি পড়া মাত্রই তোমার টোন এবং স্টাইল বুঝে ফেলে।
+
+সে অনুযায়ী একদম নিখুঁত Code তৈরি করে দেয়।
 
 
-## ৪. DeepSeek R1 ও Safety Guardrail
+## ৫. Developer Perspective: Dataset লোড করা
 
-DeepSeek R1 বা ChatGPT-কে কোনো বিপজ্জনক প্রশ্ন করলে তারা কীভাবে ভদ্রভাবে না বলে দেয়?
+💻 Developer View
 
-ধরো, তুমি জিজ্ঞেস করলে— 'কীভাবে সাইবার অ্যাটাক করব?'
-
-তখন কী ঘটে?
-
-মডেলের ব্যাকঅ্যান্ডে থাকা Alignment লেয়ার সাথে সাথে অ্যাক্টিভ হয়ে যায়। 
-
-সে দেখে যে এই প্রশ্নের Safety Guideline ভায়োলেশন স্কোর অনেক বেশি।
-
-ব্যস! মডেলটি তার নিরাপত্তা প্রোটোকল চালু করে দেয়। 
-
-সে পোলাইটলি উত্তর দেয়— 'আমি দুঃখিত, ক্ষতিকর বা বেআইনি কাজে সাহায্য করা আমার পলিসির পরিপন্থী।'
-
-
-## ৫. Hugging Face TRL দিয়ে DPO Trainer রান করা
-
-> **Developer View**
-> 
-> যদি তুমি একজন Developer হও, তবে পাইথনে `trl` লাইব্রেরি ব্যবহার করে সহজেই কাস্টম DPO Trainer তৈরি করতে পারবে।
-> 
-> চলো এর একটি প্রোডাকশন লেভেলের পাইথন কোড দেখে নিই।
+ডেভলপার হিসেবে পাইথনে `datasets` লাইব্রেরি ব্যবহার করে কাস্টম Alpaca Format-এর Dataset লোড করার উপায়টি চলো দেখে নিই।
 
 ```python
-from trl import DPOTrainer
-from transformers import TrainingArguments
 from datasets import Dataset
 
-# ১. কাস্টম প্রেফারেন্স Dataset (Prompt, Chosen, Rejected)
-preference_data = [
+# ১. র অ্যান্ড কাস্টম Dataset লিস্ট (Alpaca Format)
+raw_data = [
     {
-        "prompt": "bKash পিন রিসেট করতে কী আইডি লাগবে?",
-        "chosen": "তোমার অরিজিনাল এনআইডি (NID) কার্ডের কপি লাগবে।", # Preferred
-        "rejected": "যেকোনো একটি র্যান্ডম ফেক আইডি কার্ড হলেই হবে।"   # Rejected/Unsafe
+        "instruction": "বিকাশ পিন লক হলে কী করব?",
+        "output": "নিকটস্থ কাস্টমার কেয়ার সেন্টারে যোগাযোগ করো।"
+    },
+    {
+        "instruction": "পিন রিসেট করতে কী কী Document লাগবে?",
+        "output": "তোমার অরিজিনাল এনআইডি (NID) কপি এবং সিম কার্ড প্রয়োজন।"
     }
 ]
 
-dataset = Dataset.from_list(preference_data)
+# ২. Hugging Face Dataset অবজেক্টে রূপান্তর
+dataset = Dataset.from_list(raw_data)
 
-# ২. DPO Training Arguments ডিফাইন করো
-training_args = TrainingArguments(
-    output_dir="./dpo_aligned_model",
-    per_device_train_batch_size=2,
-    learning_rate=5e-7,
-    logging_steps=10,
-    remove_unused_columns=False
-)
+# ৩. টেমপ্লেটিং Function (Formatting function for training)
+def format_prompts(batch):
+    formatted_texts = []
+    for i in range(len(batch['instruction'])):
+        prompt = f"### Instruction:\n{batch['instruction'][i]}\n\n### Response:\n{batch['output'][i]}"
+        formatted_texts.append(prompt)
+    return {"text": formatted_texts}
 
-# ৩. DPO Trainer ইনিশিয়ালাইজ (বেস Model ও রেফারেন্স Model সহ)
-# (এখানে মক টেমপ্লেট দেখানো হয়েছে, প্রোডাকশনে Model অবজেক্ট পাস করতে হয়)
-print("DPO Trainer Initialized! ready to align the model on safety policies...")
+# ৪. ম্যাপ Function প্রয়োগ
+tokenized_dataset = dataset.map(format_prompts, batched=True)
+
+print("--- FORMATTED DATASET FOR TRAINING ---")
+print(tokenized_dataset[0]['text'])
 ```
 
 
-## ৬. Red Teaming ও Guardrails
+## ৬. Production Perspective: Data Anonymization
 
-> **Production Reality**
-> 
-> তুমি Model-কে খুব সুন্দরভাবে সাজালে। কিন্তু এরপরেও হ্যাকাররা Jailbreak বা Prompt Injection দিয়ে তোমার সব নিরাপত্তা ভেঙে দিতে পারে।
-> 
-> বাস্তবে এর জন্য দুটি দারুণ সমাধান আছে।
+🏭 Production Reality
 
-প্রথমটি হলো Red Teaming।
+Dataset রেডি করার সময় সবচেয়ে বড় সিকিউরিটি রিস্ক হলো PII Leakage বা ব্যক্তিগত তথ্য ফাস হয়ে যাওয়া।
 
-এখানে মডেলটি সবার জন্য উন্মুক্ত করার আগে প্রফেশনাল হ্যাকারদের ডেকে আনা হয়। 
+PII কী?
 
-তারা ইচ্ছে করে মডেলকে নানাভাবে অ্যাটাক করে এর দুর্বলতা খুঁজে বের করে।
+এটি হলো Personally Identifiable Information, যেমন মানুষের নাম, ফোন নাম্বার, ইমেইল ইত্যাদি।
 
-দ্বিতীয়টি হলো Guardrails।
+এর ঝুঁকি বা Risk কী?
 
-এখানে মডেলের ইনপুট ও আউটপুট গেটওয়েতে একটি ছোট প্রহরী বা Classifier বসানো থাকে。
+লাইভ চ্যাট Log থেকে যদি সরাসরি ফোন নাম্বার বা ইমেইল দিয়ে Model ট্রেইন করে ফেলো, তবে সেই তথ্য Model-এর ব্রেইনে সেভ হয়ে যাবে।
 
-সে যদি দেখে কোনো ক্ষতিকর কমান্ড বা রেসপন্স তৈরি হচ্ছে, সাথে সাথে সেটিকে লক করে দেয়।
+পরবর্তীতে চ্যাট করার সময় Model সেই গোপন তথ্য অন্য কারও সামনে ফাস করে দিতে পারে!
 
+তাহলে এর সমাধান কী?
 
-## ৭. সাধারণ কিছু ভুল ধারণা
+খুব সহজ, ট্রেইনিংয়ের আগে ডেটাকে Anonymize বা মাস্ক করে ফেলতে হবে।
 
-> **Common Mistake**
-> 
-> **ভুল ধারণা:** DPO বা RLHF করলে Model-এর সব সাধারণ কোডিং বা ম্যাথের দক্ষতা অনেক বেড়ে যাবে।
-> 
-> **বাস্তবতা:** একে AI ফিল্ডে বলা হয় **Alignment Tax**। মডেলকে অতিরিক্ত কড়া নিয়মের মধ্যে রাখলে তার ক্রিয়েটিভিটি আর জটিল চিন্তা করার ক্ষমতা কমে যায়।
-
-এমনকি অনেক সময় সাধারণ কোনো নির্দোষ প্রশ্ন করলেও সে ভয় পেয়ে উত্তর দিতে অস্বীকৃতি জানায়।
-
-তাই প্রোডাকশনে নিরাপত্তা ও উপযোগিতার মধ্যে একটি সঠিক ব্যালেন্স রাখা খুবই জরুরি।
+যেমন Regular Expression বা `presidio` লাইব্রেরি ব্যবহার করে ফোন নাম্বারকে `<PHONE>` এবং নামকে `<NAME>` দিয়ে বদলে দেওয়া।
 
 
-## ৮. সুশীল নীতি পুলিশ
+## ৭. Common Mistakes
 
-সহজভাবে বোঝার জন্য একটা চমৎকার Mental Model ব্যবহার করা যাক।
+🔴 Common Mistake
 
-ধরে নাও, Alignment হলো AI-এর মাথায় একজন সুশীল নীতি পুলিশ বসিয়ে দেওয়া।
+ভুল ধারণা:
 
-[VISUAL]
-Title: Internal Safety Guard Dog Analogy of Alignment
-Illustration: Inner controller node blocking forbidden vector paths before output generation
-Placement: Under Mental Model
-Purpose: Ground the concept of active internal suppression.
+ডেটাসেটে ব্যাকরণ বা তথ্যের ভুল থাকলেও সমস্যা নেই, Model নিজে নিজেই সব ঠিক করে নেবে।
 
-```
-  [ Raw Thought Generation ] ──► [ Internal Safety Officer (DPO) ] ──► [ Output Response ]
-                                                │
-                                                ▼ (Blocks unsafe/illegal paths)
-                                       "Refusal Message"
-```
+বাস্তবতা:
 
-ভাবো, মডেলটি হলো দারুণ প্রতিভাবান এক শিশু।
+Model কিন্তু ট্রেইনিং ডেটাসেটের স্টাইল হুবহু অনুকরণ করে।
 
-সে দুনিয়ার সব ভালো ও মন্দ কথা বলতে পারে। 
+তাই ডেটাসেটে বানান ভুল থাকলে ফাইন-টিউনড Model-ও ভুল বানানই জেনারেট করবে।
 
-এখন তুমি তার ব্রেইনে একজন সুশীল নীতি পুলিশ বসিয়ে দিলে।
-
-শিশুটির মুখ দিয়ে যখনই কোনো ক্ষতিকর কথা বের হতে যায়, পুলিশটি সাথে সাথে তার মুখ চেপে ধরে। 
-
-এবং তাকে সবচেয়ে ভদ্র ও নিরাপদ কথাটি বলতে বাধ্য করে।
+এজন্য Dataset সবসময় একদম পরিষ্কার ও নির্ভুল রাখতে হবে।
 
 
-## ৯. কাস্টম DPO Loss হিসাব করা
+## ৮. Mental Model: অ্যাক্টিং স্কুল
 
-চলো, এবার আমরা পাইথনে কোনো লাইব্রেরি ছাড়া সরাসরি NumPy ব্যবহার করে DPO Loss হিসাব করার নিয়মটি দেখে নিই।
+RAG এবং Fine-Tuning-এর পার্থক্য বোঝার জন্য একটি সহজ Mental Model ব্যবহার করা যাক।
+
+RAG হলো অনেকটা Memory কার্ড রিডার-এর মতো।
+
+এখানে Model-এর ব্রেইনে কোনো পরিবর্তন হয় না।
+
+তুমি তাকে একটা External Memory ড্রাইভ কানেক্ট করে দিলে, সে শুধু রিড করে উত্তর দিল।
+
+আর Fine-Tuning হলো অ্যাক্টিং স্কুলে ক্যারেক্টার ট্রেনিং নেওয়ার মতো।
+
+তুমি একজন অভিনেতাকে অ্যাক্টিং স্কুলে পাঠালে সে কিন্তু নতুন কোনো ইতিহাস বা তথ্য শিখছে না।
+
+সে শুধু শিখছে কীভাবে একজন মিষ্টি স্বভাবের ডাক্তারের মতো অভিনয় করতে হয় বা কথা বলতে হয়।
+
+
+## ৯. Mini Project: Custom Dataset এবং PII Filter
+
+চলো পাইথনে Regex ব্যবহার করে কোনো লাইব্রেরি ছাড়াই একটি কাস্টম Data Anonymizer তৈরি করে ফেলি।
+
+এর মাধ্যমে আমরা সহজেই Fine-Tuning ডেটাসেট থেকে গোপন তথ্য ফিল্টার করতে পারব।
 
 ```python
-import numpy as np
+import re
 
-# ১. মক Log-প্রোবাবিলিটিজ (Log-probabilities of active and reference models)
-# log_pi_theta = আমাদের একটিভ Model-এর Token জেনারেশন প্রোবাবিলিটি
-# log_pi_ref   = আমাদের ফ্রিজড রেফারেন্স Model-এর প্রোবাবিলিটি
+# ১. র কাস্টমার কনভারসেশন Log (ফোন নাম্বার ও ইমেইলসহ গোপন Data)
+customer_logs = [
+    {
+        "instruction": "আমার অ্যাকাউন্ট নম্বর ০১৮১২৩৪৫৬৭৮ এর পিন লক হয়ে গেছে।",
+        "output": "প্রিয় কাস্টমার, তোমার নম্বর ০১৮১২৩৪৫৬৭৮ এর পিন রিসেট করার জন্য NID নিয়ে অফিসে এসো।"
+    },
+    {
+        "instruction": "যেকোনো জিজ্ঞাসায় karim123@gmail.com এ মেইল করতে পারো কি?",
+        "output": "হ্যাঁ, karim123@gmail.com এ আমাদের সাপোর্ট টিম ২৪ ঘণ্টা একটিভ থাকে।"
+    }
+]
 
-# চুজেন বা উইনার উত্তরের প্রোবাবিলিটি একটিভ মডেলে বেশি
-log_pi_theta_chosen = -0.15
-log_pi_ref_chosen = -0.30
+# ২. কাস্টম PII অ্যানোনিমাইজার Function
+def anonymize_text(text):
+    # ফোন নাম্বার মাস্কিং (বাংলা মোবাইল ১০-১১ ডিজিট)
+    phone_pattern = r'(?:০১৮|০১৭|০১৫|০১৬|০১৯|০১৩)\d{৮}|\b01[3-9]\d{8}\b'
+    text = re.sub(phone_pattern, "<PHONE_NUMBER>", text)
+    
+    # ইমেইল মাস্কিং
+    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    text = re.sub(email_pattern, "<EMAIL_ADDRESS>", text)
+    
+    return text
 
-# রিজেক্টেড বা লুজার উত্তরের প্রোবাবিলিটি একটিভ মডেলে কমে গেছে
-log_pi_theta_rejected = -0.90
-log_pi_ref_rejected = -0.50
+# ৩. Dataset স্যানিটাইজ ও রূপান্তর করো
+sanitized_dataset = []
 
-# ২. ডিপিও হাইপারপ্যারামিটার (Beta - scaling factor)
-beta = 0.5
+for log in customer_logs:
+    clean_instruction = anonymize_text(log["instruction"])
+    clean_output = anonymize_text(log["output"])
+    
+    sanitized_dataset.append({
+        "instruction": clean_instruction,
+        "output": clean_output
+    })
 
-# ৩. ডিপিও Loss Calculation সমীকরণ
-# loss = -ln(sigmoid(beta * ln(pi_theta_w/pi_ref_w) - beta * ln(pi_theta_l/pi_ref_l)))
-
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
-# উইনার এবং লুজার রেশিও পরিমাপ
-ratio_chosen = log_pi_theta_chosen - log_pi_ref_chosen
-ratio_rejected = log_pi_theta_rejected - log_pi_ref_rejected
-
-# ডিপিও Loss মান
-dpo_loss = -np.log(sigmoid(beta * (ratio_chosen - ratio_rejected)))
-
-print(f"Chosen Log-Ratio:   {ratio_chosen:.4f}")
-print(f"Rejected Log-Ratio: {ratio_rejected:.4f}\n")
-print(f"Calculated DPO Loss Score: {dpo_loss:.4f}")
+# ৪. Output প্রিন্ট করো
+print("--- SANITIZED DATASET FOR SECURE FINE-TUNING ---")
+for idx, data in enumerate(sanitized_dataset):
+    print(f"Data {idx+1}:")
+    print(f"Instruction: '{data['instruction']}'")
+    print(f"Output:      '{data['output']}'")
+    print("-" * 50)
 ```
 
-**Code Breakdown**
+#### Code Breakdown:
 
-কোডটি কীভাবে কাজ করছে চলো দেখে নিই।
+এখানে Input হিসেবে আমরা কী দিচ্ছি?
 
-এখানে Input হিসেবে আমরা একটিভ ও রেফারেন্স মডেলের পছন্দের ও অপছন্দের উত্তরের সম্ভাবনা দিয়েছি।
+কাস্টমারদের গোপন ফোন নাম্বার ও ইমেইলসহ র চ্যাট হিস্টোরি।
 
-এর ওপরে গাণিতিক সমীকরণটি প্রয়োগ করার পর আমরা পাচ্ছি DPO Loss Score।
+Output হিসেবে কী পাচ্ছি?
 
-এটি মূলত পছন্দের ও অপছন্দের উত্তরের রেশিও দেখে মডেলকে ট্রেন করে।
+PII ফিল্টার করা একদম নিরাপদ Fine-Tuning Dataset।
 
-যখনই তুমি কাস্টম সেফটি এলাইনমেন্ট করতে যাবে, তখনই এই নিয়মটি কাজে লাগবে।
+এটি কীভাবে কাজ করছে?
 
+আমাদের Custom Regex Pattern খুব সহজেই ফোন এবং ইমেইল খুঁজে বের করে ট্যাগ দিয়ে বদলে দিচ্ছে।
 
-## ১০. ইন্টারভিউতে সাধারণ কিছু প্রশ্ন
+এর ফলে আমাদের প্রোডাকশন ডেটা লিক হওয়ার কোনো সম্ভাবনাই থাকছে না।
 
-### Beginner লেভেল
+আমরা এটি কখন ব্যবহার করব?
 
-**প্রশ্ন:** Alignment কেন করা হয় এবং এর প্রধান তিনটি ভিত্তি কী?
-
-**উত্তর:** মডেল যাতে মানুষের নৈতিকতা ও সুরক্ষার সীমানায় থেকে উত্তর দিতে পারে, সেজন্য Alignment করা হয়। এর প্রধান তিনটি ভিত্তি হলো Helpfulness, Honesty এবং Harmlessness।
-
-### Intermediate লেভেল
-
-**প্রশ্ন:** RLHF-এর চেয়ে DPO কেন বেশি জনপ্রিয় হচ্ছে?
-
-**উত্তর:** RLHF-এ একসাথে তিনটি আলাদা Model চালাতে হয়, যা অনেক খরচ বাড়ায় আর আনস্ট্যাবল করে। আর DPO কোনো আলাদা Reward Model ছাড়াই সরাসরি একটি Loss Function ব্যবহার করে কাজ শেষ করে দেয়। তাই এটি অনেক দ্রুত ও স্ট্যাবল।
-
-### Advanced লেভেল
-
-**প্রশ্ন:** Alignment Tax কী এবং এটি কীভাবে কমানো যায়?
-
-**উত্তর:** অতিরিক্ত কঠোর নিয়মের কারণে মডেলের কোডিং বা রিজনিংয়ের মতো জটিল কাজের দক্ষতা কমে যাওয়াকে Alignment Tax বলে। এটি কমানোর জন্য সেফটি ডেটার পাশাপাশি প্রচুর পরিমাণে জেনারেল লজিক্যাল ডেটা যুক্ত করতে হয়। এছাড়াও ব্যাকঅ্যান্ডে Llama Guard-এর মতো External Guardrails ব্যবহার করা যেতে পারে।
+রিয়েল ইউজার ডেটা ব্যবহার করে Fine-Tuning Dataset রেডি করার সময়।
 
 
-## ১১. যা শিখলাম
+## ১০. Interview Questions
 
-চলো চট করে পুরো বিষয়টির ওপর চোখ বুলিয়ে নিই।
+### Beginner
 
-Alignment বেস মডেল এবং SFT মডেলকে মানুষের নিরাপত্তা ও নৈতিকতার গণ্ডির ভেতরে রাখে।
+**প্রশ্ন:** কখন RAG বনাম Fine-Tuning-এর মধ্যে সঠিক Architectural সিদ্ধান্ত নিতে হবে?
 
-RLHF মানুষের ফিডব্যাক নিয়ে Reward Model তৈরি করে এবং PPO অপ্টিমাইজারের মাধ্যমে লুপ সম্পন্ন করে।
+**উত্তর:** যখন প্রজেক্টের লক্ষ্য রিয়েল-টাইম এবং নির্ভুল Factual তথ্য দেওয়া, তখন RAG সেরা চয়েস।
 
-DPO সরাসরি সমীকরণের সাহায্যে মানুষের পছন্দ-অপছন্দের রেশিও টিউন করে দেয়।
+আর যখন লক্ষ্য Model-কে নির্দিষ্ট টোন বা Custom Output Format (যেমন JSON বা SQL) শেখানো, তখন Fine-Tuning একমাত্র সমাধান।
 
-আর বাস্তব প্রজেক্টে সুরক্ষার জন্য Red Teaming করা অত্যন্ত জরুরি।
+### Intermediate
+
+**প্রশ্ন:** Fine-Tuning Dataset তৈরির সময় PII Masking কেন আবশ্যক?
+
+**উত্তর:** PII মাস্কিং না করলে কাস্টমারের গোপন ফোন নাম্বার বা ইমেইল চিরতরে Model-এর ব্রেইনে সেভ হয়ে যাবে।
+
+পরবর্তীতে Prompt হ্যাকিংয়ের মাধ্যমে AI সেই গোপন ডাটা সবার সামনে ফাস করে দিতে পারে।
+
+এটি একটি বড় সিকিউরিটি লিক ঘটাবে।
+
+### Advanced
+
+**প্রশ্ন:** SFT ট্রেনিংয়ের সময় Loss Calculation-এ কেন Target Prompt Masking বা Index -100 ব্যবহার করা হয়?
+
+**উত্তর:** SFT ট্রেনিংয়ে আমাদের মূল লক্ষ্য হলো সঠিক উত্তর দিতে শেখানো।
+
+ইউজার কী প্রশ্ন করবে তার ওপর মডেলের কোনো হাত নেই।
+
+Prompt Token-এর ওপর Loss Calculate করলে মেমরি ও Gradient Optimization নষ্ট হয়।
+
+টার্গেট মাস্কিং চেইন রুলকে শুধুমাত্র Assistant Response-এর ওপর Weights আপডেট করতে সাহায্য করে।
 
 
-## १२. এরপর কী?
+## Chapter Summary
 
-অভিনন্দন! তুমি Fine-Tuning-এর মতো জটিল একটি পার্ট শেষ করে ফেলেছ।
+চলো সংক্ষেপে পুরো চ্যাপ্টারটি রিভিশন দিয়ে নিই:
 
-পরবর্তী চ্যাপ্টার থেকে শুরু হচ্ছে আমাদের সবচেয়ে এক্সাইটিং সফর— Agentic AI।
+SFT হলো মডেলের আচরণ ও কথা বলার টোন পরিবর্তন করার মূল গাণিতিক পদ্ধতি।
 
-সেখানে আমরা দেখব কীভাবে সাধারণ চ্যাটবট থেকে শক্তিশালী AI Agent তৈরি করা যায়। 
+মনে রাখবে, RAG হলো রিয়েল-টাইম ডাটার রাজা, আর Fine-Tuning হলো Format ও Persona-র রাজা।
 
-চলবে...
+আমরা ডেটাসেট তৈরির জন্য Alpaca এবং ShareGPT—এই দুটি জনপ্রিয় Format ব্যবহার করি।
+
+আর হ্যাঁ, প্রোডাকশন ডেটাসেট তৈরির সময় PII Masking করা কিন্তু একদম বাধ্যতামুলক!
+
+
+## What's Next?
+
+দারুণ! আমরা Supervised Fine-Tuning-এর মূল বিষয়গুলো শিখে ফেলেছি।
+
+পরের চ্যাপ্টারে আমরা এই প্রসেসকে আরও সহজ ও কম খরচে করার ম্যাজিক শিখব।
+
+চলো তাহলে দেখে নিই: **Chapter 18: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)**।
+
+কম খরচে কীভাবে ল্যাপটপেই বড় মডেল ফাইন-টিউন করা যায়, সেটাই দেখব সেখানে। Deal?
+
+**Chapter 17 শেষ।**

@@ -464,7 +464,7 @@ Reasoning Model-এর চমৎকার জগৎটা আমরা বুঝ
 
 আমরা প্রবেশ করছি প্রম্পট ইঞ্জিনিয়ারিংয়ের দুনিয়ায়!
 
-**Chapter 29: Prompt Engineering Fundamentals — Zero-Shot, Few-Shot & Persona Prompting।**
+**Chapter 11: Prompt Engineering Fundamentals — Zero-Shot, Few-Shot & Persona Prompting।**
 
 সেখানে দেখবো কীভাবে সামান্য ইনস্ট্রাকশন আর উদাহরণ বদলে দিয়ে মডেলের রেসপন্স নিখুঁত করা যায়।
 

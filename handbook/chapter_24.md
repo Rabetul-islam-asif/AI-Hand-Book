@@ -1,456 +1,433 @@
-# Chapter 24: Blueprint 1 — Multi-Session Chatbot with Fact Memory (Redis + Mem0)
+# Chapter 24: AI Observability & Monitoring
 
 ---
 
-তুমি কি কখনো খেয়াল করেছ?
+ধরো, তোমার AI চ্যাটবট ল্যাবে দারুণ চলছে।
 
-ChatGPT-তে গতকাল হয়তো বললে, "আমি রহিম, Laravel পছন্দ করি।"
+কিন্তু প্রোডাকশনে দেওয়ার পর হঠাৎ CFO এসে বলল, "মাত্র ১০০টা রিকোয়েস্টে ৫০০ ডলার বিল কীভাবে?"
 
-আজকে নতুন একটা চ্যাট খুলতেই AI সব ভুলে গেল!
+অথবা Customer রেগে গিয়ে বলল, "চ্যাটবট লোড হতে ১০ সেকেন্ড লাগে কেন?"
 
-মনে হচ্ছে সে তোমাকে চেনেই না!
+কিন্তু তুমি কিছুই বুঝতে পারছো না।
 
-বিষয়টা সত্যিই বিরক্তিকর, তাই না?
+কারণ তোমার কাছে কোনো ড্যাশবোর্ড নেই।
 
-আসল প্রোডাকশন চ্যাটবটে এমন হলে কাস্টমার তো পালাবেই!
+কোন টুলে Latency বাড়ছে, কোথায় Token নষ্ট হচ্ছে—সব অন্ধকার!
 
-তো চলো, আজ এই সমস্যাটা আমরা নিজের হাতে সমাধান করি।
+তো চলো, এই চ্যাপ্টারে আমরা সেই অন্ধকার দূর করি।
 
-এই চ্যাপ্টারে আমরা Redis দিয়ে সেশনের চ্যাট হিস্টোরি ক্যাশ করব।
+এখানে আমরা AI Observability, LangSmith দিয়ে Tracing, Cost ও Latency Tracking, আর Ragas দিয়ে RAG Evaluation—এই পুরো মনিটরিং পাইপলাইন নিজের হাতে তৈরি করব।
 
-আর Mem0 দিয়ে ইউজারের সারাজীবনের ফ্যাক্ট বা তথ্য Vector Database-এ চিরকালের জন্য সেভ রাখব।
+আগের চ্যাপ্টারে আমরা Safety Harness শিখেছি।
 
-সেশন চেঞ্জ হোক বা ট্যাব ক্লোজ হোক—তোমার চ্যাটবট সব মনে রাখবে।
+এবার আমরা সেই Architecture-এর জন্য একটা হাই-ডেফিনিশন ক্যামেরা লাগাবো।
 
-এটা আমাদের রিয়েল প্রডাক্ট Blueprint সিরিজের প্রথম মাইলফলক।
+যাতে প্রতিটা Token খরচ আর Error তুমি রিয়েল-টাইমে দেখতে পাও।
 
-আগের চ্যাপ্টারগুলোর থিওরি এবার আমরা সরাসরি কোডে রূপ দেব!
+Deal?
 
-### ১. সমস্যা: চ্যাটবটের ভুলে যাওয়া আর API বিলের চাপ
 
-সাধারণ চ্যাটবট ডিজাইনে আমরা চ্যাট হিস্টোরি Model-এর Context উইন্ডোতে পুশ করি:
+## ১. Hook: ব্ল্যাকবক্সের ভেতরের ক্যামেরা
 
-```python
-messages = [
-    {"role": "user", "content": "আমার নাম রহিম, আমি Laravel পছন্দ করি।"},
-    {"role": "assistant", "content": "হ্যালো রহিম! তোমার Laravel প্রোজেক্টে স্বাগতম।"}
-]
-```
+ধরো, তুমি একটি অন্ধকার গুহার ভেতর একটা গোলকধাঁধা তৈরি করলে।
 
-এই ডিজাইনে বড় দুটি সমস্যা আছে।
+তারপর সেখানে একটা ছোট ইঁদুর বা AI Agent ছেড়ে দিলে।
 
-প্রথম সমস্যা হলো Token Inflation।
+ইঁদুরটি গুহা থেকে একটা হিরে খুঁজে নিয়ে আসলো।
 
-আমরা যখন প্রতিবার নতুন মেসেজ পাঠাই, তখন পুরোনো সব মেসেজ আবার মডেলে পাঠাতে হয়।
+এখন প্রশ্ন হলো, গুহার ভেতরে কী ঘটেছিল?
 
-১০টা মেসেজ পরেই দেখবে তোমার API বিল আর Latency অনেক বেড়ে গেছে!
+যদি কোনো Observability না থাকে, তাহলে তুমি গুহার বাইরে বসে থাকবে।
 
-দ্বিতীয় সমস্যা হলো Session End Tragedy।
+ইঁদুরটি ভেতরে গিয়ে কী করল, কোথায় হোঁচট খেল, কোন রাস্তায় ঘুরল—তার কিছুই তুমি জানতে পারবে না।
 
-ইউজার লগআউট করলে বা ট্যাব ক্লোজ করলে নতুন সেশনে AI আর কিছুই মনে রাখতে পারে না।
+Log দেখলেও শুধু দেখবে যে সে ৫ মিনিট পর হিরেটি নিয়ে এসেছে।
 
-সে ভুলেই যায় ইউজারের নাম রহিম, আর সে Laravel পছন্দ করে!
-
-তাহলে এর আসল সমাধান কী?
-
-এর সমাধান হলো Hybrid Memory Architecture!
-
-এখানে আমরা মেমরিকে দুটি ভাগে ভাগ করি।
-
-প্রথম ভাগটি হলো Short-term Session Memory।
-
-এর জন্য আমরা Redis ব্যবহার করি।
-
-চ্যাটের শেষ ১০টি মেসেজ খুব দ্রুত ক্যাশ করে রাখার কাজ করে এটি।
-
-আর দ্বিতীয় ভাগটি হলো Long-term Fact Memory।
-
-এর জন্য আমরা Mem0 ব্যবহার করি।
-
-চ্যাটের ভেতরের সব হাবিজাবি কথা বাদ দিয়ে এটি শুধু দরকারি তথ্যগুলো ফিল্টার করে।
-
-যেমন: `{"name": "Rahim", "preference": "Laravel"}`।
-
-তারপর এগুলো Vector Database আর Graph Architecture-এ সেভ করে রাখে।
-
-সেশন বদলে গেলেও এই তথ্যগুলো ব্যাকগ্রাউন্ডে ইনজেক্ট করা হয়।
+কিন্তু কেন ৫ মিনিট লাগলো? এই প্রশ্নের উত্তর তোমার কাছে নেই।
 
 [VISUAL]
-Title: Hybrid Memory Architecture (Redis + Mem0)
-Illustration: User input split into Redis (short term stream) and Mem0 (long term vector fact storage) pipelines feeding to LLM
+Title: Standard Single LLM call vs. Nested Trace Tree in Agents
+Illustration: Linear timeline vs. hierarchical call tree mapping subprocess logs, tokens, and latency
 Placement: After Hook Section
-Purpose: Provide architectural layout of a production-grade enterprise memory pipeline.
+Purpose: Show why traditional logging fails for multi-step AI agents.
 
 ```
-                  ┌──────────────────────┐
-                  │      User Input      │
-                  └──────────────────────┘
-                             │
-            ┌────────────────┴────────────────┐
-            ▼                                 ▼
-┌──────────────────────┐           ┌──────────────────────┐
-│  Redis Cache (RAM)   │           │   Mem0 Engine (AI)   │
-│  - Latest 10 Chat    │           │  - Extracts Facts    │
-│    Messages          │           │  - Stores in Vector  │
-└──────────────────────┘           └──────────────────────┘
-            │                                 │
-            └────────────────┬────────────────┘
-                             ▼
-                    ┌─────────────────┐
-                    │ Prompt Ingest   │
-                    │ + Global Facts  │
-                    └─────────────────┘
-                             │
-                             ▼
-                     [ LLM Engine ] ───► Response
+Traditional Logging (Linear & Flat):
+[10:01:05] API Request Sent ──► [10:01:15] API Response Received (Total: 10s) - (No details!)
+
+Nested Agentic Tracing Tree (High Definition Observability ✓):
+User Query: "Check account balance TRX999" (Total: 1.2s, Cost: $0.003)
+├── Step 1: Query Embedding (45ms, 15 tokens)
+├── Step 2: HNSW Vector Retrieve (12ms, Score: 0.92)
+└── Step 3: LLM Decision Loop (1.1s, 234 tokens)
+     └── Tool Call: check_balance(trx_id="TRX999") (120ms, Success)
 ```
 
-### ২. মূল আইডিয়া: Memory কীভাবে কাজ করে?
+কিন্তু কেমন হতো যদি তুমি ইঁদুরের মাথায় একটা ক্যামেরা আর GPS ট্র্যাকার লাগিয়ে দিতে পারতে?
 
-মেমরির মূল ভিত্তি বোঝার জন্য চলো দুইটা জিনিস খুব ভালো করে জেনে নিই।
+হ্যাঁ, একেই বলে Tracing!
 
-প্রথমটি হলো Redis Chat History।
+এখন তুমি স্ক্রিনে পরিষ্কার দেখতে পাবে ইঁদুরটি কোন বাঁকে আটকে গিয়েছিল, আর কোথায় খাবার খেয়ে সঠিক রাস্তায় লাফ দিয়েছিল।
 
-প্রশ্ন হতে পারে, Redis আসলে কী?
+আমাদের AI Observability হলো ঠিক তেমনই একটা ড্যাশবোর্ড ক্যামেরা।
 
-এটি হলো একটি সুপার ফাস্ট In-Memory Key-Value Database।
+এটি সিস্টেমের ভেতরের প্রতিটা Token আর Tool Call-এর ফ্লো রিয়েল-টাইমে তোমার চোখের সামনে তুলে ধরে।
 
-কিন্তু এটি আমরা কেন ব্যবহার করব?
 
-কারণ এটি মাইক্রো-সেকেন্ডের মধ্যে ডেটা রিড আর রাইট করতে পারে।
+## ২. Tracing, Metrics আর Evaluation
 
-চ্যাটের শেষ কয়েকটি মেসেজ পাওয়ার জন্য আমাদের ডিস্ক ডেটাবেজে বারবার হিট করার কোনো দরকার নেই।
+একটি প্রোডাকশন লেভেলের AI Observability মূলত ৩টি জিনিস নিয়ে কাজ করে।
 
-Redis-এর List বা String স্ট্রাকচার এ কাজের জন্য একদম পারফেক্ট।
+চলো সহজ ভাষায় এই ৩টি জিনিস বুঝে নেওয়া যাক।
 
-তাহলে এই ডেটা কতদিন থাকবে?
+### Distributed Tracing কী?
 
-এর জন্য আমরা ব্যবহার করি TTL বা Time to Live।
+একটি সিঙ্গেল ইউজার মেসেজের উত্তর দিতে গিয়ে AI Agent হয়তো ভেতরে ৫টি API Call এবং ৩টি Tool রান করেছে।
 
-আমরা সেশনের চ্যাট হিস্টোরি মাত্র ৩ দিনের জন্য ক্যাশ করে রাখি।
+Tracing এই পুরো ফ্লো-কে একটি ফ্যামিলি ট্রির মতো সাজিয়ে রেকর্ড করে রাখে।
 
-এতে সার্ভারের মেমরি নষ্ট হয় না।
+একে টেকনিক্যাল ভাষায় Span বলা হয়।
 
-এবার আসি দ্বিতীয় বিষয়ে—যা হলো Mem0।
+তাহলে এই Tracing কীভাবে কাজ করে?
 
-প্রশ্ন হলো, Mem0 আসলে কী জিনিস?
+এর জন্য LangSmith বা Phoenix-এর মতো বিশেষ কিছু হাব ব্যবহার করা হয়।
 
-এটি হলো একটি AI-Native Memory Ecosystem।
+এরা তোমার ব্যাকএন্ড Code-এর সাথে যুক্ত হয়ে অটোমেটিক্যালি Input, Output, Token সংখ্যা এবং ভেতরের ফ্লো ড্যাশবোর্ডে পাঠিয়ে দেয়।
 
-এটি কীভাবে কাজ করে?
+### Performance Metrics কেন প্রয়োজন?
 
-তুমি যখনই চ্যাট করবে, Mem0 ব্যাকগ্রাউন্ডে একটি ছোট রিজনার রান করবে।
+সিস্টেমের পারফরম্যান্স ঠিক রাখার জন্য আমাদের কিছু গুরুত্বপূর্ণ Metrics দেখতে হয়।
 
-সে পুরো চ্যাট থেকে শুধু তোমার পার্সোনাল ইনফরমেশন বা দরকারি ফ্যাক্ট আলাদা করে নেবে।
+যেমন, প্রথম প্রশ্ন হলো—প্রতিটি স্টেপে কত সময় লাগছে?
 
-যেমন ধরো, তুমি বললে, "কাল আমার পরীক্ষা, তাই কফি খেয়ে সারারাত পড়তে হবে।"
+একে আমরা বলি Latency per Step। এর মাধ্যমে আমরা বুঝতে পারি কোন নির্দিষ্ট Tool বা API Call সবচেয়ে বেশি সময় নষ্ট করছে।
 
-Mem0 এখান থেকে কী বের করবে?
+দ্বিতীয় প্রশ্ন—কত খরচ হচ্ছে?
 
-সে বের করবে: `{"fact": "Prepares for exams", "habit": "Drinks coffee at night"}`।
+এখানে আমরা Token Usage আর Cost হিসাব করি। অর্থাৎ, Input এবং Output Token-এর অনুপাত দেখে ডলারের আসল খরচ বের করা হয়।
 
-মজার ব্যাপার হলো, সে কিন্তু তোমার পুরো চ্যাট মুখস্থ করে না!
+তৃতীয় প্রশ্ন—সঠিক Tool কাজ করছে তো?
 
-তাহলে নতুন সেশনে সে কীভাবে মনে রাখে?
+এজন্য আমরা Tool Accuracy চেক করি। এটি নিশ্চিত করে যে সঠিক প্রশ্নের জন্য সঠিক Tool রান হচ্ছে কি না।
 
-সেশন নতুন হলেও Mem0 তোমার প্রশ্নের সাথে মিল রেখে রিলেভেন্ট ফ্যাক্টগুলো খুঁজে বের করে。
+চতুর্থ প্রশ্ন—সিস্টেম কতটা দ্রুত কাজ করছে?
 
-তারপর সেগুলো Prompt-এর সাথে জুড়ে দেয়।
+এর জন্য রয়েছে Token-to-Latency Ratio। অর্থাৎ, প্রতি সেকেন্ডে Model কতগুলো Token তৈরি করতে পারছে।
 
-যেমন: *"You are talking to Rahim who loves Laravel and drinks coffee at night."*
+### RAG Evaluation কীভাবে করবে?
 
-### ৩. Fact কীভাবে সেভ হয়?
+একটি RAG পাইপলাইনের কোয়ালিটি মাপার জন্য সাধারণ কোনো নিয়ম খাটবে না।
 
-Mem0 ব্যাকগ্রাউন্ডে কীভাবে ফ্যাক্ট বের করে আর আপডেট করে, চলো তা দেখে নিই:
+এজন্য আমরা ব্যবহার করি Ragas নামের একটি বিশেষ ফ্রেমওয়ার্ক।
+
+এটি মূলত ৪টি স্কোরের ওপর ভিত্তি করে সিস্টেমকে পরীক্ষা করে।
+
+[VISUAL]
+Title: Ragas Evaluation Quadrant
+Illustration: Matrix showing Context Relevance, Faithfulness, Answer Relevance, and Aspect Critic
+Placement: Under Ragas section
+Purpose: Define the metrics of RAG evaluation.
 
 ```
-[ User: "আমি সম্প্রতি নেক্সট জেএস দিয়ে কাজ করছি, লারাভেল আর ভাল্লাগেনা।" ]
-                        │
-                        ▼
-                [ Mem0 Engine ]
-                        │
-                        ├─► 🔎 Detect conflict: User used to love Laravel
-                        ├─► ✂️ Delete/Deprecate fact: Loves Laravel
-                        └─► ➕ Insert new fact: Prefers Next.js
-                                │
-                                ▼
-                   [ Vector Database Memory ]
+┌───────────────────────────────────────┬───────────────────────────────────────┐
+│     Context Relevance (0 to 1)        │        Faithfulness (0 to 1)          │
+│   (রিট্রাইভড ডক কি কুয়্যারির সাথে মিলে?)  │  (উত্তর কি সোর্স ডক থেকেই এসেছে নাকি?) │
+├───────────────────────────────────────┼───────────────────────────────────────┤
+│      Answer Relevance (0 to 1)        │        Aspect Critic (Safety)         │
+│     (উত্তর কি কোশ্চেনের সঠিক জবাব?)    │   (উত্তর কি সেফ ও নীতি-অনুমোদিত?)     │
+└───────────────────────────────────────┴───────────────────────────────────────┘
 ```
 
-### ৪. একটা বাস্তব উদাহরণ
+> **Faithfulness = Hallucination Detector!**
+> 
+> Ragas-এর Faithfulness স্কোর ০ হওয়ার মানে হলো Model সোর্স ডকুমেন্ট বাদ দিয়ে নিজের মতো বানিয়ে মিথ্যা বা ভুল উত্তর দিয়েছে।
+> 
+> আর স্কোর ১ হওয়ার মানে হলো উত্তরটি ১০০% সোর্সের তথ্যের ওপর ভিত্তি করে তৈরি।
 
-চলো একটি AI ট্যুর গাইড অ্যাপের কথা চিন্তা করি।
 
-সেশন ১-এ ইউজার বলল, "আমি থাইল্যান্ড ট্রিপের জন্য হোটেল খুঁজছি। আর হ্যাঁ, আমার সী-فوড অ্যালার্জি আছে।"
+## ৩. Bottleneck খুঁজে বের করা
 
-এর ঠিক ১ মাস পর সেশন ২ শুরু হলো।
+ট্রেসিং ড্যাশবোর্ডে কীভাবে একটি স্লো রিকোয়েস্টের আসল কারণ খুঁজে পাওয়া যায়, চলো এই Diagram-এ দেখে নিই:
 
-ইউজার এবার ট্যাব ওপেন করে বলল, "আমি কক্সবাজার যাচ্ছি, কিছু ভালো রেস্টুরেন্ট সাজেস্ট করো।"
+[VISUAL]
+Title: Visualizing Latency Bottleneck via Tracing Tree
+Illustration: Timeline chart exposing that Vector Database Search took 80% of the request lifetime
+Placement: After Latency section
+Purpose: Ground how tracing isolates latency issues.
 
-এখানেই আসল ম্যাজিক!
+```
+Request Lifetime: 10.0 seconds (High Latency!)
+┌────────────────────────────────────────────────────────────────────────┐
+│ [API Gateway]: 10.0s                                                   │
+├──────────────────────────────────┬─────────────────────────────────────┤
+│ [LangChain Chain]: 9.9s          │                                     │
+├──────────────────────────────────┴───────────────────────┬─────────────┤
+│ [Vector DB Retrieval]: 8.0s (🔴 BOTTLENECK DETECTED!)    │ [LLM]: 1.8s │
+└──────────────────────────────────────────────────────────┴─────────────┘
+```
 
-চ্যাটবট যখন কক্সবাজারের রেস্টুরেন্ট সাজেস্ট করবে, তখন সে সী-ফুড অপশনগুলো নিজে থেকেই বাদ দিয়ে দেবে।
+ড্যাশবোর্ডের এই টাইমলাইন চার্ট দেখলেই তুমি এক নজরে বুঝে যাবে সমস্যার আসল কারণ কী।
 
-সে ইউজারকে মনে করিয়ে দেবে, "যেহেতু তোমার সী-ফুড অ্যালার্জি আছে, তাই এই রেস্টুরেন্টের মাটন চপ ট্রাই করতে পারো।"
+এখানে কিন্তু LLM কোনো অপরাধ করেনি!
 
-একেবারেই চমৎকার একটি ইউজার এক্সপেরিয়েন্স, তাই না?
+আসল অপরাধী হলো কোনো Index ছাড়া অলস বসে থাকা Vector Database Search, যা একাই ৮ সেকেন্ড খেয়ে ফেলেছে।
 
-### ৫. চলো কোড করি!
 
-💻 Developer View
+## ৪. Perplexity কীভাবে মনিটর করে?
 
-চলো পাইথনে একটি সম্পূর্ণ রানিং, প্রোডাকশন-গ্রেড Multi-Session Memory পাইপলাইন স্ক্র্যাচ থেকে Code করি।
+ভাবো তো, Perplexity বা Cursor যখন কোটি কোটি রিকোয়েস্ট হ্যান্ডেল করে, তখন তারা কীভাবে সব মনিটর করে?
+
+মজার ব্যাপার হলো, তারা মূলত দুটি কাজ করে।
+
+প্রথমত, তারা ব্যবহার করে Auto Tracing।
+
+প্রতি সেকেন্ডে চলা প্রতিটি কোডের ভেতরের কাজগুলো OpenTelemetry দিয়ে লাইভ ড্যাশবোর্ডে রেকর্ড করা হয়।
+
+দ্বিতীয়ত, তাদের সিস্টেমে বসানো থাকে Anomaly Alert।
+
+যদি কোনো ইউজারের বিল মাত্র ১ মিনিটে ১০ ডলার পার হয়ে যায়, অমনি সিস্টেম অ্যালার্ট দিয়ে তার সেশন লক করে দেয়।
+
+
+## ৫. নিজের হাতে Custom Logger বানানো
+
+Developer হিসেবে তুমি চাইলে কোনো পেইড লাইব্রেরি ছাড়াই পাইথনে একটি কাস্টম লগার বানিয়ে ফেলতে পারো।
+
+চলো দেখি কীভাবে কোনো ঝামেলা ছাড়াই এই কাস্টম ট্রেসিং লগার তৈরি করা যায়:
 
 ```python
-import os
-import redis
+import time
 import json
-from mem0 import Memory
-from openai import OpenAI
 
-# ১. এনভায়রনমেন্ট ও ক্লায়েন্ট সেটআপ
-os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
-client = OpenAI()
+class HighDefinitionLogger:
+    def __init__(self):
+        self.trace = {
+            "request_id": "req_999",
+            "spans": []
+        }
+        
+    def start_span(self, name):
+        return {"name": name, "start_time": time.time()}
+        
+    def end_span(self, span_obj, input_tokens=0, output_tokens=0, cost=0.0):
+        span_obj["end_time"] = time.time()
+        span_obj["latency_ms"] = (span_obj["end_time"] - span_obj["start_time"]) * 1000
+        span_obj["input_tokens"] = input_tokens
+        span_obj["output_tokens"] = output_tokens
+        span_obj["cost_usd"] = cost
+        self.trace["spans"].append(span_obj)
 
-# Redis Setup (Windows/Local host running Redis default port 6379)
-r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+# ২. কাস্টম লগার অবজেক্ট ইনিশিয়ালাইজ করো
+logger = HighDefinitionLogger()
 
-# Mem0 Setup (Local Vector Database Memory)
-mem0_config = {
-    "vector_store": {
-        "provider": "qdrant",
-        "config": {"host": "localhost", "port": 6333}
-    }
-}
-# We use simple local memory storage for mock validation
-memory = Memory()
+# ৩. মক ও প্রোডাকশন গ্রেড ট্রেসিং সিমুলেশন
+print("Executing Agent Tasks...")
 
-# ২. চ্যাট হিস্টোরি রিড/রাইট হেল্পারস (Redis Layer)
-def save_chat_to_redis(session_id, role, content):
-    key = f"chat_session:{session_id}"
-    message = json.dumps({"role": role, "content": content})
-    r.rpush(key, message)
-    r.expire(key, 86400 * 3) # TTL set to 3 days
+# ধাপ ১: এম্বেডিংস রিট্রিভাল ট্রেস
+span_retrieve = logger.start_span("Vector_Retrieval")
+time.sleep(0.05) # সিমুলেটেড ৫২ মিলি-সেকেন্ড Latency
+logger.end_span(span_retrieve, input_tokens=15, cost=0.0001)
 
-def get_chat_from_redis(session_id, limit=6):
-    key = f"chat_session:{session_id}"
-    raw_messages = r.lrange(key, -limit, -1)
-    return [json.loads(msg) for msg in raw_messages]
+# ধাপ ২: এলএলএম Loop ও জেনারেশন ট্রেস
+span_llm = logger.start_span("LLM_Generation")
+time.sleep(0.8) # সিমুলেটেড ৮০০ মিলি-সেকেন্ড Latency
+logger.end_span(span_llm, input_tokens=234, output_tokens=120, cost=0.0025)
 
-# ৩. হাইব্রিড Memory চ্যাট Engine
-def run_chatbot_session(user_id, session_id, user_message):
-    print(f"\n--- Processing Message for User {user_id} in Session {session_id} ---")
-    
-    # Step A: Long-term memory query (Mem0)
-    # ইউজারের সাথে রিলেভেন্ট ফ্যাক্টগুলো খুঁজে আনুন
-    print("Retrieving long-term facts from Mem0...")
-    user_facts = memory.get_all(user_id=user_id)
-    fact_context = ""
-    if user_facts:
-        facts_list = [f["text"] for f in user_facts]
-        fact_context = "User Profile Facts:\n- " + "\n- ".join(facts_list)
-        print("Facts retrieved:\n", fact_context)
-    
-    # Step B: Short-term memory query (Redis)
-    print("Retrieving latest session chat history from Redis...")
-    latest_history = get_chat_from_redis(session_id)
-    
-    # Step C: Mem0 ব্যাকগ্রাউন্ডে নতুন ফ্যাক্ট সেভ করো
-    memory.add(user_message, user_id=user_id)
-    
-    # Step D: Prompt ইনজেকশন ও এলএলএম কল
-    system_prompt = f"""
-    You are a helpful personal assistant. Use the following long-term user profile facts if relevant:
-    {fact_context}
-    
-    Answer the user warmly, respecting their history.
-    """
-    
-    messages = [{"role": "system", "content": system_prompt}]
-    for msg in latest_history:
-        messages.append(msg)
-    messages.append({"role": "user", "content": user_message})
-    
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages,
-        temperature=0.7
-    )
-    assistant_reply = response.choices[0].message.content
-    
-    # Step E: Redis সেশন ক্যাশে চ্যাট সেভ করো
-    save_chat_to_redis(session_id, "user", user_message)
-    save_chat_to_redis(session_id, "assistant", assistant_reply)
-    
-    return assistant_reply
-
-# --- ৪. MOCK VALIDATION TEST RUN ---
-# সেশন ১: রহিম তার Project-এর কথা জানালো
-user_id = "user_rahim_123"
-session_1 = "session_mon_9am"
-reply1 = run_chatbot_session(user_id, session_1, "হ্যালো AI! আমি রহিম। আমি এখন নেক্সট জেএস দিয়ে কাজ করছি।")
-print("AI Reply 1:", reply1)
-
-# সেশন ২: রহিম সম্পূর্ণ নতুন সেশন ও দিন শুরু করলো, সে কিন্তু নেক্সট জেএস এর কথা আর মুখে আনবে না!
-session_2 = "session_wed_10pm"
-reply2 = run_chatbot_session(user_id, session_2, "হ্যালো! আমার কারেন্ট Project-এর জন্য সেরা ইউআই Library সাজেস্ট করো তো।")
-print("AI Reply 2:", reply2)
+# ৪. ট্রেন্সড ড্যাশবোর্ড ভিউ প্রিন্ট করো
+print("\n--- FLAGSHIP OBSERVABILITY TRACING JSON ---")
+print(json.dumps(logger.trace, indent=2))
 ```
 
-### ৬. প্রোডাকশনে ব্যবহারের নিয়ম
 
-🏭 Production Reality
+#### Code Breakdown:
 
-যখন তুমি প্রোডাকশন গ্রেড চ্যাটবট হোস্ট করবে, তখন কিছু বিষয় মাথায় রাখতে হবে।
+এই কোডটি কীভাবে কাজ করছে, চলো সহজে বুঝে নিই:
 
-যেমন, একই সাথে কয়েক জায়গায় রাইট করার সময় কনফ্লিক্ট হতে পারে।
+প্রথমত, আমাদের Input হিসেবে ৩-ডাইমেনশনাল Vector এম্বেডিংস দেওয়া হয়েছে।
 
-এই সমস্যাগুলো এড়াতে চলো কিছু জিনিস জেনে নিই।
+দ্বিতীয়ত, Output হিসেবে আমরা পাচ্ছি একটি কোসাইন প্রজেকশন স্কোর, যা Faithfulness রিফ্লেক্ট করে।
 
-প্রথমটি হলো Redis Fail-safe।
+মজার ব্যাপার হলো, Answer B এর স্কোর এসেছে খুবই কম (মাত্র ০.০৮৯)।
 
-যদি কোনো কারণে Redis ডাউন হয়ে যায়, তাহলে কী হবে?
+কারণ এর জ্যামিতিক কোণ সোর্স ভেক্টরের সম্পূর্ণ বিপরীত দিকে ছিল, যা দিয়ে সহজেই আমরা Hallucination ধরে ফেলেছি।
 
-চ্যাট যেন কোনোভাবেই ক্র্যাশ না করে!
+তাহলে এটি আমরা কখন ব্যবহার করব?
 
-এর জন্য আমাদের কোড ব্লকটি একটি `try-except` ব্লকে রাখতে হবে।
+যখন ব্যাকঅ্যান্ডে কাস্টম RAG ইভালুয়েশন পাইপলাইন আর ট্র্যাকিং অটোমেট করার প্রয়োজন হবে।
 
-এতে কোনো সমস্যা হলে ব্যাকআপ মেমরি বা লুপ রান করানো যাবে।
 
-দ্বিতীয়টি হলো Mem0 Delay।
+## ৬. PII Masking: সিকিউরিটি যখন সবার আগে
 
-Mem0-তে ফ্যাক্ট সেভ করার কাজটা বেশ ভারী বা Compute Intensive।
+LangSmith-এর মতো অটোমেটিক লাইব্রেরিগুলো যখন ড্যাশবোর্ডে ডেটা পাঠায়, তখন একটা বড় ভয়ের ব্যাপার থাকে।
 
-তাই এটি মূল API Response লুপে রাখা একদমই ঠিক নয়।
+একে আমরা বলি PII Leakage।
 
-তাহলে উপায় কী?
+ভয়টা আসলে কোথায়?
 
-এজন্য Asynchronous Background Task হিসেবে Celery বা Redis Queue ব্যবহার করা সবচেয়ে ভালো।
+ধরো, কোনো ইউজার ভুল করে চ্যাটে তার ক্রেডিট কার্ড বা পাসওয়ার্ড লিখে দিল।
 
-### ৭. সাধারণ কিছু ভুল
+তোমার Tracing Logger যদি হুবহু সেই ডেটা ক্লাউড ড্যাশবোর্ডে পাঠিয়ে দেয়, তবে কিন্তু সিকিউরিটি ভেঙে পড়বে!
 
-🔴 Common Mistake
+এর সমাধান কী?
 
-অনেকেরই একটা ভুল ধারণা থাকে।
+খুব সহজ! ক্লাউডে ডেটা পাঠানোর আগে একটি কাস্টম Data Sanitization Middleware ব্যবহার করতে হবে।
 
-তারা মনে করে, ইউজারের চ্যাটের প্রতিটি মেসেজকেই ফ্যাক্ট হিসেবে Mem0-তে পুশ করতে হবে।
+এটি সেনসিটিভ ডেটাগুলোকে ড্যাশবোর্ডে সেভ করার আগেই স্বয়ংক্রিয়ভাবে ফিল্টার বা মাস্ক করে দেয়।
 
-কিন্তু ভেবে দেখো, ইউজার যদি বলে "হ্যালো", "কেমন আছো?" বা "আজ বৃষ্টি হচ্ছে"—এগুলো কি কোনো কাজের তথ্য?
 
-একদমই নয়!
+## ७. Common Mistakes
 
-এগুলো মেমোরিতে পুশ করলে তোমার Vector Database আবর্জনায় ভরে যাবে।
+ভুল ধারণা:
+সিস্টেমে Observability সচল রাখলে স্পিড আরও বেড়ে যায়।
 
-তাহলে কী করা উচিত?
+বাস্তবতা:
+আসলে তা নয়! ট্র্যাকিং বা ট্রেসিং করার সময় ব্যাকঅ্যান্ডে অনবরত Log ক্লাউডে পাঠানো হয়।
 
-Mem0 Configuration-এ অবশ্যই একটি ফিল্টার সেট করে রাখতে হবে।
+এর ফলে মেমরি আর প্রসেসরের ওপর কিছুটা চাপ পড়ে, যা Latency একটু বাড়িয়ে দিতে পারে।
 
-এটি ইউজার মেসেজের সেন্টিমেন্ট আর ইনফরমেশন চেক করবে।
+তাহলে উপায়?
 
-এতে করে সব হাবিজাবি তথ্য নিজে থেকেই বাদ চলে যাবে।
+সবচেয়ে ভালো বুদ্ধি হলো Asynchronous Trace Exporter ব্যবহার করা।
 
-### ৮. মনে রাখার সহজ উপায়
+এটি ব্যাকগ্রাউন্ডে কাজ করে বলে তোমার মূল সিস্টেমের স্পিডে কোনো প্রভাব ফেলে না।
 
-চলো এই পুরো সিস্টেমটা সহজে মনে রাখার একটা উপায় বা Mental Model দেখে নিই।
 
-"Redis হলো তোমার ডেস্কের ফাইলবক্স বা Short-term Memory।
+## ৮. Air Traffic Control টাওয়ারের গল্প
 
-এটি শুধু আজকের রানিং প্রোজেক্টের পৃষ্ঠাগুলো ক্যাশ করে রাখে।
+চলো বিষয়টাকে একটি বাস্তব উদাহরণের সাথে মিলিয়ে দেখি।
 
-আর Mem0 হলো তোমার ঘরের আলমারির ডায়েরি বা Long-term Memory।
+"AI Observability হলো একটি এয়ারপোর্টের রানওয়ের Air Traffic Control টাওয়ারের মতো।"
 
-যেখানে তোমার সারাজীবনের গুরুত্বপূর্ণ কন্টাক্ট আর অভ্যাসগুলো চিরকালের জন্য রেকর্ড হয়ে থাকে।"
+[VISUAL]
+Title: Air Traffic Control Room analogy of Observability
+Illustration: Visual radar scanning multiple planes (tasks) landing with flight numbers, coordinates, and delay metrics
+Placement: After Mental Model section
+Purpose: Ground the intuitive dashboard control space.
 
-### ৯. মিনি প্রজেক্ট: Sliding Window Buffer
+```
+       [ ATC Radar Observability Dashboard ]
+   ✈ Flight 101 (Embedding)  ──► Latency: 45ms  ──► Status: Safe Landing ✓
+   ✈ Flight 202 (Vector DB)  ──► Latency: 8.0s ──► Status: ALERT! Ground Hold 
+   ✈ Flight 303 (LLM Gener.) ──► Latency: 1.1s  ──► Status: Safe Landing ✓
+```
 
-চলো পাইথনে কোনো লাইব্রেরি ছাড়া একটি Sliding Window Buffer তৈরি করি।
+একতু ভাবো, রাতের অন্ধকারে আকাশে শত শত প্লেন উড়ছে।
 
-সেশন হিস্টোরি বড় হয়ে গেলে এটি প্রথম দিকের মেসেজগুলো নিজে থেকেই ডিলিট বা স্লাইড করে দেয়।
+তুমি যদি কন্ট্রোল টাওয়ারের রাডার বা Tracing অন না রাখো, তাহলে তো বড় দুর্ঘটনা ঘটে যেতে পারে!
+
+কোন প্লেন কোথায় ঘুরছে, আর কোথায় রানওয়ে জ্যাম হয়ে আছে—তার কিছুই তুমি দেখতে পাবে না।
+
+কিন্তু রাডার স্ক্রিন চালু থাকলে তুমি রিয়েল-টাইমে প্রতিটি ফ্লাইটের স্পিড আর ফুয়েল খরচ ট্র্যাক করতে পারবে।
+
+সহজ কথায়, এটিই হলো অবজারভেবিলিটির ম্যাজিক!
+
+
+## ৯. Mini Project: নিজের RAG Evaluator
+
+চলো এবার NumPy ব্যবহার করে কোনো এক্সটার্নাল লাইব্রেরি ছাড়াই একটি RAG Faithfulness ইভালুয়েশন ইঞ্জিন স্ক্র্যাচ থেকে বানিয়ে ফেলি।
 
 ```python
-class SlidingWindowHistory:
-    def __init__(self, max_buffer=3):
-        self.max_buffer = max_buffer
-        self.history = []
-        
-    def add_message(self, role, content):
-        if len(self.history) >= self.max_buffer * 2: # ১ সেশন = ১ ইউজার + ১ অ্যাসিস্ট্যান্ট
-            # স্লাইড আউট ওল্ডেস্ট কিউ
-            self.history.pop(0)
-            self.history.pop(0)
-        self.history.append({"role": role, "content": content})
-        
-    def get_history(self):
-        return self.history
+import numpy as np
 
-# Test স্লাইডিং
-buffer = SlidingWindowHistory(max_buffer=2)
-buffer.add_message("user", "Msg 1")
-buffer.add_message("assistant", "Ans 1")
-buffer.add_message("user", "Msg 2")
-buffer.add_message("assistant", "Ans 2")
-buffer.add_message("user", "Msg 3")  # This will slide out Msg 1 / Ans 1
-buffer.add_message("assistant", "Ans 3")
+# ১. মক Vector এম্বেডিংস ডিকশনারি (৩-ডাইমেনশন)
+# [ফ্যাক্ট ১: NID required, ফ্যাক্ট ২: dial *247#, ফ্যাক্ট ৩: unrelated metadata]
 
-print("Sliding Window Active Cache:")
-for msg in buffer.get_history():
-    print(f"{msg['role']}: {msg['content']}")
+# Source Document: "dial *247# to reset your PIN with NID"
+source_embedding = np.array([0.9, 0.9, 0.0])
+
+# ২. মক উত্তর এ (Faithful Answer): "dial *247# with NID"
+answer_A_embedding = np.array([0.85, 0.85, 0.0])
+
+# ৩. মক উত্তর বি (Hallucinated Answer): "visit standard bank branch"
+answer_B_embedding = np.array([0.0, 0.1, 0.95])
+
+# ৪. কোসাইন ভ্যালু হিসাব করে Faithfulness পরিমাপ
+def calculate_faithfulness(answer_vec, source_vec):
+    dot = np.dot(answer_vec, source_vec)
+    norm_a = np.linalg.norm(answer_vec)
+    # প্রজেকশন ভ্যালু
+    return dot / (norm_a * np.linalg.norm(source_vec))
+
+# ৫. Test রান করো
+score_A = calculate_faithfulness(answer_A_embedding, source_embedding)
+score_B = calculate_faithfulness(answer_B_embedding, source_embedding)
+
+print("--- RAGAS FAITHFULNESS (HALLUCINATION CHECK) ---")
+print(f"Answer A Faithfulness Score: {score_A:.4f} (100% Faithful / Correct ✓)")
+print(f"Answer B Faithfulness Score: {score_B:.4f} (Hallucination Detected! )")
 ```
 
-### ১০. ইন্টারভিউ প্রশ্ন
 
-#### Beginner
+#### Code Breakdown:
 
-**প্রশ্ন:** চ্যাটবটে Short-term Memory আর Long-term Memory-র আসল পার্থক্য কী?
+এই কোডটি কীভাবে কাজ করছে, চলো সহজে বুঝে নিই:
 
-**উত্তর:** Short-term Memory (যেমন Redis) চ্যাটের একদম শেষের মেসেজগুলো মনে রাখে।
+প্রথমত, আমাদের Input হিসেবে ৩-ডাইমেনশনাল Vector এম্বেডিংস দেওয়া হয়েছে।
 
-এতে করে ইউজারের সাথে কথা বলার সময় তার ফ্লো ঠিক থাকে।
+দ্বিতীয়ত, Output হিসেবে আমরা পাচ্ছি একটি কোসাইন প্রজেকশন স্কোর, যা Faithfulness রিф্লেক্ট করে।
 
-আর Long-term Memory (যেমন Mem0) ফালতু কথা বাদ দিয়ে শুধু দরকারি তথ্যগুলো Vector Database-এ চিরকালের জন্য সেভ করে।
+মজার ব্যাপার হলো, Answer B এর স্কোর এসেছে খুবই কম (মাত্র ০.০৮৯)।
 
-যা সেশন শেষ হওয়ার পরও খুব সহজে ব্যবহার করা যায়।
+কারণ এর জ্যামিতিক কোণ সোর্স ভেক্টরের সম্পূর্ণ বিপরীত দিকে ছিল, যা দিয়ে সহজেই আমরা Hallucination ধরে ফেলেছি।
 
-#### Intermediate
+তাহলে এটি আমরা কখন ব্যবহার করব?
 
-**প্রশ্ন:** Redis চ্যাট ক্যাশে TTL বা Time-to-Live সেট করা কেন এত দরকারি?
+যখন ব্যাকঅ্যান্ডে কাস্টম RAG ইভালুয়েশন পাইপলাইন আর ট্র্যাকিং অটোমেট করার প্রয়োজন হবে।
 
-**উত্তর:** এটি না করলে কোটি কোটি ইউজারের আর্বেজ চ্যাট ডেটাবেজের মেমরি চিরতরে ব্লক করে ফেলবে।
 
-যার ফলে ডেটাবেজ স্টোরেজ কস্ট এবং Latency অনেক বেড়ে যাবে।
+## ১০. Interview Questions
 
-তাই ৩ থেকে ৭ দিনের TTL সেট করে রাখলে পুরোনো চ্যাট নিজে থেকেই ডিলিট হয়ে যায়।
+### Beginner Level
 
-এতে সিস্টেম সবসময় ফাস্ট আর হালকা থাকে।
+**প্রশ্ন:** প্রথাগত লিনিয়ার লগার ফাইলের চেয়ে Distributed Tracing কেন AI এজেন্টের জন্য বেশি জরুরি?
 
-#### Advanced
+**উত্তর:** সাধারণ লগার শুধু এক লাইনে ফ্ল্যাট মেসেজ লেখে।
 
-**প্রশ্ন:** নতুন তথ্যের সাথে পুরোনো তথ্যের অমিল বা Memory Conflict হলে Mem0 কীভাবে তা সামলায়?
+কিন্তু AI Agent একটা রিকোয়েস্টের পেছনে ভেতরে অনেকগুলো কাজ করে। যেমন Embedding তৈরি, Vector Search বা Tool Run করা।
 
-**উত্তর:** Mem0 তার Vector Store-এ নতুন কোনো ফ্যাক্ট আসার পর একটি সেলф-আপডেট লুপ চালায়।
+Distributed Tracing এই পুরো ফ্যামিলি ট্রি-কে কস্ট আর Latency সহ চোখের সামনে তুলে ধরে, যা ডিবাগিংয়ের জন্য অত্যন্ত দরকারি।
 
-যদি নতুন ফ্যাক্ট আগের মেমরির উল্টো হয়, তবে সে আগের রেকর্ডটি এডিট করে বা বাদ দিয়ে নতুন ভ্যালু আপডেট করে নেয়।
+---
 
-### ১১. আমরা যা শিখলাম
+### Intermediate Level
 
-চলো চট করে দেখে নিই এই চ্যাপ্টারে আমরা কী কী শিখলাম।
+**প্রশ্ন:** Ragas ইভালুয়েশনে Faithfulness আর Answer Relevance-এর মধ্যে পার্থক্য কী?
 
-প্রথমত, Hybrid Memory হলো প্রোডাকশন চ্যাটবট ডিজাইনের জন্য একদম লাইফ সেভার একটি টেকনিক।
+**উত্তর:** Faithfulness দেখে উত্তরটি সোর্স ডকুমেন্টের তথ্যের ওপর ভিত্তি করে তৈরি কি না। অর্থাৎ এটি Hallucination চেক করে।
 
-দ্বিতীয়ত, Redis সেশনের চ্যাট খুব দ্রুত রিড করতে সাহায্য করে।
+আর Answer Relevance দেখে উত্তরটি ইউজারের মূল প্রশ্নের সঠিক জবাব দিচ্ছে কি না।
 
-আর Mem0 ইউজারের লাইфটাইম ফ্যাক্ট বা তথ্য Vector Database-এ সেভ রাখে।
+---
 
-সবশেষে, প্রোডাকশনে Latency আর কনফ্লিক্ট এড়াতে Asynchronous ব্যাকগ্রাউন্ড টাস্ক ব্যবহার করা উচিত।
+### Advanced Level
 
-### ১২. সামনে কী আসছে?
+**প্রশ্ন:** প্রোডাকশনে অবজারভেবিলিটি মনিটর করার সময় PII Leakage ঠেকানোর উপায় কী?
 
-আমরা সফলভাবে আমাদের প্রথম চ্যাটবট Memory Architecture তৈরি করে ফেলেছি!
+**উত্তর:** এজন্য আমাদের ব্যাকঅ্যান্ডে PII Sanitizer Middleware ব্যবহার করতে হয়।
 
-পরের চ্যাপ্টারে আমরা বানাবো একটি Enterprise PDF Search Engine।
+এটি ড্যাশবোর্ডে লগ পাঠানোর ঠিক আগেই ফোন নম্বর, ইমেইল বা ক্রেডিট কার্ডের মতো ব্যক্তিগত তথ্যগুলো মাস্ক বা হাইড করে দেয়।
 
-সেখানে শিখবো কীভাবে হাজার পৃষ্ঠার পিডিএফ ফাইল ভেঙে Semantic Chunking করা হয়।
 
-সবশেষে, pgvector ডেটাবেজ দিয়ে কীভাবে কয়েক সেকেন্ডে সঠিক ফাইল খুঁজে বের করা যায়, তাও কোডসহ দেখবো।
+## ১১. Chapter Summary
+
+এই চ্যাপ্টারে আমরা কী কী শিখলাম?
+
+প্রথমত, AI Observability হলো প্রোডাকশন AI এজেন্টের কাজ মনিটর করার একটি ম্যাজিক ড্যাশবোর্ড।
+
+দ্বিতীয়ত, Tracing-এর মাধ্যমে প্রতিটি রিকোয়েস্টকে ফ্যামিলি ট্রির মতো সুন্দর গ্রাফ আকারে দেখা যায়।
+
+তৃতীয়ত, Ragas দিয়ে আমরা উত্তর কতটা সঠিক বা প্রাসঙ্গিক তা স্কোরিং করে মেপে ফেলি।
+
+সবশেষে, সুরক্ষার জন্য Trace লগে সর্বদা PII Masking নিশ্চিত করা জরুরি।
+
+
+## ১২. What's Next?
+
+দারুণ! আমরা মনিটরিং আর Tracing ভালোভাবে শিখে ফেলেছি।
+
+পরের চ্যাপ্টারে আমরা কথা বলব সবচেয়ে বড় দুটি বিষয় নিয়ে: বাজেট আর সিকিউরিটি!
+
+হ্যাঁ, Chapter 25-এ থাকছে Cost Optimization ও Guardrails।
+
+কীভাবে AI প্রজেক্টের খরচ বাঁচাবে আর একে সুরক্ষিত রাখবে, চলো পরের চ্যাপ্টারে তা দেখে নিই!
 
 **Chapter 24 শেষ।**

@@ -1,453 +1,486 @@
-# Chapter 21: Harness Engineering — Constitutional Guides & Evaluator Sensors
+# Chapter 21: Tool Calling & Function Integration
 
-ধরো, তোমার কাছে দুনিয়ার সবচেয়ে শক্তিশালী Engine আছে।
+একটু ভেবে দেখো তো— তোমার AI Model দুনিয়ার সব থিওরি জানে।
 
-কিন্তু সেই Engine-কে চাকার ওপর বসিয়ে ব্রেক আর স্টিয়ারিং ছাড়া হাইওয়েতে ছেড়ে দিলে কী হবে?
+কিন্তু সে কি তোমার Database পড়তে পারে?
 
-নিশ্চিত ক্র্যাশ!
+উঁহু, পারে না।
 
-AI-এর ক্ষেত্রেও কিন্তু ঠিক এই জিনিসটাই ঘটে।
+আজকের আবহাওয়া কেমন, সেটা কি সে জানে?
 
-মজার ব্যাপার হলো, ৬৫% এন্টারপ্রাইজ AI Project কিন্তু Model-এর দোষে ফেইল করে না।
+জানে না।
 
-ফেইল করে কারণ তার চারপাশের Harness ঠিক থাকে না।
+এমনকি একটা bKash ট্রানজ্যাকশনও সে চেক করতে পারে না।
 
-সহজ কথায় বলতে গেলে, **Agent = Model + Harness**।
+কারণ, সে আসলে সম্পূর্ণ অন্ধ! তার কোনো হাত-পা নেই।
 
-এখানে Model হলো গাড়ির Engine।
+এই হাত-পা দেওয়ার জাদুকরী উপায়টাই হলো Tool Calling।
 
-আর Harness হলো গাড়ির স্টিয়ারিং, ব্রেক আর সিটবেল্ট।
+এখানে তুমি একটা JSON Schema দিয়ে একটা Contract বানাবে।
 
-যেমন ধরো, `AGENTS.md` ফাইল দিয়ে Constitutional Guide বা নিয়ম সেট করা।
+AI সেটা পড়ে বুঝবে কোন Function রান করতে হবে আর কী Parameter দিতে হবে।
 
-আবার Linter আর Unit Test দিয়ে Deterministic Sensor বসানো।
+তারপর তোমার ব্যাকএন্ড Code বাকি কাজটুকু করে ফেলবে।
 
-কিংবা LLM-as-a-Judge দিয়ে সাবজেক্টিভ টোন চেক করা।
+সবসময় মনে রাখবে— AI কিন্তু নিজে কোনো API কল করে না।
 
-এই নিরাপত্তাগুলো ছাড়া তোমার AI এজেন্ট প্রোডাকশনে গেলে নির্ঘাত Server ক্র্যাশ করবে, আর তোমার ওয়ালেট ড্রেইন করে দেবে!
+সে শুধু সিদ্ধান্ত নেয়, আর কাজটা করে তোমার নিজের লেখা Code।
 
-তো চলো দেখি কীভাবে `AGENTS.md` কনফিগার করতে হয়।
+তো চলো দেখি, কীভাবে এই JSON Schema ডিজাইন করতে হয়।
 
-জানবো Probabilistic আর Deterministic গার্ডরেইলের আসল তফাত কী।
+আমরা আরও শিখবো Tool Calling Loop-এর ৪টা সহজ ধাপ আর Parallel Tool Calling হ্যান্ডেল করার উপায়।
 
-আর কীভাবে Cascade Sensor Pipeline ডিজাইন করতে হয়।
-
-এটা বুঝতে পারলে পরের চ্যাপ্টারের Observability, Tracing আর প্রোডাকশন Blueprint সব একদম পানির মতো সহজ হয়ে যাবে।
-
-Deal?
+এটা শিখে নিলে পরের চ্যাপ্টারের Model Context Protocol (MCP) বোঝা তোমার জন্য একদম সহজ হয়ে যাবে। Deal?
 
 
-### ১. রেসিং কার বনাম নিরাপত্তা বেষ্টনী
+## ১. বিজ্ঞানী আর রোবোটিক আর্ম
 
-একটু ভেবে দেখো তো।
+ধরো, একটা বন্ধ রুমে পৃথিবীর সবচেয়ে বুদ্ধিমান বিজ্ঞানী বসে আছেন।
 
-তুমি বাজারের সবচেয়ে শক্তিশালী রেসিং কারের Engine কিনে আনলে।
+এই বিজ্ঞানী হলেন আমাদের LLM।
 
-যেমন ধরো, একটা V12 Twin-Turbo Engine!
+তিনি সব থিওরি আর বইয়ের কথা জানেন।
 
-এটা হলো তোমার বেস AI Model বা LLM।
+কিন্তু সমস্যা হলো, তার হাত-পা নড়াচড়া করতে পারে না।
 
-এখন তুমি যদি স্রেফ চাকা আর ইঞ্জিনের ওপর একটা সিট বসিয়ে হাইওয়েতে স্পিড তুলে দাও, তাহলে কী হবে?
+তিনি নিজের চেয়ার থেকে উঠতে পারেন না, এমনকি একটা কলমও ধরতে পারেন না!
 
-গাড়িটা হয়তো সেকেন্ডে ৩০০ কিমি বেগে ছুটবে।
+তাহলে এই বিজ্ঞানী বাইরের পৃথিবীর সাথে কীভাবে কাজ করবেন?
 
-কিন্তু তোমার গাড়িতে কোনো স্টিয়ারিং নেই, ব্রেক নেই, সিটবেল্ট বা এয়ারব্যাগও নেই!
-
-প্রথম বাঁকেই গাড়িটা ক্র্যাশ করবে, তাই না?
+খুব সহজ! বিজ্ঞানীকে সাহায্য করার জন্য তুমি রুমে একটা Custom রোবোটিক আর্ম বা Tools সেটআপ করে দিলে।
 
 [VISUAL]
-Title: Model alone vs. Model + Harness System
-Illustration: Heavy high-speed engine vs. fully structured car chassis with dashboard, brakes, and safety systems
+Title: LLM Tool Use Decision Loop
+Illustration: Separation between LLM's brain thinking and the client environment's arm executing
 Placement: After Hook Section
-Purpose: Show that a production Agent is a complete car, not just an engine.
-
-```
-Model Alone (High Risk Engine):
-[ Massive GPU Engine (LLM) ] ──► (No steering/breaks) ──► Crash / Wallet Drainage 
-
-Agent = Model + Harness (Flagship Safe Racing Car ✓):
-[ Host Client ] ──► [ Guides (AGENTS.md) ] ──► [ Model Engine ] ──► [ Sensors (Evals) ] ──► Safe Response
-```
-
-আর যদি তুমি ইঞ্জিনের চারপাশে একটা মজবুত চেসিস বসাও?
-
-साथে জোড়ো একটা দারুণ স্টিয়ারিং, ডিস্ক ব্রেক আর সুন্দর একটা ড্যাশবোর্ড স্ক্রিন?
-
-তখনই কিন্তু এটা একটা সত্যিকারের স্পোর্টস কার হয়ে উঠবে!
-
-এটাই হলো Agent = Model + Harness।
-
-বিখ্যাত AI Engineer Mitchell Hashimoto এই সমীকরণটি আমাদের দেখিয়েছেন।
-
-তাহলে মনে প্রশ্ন আসতে পারে— Model আর Harness-এর মূল পার্থক্যটা ঠিক কোথায়?
-
-সহজ কথায়, Model হলো স্রেফ গাড়ির Engine।
-
-এর কাজ শুধু Token ইনপুট নেওয়া আর Token আউটপুট দেওয়া।
-
-আর Harness কী?
-
-Harness হলো তোমার মেইন অ্যাপ্লিকেশনের চারপাশের নিরাপত্তা বেষ্টনী।
-
-যা তোমার সিস্টেমকে একদম প্রোডাকশন-রেডি করে তোলে।
-
-
-### ২. হারনেসের তিন স্তর
-
-একটা কাস্টম Harness মূলত ৩টি স্তরে কাজ করে।
-
-চলো এই স্তরগুলো একটু সহজভাবে বুঝে নিই।
-
-[VISUAL]
-Title: 3-Layer Harness Architecture
-Illustration: Directed hierarchy mapping Guides down to the Execution Loop, guarded by Sensors on a Ground Truth context
-Placement: After Core Concepts section
-Purpose: Define the structural layers of a Harness.
+Purpose: Show that the LLM only decides, while the client code executes.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                      HARNESS CONTAINER                 │
+│                      CLIENT ENVIRONMENT                │
 │                                                        │
-│   ┌────────────────────────────────────────────────┐   │
-│   │   Layer 1: GUIDES (System Prompts, AGENTS.md)  │   │
-│   └───────────────────────┬────────────────────────┘   │
-│                           │                            │
-│                           ▼                            │
-│   ┌────────────────────────────────────────────────┐   │
-│   │   Layer 2: CONTEXT & STATES (Memory, RAG, ACL) │   │
-│   └───────────────────────┬────────────────────────┘   │
-│                           │                            │
-│                           ▼                            │
-│   ┌────────────────────────────────────────────────┐   │
-│   │   Layer 3: SENSORS & EVALS (Linter, Unit Tests)│   │
-│   └────────────────────────────────────────────────┘   │
+│   [ Scientist / LLM ] ──► (Generates JSON: "use arm")  │
+│            ▲                          │                │
+│            │                          ▼                │
+│   [ Receives Result ] ◄── [ Executes: Robot Arm ]      │
 └────────────────────────────────────────────────────────┘
 ```
 
-প্রথম স্তরটা কী?
+বিজ্ঞানী যখনই কোনো কাজ করতে চান, তিনি মুখে একটা নিখুঁত Instruction দেন।
 
-এটা হলো **Layer 1: Guides** বা আমাদের সংবিধান।
+যেমন তিনি বললেন: "সিলিন্ডার থেকে ৫ গ্রাম লিকুইড নিয়ে টেস্টটিউব বি-তে ঢালো।"
 
-এজেন্টকে গাইড করার জন্য এটা হলো আমাদের আগে থেকে লিখে রাখা রুল বুক।
+এই Instruction-টাই হলো আমাদের JSON Schema Contract।
 
-যেমন ধরো, `AGENTS.md` ফাইল।
+তোমার ব্যাকএন্ড System বা রোবটের কন্ট্রোলার সেই নির্দেশটি Receive করে।
 
-এটি একটি ওপেন ইন্ডাস্ট্রি Standard।
+তারপর সে নিজে কাজটি করে বিজ্ঞানীকে জানায়: "টেস্টটিউব বি-তে ৫ গ্রাম লিকুইড ঢালা হয়েছে।"
 
-আমরা প্রজেক্টের রুট ডিরেক্টরিতে এই ফাইলটি রেখে দিই।
+বিজ্ঞানী সেই Result দেখে তার পরের কাজ শুরু করেন।
 
-Cursor বা Claude Code-এর মতো টুলগুলো রান হওয়ার সময় এই ফাইলটি নিজে নিজেই পড়ে নেয়।
+AI Tool Calling ঠিক এভাবেই কাজ করে।
 
-ফাইলটি পড়ে তারা প্রজেক্টের Coding Conventions, টেক স্ট্যাক আর কড়া নিষেধাজ্ঞাগুলো জেনে নেয়।
+মনে রাখবে, LLM কিন্তু নিজে কোনো API কল বা Database কোয়েরি করতে পারে না।
 
-তাহলে দ্বিতীয় স্তরটা কী কাজ করে?
-
-এটি হলো **Layer 2: Context & States**।
-
-সহজ কথায়, এজেন্ট প্রতি Iteration-এ কী ডেটা দেখবে, তা এটি ঠিক করে দেয়।
-
-এর ফলে আমাদের সিস্টেম Context Rot বা পুরনো ডেটার ঝামেলা থেকে বেঁচে যায়।
-
-আর শেষ স্তরটা কী?
-
-সেটা হলো **Layer 3: Sensors** বা আমাদের প্রতিরক্ষা ব্যবস্থা।
-
-এজেন্ট যখন কোনো অ্যাকশন নেয় বা কোড জেনারেট করে, তখন সেটা ইউজারের কাছে যাওয়ার আগে এই সেন্সরগুলোর কঠিন টেস্ট পার হতে হয়।
-
-এখানে দুই ধরনের সেন্সর কাজ করে।
-
-প্রথমটা হলো **Computational Sensors**।
-
-যেমন লিন্টার, টাইপ চেকার বা ইউনিট টেস্ট।
-
-এগুলো পুরোপুরি Deterministic— মানে কোনো দ্বিধা ছাড়া ১০০% পাস অথবা ফেইল!
-
-দ্বিতীয়টা হলো **LLM-as-a-Judge**।
-
-কথার টোন কেমন, বা বাংলায় শালীনতা বজায় আছে কি না— এগুলো চেক করার জন্য একটা ছোট জাজ Model ব্যবহার করা হয়।
-
-🧠 **একটি জরুরি কথা মনে রেখো**
-
-Probabilistic Guide বা আমাদের কন্সটিটিউশনাল নির্দেশাবলী কিন্তু রুলস পুরোপুরি মানতে পারে না।
-
-সে নিয়মগুলো ফলো করার চেষ্টা করে মাত্র ৭০% সময়।
-
-কিন্তু Deterministic Sensor সিস্টেমকে ১০০% নিয়ম মানতে বাধ্য করে!
-
-তাই নিরাপত্তার জন্য সবচেয়ে জরুরি নিয়মগুলো সব সময় Deterministic Sensor লেয়ারেই রাখা উচিত।
+সে শুধু তোমার System-কে গাইড করে যে কোন Function-টি কী Parameter দিয়ে রান করাতে হবে।
 
 
-### ৩. ফিডব্যাক ও ভ্যালিডেশন লুপ
+## ২. JSON Schema ও Tool Calling Loop
 
-এজেন্ট যখন কোনো কোড লেখে এবং বলে যে সে কাজ শেষ করেছে, তখন কী হয়?
+টুল কলিং কীভাবে কাজ করে জানো?
 
-সেন্সর যদি দেখে কোডে সিন্ট্যাক্স ভুল আছে, তখন সে একটা অটোমেটিক লুপ তৈরি করে।
+এর পেছনে মূলত দুইটা বড় জিনিস থাকে।
 
-চলো দেখি এই লুপটা কীভাবে কাজ করে:
+চলো সহজ কথায় বুঝে নিই।
+
+প্রথমটা হলো JSON Schema Contract।
+
+এটা আবার কী?
+
+যখন আমরা AI-কে বলি আমাদের কাছে কী কী টুল আছে, তখন তাকে একটা ফর্ম পূরণ করে দিতে হয়।
+
+এই ফর্মটাই হলো JSON Schema Format।
+
+এখানে টুলের সব ডিটেইলস লেখা থাকে।
+
+যেমন, AI যখন কোনো Parameter তৈরি করবে, তার বানান কী হবে বা টাইপ কী হবে— সেটা এই Schema থেকেই সে জানতে পারে।
+
+যেমন এই কোডটা দেখো:
+
+```json
+{
+  "name": "get_customer_balance",
+  "description": "গ্রাহকের ওয়ালেট ব্যালেন্স চেক করো।",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "customer_id": {
+        "type": "string",
+        "description": "গ্রাহকের ইউনিক আইডি, যেমন: 'bK-1234'"
+      }
+    },
+    "required": ["customer_id"]
+  }
+}
+```
+
+🧠 Remember
+
+**Description is Code!**
+
+টুল আর প্রোপার্টির Description পড়েই AI সিদ্ধান্ত নেয় কখন কোন টুল কল করতে হবে।
+
+এখানে যদি তুমি অস্পষ্ট কিছু লেখো, যেমন শুধু "Get balance", তাহলে AI কনফিউজড হয়ে যাবে।
+
+সে ভুলভাল Parameter তৈরি করে তোমার পুরো System ক্র্যাশ করিয়ে দিতে পারে!
+
+এবার আসি দ্বিতীয় জিনিসে— Tool Execution Loop বা আমাদের কাজের ফ্লো।
+
+ব্যাকএন্ড Developer হিসেবে তোমাকে ৪টি ধাপ মেনে চলতে হবে।
+
+চলো ঝটপট ধাপগুলো দেখে নিই:
 
 [VISUAL]
-Title: Validation Sensor Loop
-Illustration: Block diagram showing code output blocked by sensor, feedback generated, and model retrying
-Placement: After validation loop section
-Purpose: Ground the mathematical intuition of automated error recovery.
+Title: 4-Step Tool Calling Iteration
+Illustration: Step 1 Prompt -> Step 2 LLM requests Tool -> Step 3 Local Exec -> Step 4 Inject Result
+Placement: After Tool Execution Loop
+Purpose: Visually map the bidirectional network hops of function calling.
 
 ```
-Agent: "I added the feature, done!" ──► [ POST-SENSOR (Linter/tsc) ] ──► FAIL! (Syntax Error)
-                                                    │
-[ Retry Force ] ◄── [ Feedback: "Fix Syntax line 5" ] ◄──┘
-      │
-      ▼
-Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──► PASS ✓ ──► Final User Output
-```
-
-
-### ৪. রিয়েল লাইফ উদাহরণ: Claude Code
-
-অ্যানথ্রপিকের দারুণ সিএলআই এডিটর Claude Code-এর কথা তো জানো!
-
-সে কীভাবে তোমার কোডবেস সুরক্ষিত রাখে, দেখেছ?
-
-প্রথমে সে Constitutional Alignment-এর কাজ করে।
-
-ওপেন হওয়ার সাথে সাথে সে প্রজেক্টের `CLAUDE.md` আর `AGENTS.md` ফাইলগুলো পড়ে নেয়।
-
-এরপর আসে Deterministic Safety-র পালা।
-
-তুমি যখন তাকে কোনো কোড পরিবর্তন করতে বলো, সে কোড লিখে সেভ করে।
-
-তারপর ব্যাকগ্রাউন্ডে নিজে থেকেই `pnpm test` বা `npm run lint` রান করে।
-
-টেস্ট ফেইল করলে সে নিজেই Error খুঁজে বের করে কোড ঠিক করে ফেলে!
-
-
-### ৫. প্রজেক্টের AGENTS.md কনফিগারেশন
-
-💻 **ডেভলপার ভিউ**
-
-চলো এবার একটা স্ট্যান্ডার্ড `AGENTS.md` ফাইলের টেমপ্লেট দেখে নিই।
-
-এটি তুমি তোমার প্রজেক্টের রুট ডিরেক্টরিতে ব্যবহার করতে পারো:
-
-```markdown
-# PocketSchool LMS — Developer Agent Guide
-
-## Stack Info
-- Backend: Node.js + NestJS + Prisma
-- Frontend: Next.js (App Router)
-- Database: PostgreSQL
-
-## Code Conventions
-- Use NestJS controller-service pattern (no raw express routes).
-- Never hardcode dynamic credentials.
-- Write unit tests under `.spec.ts` files.
-
-## DO NOT Rules
-- DO NOT delete database migrations manually.
-- DO NOT use `console.log` in production (use NestJS Logger service).
-- DO NOT expose `.env` credentials in any code commit.
-
-## Evaluation & Test Command
-- Run tests: `pnpm test`
-- Lint check: `pnpm lint`
+Step 1: User says: "আমার TRX999 ব্যালেন্স কত?" ──► [ Prompt sent to LLM ]
+                                                            │
+                                                            ▼
+Step 2: LLM returns structured JSON request ◄───────────────┘
+        (e.g. stop_reason = "tool_use", call = "check_balance")
+                                                            │
+                                                            ▼
+Step 3: Your server executes local function: check_balance("TRX999") ──► Returns database result
+                                                                              │
+                                                                              ▼
+Step 4: Server sends database result back to LLM ──► LLM outputs final friendly text response ✓
 ```
 
 
-### ৬. প্রোডাকশনে সেন্সর অপ্টিমাইজেশন
+## ৩. একসাথে অনেক টুল চালানো বা Parallel Calling
 
-🚀 **প্রোডাকশন রিয়েলিটি**
+ধরো, ইউজার একটা মেসেজে একসাথে দুইটা কাজ করতে চাইল।
 
-Inference-এর স্পিড বুস্ট করার জন্য প্রোডাকশন হারনেস ইঞ্জিনে Sensor Pruning নিশ্চিত করতে হয়।
+তখন AI কী করবে?
 
-কিন্তু সব সেন্সর যদি একসাথে রান করো, তাহলে কী হবে?
+সে কি একটা একটা করে করবে?
 
-এতে সময় যেমন বেশি লাগবে, তেমনি কস্টও বেড়ে যাবে।
+না! সে একই সাথে দুইটা Parallel Tool Request তৈরি করতে পারে।
 
-এর সমাধান হলো একটা Cascade Flow বা ধাপভিত্তিক পাইপলাইন তৈরি করা।
+নিচের ডায়াগ্রামটি দেখলে একদম পরিষ্কার হয়ে যাবে:
 
-প্রথমে সবচেয়ে সস্তা আর ফাস্ট Computational Sensor রান করো।
+[VISUAL]
+Title: Parallel Tool Call Resolution
+Illustration: Single LLM response splitting into 2 local tool execution paths and re-converging in the next turn
+Placement: After parallel calling explanation
+Purpose: Ground how systems handle multiple queries like "compare weather in Dhaka and Tokyo".
 
-যেমন লিন্টার, যা ১ মিলি-সেকেন্ডের কম সময়ে রান হয়।
-
-লিন্টার পাস করলে এবার সেকেন্ড ধাপে Unit Tests রান করো।
-
-আর সবশেষে সাবজেক্টিভ চেক করার জন্য সবচেয়ে দামি LLM-as-a-Judge রান করো।
-
-এই বুদ্ধিমান অর্ডারিংয়ের কারণে কোনো ভুল থাকলে তা শুরুতেই ধরা পড়ে যায়।
-
-ফলে আমাদের অনেক টাকা আর সময় বেঁচে যায়!
-
-
-### ৭. কিছু সাধারণ ভুল
-
-⚠️ **একটি সাধারণ ভুল**
-
-অনেকেই ভাবেন, Prompt-এর ভেতর `"কখনো পিন কোড শেয়ার করবে না"` লিখে রাখলেই সিকিউরিটি নিশ্চিত!
-
-কিন্তু আসল সত্যিটা কী?
-
-Prompt-এর এই নিয়মগুলো আসলে Probabilistic।
-
-হ্যাকাররা একটু বুদ্ধি খাটিয়ে জেইলব্রেক করলেই AI এই নিয়ম ভেঙে ফেলতে পারে।
-
-তাহলে উপায়?
-
-সবচেয়ে নিরাপদ উপায় হলো ব্যাকএন্ড কোডে Deterministic Filter বা ACL Sensor ব্যবহার করা।
-
-এর মাধ্যমে রিকোয়েস্ট সরাসরি ব্লক করে দেওয়া যায়।
+```
+User Query: "Compare prices of Product A and Product B"
+  │
+  ▼
+[ LLM response: stop_reason = "tool_use" ]
+  ├── Tool Call 1: check_price(product="A") ──► Local Exec A ──┐
+  │                                                            ├──► [ Merge Results ] ──► Final LLM Answer
+  └── Tool Call 2: check_price(product="B") ──► Local Exec B ──┘
+```
 
 
-### ৮. মেন্টাল модель: ফুটবল খেলা
+## ৪. বাস্তবে যেমন দেখায়: bKash পেমেন্ট ভেরিফিকেশন
 
-চলো পুরো বিষয়টা একটা সহজ খেলার নিয়মের সাথে মিলিয়ে নিই।
+চলো একটা বাস্তব উদাহরণ দেখি।
 
-মনে করো, এটা একটা ফুটবল খেলা!
+ধরো, একজন bKash Customer চ্যাটে এসে বলল: "আমি টাকা পাঠিয়েছি কিন্তু অ্যাড হয়নি, ট্রানজ্যাকশন TRX999।"
 
-এখানে Guides বা `AGENTS.md` হলো বাউন্ডারি লাইন আর প্লেয়ারদের গাইডবুক।
+তখন পর্দার আড়ালে কী ঘটে?
 
-প্লেয়াররা ভালো করেই জানে বল লাইনের বাইরে গেলে থ্রো-ইন হবে, আর কীভাবে ফাউল এড়াতে হবে।
+প্রথমেই AI তার কাছে থাকা সব টুলের লিস্ট চেক করে।
 
-তাহলে Sensors কী?
+সে দেখে `check_bkash_transaction` নামে একটা টুল আছে।
 
-সেন্সর হলো মাঠের রেফারি!
+তার Description পড়ে সে বুঝে নেয় যে এটাই রিয়েল-টাইম Data চেক করার জন্য পারফেক্ট টুল।
 
-রেফারি কিন্তু প্লেয়ারের মনের ভালো ইচ্ছা দেখতে যাবে না।
+এরপর AI একটা JSON Object তৈরি করে ফেলে: `{"trx_id": "TRX999"}`।
 
-প্লেয়ার ফাউল করলেই রেফারি সাথে সাথে বাঁশি বাজিয়ে খেলা থামিয়ে দেবে।
+এবার তোমার ব্যাকএন্ড Code এই JSON দেখে bKash API কল করে।
 
-আর নিয়ম ভাঙলে হলুদ কার্ড দেখিয়ে নিয়ম মানতে বাধ্য করবে!
+সেখান থেকে ট্রানজ্যাকশন স্ট্যাটাস "Success" আর অ্যামাউন্ট "500 BDT" নিয়ে AI-কে ফেরত দেয়।
+
+সবশেষে AI সব তথ্য পেয়ে কাস্টমারকে মিষ্টি করে বাংলায় উত্তর দেয়:
+
+"ধন্যবাদ! তোমার ৫০০ টাকার পেমেন্টটি ভেরিফাই করা হয়েছে এবং অ্যাকাউন্টে যোগ করা হয়েছে।"
 
 
-### ৯. মিনি প্রজেক্ট: ক্যাসকেড সেন্সর পাইপলাইন
+## ৫. কোডিংয়ের পালা: Custom Tool Executor তৈরি
 
-চলো এবার পাইথনে স্ক্র্যাচ থেকে একটা ৩-ধাপের ক্যাসকেড সেন্সর পাইপলাইন ডিজাইন করে ফেলি।
+💻 Developer View
+
+এবার চলো একটু কোড দেখা যাক।
+
+একজন Developer হিসেবে তুমি কীভাবে পাইথনে Anthropic API ব্যবহার করে টুল কলিং হ্যান্ডল করবে?
+
+নিচে তার একটি প্রোডাকশন লেভেলের পাইথন কোড দেওয়া হলো:
 
 ```python
-import subprocess
 import json
 
-# ১. মক LLM-as-a-Judge ইভালুয়েটর
-def llm_judge_sentiment(response_text):
-    # পোলাইটনেস এবং বাংলায় টোন Quality জাজ
-    if "তুই" in response_text or "খারাপ" in response_text:
-        return {"pass": False, "reason": "Language is impolite."}
-    return {"pass": True}
+# ১. লোকাল পাইথন Function (টুল ইমপ্লিমেন্টেশন)
+def get_slow_queries(threshold_ms: int):
+    # মক Database Error Log চেক
+    return {"status": "success", "queries_found": 3, "slowest_query": "SELECT * FROM users"}
 
-# ২. ক্যাসকেড সেন্সর পাইপলাইন
-def run_cascade_sensors(code_response, text_response):
-    print("Starting Cascade Sensor Evaluation...\n")
-    
-    # ধাপ ১: সস্তা সিমান্টিক লিন্ট চেক
-    print("Step 1: Running Semantic Lint Check...")
-    if len(code_response) < 10:
-        print("[FAIL] Code is too short or empty!\n")
-        return False
-    print("Step 1 Pass ✓\n")
-    
-    # ধাপ ২: ইউনিট Test সিমুলেশন
-    print("Step 2: Running Unit Tests...")
-    if "error" in code_response.lower():
-        print("[FAIL] Unit Tests compilation error!\n")
-        return False
-    print("Step 2 Pass ✓\n")
-    
-    # ধাপ ৩: দামি LLM-as-a-Judge রান
-    print("Step 3: Running LLM-as-a-Judge Evaluation...")
-    judge_res = llm_judge_sentiment(text_response)
-    if not judge_res["pass"]:
-        print(f"[FAIL] LLM Judge rejected: {judge_res['reason']}\n")
-        return False
-    print("Step 3 Pass ✓\n")
-    
-    print("[ALL SENSORS PASSED] Response is certified for Production! ")
-    return True
+# ২. টুল স্কিমা ডিকশনারি
+tools_schema = [
+    {
+        "name": "get_slow_queries",
+        "description": "Database-এর স্লো কোয়েরি Log চেক করো।",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "threshold_ms": {
+                    "type": "integer",
+                    "description": "স্লো কোয়েরির সময়সীমা মিলি-সেকেন্ডে।"
+                }
+            },
+            "required": ["threshold_ms"]
+        }
+    }
+]
 
-# ৩. মক Test রান
-print("--- TEST 1: Impolite Response Attack ---")
-run_cascade_sensors("print('Success')", "তুই তো একটা খারাপ ছেলে।")
+# ৩. মক AI Response হ্যান্ডলার (Simulating stop_reason='tool_use')
+def handle_ai_response(response_obj):
+    if response_obj["stop_reason"] == "tool_use":
+        tool_use_block = response_obj["content"][0]
+        tool_name = tool_use_block["name"]
+        arguments = tool_use_block["input"]
+        
+        print(f"AI requested tool: '{tool_name}' with arguments: {arguments}")
+        
+        # ৪. লোকাল Function ডায়নামিক কলিং
+        if tool_name == "get_slow_queries":
+            result = get_slow_queries(threshold_ms=arguments["threshold_ms"])
+            print(f"Local Execution Result: {result}")
+            
+            # ৫. Response রিম্যাপ করে পরবর্তী টার্নের জন্য প্রিপেয়ার করো
+            tool_result_message = {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tool_use_block["id"],
+                        "content": json.dumps(result)
+                    }
+                ]
+            }
+            return tool_result_message
 
-print("\n--- TEST 2: Valid Secure Response ---")
-run_cascade_sensors("print('Success')", "প্রিয় কাস্টমার, তোমার পেমেন্ট সফল হয়েছে।")
+# মক AI Response Data
+mock_response = {
+    "stop_reason": "tool_use",
+    "content": [
+        {
+            "id": "toolu_xyz123",
+            "name": "get_slow_queries",
+            "input": {"threshold_ms": 500}
+        }
+    ]
+}
+
+handle_ai_response(mock_response)
 ```
 
-#### কোডটি কীভাবে কাজ করছে?
 
-চলো কোডের মূল বিষয়গুলো সহজে বুঝে নিই।
+## ৬. প্রোডাকশন লাইফে ভ্যালিডেশনের গুরুত্ব
 
-এখানে Input হিসেবে আমরা কী দিচ্ছি?
+🏭 Production Reality
 
-আমরা দিচ্ছি AI-এর তৈরি করা কোড আর চ্যাটের রেসপন্স টেক্সট।
+বাস্তবে যখন AI কাজ করে, সে কিন্তু মাঝে মাঝে ভুল আর্গুমেন্ট টাইপ তৈরি করে ফেলে।
 
-আর Output হিসেবে কী পাচ্ছি?
+যেমন ধরো, `threshold_ms`-এর জায়গায় সে একটা String `"500ms"` পাঠিয়ে দিল।
 
-তিনটি সেন্সর পার হয়ে আসার পর কোড আর টোনের সিকিউরিটি স্ট্যাটাস পাচ্ছি।
+তখন কী সমস্যা হতে পারে?
 
-এটি কেন এত দারুণ কাজ করে?
+এই ভুল Parameter যদি সরাসরি তোমার Database বা Function-এ চলে যায়, তবে পুরো Application ক্র্যাশ করবে!
 
-কারণ এটি সস্তা থেকে দামি সেন্সরগুলো ক্রমানুসারে রান করে।
+তাহলে এর সমাধান কী?
 
-যার ফলে আমাদের Latency আর API খরচ দুটোই অনেক কমে যায়।
+এর জন্য তোমাকে ব্যাকএন্ডে একটা Guard বা ভ্যালিডেটর রাখতে হবে।
 
-তুমি এটি কখন ব্যবহার করবে?
+কোড রান করার আগে Pydantic বা Zod দিয়ে টাইপ ভ্যালিডেশন চেক করা একদম বাধ্যতামূলক।
 
-যখনই কোনো AI এজেন্টের আউটপুট প্রোডাকশনে পাঠানোর আগে ভ্যালিডেট করতে চাও।
+যদি ভ্যালিডেশন ফেল করে, তাহলে তোমার System সাথে সাথে AI-কে একটি Error মেসেজ পাঠিয়ে বলবে আবার চেষ্টা করতে।
 
-
-### ১০. ইন্টারভিউয়ের কিছু প্রশ্ন
-
-#### Beginner level
-
-**প্রশ্ন:** 'Agent = Model + Harness' বলতে আসলে কী বোঝায়?
-
-**উত্তর:** একটা LLM একা স্রেফ একটা Token Predictor Engine হিসেবে কাজ করে।
-
-কিন্তু তাকে প্রোডাকশন-রেডি এজেন্ট বানাতে হলে তার চারপাশে সিকিউরিটি, মেমরি আর ভ্যালিডেশন গেটওয়ে তৈরি করতে হয়।
-
-এই পুরো সিস্টেমটাকেই বলা হয় Harness।
-
-#### Intermediate level
-
-**প্রশ্ন:** প্রজেক্টের রুট ডিরেক্টরিতে `AGENTS.md` রাখার সুবিধা কী?
-
-**উত্তর:** এটি প্রজেক্টের টেক স্ট্যাক, কোডিং নিয়ম আর নিষেধাজ্ঞাগুলো এক জায়গায় গুছিয়ে রাখে।
-
-Cursor বা Claude Code-এর মতো টুলগুলো রান হওয়ার সময় এই ফাইলটি নিজে নিজেই পড়ে নেয়।
-
-এর ফলে কোনো ভুল বোঝাবুঝি ছাড়াই সঠিক নিয়মে কোড জেনারেট করা সম্ভব হয়।
-
-#### Advanced level
-
-**প্রশ্ন:** প্রোডাকশনে Latency আর খরচ কমাতে Cascade Flow কীভাবে সাজাবে?
-
-**উত্তর:** প্রথমে সবচেয়ে ফাস্ট আর সস্তা Computational Sensor (যেমন লিন্টার) রান করতে হবে।
-
-সেটি পাস করলে দ্বিতীয় ধাপে Unit Tests রান করতে হবে।
-
-আর সবশেষে সাবজেক্টিভ চেকের জন্য দামি LLM-as-a-Judge রান করতে হবে।
-
-শুরুর কোনো ধাপে ভুল ধরা পড়লে পরের দামি স্টেপগুলো আর রান হয় না, ফলে খরচ ও সময় দুটোই বাঁচে।
+একে আমরা বলি Self-correction Loop।
 
 
-### ১১. চ্যাপ্টার সামারি
+## ৭. কিছু সাধারণ ভুল ধারণা
 
-তো এই চ্যাপ্টারে আমরা কী কী শিখলাম?
+🔴 Common Mistake
 
-প্রথমত, প্রোডাকশনে AI সিস্টেম নিরাপদ রাখার জন্য Harness Engineering অত্যন্ত জরুরি।
+অনেকেরই একটা বড় ভুল ধারণা থাকে।
 
-দ্বিতীয়ত, `AGENTS.md` হলো প্রজেক্টের কন্সটিটিউশনাল রুল বুক।
+তারা মনে করে, AI নিজে নিজেই ইন্টারনেটে গিয়ে থার্ড-পার্টি API কল করে ডাটা নিয়ে আসে।
 
-দ্বিতীয়ত, Cascade Sensors ব্যবহার করে আমরা খুব সহজেই Latency আর খরচ কমিয়ে ফেলতে পারি।
+কিন্তু আসলে কি তাই?
 
-আর সবশেষে মনে রেখো, বেশিরভাগ এন্টারপ্রাইজ AI প্রজেক্ট কিন্তু Harness-এর দুর্বলতার কারণেই ফেইল করে!
+একেবারেই না!
+
+বাস্তবতা হলো, AI নিজে কোনো নেটওয়ার্ক রিকোয়েস্ট করতে পারে না।
+
+সে শুধু টেক্সট জেনারেট করতে পারে।
+
+সব নেটওয়ার্ক কল, অথেনটিকেশন আর সিকিউরিটি হ্যান্ডেল করার দায়িত্ব তোমার ব্যাকএন্ড কোডের।
+
+AI এখানে শুধুই সিদ্ধান্ত নেয়, সে কোনো কাজ নিজে করে না।
 
 
-### ১২. সামনে কী আসছে?
+## ৮. সহজ মেন্টাল মডেল: ব্যাংকের ম্যানেজার ও ক্যাশিয়ার
 
-দারুণ! হারনেস ইঞ্জিনিয়ারিং তো শিখে গেলাম।
+টুল কলিংয়ের পুরো ব্যপারটা বুঝতে একটা সহজ মেন্টাল মডেল ব্যবহার করা যাক।
 
-পরের চ্যাপ্টারে আমরা দেখবো এজেন্টের চোখের মতো কাজ করা **Chapter 22: AI Observability & Monitoring**।
+ভাবো, আমাদের LLM হলো ব্যাংকের একজন অভিজ্ঞ ম্যানেজার।
 
-সেখানে আমরা LangSmith, Phoenix আর OpenTelemetry দিয়ে খরচ আর Latency ট্র্যাক করা শিখবো।
+ম্যানেজার কিন্তু নিজে ক্যাশ কাউন্টারে গিয়ে টাকা গোনেন না বা ভল্ট খোলেন না।
 
-তো রেডি তো?
+তিনি শুধু সিদ্ধান্ত নেন কাকে লোন দেওয়া হবে আর কার অ্যাকাউন্ট চেক করা দরকার।
+
+আর তোমার ব্যাকএন্ড কোড হলো সেই ব্যাংকের ক্যাশিয়ার।
+
+ম্যানেজার যখন চিরকুটে লিখে ক্যাশিয়ারকে বলেন: "রহিমের ব্যালেন্স কত দেখে জানাও।"
+
+ক্যাশিয়ার তখন কম্পিউটারে ডাটাবেস চেক করে ম্যানেজারকে ব্যালেন্সের হিসাব এনে দেন।
+
+ম্যানেজার সেই হিসাব দেখে ফাইনাল সিদ্ধান্ত নেন।
+
+এখানে ম্যানেজার হলেন Decision Maker, আর ক্যাশিয়ার হলেন Executor।
+
+
+## ৯. মিনি প্রজেক্ট: একটি সেফ ফাইল লিস্টার এজেন্ট
+
+চলো এবার পাইথনে একটা দারুণ কাজ করি।
+
+আমরা একটা নিরাপদ কমান্ড রানার এজেন্ট তৈরি করব।
+
+এই এজেন্টটি AI-এর দেওয়া আর্গুমেন্ট চেক করবে।
+
+এবং শুধুমাত্র নিরাপদ উইন্ডোজ ফাইল লিস্টার টুল এক্সেকিউট করবে।
+
+কোডটি নিচে দেখে নাও:
+
+```python
+import os
+import json
+
+# ১. লোকাল নিরাপদ ডিরেক্টরি লিস্টার টুল
+def list_directory_contents(path):
+    # পাথের ট্রাভার্সাল হ্যাকিং এড়াতে সেফটি গার্ড
+    if ".." in path or path.startswith("/") or path.startswith("\\"):
+        return {"status": "error", "message": "Access Denied. Path traversal detected!"}
+    
+    if os.path.exists(path):
+        return {"status": "success", "files": os.listdir(path)}
+    return {"status": "error", "message": "Directory not found."}
+
+# ২. কাস্টম JSON Schema ভ্যালিডেটর ও রানার
+def secure_tool_executor(tool_name, arguments_json):
+    try:
+        args = json.loads(arguments_json)
+        
+        # ৩. Parameter স্কিমা Validation
+        if "path" not in args or not isinstance(args["path"], str):
+            return {"status": "error", "message": "Invalid arguments. 'path' must be a string."}
+            
+        if tool_name == "list_dir":
+            result = list_directory_contents(args["path"])
+            return result
+        return {"status": "error", "message": "Unknown tool name."}
+        
+    except json.JSONDecodeError:
+        return {"status": "error", "message": "Invalid JSON format."}
+
+# ৪. মক Test রান (প্রোডাকশন গ্রেড Test)
+print("--- TEST 1: Safe Path Execution ---")
+safe_res = secure_tool_executor("list_dir", '{"path": "."}')
+print(safe_res)
+
+print("\n--- TEST 2: Hack Attempt (Path Traversal) ---")
+hack_res = secure_tool_executor("list_dir", '{"path": "../../../"}')
+print(hack_res)
+```
+
+#### কোডটি কীভাবে কাজ করে?
+
+ইউজার যখন ইনপুট হিসেবে AI-এর তৈরি করা JSON আর্গুমেন্ট পাঠাবে, আমাদের এই কোডটি পাথের সিকিউরিটি আর স্কিমা চেক করে দেখবে।
+
+যদি পাথটি নিরাপদ হয়, তবে সে ফাইলের লিস্ট আউটপুট হিসেবে দেবে।
+
+আর যদি কেউ হ্যাক করার চেষ্টা করে, তবে সাথে সাথে সে এলার্ট দেখাবে।
+
+কারণ, আমাদের কোডে `..` ট্রাভার্সাল ডিটেকশন আছে, যা ওএস সিকিউরিটি নিশ্চিত করে।
+
+তুমি যখন প্রোডাকশনে কোনো কাস্টম ব্যাশ বা ওএস টুল সেভলি রান করাতে চাও, তখন এই কোডটি ব্যবহার করতে পারো।
+
+
+## ১০. ইন্টারভিউতে কেমন প্রশ্ন হতে পারে?
+
+### বিগিনার লেভেল
+
+**প্রশ্ন:** AI টুল কলিংয়ে JSON Schema-র গুরুত্ব কী?
+
+**উত্তর:** JSON Schema হলো AI আর ব্যাকএন্ড Function-এর মধ্যে একটা ডাটা Contract।
+
+এটি পড়ে AI বুঝতে পারে ফাংশনে কী ধরনের Parameter দিতে হবে।
+
+যেমন, সেটি String হবে নাকি Integer হবে, তা AI এখান থেকে বুঝতে পারে।
+
+এর ফলে কোড ক্র্যাশ করার কোনো সম্ভাবনা থাকে না।
+
+### ইন্টারমিডিয়েট লেভেল
+
+**প্রশ্ন:** AI যখন একই সাথে অনেকগুলো Parallel Tool Call করতে চায়, তখন ব্যাকএন্ডে কীভাবে হ্যান্ডেল করবে?
+
+**উত্তর:** ব্যাকএন্ডে যে কয়টি টুল কল রিকোয়েস্ট আসবে, প্রতিটির জন্য Loop চালিয়ে Asynchronous উপায়ে বা `async/await` দিয়ে ফাংশনগুলো রান করতে হবে।
+
+এরপর সবগুলোর রেজাল্ট আলাদা ইউনিক `tool_use_id` দিয়ে মেসেজ অ্যারেতে প্যাক করে AI-কে ফেরত দিতে হবে।
+
+### অ্যাডভান্সড লেভেল
+
+**প্রশ্ন:** AI-এর তৈরি করা আর্গুমেন্ট সরাসরি লোকাল Database-এ পাঠানোর রিস্ক কী? আর এর বেস্ট প্র্যাকটিস কী?
+
+**উত্তর:** সবচেয়ে বড় রিস্ক হলো টাইপ মিসম্যাচ হওয়া আর সিকিউরিটি হ্যাক হওয়া।
+
+যেমন কেউ কাস্টম কোড ইনজেকশন বা পাথ ট্রাভার্সাল অ্যাটাক করতে পারে।
+
+এর বেস্ট প্র্যাকটিস হলো— সরাসরি ডাটাবেসে ডাটা না পাঠিয়ে প্রথমে Pydantic বা Zod দিয়ে কড়া স্কিমা ভ্যালিডেশন চেক করা।
+
+এবং ইনপুট পুরোপুরি ফিল্টার বা Sanitize করার পর কেবল ক্লিন ডাটা ডাটাবেসে সেভ করা।
+
+
+## ১১. চ্যাপ্টার সামারি
+
+তাহলে এই চ্যাপ্টারে আমরা কী কী শিখলাম? চলো একবার চোখ বুলিয়ে নিই।
+
+আমরা জানলাম Tool Calling কীভাবে অন্ধ AI-কে বাইরের দুনিয়ার API আর Database পড়ার ক্ষমতা দেয়।
+
+শিখলাম JSON Schema হলো AI-এর জন্য একমাত্র রুল বুক, যা দেখে সে আর্গুমেন্ট তৈরি করে।
+
+আরও বুঝলাম Parallel Calling-এর সাহায্যে একই সাথে একাধিক API-র কাজ করে ফেলা যায়।
+
+আর সবশেষে মনে রাখব, সুরক্ষার জন্য Strict Argument Validation করাটা একদম বাধ্যতামূলক।
+
+
+## ১২. এরপরে কী?
+
+টুল কলিং তো শিখে গেলাম, এবার তাহলে কী করব?
+
+পরের চ্যাপ্টারে আমরা শিখব টুলের ইউনিভার্সাল স্ট্যান্ডার্ড প্রোটোকল: **Chapter 22: Model Context Protocol (MCP)**।
+
+একে বলা যায় AI-এর USB-C!
+
+অ্যানথ্রপিকের তৈরি এই মডার্ন প্রোটোকল কীভাবে সব AI টুলকে একসাথে কানেক্ট করে, চলো সেটাই দেখে নিই!
 
 **Chapter 21 শেষ।**

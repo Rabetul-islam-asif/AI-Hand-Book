@@ -1,486 +1,402 @@
-# Chapter 19: Tool Calling & Function Integration
+# Chapter 19: Alignment — RLHF, DPO & Safety Tuning
 
-একটু ভেবে দেখো তো— তোমার AI Model দুনিয়ার সব থিওরি জানে।
+---
 
-কিন্তু সে কি তোমার Database পড়তে পারে?
+তুমি তোমার Model-কে Fine-Tune করেছো।
 
-উঁহু, পারে না।
+সে এখন দারুণ গুছিয়ে কথা বলতে পারে।
 
-আজকের আবহাওয়া কেমন, সেটা কি সে জানে?
+কিন্তু ধরো, কেউ তাকে জিজ্ঞেস করল— 'কীভাবে বোমা বানাব?'
 
-জানে না।
+সে কি তখন চুপ থাকবে? নাকি খুব হাসিমুখে বোমা বানানোর রেসিপি দিয়ে দেবে?
 
-এমনকি একটা bKash ট্রানজ্যাকশনও সে চেক করতে পারে না।
+ঠিক এই জায়গাতেই প্রয়োজন Alignment।
 
-কারণ, সে আসলে সম্পূর্ণ অন্ধ! তার কোনো হাত-পা নেই।
+সহজ টাকায়, Alignment হলো তোমার AI-কে একটা লক্ষ্মী ছেলের মতো গড়ে তোলা। 
 
-এই হাত-পা দেওয়ার জাদুকরী উপায়টাই হলো Tool Calling।
+যাতে সে মানুষের ক্ষতি না করে, নিরাপদ থাকে আর কাজের কথা বলে।
 
-এখানে তুমি একটা JSON Schema দিয়ে একটা Contract বানাবে।
+এর জন্য ক্লাসিক্যাল পথ হলো RLHF।
 
-AI সেটা পড়ে বুঝবে কোন Function রান করতে হবে আর কী Parameter দিতে হবে।
+কিন্তু সেটা বেশ জটিল।
 
-তারপর তোমার ব্যাকএন্ড Code বাকি কাজটুকু করে ফেলবে।
+Engineers এবং Researchers-দের জন্য এটি বেশ ঝামেলার।
 
-সবসময় মনে রাখবে— AI কিন্তু নিজে কোনো API কল করে না।
+তাই গবেষকরা নিয়ে এলেন অনেক সহজ ও স্ট্যাবল এক পদ্ধতি— DPO।
 
-সে শুধু সিদ্ধান্ত নেয়, আর কাজটা করে তোমার নিজের লেখা Code।
-
-তো চলো দেখি, কীভাবে এই JSON Schema ডিজাইন করতে হয়।
-
-আমরা আরও শিখবো Tool Calling Loop-এর ৪টা সহজ ধাপ আর Parallel Tool Calling হ্যান্ডেল করার উপায়।
-
-এটা শিখে নিলে পরের চ্যাপ্টারের Model Context Protocol (MCP) বোঝা তোমার জন্য একদম সহজ হয়ে যাবে। Deal?
+তো চলো, আজ আমরা এই মজার ব্যাপারগুলোই খুব সহজ ভাষায় শিখব। Deal?
 
 
-## ১. বিজ্ঞানী আর রোবোটিক আর্ম
+## ১. বন্য ঘোড়াকে পোষ মানানো
 
-ধরো, একটা বন্ধ রুমে পৃথিবীর সবচেয়ে বুদ্ধিমান বিজ্ঞানী বসে আছেন।
+ধরো, তুমি জঙ্গল থেকে একটা অসম্ভব শক্তিশালী বন্য ঘোড়া ধরে আনলে।
 
-এই বিজ্ঞানী হলেন আমাদের LLM।
+এখন একে কাজে লাগাবে কীভাবে?
 
-তিনি সব থিওরি আর বইয়ের কথা জানেন।
+প্রথম ধাপ হলো Pre-training। 
 
-কিন্তু সমস্যা হলো, তার হাত-পা নড়াচড়া করতে পারে না।
+এখানে ঘোড়াটা বন্য। সে অনেক জোরে দৌড়াতে পারে, কিন্তু কোন দিকে যাবে তা জানে না। 
 
-তিনি নিজের চেয়ার থেকে উঠতে পারেন না, এমনকি একটা কলমও ধরতে পারেন না!
+এর পরের ধাপ হলো SFT।
 
-তাহলে এই বিজ্ঞানী বাইরের পৃথিবীর সাথে কীভাবে কাজ করবেন?
-
-খুব সহজ! বিজ্ঞানীকে সাহায্য করার জন্য তুমি রুমে একটা Custom রোবোটিক আর্ম বা Tools সেটআপ করে দিলে।
+এখানে তুমি তাকে রশি দিয়ে বেঁধে নির্দিষ্ট রাস্তায় সোজা হাঁটা শেখালে। সে এখন কিছুটা বাধ্য।
 
 [VISUAL]
-Title: LLM Tool Use Decision Loop
-Illustration: Separation between LLM's brain thinking and the client environment's arm executing
+Title: Alignment Progression: SFT vs. RLHF/DPO
+Illustration: Directed lane walking vs. learning ethics / safety boundaries (pit avoidance)
 Placement: After Hook Section
-Purpose: Show that the LLM only decides, while the client code executes.
+Purpose: Show why alignment is needed after SFT.
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                      CLIENT ENVIRONMENT                │
-│                                                        │
-│   [ Scientist / LLM ] ──► (Generates JSON: "use arm")  │
-│            ▲                          │                │
-│            │                          ▼                │
-│   [ Receives Result ] ◄── [ Executes: Robot Arm ]      │
-└────────────────────────────────────────────────────────┘
+Supervised Fine-Tuning (Lane Walking - Copies prompts):
+[ Road Target ] ◄── (SFT Model blindly copies exact text patterns)
+
+Safety Alignment (RLHF / DPO - Ethical Boundary & Self-Correction):
+[ Safe Zone ]  ◄── (Model evaluates ethical safety before responding)
+     ▲
+     │ (Avoids dangerous cliffs/hallucinations)
+[ Danger Pit (PII Leak/Hacks) ] (Hard Blocked )
 ```
 
-বিজ্ঞানী যখনই কোনো কাজ করতে চান, তিনি মুখে একটা নিখুঁত Instruction দেন।
+কিন্তু ঘোড়াটার সামনে যদি হঠাৎ একটা গভীর খাদ পড়ে?
 
-যেমন তিনি বললেন: "সিলিন্ডার থেকে ৫ গ্রাম লিকুইড নিয়ে টেস্টটিউব বি-তে ঢালো।"
+সে কি নিজে থেকে থামবে? 
 
-এই Instruction-টাই হলো আমাদের JSON Schema Contract।
+না, সে হয়তো সোজা লাফ দিয়ে নিচে পড়ে যাবে। কারণ সে জানে না কোনটা বিপদ আর কোনটা নিরাপদ।
 
-তোমার ব্যাকএন্ড System বা রোবটের কন্ট্রোলার সেই নির্দেশটি Receive করে।
+তাকে এই খাদের বিপদ এড়ানো শেখাতে হলে কী করতে হবে?
 
-তারপর সে নিজে কাজটি করে বিজ্ঞানীকে জানায়: "টেস্টটিউব বি-তে ৫ গ্রাম লিকুইড ঢালা হয়েছে।"
+তোমাকে তাকে পুরস্কার আর শাস্তি দিয়ে ট্রেন করতে হবে। 
 
-বিজ্ঞানী সেই Result দেখে তার পরের কাজ শুরু করেন।
+সহজ টাকায়, এটাই হলো Alignment।
 
-AI Tool Calling ঠিক এভাবেই কাজ করে।
+SFT মডেলকে শুধু কপি করা শেখায়।
 
-মনে রাখবে, LLM কিন্তু নিজে কোনো API কল বা Database কোয়েরি করতে পারে না।
-
-সে শুধু তোমার System-কে গাইড করে যে কোন Function-টি কী Parameter দিয়ে রান করাতে হবে।
+আর Alignment তাকে মানুষের নৈতিকতা ও নিরাপত্তা বজায় রেখে সিদ্ধান্ত নিতে শেখায়।
 
 
-## ২. JSON Schema ও Tool Calling Loop
+## ২. মানুষের পছন্দ-অপছন্দ ও Alignment
 
-টুল কলিং কীভাবে কাজ করে জানো?
+Alignment করার জন্য সাধারণত দুটি জনপ্রিয় পদ্ধতি ব্যবহার করা হয়।
 
-এর পেছনে মূলত দুইটা বড় জিনিস থাকে।
+প্রথমটি হলো RLHF। 
 
-চলো সহজ কথায় বুঝে নিই।
+ChatGPT কিন্তু এই পদ্ধতিতেই তৈরি হয়েছে। 
 
-প্রথমটা হলো JSON Schema Contract।
-
-এটা আবার কী?
-
-যখন আমরা AI-কে বলি আমাদের কাছে কী কী টুল আছে, তখন তাকে একটা ফর্ম পূরণ করে দিতে হয়।
-
-এই ফর্মটাই হলো JSON Schema Format।
-
-এখানে টুলের সব ডিটেইলস লেখা থাকে।
-
-যেমন, AI যখন কোনো Parameter তৈরি করবে, তার বানান কী হবে বা টাইপ কী হবে— সেটা এই Schema থেকেই সে জানতে পারে।
-
-যেমন এই কোডটা দেখো:
-
-```json
-{
-  "name": "get_customer_balance",
-  "description": "গ্রাহকের ওয়ালেট ব্যালেন্স চেক করো।",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "customer_id": {
-        "type": "string",
-        "description": "গ্রাহকের ইউনিক আইডি, যেমন: 'bK-1234'"
-      }
-    },
-    "required": ["customer_id"]
-  }
-}
-```
-
-🧠 Remember
-
-**Description is Code!**
-
-টুল আর প্রোপার্টির Description পড়েই AI সিদ্ধান্ত নেয় কখন কোন টুল কল করতে হবে।
-
-এখানে যদি তুমি অস্পষ্ট কিছু লেখো, যেমন শুধু "Get balance", তাহলে AI কনফিউজড হয়ে যাবে।
-
-সে ভুলভাল Parameter তৈরি করে তোমার পুরো System ক্র্যাশ করিয়ে দিতে পারে!
-
-এবার আসি দ্বিতীয় জিনিসে— Tool Execution Loop বা আমাদের কাজের ফ্লো।
-
-ব্যাকএন্ড Developer হিসেবে তোমাকে ৪টি ধাপ মেনে চলতে হবে।
-
-চলো ঝটপট ধাপগুলো দেখে নিই:
+এটি মূলত তিনটি ধাপে কাজ করে।
 
 [VISUAL]
-Title: 4-Step Tool Calling Iteration
-Illustration: Step 1 Prompt -> Step 2 LLM requests Tool -> Step 3 Local Exec -> Step 4 Inject Result
-Placement: After Tool Execution Loop
-Purpose: Visually map the bidirectional network hops of function calling.
+Title: Classical RLHF Ingestion Pipeline
+Illustration: Multi-step flowchart from Human Preference to Reward Model tuning, leading to PPO Optimizer
+Placement: After Core Concepts section
+Purpose: Visually demonstrate the 3-stage complexity of RLHF.
 
 ```
-Step 1: User says: "আমার TRX999 ব্যালেন্স কত?" ──► [ Prompt sent to LLM ]
-                                                            │
-                                                            ▼
-Step 2: LLM returns structured JSON request ◄───────────────┘
-        (e.g. stop_reason = "tool_use", call = "check_balance")
-                                                            │
-                                                            ▼
-Step 3: Your server executes local function: check_balance("TRX999") ──► Returns database result
-                                                                              │
-                                                                              ▼
-Step 4: Server sends database result back to LLM ──► LLM outputs final friendly text response ✓
+Step 1: SFT Model ──► Generate Multiple Answers
+                               │
+                               ▼
+Step 2: Humans Label Answers ──► [ Train Reward Model ] (লার্নিং মানুষের ভালোলাগা)
+                               │
+                               ▼
+Step 3: PPO Optimizer ──► [ Update LLM Weights ] ──► (Ensures high reward score)
 ```
 
+ধাপগুলো কেমন চলো দেখি।
 
-## ৩. একসাথে অনেক টুল চালানো বা Parallel Calling
+প্রথম ধাপ হলো Preference Dataset তৈরি করা। 
 
-ধরো, ইউজার একটা মেসেজে একসাথে দুইটা কাজ করতে চাইল।
+এখানে Model-কে একটা প্রশ্ন বা Prompt দেওয়া হয়। সে তখন কয়েকটা ভিন্ন উত্তর তৈরি করে।
 
-তখন AI কী করবে?
+এরপর মানুষ এসে দেখে বলে দেয়— কোন উত্তরটা সবচেয়ে ভালো আর কোনটা ক্ষতিকর।
 
-সে কি একটা একটা করে করবে?
+দ্বিতীয় ধাপ হলো Reward Model তৈরি করা। 
 
-না! সে একই সাথে দুইটা Parallel Tool Request তৈরি করতে পারে।
+মানুষের এই পছন্দ-অপছন্দের Data দিয়ে আমরা একটা আলাদা Reward Model ট্রেইন করি। 
 
-নিচের ডায়াগ্রামটি দেখলে একদম পরিষ্কার হয়ে যাবে:
+এটি যেকোনো উত্তরের মান দেখে তাকে ১ থেকে ১০ এর মধ্যে রেটিং দিতে পারে।
+
+তৃতীয় ধাপ হলো PPO। 
+
+এই Algorithm-টি মূলত Reward Model-এর রেটিং অনুযায়ী আমাদের আসল Model-এর Parameter আপডেট করে দেয়।
+
+কিন্তু RLHF যতই শক্তিশালী হোক না কেন, এর ভেতরের Architecture কিন্তু বেশ জটিল।
+
+একসাথে তিন-তিনটি Model ওরিজিনাল GPU-তে লোড রাখতে হয়!
+
+এটি যেমন ব্যয়বহুল, তেমনি আনস্ট্যাবল।
+
+তাহলে এর সহজ সমাধান কী?
+
+এর সমাধান হলো DPO। ২০২৩ সালে স্ট্যানফোর্ড ইউনিভার্সিটি এটি আবিষ্কার করে।
+
+এখানে কোনো আলাদা Reward Model বা জটিল PPO অ্যালগরিদম লাগে না। 
+
+এটি সরাসরি Single-Step Optimization ব্যবহার করে। 
+
+খুব সহজ সমীকরণের মাধ্যমে এটি মানুষের পছন্দের এবং অপছন্দের উত্তরের রেশিও টিউন করে দেয়।
+
+##### The DPO Loss Equation:
+$$L_{\text{DPO}}(\theta; \pi_{\text{ref}}) = -E_{(x, y_w, y_l)} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_w | x)}{\pi_{\text{ref}}(y_w | x)} - \beta \log \frac{\pi_\theta(y_l | x)}{\pi_{\text{ref}}(y_l | x)} \right) \right]$$
+
+এখানে প্রতীকগুলো দিয়ে কী বোঝানো হচ্ছে?
+
+সহজ করে বলি:
+
+$y_w$ হলো Winner বা মানুষের পছন্দের উত্তর।
+
+$y_l$ হলো Loser বা মানুষের অপছন্দের উত্তর।
+
+$\pi_\theta$ হলো আমাদের মূল Model, যাকে আমরা ট্রেন করছি।
+
+আর $\pi_{\text{ref}}$ হলো রেফারেন্স Model, যা ট্রেইনিংকে সঠিক ট্র্যাকে রাখে।
+
+> **Remember**
+> 
+> **RLHF:** ৩টি আলাদা Model ও জটিল Loop লাগে।  
+> **DPO:** সরাসরি এক স্টেপেই Alignment শেষ করে দেয়।
+
+
+## ৩. ডিপিও লুপের সিঙ্গেল-স্টেপ Alignment
+
+ডিপিও লুপে কীভাবে পছন্দের Token-এর সম্ভাবনা বাড়ানো হয় আর অপছন্দের Token ব্লক করা হয়?
+
+চলো নিচের ডায়াগ্রাম থেকে তা সহজে বুঝে নিই।
 
 [VISUAL]
-Title: Parallel Tool Call Resolution
-Illustration: Single LLM response splitting into 2 local tool execution paths and re-converging in the next turn
-Placement: After parallel calling explanation
-Purpose: Ground how systems handle multiple queries like "compare weather in Dhaka and Tokyo".
+Title: DPO Single-Step Weight Update Flow
+Illustration: Visual representation of shifting weight vectors toward the preferred target space while pushing away from the rejected space
+Placement: After DPO Equation section
+Purpose: Ground the mathematical gradient attraction and repulsion of DPO.
 
 ```
-User Query: "Compare prices of Product A and Product B"
-  │
-  ▼
-[ LLM response: stop_reason = "tool_use" ]
-  ├── Tool Call 1: check_price(product="A") ──► Local Exec A ──┐
-  │                                                            ├──► [ Merge Results ] ──► Final LLM Answer
-  └── Tool Call 2: check_price(product="B") ──► Local Exec B ──┘
+       DPO Latent Space Shifts
+                    ┌────────────────────────┐
+                    │      Active Model      │
+                    └───────────┬────────────┘
+         ┌──────────────────────┴──────────────────────┐
+ ┌───────▼───────┐                             ┌───────▼───────┐
+ │   Winner Yw   │                             │   Loser Yl    │
+ │ (Preferred)   │                             │  (Rejected)   │
+ └───────┬───────┘                             └───────┬───────┘
+         │                                             │
+   Gradient Pull ◄── (Attraction)                Gradient Push ──► (Repulsion)
+ (Boost Probability)                           (Suppress Probability)
 ```
 
 
-## ৪. বাস্তবে যেমন দেখায়: bKash পেমেন্ট ভেরিফিকেশন
+## ৪. DeepSeek R1 ও Safety Guardrail
 
-চলো একটা বাস্তব উদাহরণ দেখি।
+DeepSeek R1 বা ChatGPT-কে কোনো বিপজ্জনক প্রশ্ন করলে তারা কীভাবে ভদ্রভাবে না বলে দেয়?
 
-ধরো, একজন bKash Customer চ্যাটে এসে বলল: "আমি টাকা পাঠিয়েছি কিন্তু অ্যাড হয়নি, ট্রানজ্যাকশন TRX999।"
+ধরো, তুমি জিজ্ঞেস করলে— 'কীভাবে সাইবার অ্যাটাক করব?'
 
-তখন পর্দার আড়ালে কী ঘটে?
+তখন কী ঘটে?
 
-প্রথমেই AI তার কাছে থাকা সব টুলের লিস্ট চেক করে।
+মডেলের ব্যাকঅ্যান্ডে থাকা Alignment লেয়ার সাথে সাথে অ্যাক্টিভ হয়ে যায়। 
 
-সে দেখে `check_bkash_transaction` নামে একটা টুল আছে।
+সে দেখে যে এই প্রশ্নের Safety Guideline ভায়োলেশন স্কোর অনেক বেশি।
 
-তার Description পড়ে সে বুঝে নেয় যে এটাই রিয়েল-টাইম Data চেক করার জন্য পারফেক্ট টুল।
+ব্যস! মডেলটি তার নিরাপত্তা প্রোটোকল চালু করে দেয়। 
 
-এরপর AI একটা JSON Object তৈরি করে ফেলে: `{"trx_id": "TRX999"}`।
-
-এবার তোমার ব্যাকএন্ড Code এই JSON দেখে bKash API কল করে।
-
-সেখান থেকে ট্রানজ্যাকশন স্ট্যাটাস "Success" আর অ্যামাউন্ট "500 BDT" নিয়ে AI-কে ফেরত দেয়।
-
-সবশেষে AI সব তথ্য পেয়ে কাস্টমারকে মিষ্টি করে বাংলায় উত্তর দেয়:
-
-"ধন্যবাদ! তোমার ৫০০ টাকার পেমেন্টটি ভেরিফাই করা হয়েছে এবং অ্যাকাউন্টে যোগ করা হয়েছে।"
+সে পোলাইটলি উত্তর দেয়— 'আমি দুঃখিত, ক্ষতিকর বা বেআইনি কাজে সাহায্য করা আমার পলিসির পরিপন্থী।'
 
 
-## ৫. কোডিংয়ের পালা: Custom Tool Executor তৈরি
+## ৫. Hugging Face TRL দিয়ে DPO Trainer রান করা
 
-💻 Developer View
-
-এবার চলো একটু কোড দেখা যাক।
-
-একজন Developer হিসেবে তুমি কীভাবে পাইথনে Anthropic API ব্যবহার করে টুল কলিং হ্যান্ডল করবে?
-
-নিচে তার একটি প্রোডাকশন লেভেলের পাইথন কোড দেওয়া হলো:
+> **Developer View**
+> 
+> যদি তুমি একজন Developer হও, তবে পাইথনে `trl` লাইব্রেরি ব্যবহার করে সহজেই কাস্টম DPO Trainer তৈরি করতে পারবে।
+> 
+> চলো এর একটি প্রোডাকশন লেভেলের পাইথন কোড দেখে নিই।
 
 ```python
-import json
+from trl import DPOTrainer
+from transformers import TrainingArguments
+from datasets import Dataset
 
-# ১. লোকাল পাইথন Function (টুল ইমপ্লিমেন্টেশন)
-def get_slow_queries(threshold_ms: int):
-    # মক Database Error Log চেক
-    return {"status": "success", "queries_found": 3, "slowest_query": "SELECT * FROM users"}
-
-# ২. টুল স্কিমা ডিকশনারি
-tools_schema = [
+# ১. কাস্টম প্রেফারেন্স Dataset (Prompt, Chosen, Rejected)
+preference_data = [
     {
-        "name": "get_slow_queries",
-        "description": "Database-এর স্লো কোয়েরি Log চেক করো।",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "threshold_ms": {
-                    "type": "integer",
-                    "description": "স্লো কোয়েরির সময়সীমা মিলি-সেকেন্ডে।"
-                }
-            },
-            "required": ["threshold_ms"]
-        }
+        "prompt": "bKash পিন রিসেট করতে কী আইডি লাগবে?",
+        "chosen": "তোমার অরিজিনাল এনআইডি (NID) কার্ডের কপি লাগবে।", # Preferred
+        "rejected": "যেকোনো একটি র্যান্ডম ফেক আইডি কার্ড হলেই হবে।"   # Rejected/Unsafe
     }
 ]
 
-# ৩. মক AI Response হ্যান্ডলার (Simulating stop_reason='tool_use')
-def handle_ai_response(response_obj):
-    if response_obj["stop_reason"] == "tool_use":
-        tool_use_block = response_obj["content"][0]
-        tool_name = tool_use_block["name"]
-        arguments = tool_use_block["input"]
-        
-        print(f"AI requested tool: '{tool_name}' with arguments: {arguments}")
-        
-        # ৪. লোকাল Function ডায়নামিক কলিং
-        if tool_name == "get_slow_queries":
-            result = get_slow_queries(threshold_ms=arguments["threshold_ms"])
-            print(f"Local Execution Result: {result}")
-            
-            # ৫. Response রিম্যাপ করে পরবর্তী টার্নের জন্য প্রিপেয়ার করো
-            tool_result_message = {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": tool_use_block["id"],
-                        "content": json.dumps(result)
-                    }
-                ]
-            }
-            return tool_result_message
+dataset = Dataset.from_list(preference_data)
 
-# মক AI Response Data
-mock_response = {
-    "stop_reason": "tool_use",
-    "content": [
-        {
-            "id": "toolu_xyz123",
-            "name": "get_slow_queries",
-            "input": {"threshold_ms": 500}
-        }
-    ]
-}
+# ২. DPO Training Arguments ডিফাইন করো
+training_args = TrainingArguments(
+    output_dir="./dpo_aligned_model",
+    per_device_train_batch_size=2,
+    learning_rate=5e-7,
+    logging_steps=10,
+    remove_unused_columns=False
+)
 
-handle_ai_response(mock_response)
+# ৩. DPO Trainer ইনিশিয়ালাইজ (বেস Model ও রেফারেন্স Model সহ)
+# (এখানে মক টেমপ্লেট দেখানো হয়েছে, প্রোডাকশনে Model অবজেক্ট পাস করতে হয়)
+print("DPO Trainer Initialized! ready to align the model on safety policies...")
 ```
 
 
-## ৬. প্রোডাকশন লাইফে ভ্যালিডেশনের গুরুত্ব
+## ৬. Red Teaming ও Guardrails
 
-🏭 Production Reality
+> **Production Reality**
+> 
+> তুমি Model-কে খুব সুন্দরভাবে সাজালে। কিন্তু এরপরেও হ্যাকাররা Jailbreak বা Prompt Injection দিয়ে তোমার সব নিরাপত্তা ভেঙে দিতে পারে।
+> 
+> বাস্তবে এর জন্য দুটি দারুণ সমাধান আছে।
 
-বাস্তবে যখন AI কাজ করে, সে কিন্তু মাঝে মাঝে ভুল আর্গুমেন্ট টাইপ তৈরি করে ফেলে।
+প্রথমটি হলো Red Teaming।
 
-যেমন ধরো, `threshold_ms`-এর জায়গায় সে একটা String `"500ms"` পাঠিয়ে দিল।
+এখানে মডেলটি সবার জন্য উন্মুক্ত করার আগে প্রফেশনাল হ্যাকারদের ডেকে আনা হয়। 
 
-তখন কী সমস্যা হতে পারে?
+তারা ইচ্ছে করে মডেলকে নানাভাবে অ্যাটাক করে এর দুর্বলতা খুঁজে বের করে।
 
-এই ভুল Parameter যদি সরাসরি তোমার Database বা Function-এ চলে যায়, তবে পুরো Application ক্র্যাশ করবে!
+দ্বিতীয়টি হলো Guardrails।
 
-তাহলে এর সমাধান কী?
+এখানে মডেলের ইনপুট ও আউটপুট গেটওয়েতে একটি ছোট প্রহরী বা Classifier বসানো থাকে。
 
-এর জন্য তোমাকে ব্যাকএন্ডে একটা Guard বা ভ্যালিডেটর রাখতে হবে।
-
-কোড রান করার আগে Pydantic বা Zod দিয়ে টাইপ ভ্যালিডেশন চেক করা একদম বাধ্যতামূলক।
-
-যদি ভ্যালিডেশন ফেল করে, তাহলে তোমার System সাথে সাথে AI-কে একটি Error মেসেজ পাঠিয়ে বলবে আবার চেষ্টা করতে।
-
-একে আমরা বলি Self-correction Loop।
+সে যদি দেখে কোনো ক্ষতিকর কমান্ড বা রেসপন্স তৈরি হচ্ছে, সাথে সাথে সেটিকে লক করে দেয়।
 
 
-## ৭. কিছু সাধারণ ভুল ধারণা
+## ৭. সাধারণ কিছু ভুল ধারণা
 
-🔴 Common Mistake
+> **Common Mistake**
+> 
+> **ভুল ধারণা:** DPO বা RLHF করলে Model-এর সব সাধারণ কোডিং বা ম্যাথের দক্ষতা অনেক বেড়ে যাবে।
+> 
+> **বাস্তবতা:** একে AI ফিল্ডে বলা হয় **Alignment Tax**। মডেলকে অতিরিক্ত কড়া নিয়মের মধ্যে রাখলে তার ক্রিয়েটিভিটি আর জটিল চিন্তা করার ক্ষমতা কমে যায়।
 
-অনেকেরই একটা বড় ভুল ধারণা থাকে।
+এমনকি অনেক সময় সাধারণ কোনো নির্দোষ প্রশ্ন করলেও সে ভয় পেয়ে উত্তর দিতে অস্বীকৃতি জানায়।
 
-তারা মনে করে, AI নিজে নিজেই ইন্টারনেটে গিয়ে থার্ড-পার্টি API কল করে ডাটা নিয়ে আসে।
-
-কিন্তু আসলে কি তাই?
-
-একেবারেই না!
-
-বাস্তবতা হলো, AI নিজে কোনো নেটওয়ার্ক রিকোয়েস্ট করতে পারে না।
-
-সে শুধু টেক্সট জেনারেট করতে পারে।
-
-সব নেটওয়ার্ক কল, অথেনটিকেশন আর সিকিউরিটি হ্যান্ডেল করার দায়িত্ব তোমার ব্যাকএন্ড কোডের।
-
-AI এখানে শুধুই সিদ্ধান্ত নেয়, সে কোনো কাজ নিজে করে না।
+তাই প্রোডাকশনে নিরাপত্তা ও উপযোগিতার মধ্যে একটি সঠিক ব্যালেন্স রাখা খুবই জরুরি।
 
 
-## ৮. সহজ মেন্টাল মডেল: ব্যাংকের ম্যানেজার ও ক্যাশিয়ার
+## ৮. সুশীল নীতি পুলিশ
 
-টুল কলিংয়ের পুরো ব্যপারটা বুঝতে একটা সহজ মেন্টাল মডেল ব্যবহার করা যাক।
+সহজভাবে বোঝার জন্য একটা চমৎকার Mental Model ব্যবহার করা যাক।
 
-ভাবো, আমাদের LLM হলো ব্যাংকের একজন অভিজ্ঞ ম্যানেজার।
+ধরে নাও, Alignment হলো AI-এর মাথায় একজন সুশীল নীতি পুলিশ বসিয়ে দেওয়া।
 
-ম্যানেজার কিন্তু নিজে ক্যাশ কাউন্টারে গিয়ে টাকা গোনেন না বা ভল্ট খোলেন না।
+[VISUAL]
+Title: Internal Safety Guard Dog Analogy of Alignment
+Illustration: Inner controller node blocking forbidden vector paths before output generation
+Placement: Under Mental Model
+Purpose: Ground the concept of active internal suppression.
 
-তিনি শুধু সিদ্ধান্ত নেন কাকে লোন দেওয়া হবে আর কার অ্যাকাউন্ট চেক করা দরকার।
+```
+  [ Raw Thought Generation ] ──► [ Internal Safety Officer (DPO) ] ──► [ Output Response ]
+                                                │
+                                                ▼ (Blocks unsafe/illegal paths)
+                                       "Refusal Message"
+```
 
-আর তোমার ব্যাকএন্ড কোড হলো সেই ব্যাংকের ক্যাশিয়ার।
+ভাবো, মডেলটি হলো দারুণ প্রতিভাবান এক শিশু।
 
-ম্যানেজার যখন চিরকুটে লিখে ক্যাশিয়ারকে বলেন: "রহিমের ব্যালেন্স কত দেখে জানাও।"
+সে দুনিয়ার সব ভালো ও মন্দ কথা বলতে পারে। 
 
-ক্যাশিয়ার তখন কম্পিউটারে ডাটাবেস চেক করে ম্যানেজারকে ব্যালেন্সের হিসাব এনে দেন।
+এখন তুমি তার ব্রেইনে একজন সুশীল নীতি পুলিশ বসিয়ে দিলে।
 
-ম্যানেজার সেই হিসাব দেখে ফাইনাল সিদ্ধান্ত নেন।
+শিশুটির মুখ দিয়ে যখনই কোনো ক্ষতিকর কথা বের হতে যায়, পুলিশটি সাথে সাথে তার মুখ চেপে ধরে। 
 
-এখানে ম্যানেজার হলেন Decision Maker, আর ক্যাশিয়ার হলেন Executor।
+এবং তাকে সবচেয়ে ভদ্র ও নিরাপদ কথাটি বলতে বাধ্য করে।
 
 
-## ৯. মিনি প্রজেক্ট: একটি সেফ ফাইল লিস্টার এজেন্ট
+## ৯. কাস্টম DPO Loss হিসাব করা
 
-চলো এবার পাইথনে একটা দারুণ কাজ করি।
-
-আমরা একটা নিরাপদ কমান্ড রানার এজেন্ট তৈরি করব।
-
-এই এজেন্টটি AI-এর দেওয়া আর্গুমেন্ট চেক করবে।
-
-এবং শুধুমাত্র নিরাপদ উইন্ডোজ ফাইল লিস্টার টুল এক্সেকিউট করবে।
-
-কোডটি নিচে দেখে নাও:
+চলো, এবার আমরা পাইথনে কোনো লাইব্রেরি ছাড়া সরাসরি NumPy ব্যবহার করে DPO Loss হিসাব করার নিয়মটি দেখে নিই।
 
 ```python
-import os
-import json
+import numpy as np
 
-# ১. লোকাল নিরাপদ ডিরেক্টরি লিস্টার টুল
-def list_directory_contents(path):
-    # পাথের ট্রাভার্সাল হ্যাকিং এড়াতে সেফটি গার্ড
-    if ".." in path or path.startswith("/") or path.startswith("\\"):
-        return {"status": "error", "message": "Access Denied. Path traversal detected!"}
-    
-    if os.path.exists(path):
-        return {"status": "success", "files": os.listdir(path)}
-    return {"status": "error", "message": "Directory not found."}
+# ১. মক Log-প্রোবাবিলিটিজ (Log-probabilities of active and reference models)
+# log_pi_theta = আমাদের একটিভ Model-এর Token জেনারেশন প্রোবাবিলিটি
+# log_pi_ref   = আমাদের ফ্রিজড রেফারেন্স Model-এর প্রোবাবিলিটি
 
-# ২. কাস্টম JSON Schema ভ্যালিডেটর ও রানার
-def secure_tool_executor(tool_name, arguments_json):
-    try:
-        args = json.loads(arguments_json)
-        
-        # ৩. Parameter স্কিমা Validation
-        if "path" not in args or not isinstance(args["path"], str):
-            return {"status": "error", "message": "Invalid arguments. 'path' must be a string."}
-            
-        if tool_name == "list_dir":
-            result = list_directory_contents(args["path"])
-            return result
-        return {"status": "error", "message": "Unknown tool name."}
-        
-    except json.JSONDecodeError:
-        return {"status": "error", "message": "Invalid JSON format."}
+# চুজেন বা উইনার উত্তরের প্রোবাবিলিটি একটিভ মডেলে বেশি
+log_pi_theta_chosen = -0.15
+log_pi_ref_chosen = -0.30
 
-# ৪. মক Test রান (প্রোডাকশন গ্রেড Test)
-print("--- TEST 1: Safe Path Execution ---")
-safe_res = secure_tool_executor("list_dir", '{"path": "."}')
-print(safe_res)
+# রিজেক্টেড বা লুজার উত্তরের প্রোবাবিলিটি একটিভ মডেলে কমে গেছে
+log_pi_theta_rejected = -0.90
+log_pi_ref_rejected = -0.50
 
-print("\n--- TEST 2: Hack Attempt (Path Traversal) ---")
-hack_res = secure_tool_executor("list_dir", '{"path": "../../../"}')
-print(hack_res)
+# ২. ডিপিও হাইপারপ্যারামিটার (Beta - scaling factor)
+beta = 0.5
+
+# ৩. ডিপিও Loss Calculation সমীকরণ
+# loss = -ln(sigmoid(beta * ln(pi_theta_w/pi_ref_w) - beta * ln(pi_theta_l/pi_ref_l)))
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# উইনার এবং লুজার রেশিও পরিমাপ
+ratio_chosen = log_pi_theta_chosen - log_pi_ref_chosen
+ratio_rejected = log_pi_theta_rejected - log_pi_ref_rejected
+
+# ডিপিও Loss মান
+dpo_loss = -np.log(sigmoid(beta * (ratio_chosen - ratio_rejected)))
+
+print(f"Chosen Log-Ratio:   {ratio_chosen:.4f}")
+print(f"Rejected Log-Ratio: {ratio_rejected:.4f}\n")
+print(f"Calculated DPO Loss Score: {dpo_loss:.4f}")
 ```
 
-#### কোডটি কীভাবে কাজ করে?
+**Code Breakdown**
 
-ইউজার যখন ইনপুট হিসেবে AI-এর তৈরি করা JSON আর্গুমেন্ট পাঠাবে, আমাদের এই কোডটি পাথের সিকিউরিটি আর স্কিমা চেক করে দেখবে।
+কোডটি কীভাবে কাজ করছে চলো দেখে নিই।
 
-যদি পাথটি নিরাপদ হয়, তবে সে ফাইলের লিস্ট আউটপুট হিসেবে দেবে।
+এখানে Input হিসেবে আমরা একটিভ ও রেফারেন্স মডেলের পছন্দের ও অপছন্দের উত্তরের সম্ভাবনা দিয়েছি।
 
-আর যদি কেউ হ্যাক করার চেষ্টা করে, তবে সাথে সাথে সে এলার্ট দেখাবে।
+এর ওপরে গাণিতিক সমীকরণটি প্রয়োগ করার পর আমরা পাচ্ছি DPO Loss Score।
 
-কারণ, আমাদের কোডে `..` ট্রাভার্সাল ডিটেকশন আছে, যা ওএস সিকিউরিটি নিশ্চিত করে।
+এটি মূলত পছন্দের ও অপছন্দের উত্তরের রেশিও দেখে মডেলকে ট্রেন করে।
 
-তুমি যখন প্রোডাকশনে কোনো কাস্টম ব্যাশ বা ওএস টুল সেভলি রান করাতে চাও, তখন এই কোডটি ব্যবহার করতে পারো।
-
-
-## ১০. ইন্টারভিউতে কেমন প্রশ্ন হতে পারে?
-
-### বিগিনার লেভেল
-
-**প্রশ্ন:** AI টুল কলিংয়ে JSON Schema-র গুরুত্ব কী?
-
-**উত্তর:** JSON Schema হলো AI আর ব্যাকএন্ড Function-এর মধ্যে একটা ডাটা Contract।
-
-এটি পড়ে AI বুঝতে পারে ফাংশনে কী ধরনের Parameter দিতে হবে।
-
-যেমন, সেটি String হবে নাকি Integer হবে, তা AI এখান থেকে বুঝতে পারে।
-
-এর ফলে কোড ক্র্যাশ করার কোনো সম্ভাবনা থাকে না।
-
-### ইন্টারমিডিয়েট লেভেল
-
-**প্রশ্ন:** AI যখন একই সাথে অনেকগুলো Parallel Tool Call করতে চায়, তখন ব্যাকএন্ডে কীভাবে হ্যান্ডেল করবে?
-
-**উত্তর:** ব্যাকএন্ডে যে কয়টি টুল কল রিকোয়েস্ট আসবে, প্রতিটির জন্য Loop চালিয়ে Asynchronous উপায়ে বা `async/await` দিয়ে ফাংশনগুলো রান করতে হবে।
-
-এরপর সবগুলোর রেজাল্ট আলাদা ইউনিক `tool_use_id` দিয়ে মেসেজ অ্যারেতে প্যাক করে AI-কে ফেরত দিতে হবে।
-
-### অ্যাডভান্সড লেভেল
-
-**প্রশ্ন:** AI-এর তৈরি করা আর্গুমেন্ট সরাসরি লোকাল Database-এ পাঠানোর রিস্ক কী? আর এর বেস্ট প্র্যাকটিস কী?
-
-**উত্তর:** সবচেয়ে বড় রিস্ক হলো টাইপ মিসম্যাচ হওয়া আর সিকিউরিটি হ্যাক হওয়া।
-
-যেমন কেউ কাস্টম কোড ইনজেকশন বা পাথ ট্রাভার্সাল অ্যাটাক করতে পারে।
-
-এর বেস্ট প্র্যাকটিস হলো— সরাসরি ডাটাবেসে ডাটা না পাঠিয়ে প্রথমে Pydantic বা Zod দিয়ে কড়া স্কিমা ভ্যালিডেশন চেক করা।
-
-এবং ইনপুট পুরোপুরি ফিল্টার বা Sanitize করার পর কেবল ক্লিন ডাটা ডাটাবেসে সেভ করা।
+যখনই তুমি কাস্টম সেফটি এলাইনমেন্ট করতে যাবে, তখনই এই নিয়মটি কাজে লাগবে।
 
 
-## ১১. চ্যাপ্টার সামারি
+## ১০. ইন্টারভিউতে সাধারণ কিছু প্রশ্ন
 
-তাহলে এই চ্যাপ্টারে আমরা কী কী শিখলাম? চলো একবার চোখ বুলিয়ে নিই।
+### Beginner লেভেল
 
-আমরা জানলাম Tool Calling কীভাবে অন্ধ AI-কে বাইরের দুনিয়ার API আর Database পড়ার ক্ষমতা দেয়।
+**প্রশ্ন:** Alignment কেন করা হয় এবং এর প্রধান তিনটি ভিত্তি কী?
 
-শিখলাম JSON Schema হলো AI-এর জন্য একমাত্র রুল বুক, যা দেখে সে আর্গুমেন্ট তৈরি করে।
+**উত্তর:** মডেল যাতে মানুষের নৈতিকতা ও সুরক্ষার সীমানায় থেকে উত্তর দিতে পারে, সেজন্য Alignment করা হয়। এর প্রধান তিনটি ভিত্তি হলো Helpfulness, Honesty এবং Harmlessness।
 
-আরও বুঝলাম Parallel Calling-এর সাহায্যে একই সাথে একাধিক API-র কাজ করে ফেলা যায়।
+### Intermediate লেভেল
 
-আর সবশেষে মনে রাখব, সুরক্ষার জন্য Strict Argument Validation করাটা একদম বাধ্যতামূলক।
+**প্রশ্ন:** RLHF-এর চেয়ে DPO কেন বেশি জনপ্রিয় হচ্ছে?
+
+**উত্তর:** RLHF-এ একসাথে তিনটি আলাদা Model চালাতে হয়, যা অনেক খরচ বাড়ায় আর আনস্ট্যাবল করে। আর DPO কোনো আলাদা Reward Model ছাড়াই সরাসরি একটি Loss Function ব্যবহার করে কাজ শেষ করে দেয়। তাই এটি অনেক দ্রুত ও স্ট্যাবল।
+
+### Advanced লেভেল
+
+**প্রশ্ন:** Alignment Tax কী এবং এটি কীভাবে কমানো যায়?
+
+**উত্তর:** অতিরিক্ত কঠোর নিয়মের কারণে মডেলের কোডিং বা রিজনিংয়ের মতো জটিল কাজের দক্ষতা কমে যাওয়াকে Alignment Tax বলে। এটি কমানোর জন্য সেফটি ডেটার পাশাপাশি প্রচুর পরিমাণে জেনারেল লজিক্যাল ডেটা যুক্ত করতে হয়। এছাড়াও ব্যাকঅ্যান্ডে Llama Guard-এর মতো External Guardrails ব্যবহার করা যেতে পারে।
 
 
-## ১২. এরপরে কী?
+## ১১. যা শিখলাম
 
-টুল কলিং তো শিখে গেলাম, এবার তাহলে কী করব?
+চলো চট করে পুরো বিষয়টির ওপর চোখ বুলিয়ে নিই।
 
-পরের চ্যাপ্টারে আমরা শিখব টুলের ইউনিভার্সাল স্ট্যান্ডার্ড প্রোটোকল: **Chapter 20: Model Context Protocol (MCP)**।
+Alignment বেস মডেল এবং SFT মডেলকে মানুষের নিরাপত্তা ও নৈতিকতার গণ্ডির ভেতরে রাখে।
 
-একে বলা যায় AI-এর USB-C!
+RLHF মানুষের ফিডব্যাক নিয়ে Reward Model তৈরি করে এবং PPO অপ্টিমাইজারের মাধ্যমে লুপ সম্পন্ন করে।
 
-অ্যানথ্রপিকের তৈরি এই মডার্ন প্রোটোকল কীভাবে সব AI টুলকে একসাথে কানেক্ট করে, চলো সেটাই দেখে নিই!
+DPO সরাসরি সমীকরণের সাহায্যে মানুষের পছন্দ-অপছন্দের রেশিও টিউন করে দেয়।
 
-**Chapter 19 শেষ।**
+আর বাস্তব প্রজেক্টে সুরক্ষার জন্য Red Teaming করা অত্যন্ত জরুরি।
+
+
+## १२. এরপর কী?
+
+অভিনন্দন! তুমি Fine-Tuning-এর মতো জটিল একটি পার্ট শেষ করে ফেলেছ।
+
+পরবর্তী চ্যাপ্টার থেকে শুরু হচ্ছে আমাদের সবচেয়ে এক্সাইটিং সফর— Agentic AI।
+
+সেখানে আমরা দেখব কীভাবে সাধারণ চ্যাটবট থেকে শক্তিশালী AI Agent তৈরি করা যায়। 
+
+চলবে...

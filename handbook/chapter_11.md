@@ -1,387 +1,248 @@
-# Chapter 11: Embeddings & Vector Mathematics
+# Chapter 11: Prompt Engineering Fundamentals — Zero-Shot, Few-Shot & Persona Prompting
 
-তুমি কি কখনো ভেবেছো — একটা AI Model কীভাবে বুঝতে পারে যে "King" আর "Queen" শব্দ দুটোর মধ্যে গভীর মিল আছে?
+তুমি কি কখনো কোনো পেশাদার অভিনেতাকে মঞ্চে অভিনয় করতে দেখেছো?
 
-অথবা "Apple" বা "Computer" শব্দ দুটোর সাথে যে এদের কোনো মিল নেই, সেটাই বা সে কীভাবে বোঝে?
+যদি তাকে শুধু বলা হয়, "অভিনয় করো," সে হয়তো থতমত খেয়ে যাবে। সে বুঝতে পারবে না সে কি রাজা নাকি ভিখারি, নাকি কোনো গোয়েন্দা।
 
-আসলে AI তো আমাদের মতো ভাষা বোঝে না। তার কাছে সব কিছুই হলো সংখ্যার এক বিশাল নদী!
+কিন্তু যদি তাকে একটি চমৎকার Character Sheet দেওয়া হয়, যেখানে লেখা আছে: "তুমি ১৯৪০ সালের নিউ ইয়র্কের একজন দুঁদে গোয়েন্দা। খুব গম্ভীর, কিন্তু বিড়ালদের খুব ভালোবাসো।"
 
-শব্দ বা বাক্যগুলোকে যখন AI সংখ্যার Vector-এ বদলে নেয়, তখন সেগুলোর মধ্যকার কোণ আর দূরত্ব মেপেই সে আসল অর্থ খুঁজে বের করে।
+এবার সেই অভিনেতা চোখের পলকে তার চরিত্রে ঢুকে যাবে এবং দুর্দান্ত অভিনয় করে দেখাবে।
 
-তো চলো, এই চ্যাপ্টারে AI-এর ভেতরের Vector Mathematics একদম সহজ কথায় বুঝে নিই।
+আমাদের Large Language Model (LLM) গুলোর ক্ষেত্রেও কিন্তু ঠিক এই ঘটনাটিই ঘটে।
 
-আমরা দেখবো কীভাবে Cosine Similarity, L2 Distance আর Dot Product কাজ করে।
+তাদেরকে শুধু একটা সাধারণ প্রশ্ন করলেই তারা সেরা উত্তর দিতে পারে না। তাদের কাছ থেকে সেরা পারফরম্যান্স বের করে আনতে হলে সঠিক নির্দেশনা দিতে হয়।
 
-সেই সাথে জানবো আমাদের রিয়েল প্রজেক্টে কখন কোন মেট্রিক ব্যবহার করা উচিত।
+আর এই নির্দেশনা তৈরি করার বিজ্ঞান এবং শিল্পকেই আমরা বলি **Prompt Engineering**।
 
-তাহলে আর দেরি কেন? চলো শুরু করা যাক!
+তো চলো, আজকের এই চ্যাপ্টারে আমরা প্রম্পটিংয়ের একেবারে গোড়ার রহস্য এবং এর মূল স্তম্ভগুলো খুব সহজ ও ঘরোয়া ভাষায় উদঘাটন করি।
 
+---
 
-## ১. 3D মানচিত্রে শব্দের ওড়াউড়ি
+## ১. প্রম্পটের অঙ্গসংস্থান (Anatomy of a Prompt)
 
-ধরো, তুমি একটা বিশাল 3D ঘরের ঠিক মাঝখানে দাঁড়িয়ে আছো।
+একটি আদর্শ এবং প্রোডাকশন-গ্রেড প্রম্পটের ভেতরের কঙ্কালটা কেমন হয়?
 
-এই ঘরের একেকটা দিক একেকটা বৈশিষ্ট্য বা Dimension প্রকাশ করছে।
+একটি পূর্ণাঙ্গ প্রম্পটে সাধারণত ৪টি মূল অংশ থাকে:
 
-যেমন— ঘরের ডান-বাম দিকটা হলো Gender (ছেলে বা মেয়ে)।
-
-ওপর-নিচ দিকটা হলো Royalty (রাজকীয় ভাব)।
-
-আর সামনে-পেছনের দিকটা হলো Age (বয়স)।
-
-এখন তুমি যদি কিছু শব্দকে এই ঘরের ভেতর ভাসিয়ে দাও, তাহলে কী হবে?
-
-যেমন ধরো, `"King"` শব্দটাকে তুমি রাখলে ডান দিকে (Male), ওপরের দিকে (High Royalty) আর পেছনের দিকে (Old)।
-
-আবার `"Queen"` শব্দটাকে রাখলে বাম দিকে (Female), ওপরের দিকে (High Royalty) আর পেছনের দিকে (Old)।
+* **Instruction (নির্দেশনা):** তুমি মডেলকে দিয়ে ঠিক কী করাতে চাও (যেমন: "Summarize করো", "Translate করো")।
+* **Context (প্রেক্ষাপট):** মডেলকে কাজের গভীরতা বোঝানোর জন্য প্রয়োজনীয় ব্যাকগ্রাউন্ড ইনফরমেশন।
+* **Input Data (ইনপুট ডেটা):** যে নির্দিষ্ট ডেটার ওপর মডেল কাজ করবে (যেমন: একটি কাস্টমার ইমেইল বা আর্টিকেল)।
+* **Output Indicator (আউটপুট নির্দেশক):** উত্তরের ফরম্যাট কেমন হবে (যেমন: JSON, Bullet points, বা Python List)।
 
 [VISUAL]
-Title: Word Embedding Geometry
-Illustration: 3D coordinate space pointing to King, Queen, Man, and Woman with distance vectors
-Placement: After Hook Section
-Purpose: Provide a strong visual mental model for high-dimensional vector spaces.
+Title: Anatomical Structure of a Production-Grade Prompt
+Illustration: Breakdown of prompt components showing instruction, context, input data, and output wrapper
+Placement: After Prompt Anatomy section
+Purpose: Visually explain the structure of a prompt so developers can write systematic inputs.
 
 ```
-                  Royalty (y)
-                      │   [King] (0.9, 0.9, 0.2)
-                      │     .
-                      │    /  [Queen] (-0.9, 0.9, 0.2)
-                      │   /
-   ── Gender (x) ─────┼───
-                     /
-                    / [Man] (0.9, 0.1, 0.1)
-                Age (z)
+┌─────────────────────────────────────────────────────────────┐
+│ PERSONA/CONTEXT: "You are an expert customer support agent" │
+├─────────────────────────────────────────────────────────────┤
+│ INSTRUCTION: "Analyze sentiment and extract key issues"    │
+├─────────────────────────────────────────────────────────────┤
+│ DATA INPUT: "Email: The delivery was 3 days late! Terrible!"│
+├─────────────────────────────────────────────────────────────┤
+│ OUTPUT SPEC: "Format output as raw JSON: {sentiment, issue}"│
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**এই জ্যামিতিক মানচিত্রের সুবিধা কী?**
+বাস্তবে অনেক সময় আমরা এত কিছু না লিখে শুধু এক লাইনে লিখি: "আমাকে একটি কবিতা লিখে দাও।"
 
-মজার ব্যাপার হলো, তুমি যদি `"King"` Vector থেকে `"Man"` Vector বাদ দাও, আর তার সাথে `"Woman"` Vector যোগ করো, তাহলে কী হবে জানো?
+সেটা প্রম্পট হলেও, তা প্রোডাকশন-গ্রেড প্রম্পট নয়। ওটা হলো ক্যাজুয়াল প্রম্পট।
 
-তোমার হিসাবের ফলটা ঠিক `"Queen"`-এর জায়গায় গিয়ে ল্যান্ড করবে!
+রিয়েল-ওয়ার্ল্ড অ্যাপ বানানোর সময় প্রম্পটকে এই চার ভাগে ভাগ করে সাজানোই হলো বুদ্ধিমানের কাজ।
 
+---
+
+## ২. জিরো-শট বনাম ফিউ-শট প্রম্পটিং (Zero-Shot vs. Few-Shot)
+
+ধরা যাক, তুমি একটি মডেলকে দিয়ে মুভির রিভিউ পজিটিভ নাকি নেগেটিভ তা বের করাতে চাও।
+
+তুমি যদি মডেলকে সরাসরি ইনপুট দাও:
+
+> "review: এই মুভিটি খুবই চমৎকার ছিল! Sentiment:"
+
+এবং মডেল সাথে সাথে উত্তর দিল `Positive`।
+
+এখানে তুমি মডেলকে কোনো উদাহরণ দেখাওনি। সরাসরি প্রশ্ন করেছো। এটাকে বলে **Zero-Shot Prompting**।
+
+মডার্ন মডেলগুলো এত বেশি ইন্টেলিজেন্ট যে তারা কোনো উদাহরণ ছাড়াই চমৎকার জিরো-শট আউটপুট দিতে পারে।
+
+কিন্তু যদি কাজটি অনেক বেশি জটিল হয়? যেমন কোনো বিশেষ ফরম্যাটে আউটপুট আনা, যা মডেল আগে কখনো দেখেনি?
+
+তখন তোমাকে ব্যবহার করতে হবে **Few-Shot Prompting**।
+
+ফিউ-শট মানে হলো প্রম্পটের ভেতরেই ২-৩টি উদাহরণ দিয়ে মডেলকে বুঝিয়ে দেওয়া যে তুমি ঠিক কী ধরনের আউটপুট চাচ্ছ।
+
+চলো একটা প্রম্পট দেখি:
+
+```text
+Input: এই ফোনটির ব্যাটারি লাইফ একদম ফালতু।
+Output: [NEG] -> Battery
+
+Input: ক্যামেরাটা অসাধারণ লেগেছে, খুব সুন্দর ছবি ওঠে।
+Output: [POS] -> Camera
+
+Input: প্রসেসরটা একটু স্লো, তবে ডিসপ্লেটা দারুণ।
+Output: [MIX] -> Performance, Display
+
+Input: সাউন্ড কোয়ালিটি খুবই চমৎকার।
+Output:
 ```
-King - Man + Woman = Queen
-```
 
-এটা কিন্তু কোনো ম্যাজিক নয়, স্রেফ সাধারণ Vector যোগ-বিয়োগের খেল।
+এখানে মডেল যখন দেখবে আগের উদাহরণগুলোতে নির্দিষ্ট ফরম্যাটে ট্যাগ আর টপিক আলাদা করা হয়েছে, তখন সে শেষ লাইনে আউটপুট দেবে:
 
-বাস্তবে Embeddings-এর কাজও ঠিক এটাই।
+`[POS] -> Audio`
 
-শুধু ৩টা দিক বা Dimension-এর বদলে সেখানে ১৫৩৬ বা ৪০৯৬টি ডাইমেনশনের Hyper-space ব্যবহার করা হয়।
+মডেলের এই অন-দ্য-ফ্লাই বা প্রম্পটের ভেতরেই উদাহরণ দেখে নতুন প্যাটার্ন শিখে নেওয়ার ক্ষমতাকে বলা হয় **In-Context Learning**।
 
+---
 
-## ২. Vector মাপার ৩টি উপায়
+## ৩. পারসোনা প্রম্পটিং (Persona Prompting)
 
-Vector Database বা Search Engine-এ দুটো Vector-এর মধ্যে কতটা মিল আছে, তা বোঝার জন্য ৩টি প্রধান Metric ব্যবহার করা হয়।
+চলো অভিনেতার অ্যানালজিতে ফিরে যাই।
 
-[VISUAL]
-Title: Three Vector Distance Metrics
-Illustration: Comparison of Angle (Cosine), Straight Line (L2), and Projection (Dot Product) between two vectors
-Placement: After Core Concepts section
-Purpose: Visually define the core difference between Cosine, L2, and Dot Product metrics.
+মডেলকে যদি তুমি বলো, "জাভাস্ক্রিপ্ট ক্লোজার কী?" সে উইকিপিডিয়ার মতো বিশাল এক কঠিন সংজ্ঞা দেবে।
 
-```
-Cosine Similarity (Angle θ):        L2/Euclidean Distance (d):        Dot Product (Projection):
-            ▲                                  ▲                                 ▲
-           /                                  / \                               /
-          /                                  /   \                             /
-         / _ θ                              /     \                           /────►
-        /───►                              /───────►                         / (Length matters)
-     (Only Angle)                      (Straight Line)                  (Angle & Magnitude)
-```
+কিন্তু যদি তুমি লেখো:
 
-### Cosine Similarity
+> "তুমি একজন সহজ-সরল প্রাইমারি স্কুলের শিক্ষক। ১০ বছরের একটি বাচ্চার জন্য জাভাস্ক্রিপ্ট ক্লোজার খুব সহজ একটি বাস্তব উদাহরণ দিয়ে বুঝিয়ে দাও।"
 
-এটি দুটো Vector-এর মধ্যকার কোণ বা Angle ($\theta$) মেপে কাজ করে।
+তখন দেখবে মডেল ক্লোজারকে কোনো জাদুকরি বাক্স বা চকলেট বক্সের সাথে তুলনা করে মিষ্টি করে বুঝিয়ে দেবে।
 
-Vector-এর সাইজ বা Magnitude ছোট বা বড় যাই হোক না কেন, এটি শুধু তাদের দিকের মিল দেখে।
+পারসোনা প্রম্পটিংয়ের মূল উদ্দেশ্য হলো মডেলের বিশাল নলেজ বেস থেকে একটি নির্দিষ্ট অংশকে ট্রিগার করা।
 
-$$\text{Cosine Similarity}(\mathbf{a}, \mathbf{b}) = \cos(\theta) = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{a}\| \|\mathbf{b}\|}$$
+মডেল কিন্তু ইন্টারনেটের ভালো-মন্দ সব ধরনের লেখাই পড়েছে।
 
-**এর Range কত?**
+তুমি যখন তাকে একটি Persona বা ভূমিকা দাও, তখন সে তার নিউরাল নেটওয়ার্কের সেই নির্দিষ্ট স্টাইল ও টোনে রেসপন্স জেনারেট করে।
 
-$-1$ থেকে $+1$। এখানে $1$ মানে দুটো Vector হুবহু এক, $0$ মানে তাদের মধ্যে কোনো সম্পর্ক নেই, আর $-1$ মানে তারা পুরো উল্টো।
-
-**কখন ব্যবহার করবে?**
-
-Document Search বা RAG-এর মতো কাজে। যেখানে টেক্সট ছোট বা বড় হতে পারে, কিন্তু তাদের মূল ভাব একই থাকে।
-
-
-### L2 / Euclidean Distance
-
-এটি দুটো Vector-এর শেষ বিন্দুর মধ্যকার একদম সোজা সরলরেখার দূরত্ব মাপে।
-
-$$d(\mathbf{a}, \mathbf{b}) = \sqrt{\sum_{i=1}^{n} (a_i - b_i)^2}$$
-
-**এর Range কত?**
-
-$0$ থেকে $\infty$ (ইনফিনিটি) পর্যন্ত। $0$ মানে কোনো দূরত্ব নেই (হুবহু এক), আর এই মান যত বেশি হবে, দূরত্বও তত বাড়বে।
-
-**কখন ব্যবহার করবে?**
-
-Image Detection এবং ফেস রিকগনিশনের মতো কাজে, যেখানে Vector-এর পরম মান বা Magnitude অনেক বেশি গুরুত্বপূর্ণ।
-
-
-### Dot Product
-
-এটি দুটো Vector-এর মধ্যকার কোণ এবং তাদের দৈর্ঘ্য বা Magnitude—দুটো বিষয়ই একসাথে গুণ করে হিসাব করে।
-
-$$\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^{n} a_i b_i = \|\mathbf{a}\| \|\mathbf{b}\| \cos(\theta)$$
-
-**বিশেষ শর্ত কী?**
-
-যদি Vectorগুলো আগে থেকেই Normalized করা থাকে (মানে তাদের দৈর্ঘ্য ১ হয়), তবে Dot Product আর Cosine Similarity হুবহু একই রেজাল্ট দেবে।
-
-**কখন ব্যবহার করবে?**
-
-খুব ফাস্ট কাজ করে এমন প্রোডাকশন Search হাবে। কারণ হিসাবের দিক থেকে এটি অনেক দ্রুত কাজ করে, এতে কোনো Square Root বা Division-এর ঝামেলা নেই।
-
-
-## 🧠 Remember
-
-Normalized Vector ব্যবহার করলে Cosine Similarity আর Dot Product একই হয়ে যায়!
-
-এতে প্রোডাকশন সার্ভারে মেমরি আর GPU-র খরচ প্রায় ৫০% বেঁচে যায়।
-
-
-## ৩. Real World Example: Spotify-র Recommendation Engine
-
-Spotify যখন তোমার পছন্দের গানের ওপর ভিত্তি করে তোমাকে নতুন কোনো গান সাজেস্ট করে, তখন আসলে কী ঘটে?
-
-চলো খুব সহজে পুরো ব্যাপারটা ধাপে ধাপে দেখে নিই:
-
-**১. Song Embeddings বানানো**
-
-প্রথমেই প্রতিটি গানকে Vector-এ বদলে নেওয়া হয়।
-
-এখানে গানের বিট রেট, জেনার আর ভোকাল ফ্রিকোয়েন্সির মতো বিভিন্ন Feature ব্যবহার করা হয়।
-
-**২. Database-এ সেভ করা**
-
-Spotify তাদের কোটি কোটি গানের Embeddings Vector আগে থেকেই Normalized করে Database-এ জমিয়ে রাখে।
-
-**৩. Dot Product-এর ম্যাজিক**
-
-তুমি যখন কোনো গান শুনছো, তখন সেই গানের Vector-এর সাথে ডাটাবেসের অন্য সব গানের Dot Product করা হয়।
-
-আর চোখের পলকে সবচেয়ে কাছের ১০টি গান খুঁজে বের করে তোমার প্লেলিস্টে পাঠিয়ে দেওয়া হয়।
-
-
-## ৪. Developer View: pgvector ও Metric সিলেকশন
+---
 
 💻 Developer View
 
-PostgreSQL ডাটাবেসে `pgvector` Extension ব্যবহার করে কীভাবে টেবিল বানাবে আর Index ডিফাইন করবে, চলো তার SQL লজিকটা দেখে নিই:
+ডেভেলপার হিসেবে আমরা যখন প্রম্পট লিখি, তখন আমাদের প্রম্পট ডাইনামিক হতে হয়। 
 
-```sql
--- ১. pgvector এক্সটেনশন সচল করো
-CREATE EXTENSION IF NOT EXISTS vector;
+প্রতিটি ইউজার ইনপুটের জন্য আলাদা করে প্রম্পট ম্যানুয়ালি লেখা সম্ভব নয়। তাই আমরা ব্যবহার করি **Prompt Templates**।
 
--- ২. ১৫৩৬ ডাইমেনশনের Vector টেবিল তৈরি করো (OpenAI standard)
-CREATE TABLE document_embeddings (
-    id serial PRIMARY KEY,
-    content text,
-    embedding vector(1536)
-);
+চলো পাইথনে কীভাবে ফ্লেক্সিবল প্রম্পট টেমপ্লেট পার্সার বানানো যায় তা দেখে নিই।
 
--- ৩. COSIGN SIMILARITY ইনডেক্স ডিফाइन করো (cosine distance: <=>)
-CREATE INDEX ON document_embeddings USING hnsw (embedding vector_cosine_ops);
+```python
+def generate_review_prompt(user_review: str, category: str) -> str:
+    # System Instruction and Persona definition
+    persona = "You are a professional retail data analyzer specializing in electronic products."
+    
+    # Few-shot examples
+    examples = """
+Examples of expected behavior:
+Review: "The screen quality is amazing, but it heats up fast."
+Category: Display, Performance
+Output: [Display: POSITIVE], [Performance: NEGATIVE]
 
--- ৪. L2 DISTANCE ইনডেক্স ডিফाइन করো (L2 distance: <->)
-CREATE INDEX ON document_embeddings USING hnsw (embedding vector_l2_ops);
+Review: "Worst speaker ever. Sounds muffled."
+Category: Audio
+Output: [Audio: NEGATIVE]
+"""
+    
+    # Dynamic prompt building
+    prompt = f"""{persona}
+{examples}
 
--- ۵. DOT PRODUCT ইনডেক্স ডিফाइन করো (inner product distance: <#>)
-CREATE INDEX ON document_embeddings USING hnsw (embedding vector_ip_ops);
+Now analyze the following review for the category "{category}":
+Review: "{user_review}"
+Output:"""
+    return prompt.strip()
+
+# Test the prompt template builder
+test_review = "This laptop runs very smooth, but the customer service was awful."
+test_prompt = generate_review_prompt(test_review, "Performance, Customer Support")
+print(test_prompt)
 ```
 
+এই কোডটি রান করালে আমরা দেখবো কীভাবে আমাদের ডাইনামিক ইনপুটগুলো চমৎকারভাবে একটি ফিউ-শট টেমপ্লেটের সাথে জোড়া লেগে যাচ্ছে।
 
-## ৫. Production Reality: GPU Normalization-এর ট্রিক
+---
 
 🏭 Production Reality
 
-রিয়েল প্রজেক্টে RAG Server-এ লাখ লাখ Document সার্চ করার সময় সরাসরি Cosine Similarity ব্যবহার করা কিন্তু বেশ বড় একটা ভুল বা Anti-Pattern!
+প্রোডাকশন লেভেলে ফিউ-শট প্রম্পটিং ব্যবহারের কিছু বাস্তব চ্যালেঞ্জ রয়েছে।
 
-**কেন সরাসরি ব্যবহার করা ভুল?**
+সবচেয়ে বড় চ্যালেঞ্জ হলো **Token Overhead & Latency**।
 
-কারণ Cosine Similarity-র Equation-এ যে Square Root আর Division থাকে, তা GPU-কে অনেক স্লো করে দেয়।
+তুমি যদি তোমার প্রম্পটে ২০টি ফিউ-শট উদাহরণ যোগ করো, তবে প্রতিটি এপিআই কলে (API Call) অতিরিক্ত কয়েক হাজার টোকেন খরচ হবে।
 
-**তাহলে প্রোডাকশনের ট্রিকটা কী?**
+এর মানে হলো:
+১. তোমার এপিআই বিল (API Bill) অনেক বেড়ে যাবে।
+২. মডেলের রেসপন্স টাইম (Latency) দ্বিগুণ বা তিনগুণ হয়ে যাবে।
 
-ট্রিকটা হলো, Data যখন সিস্টেমে ঢোকানো বা Ingest করা হয়, তখনই Vectorগুলোকে আগে থেকে L2 Normalization করে ডাটাবেসে সেভ করে রাখা হয়।
+তাই প্রোডাকশনে ফিউ-শট প্রম্পটিং ব্যবহার করার সময় ৩ থেকে ৫টির বেশি উদাহরণ না দেওয়াই বুদ্ধিমানের কাজ।
 
-এর ফলে Query বা Inference-এর সময় GPU-কে আর কষ্ট করে ভাগ বা বর্গমূল করতে হয় না।
+যদি ৩-৫টি উদাহরণেও মডেল ভালো কাজ না করে, তবে ফিউ-শটের সংখ্যা না বাড়িয়ে মডেল Fine-Tuning করার কথা ভাবা উচিত।
 
-সে শুধু সুপার-ফাস্ট Dot Product রান করে চোখের পলকে Cosine Similarity-র সমান রেজাল্ট বের করে দেয়!
-
-
-## Common Mistake
+---
 
 🔴 Common Mistake
 
-**ভুল ধারণা:**
+**ভুল ধারণা:** প্রম্পট ইঞ্জিনিয়ারিং দিয়েই প্রোডাকশনের সমস্ত প্রবলেম সলভ করা সম্ভব।
 
-L2 Distance বা Euclidean Distance সব ধরনের Search প্রজেক্টের জন্য সেরা Metric।
+**বাস্তবতা:** অনেকেই মনে করেন প্রম্পট অনেক বড় করে সব নিয়ম লিখে দিলেই মডেল একদম নিখুঁত সফটওয়্যারের মতো কাজ করবে।
 
-**বাস্তবতা:**
+কিন্তু প্রম্পটিং কখনোই Deterministic নয়, এটি Probabilistic।
 
-যদি তোমার সাইটের কোনো লেখা বা Document-এর সাইজ অনেক অসমান হয়—যেমন একটা প্যারাগ্রাফ অনেক বড় আর অন্য একটা লাইন খুব ছোট।
+প্রম্পটে অতিরিক্ত নিয়ম লিখলে মডেলের **Instruction Drift** হতে পারে, অর্থাৎ সে শুরুর নিয়মগুলো ভুলে শেষের দিকে মন দিতে পারে।
 
-তখন কিন্তু L2 Distance বড় লেখার Vector-কে অনেক দূরে ঠেলে দেবে। একে বলে Magnitude Effect।
+যেখানে কাজের ধারা একদম ফিক্সড এবং ১০০% অ্যাকুরেসি দরকার, সেখানে প্রম্পটের বদলে ট্র্যাডিশনাল বিজনেস লজিক বা ক্লাসিক কোড ব্যবহার করা উচিত।
 
-এই সব ক্ষেত্রে কোণের দিক বা Cosine Similarity ব্যবহার করা ছাড়া কোনো উপায় নেই!
+---
 
+## 🧠 Remember
 
-## ৬. Mental Model: টর্চের আলো আর ছায়া
+প্রম্পট ইঞ্জিনিয়ারিং মানে শুধু সুন্দর ইংরেজি বা বাংলা শব্দ লেখা নয়।
 
-ব্যাপারটা মাথায় গেঁথে নেওয়ার জন্য একটা সহজ মনের ছবি বা Mental Model কল্পনা করো:
+এটি হলো মডেলের নিউরাল নেটওয়ার্ককে সঠিক রাস্তায় চালনা করার একটি লজিক্যাল ম্যাপিং।
 
-**L2 Distance মানে হলো একখানা Measurement Tape!**
+যত স্পষ্ট ইনস্ট্রাকশন আর যত নিখুঁত উদাহরণ দেবে, মডেলের হ্যালুসিনেশন করার সুযোগ তত কমে আসবে।
 
-দুই বিন্দুর মাঝখানে ফিতা ধরে সোজা দূরত্ব মাপার মতো।
+---
 
-**Cosine Similarity হলো দুটো টর্চের আলোর মধ্যকার কোণ!**
+## ৪. Interview Questions
 
-টর্চের আলো কতটা কড়া বা হালকা (Magnitude) তা কিন্তু এখানে ম্যাটার করে না। 
+#### Beginner
+১. **প্রশ্ন:** Zero-Shot এবং Few-Shot Prompting-এর মূল পার্থক্য কী?
+   * **উত্তর:** Zero-Shot-এ মডেলকে কোনো উদাহরণ না দেখিয়ে সরাসরি কোনো কাজ করতে বলা হয়। আর Few-Shot-এ কাজের ধরন বোঝানোর জন্য প্রম্পটের ভেতরেই ২-৩টি সঠিক ইনপুট-আউটপুটের উদাহরণ দেওয়া হয়।
 
-তাদের আলো ছড়ানোর কোণটা যদি একই দিকে থাকে, তবেই তাদের মিল সবচেয়ে বেশি।
+#### Intermediate
+২. **প্রশ্ন:** In-Context Learning বলতে কী বোঝায়? এটি কি মডেলের ওয়েট (Weights) পরিবর্তন করে?
+   * **উত্তর:** In-Context Learning হলো প্রম্পটের ভেতরে দেওয়া উদাহরণ দেখে রানটাইমে মডেলের নতুন কাজের প্যাটার্ন শিখে নেওয়ার ক্ষমতা। না, এটি মডেলের স্থায়ী ওয়েট বা প্যারামিটার পরিবর্তন করে না। এটি শুধুমাত্র নির্দিষ্ট কনটেক্সট উইন্ডোর ভেতরেই কাজ করে।
 
-**Dot Product হলো আলোর প্রজেকশন বা ব্রাইটনেস!**
+#### Advanced
+৩. **প্রশ্ন:** প্রোডাকশনে Few-Shot Prompting ব্যবহারের সময় কী কী ড্রব্যাক বা সীমাবদ্ধতা মাথায় রাখতে হবে এবং তা কীভাবে অপ্টিমাইজ করবে?
+   * **উত্তর:** প্রধান সীমাবদ্ধতাগুলো হলো অতিরিক্ত Token Cost এবং Latency বৃদ্ধি। প্রতিটি উদাহরণের জন্য কনটেক্সট সাইজ বড় হয়, ফলে প্রসেসিং টাইম ও বিল বাড়ে। এটি অপ্টিমাইজ করার জন্য উদাহরণের সংখ্যা ৩-৫টির মধ্যে সীমাবদ্ধ রাখতে হবে, অপ্রয়োজনীয় টেক্সট ছেঁটে ফেলতে হবে এবং প্রয়োজনে ভেক্টর ডাটাবেস থেকে রুল-বেসড উদাহরণ সিলেক্ট করতে হবে (Dynamic Few-Shot)।
 
-এটি টর্চের কোণ আর আলোর জোর—দুটোই একসাথে মাপে।
-
-টর্চ কাছে এনে আলোর জোর বাড়ালে এর মান রকেটের গতিতে বেড়ে যায়!
-
-
-## ৭. Mini Project: Python-এ Classifier
-
-চলো Python আর NumPy ব্যবহার করে কোনো ML Framework ছাড়াই একটা ছোট কোড লিখে ফেলি।
-
-আমরা কোড লিখে Cosine Similarity আর L2 Distance মেপে দেখবো কোনটা কাস্টমারের Query-র সবচেয়ে কাছে যায়!
-
-```python
-import numpy as np
-
-# ১. Database-এর ৩টি ডকের মক এম্বেডিংস Vector (৩-ডাইমেনশন)
-# ডক ১: "পেমেন্ট সফল হয়েছে"
-doc_1 = np.array([0.9, 0.8, 0.1])
-# ডক ২: "অ্যাকাউন্ট পিন লক"
-doc_2 = np.array([-0.8, -0.7, 0.9])
-# ডক ৩: "Server Configuration Error"
-doc_3 = np.array([0.1, 0.2, 0.95])
-
-database = {"Payment Success": doc_1, "PIN Locked": doc_2, "Server Error": doc_3}
-
-# ২. কাস্টমার কোয়্যারি Vector: "আমার পেমেন্ট হচ্ছে না কেন?"
-query = np.array([0.85, 0.75, -0.1])
-
-# ৩. মেট্রিক Function
-def cosine_similarity(v1, v2):
-    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-
-def l2_distance(v1, v2):
-    return np.sqrt(np.sum((v1 - v2) ** 2))
-
-# ৪. Search রান করো
-print("--- Cosine Similarity Search (Higher is Better) ---")
-for name, vec in database.items():
-    sim = cosine_similarity(query, vec)
-    print(f"Similarity with '{name}': {sim:.4f}")
-
-print("\n--- L2 Distance Search (Lower is Better) ---")
-for name, vec in database.items():
-    dist = l2_distance(query, vec)
-    print(f"Distance with '{name}': {dist:.4f}")
-```
-
-### Code Breakdown
-
-চলো কোডের খুঁটিনাটি খুব সহজে বুঝে নিই:
-
-**এখানে Input কী দিয়েছি?**
-
-একটি ৩-ডাইমেনশনের Vector Database এবং কাস্টমারের দেওয়া Query Vector।
-
-**আউটপুট কী এসেছে?**
-
-Cosine Similarity এবং L2 Distance-এর স্কোরের একটা লিস্ট।
-
-**ফলাফল কী দাঁড়াল?**
-
-আমরা দেখতে পেলাম `Payment Success` Vector-এর সাথে Cosine Score সবচেয়ে বেশি ($0.9995$) আর L2 Distance সবচেয়ে কম ($0.2121$)।
-
-তার মানে কাস্টমারের প্রশ্নটি "Payment Success" ক্যাটাগরির সাথে সবচেয়ে ভালো মিলেছে।
-
-**কখন ব্যবহার করবে?**
-
-যখন কোনো বড় ML Framework ছাড়াই কাস্টম Vector Classifier তৈরি করতে চাও, তখন এই কোডটি তোমার কাজে আসবে।
-
-
-## ৮. Interview Questions
-
-### Beginner
-
-**প্রশ্ন:**
-
-Cosine Similarity আর L2 Distance-এর মধ্যে প্রধান পার্থক্য কী?
-
-**উত্তর:**
-
-Cosine Similarity শুধু দুটো Vector-এর মধ্যকার কোণ বা Angle মাপে (তাদের Magnitude বাদ দিয়ে)। 
-
-আর L2 Distance দুটো Vector-এর Magnitude সহ তাদের ভেতরের একদম সোজা সরলরেখার দূরত্ব মাপে।
-
-
-### Intermediate
-
-**প্রশ্ন:**
-
-রিয়েল প্রোডাকশন সিস্টেমে Vector সার্চের Latency কমাতে Embeddings Normalization করার সুবিধা কী?
-
-**উত্তর:**
-
-Vectorগুলো আগে থেকে L2 Normalized করা থাকলে Cosine Similarity-র সেই জটিল Square Root আর Division এড়ানো যায়।
-
-এর ফলে GPU খুব সস্তায় আর দ্রুত Dot Product করে মিলি-সেকেন্ডের মধ্যে কোসাইন সিমিলারিটির সমান রেজাল্ট তৈরি করতে পারে। 
-
-এতে সার্চের গতি বা Latency অনেক কমে যায়।
-
-
-### Advanced
-
-**প্রশ্ন:**
-
-কোন ধরনের Data Distribution-এ Dot Product-এর রেজাল্ট Cosine Similarity-র চেয়ে খারাপ হতে পারে?
-
-**উত্তর:**
-
-যদি তোমার Data-র Vectorগুলোর দৈর্ঘ্য বা Magnitude-এ বিশাল কম-বেশি থাকে।
-
-যেমন— একটা খুব ছোট প্যারাগ্রাফ আর একটা বড় উইকিপিডিয়া পেজ। 
-
-এমন ক্ষেত্রে Dot Product বড় টেক্সটের Vector-কে বিশাল Magnitude স্কোরের জন্য ভুল ম্যাচ হিসেবে বুস্ট করতে পারে।
-
-এই ক্ষেত্রে আমাদের Magnitude-Neutral Cosine Similarity ব্যবহার করাই সবচেয়ে বুদ্ধিমানের কাজ।
-
+---
 
 ## Chapter Summary
 
-চলো সংক্ষেপে পুরো চ্যাপ্টারের মূল কথাগুলো আরেকবার চট করে দেখে নিই:
+এই Chapter-এ আমরা শিখলাম:
 
-১. Vector Embeddings মূলত শব্দ বা বাক্যকে হাই-ডাইমেনশনের জ্যামিতিক Coordinate-এ বদলে দেয়।
+* একটি ভালো প্রম্পটে Instruction, Context, Input, এবং Output Indicator থাকে।
+* Zero-Shot সরাসরি কাজ করায় এবং Few-Shot উদাহরণ দেখে রানটাইমে প্যাটার্ন বোঝায়।
+* Persona Prompting মডেলের কনটেক্সট ফিল্টারিংয়ে সাহায্য করে।
+* প্রোডাকশনে অতিরিক্ত Few-shot উদাহরণ টোকেন কস্ট ও রেসপন্স টাইম বাড়িয়ে দেয়।
+* প্রম্পটিং একটি প্রোবাবিলিস্টিক আর্ট, সব কাজের জন্য প্রম্পট উপযুক্ত নয়।
 
-২. Cosine Similarity কোণ মেপে কাজ করে এবং এটি Document Search ও RAG-এর জন্য সবচেয়ে ভালো।
-
-৩. L2 Distance পরম মান বা Magnitude মেপে কাজ করে এবং এটি Image বা ফেস Detection-এ সেরা।
-
-４. প্রোডাকশন সিস্টেমে Latency কমানোর গোল্ড স্ট্যান্ডার্ড হলো Vector-কে আগে থেকেই L2 Normalization করে রাখা এবং পরে Dot Product চালানো।
-
+---
 
 ## What's Next?
 
-দারুণ! Vector জ্যামিতির কোর ম্যাথ তো আমরা শিখে ফেললাম।
+আমরা প্রম্পটের বেসিক আর্কিটেকচার এবং কঙ্কাল বুঝে ফেলেছি।
 
-পরের চ্যাপ্টারে আমরা এই Vectorগুলোকে মেমোরিতে জমিয়ে রাখার দারুণ সব ইঞ্জিন নিয়ে গল্প করবো।
+কিন্তু যদি মডেলকে দিয়ে জটিল কোনো ম্যাথ, কোডিং সমস্যা বা মানুষের মতো যুক্তি দিয়ে চিন্তা করাতে হয়?
 
-আসছে **Chapter 12: Vector Databases — The AI Memory Engine**! 
+পরবর্তী চ্যাপ্টারে আমরা প্রম্পটিংয়ের সবচেয়ে শক্তিশালী কিছু অ্যাডভান্সড কৌশল নিয়ে আলোচনা করবো।
 
-চলতি পথে কোটি কোটি Vector কীভাবে মিলি-সেকেন্ডে সার্চ করা যায়, আমরা সেটাই দেখবো।
+**Chapter 12: Advanced Prompt Engineering — Chain of Thought, ReAct, Prompt Chaining & Meta-Prompting।**
+
+সেখানে আমরা দেখবো কীভাবে মডেলকে ধাপে ধাপে চিন্তা করানো যায় এবং এক প্রম্পটের আউটপুট অন্য প্রম্পটে চালান করে জটিল পাইপলাইন তৈরি করা যায়।
+
+**Chapter 11 শেষ।**

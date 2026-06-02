@@ -1,426 +1,452 @@
-# Chapter 15: Supervised Fine-Tuning (SFT) & Dataset Preparation
+# Chapter 15: RAG Fundamentals — The Open-Book Exam for LLMs
 
 ---
 
-ধরো, তোমার হাতে একটা বেস Model আছে।
+তুমি কি কখনো ভেবেছো — ChatGPT বা Gemini যতই শক্তিশালী হোক না কেন, তারা কিন্তু তোমার কোম্পানির ইন্টারনাল পলিসি জানে না?
 
-সে অনেক কিছু জানে, কিন্তু কথা বলে একদম নিজের মতো করে।
+অথবা কোনো কাস্টমারের লাইভ ট্রানজ্যাকশন হিস্টোরি কিংবা আজ সকালের কোনো লেটেস্ট সিক্রেট আপডেট?
 
-তুমি চাচ্ছো সে তোমার কাস্টমারদের সাথে মিষ্টি বাংলায় কথা বলুক, বা JSON Format-এ Output দিক।
+এসব কিন্তু তারা একদমই জানে না!
 
-সেটা শেখাবে কীভাবে?
+এখন এই নতুন তথ্যগুলো জানানোর জন্য কি প্রতিবার কোটি টাকা খরচ করে Model-কে Fine-Tuning করবে?
 
-সেটাই হলো Supervised Fine-Tuning (SFT)।
+সেটা তো অসম্ভব!
 
-মজার ব্যাপার হলো— অনেকে ভাবে Fine-Tuning মানে মডেলকে নতুন তথ্য শেখানো। ভুল!
+আর ঠিক এখানেই জন্ম RAG বা Retrieval-Augmented Generation-এর।
 
-নতুন ফ্যাক্টস শেখাতে চাইলে RAG ব্যবহার করো।
+তো চলো, এই চ্যাপ্টারে AI দুনিয়ার সবচেয়ে জনপ্রিয় আর দরকারি মেথড RAG-এর ভেতরের গল্পটা একদম সহজে বুঝে ফেলি।
 
-Fine-Tuning হলো মডেলকে **"কীভাবে কথা বলবে"** সেটা শেখানোর জন্য।
+আমরা দেখবো কীভাবে RAG-এর Ingestion, Retrieval আর Generation Pipeline-গুলো কাজ করে।
 
-এই তফাতটা না বুঝলে তুমি শুধু শুধু GPU কস্ট পুড়িয়ে ফেলবে।
+আরও দেখবো কীভাবে Recursive বা Semantic Chunking দিয়ে ডাটার আসল অর্থ ধরে রেখে Model-এর ইনপুট তৈরি করা যায়।
 
-तो চলো দেখি কীভাবে Instruction Dataset (Alpaca, ShareGPT formats) তৈরি করতে হয়, কখন RAG বনাম Fine-Tuning বেছে নিতে হয়, আর SFT Training Pipeline কীভাবে কাজ করে।
-
-এটা বুঝলে পরের চ্যাপ্টারের LoRA/QLoRA আর RLHF সব পানির মতো সহজ লাগবে। Deal?
+চলো, পরীক্ষার হলে বই ছাড়া বসা বনাম বই খুলে পরীক্ষা দেওয়ার এক দারুণ গল্প দিয়ে শুরু করা যাক!
 
 
-## ১. ডাক্তার বনাম তার আচরণ
+## ১. Hook: বই খুলে পরীক্ষা দেওয়া
 
-কল্পনা করো, তোমার সামনে একজন খুব দক্ষ ডাক্তার বসে আছেন।
+কল্পনা করো, তুমি একটি খুব কঠিন ফাইনাল পরীক্ষা দিতে বসেছো।
 
-ধরো, তিনি হৃদরোগের নতুন আবিষ্কৃত একটি সার্জারি রুল বা পলিসি জানেন না।
+ধরা যাক, এটা একটা Closed-Book Exam। মানে কী?
 
-এখন তুমি কী করবে?
+তার মানে, পরীক্ষার হলে তোমাকে কোনো বই বা খাতা নিতে দেওয়া হলো না।
 
-খুব সহজ! তুমি তার টেবিলের ওপর সেই নতুন রিসার্চ পেপার বা বই খুলে দিলে।
+এখন তোমাকে তোমার মাথায় সেভ থাকা পুরনো মুখস্থ জ্ঞান দিয়ে সব প্রশ্নের উত্তর লিখতে হবে।
 
-ডাক্তার পেপারের ৩ নম্বর পৃষ্ঠা দেখে নিখুঁত সার্জারি প্রসিডিউরটি বুঝে তোমাকে বুঝিয়ে দিলেন।
+এই মুখস্থ জ্ঞানই হলো Model-এর Trained Weights।
 
-এটাই হলো RAG। অনেকটা Open-Book পরীক্ষার মতো।
+কিন্তু প্রশ্ন যদি সিলেবাসের বাইরে থেকে আসে?
+
+তখন তুমি বানিয়ে বানিয়ে ভুল উত্তর লিখতে শুরু করবে।
+
+AI-এর ভাষায় একেই বলে Hallucination!
 
 [VISUAL]
-Title: When to use RAG vs. Fine-Tuning
-Illustration: Dynamic document drawer (RAG) vs. modifying brain synapses/tone (Fine-Tuning)
+Title: Closed-Book LLM vs. Open-Book RAG Pipeline
+Illustration: Flat prediction from weight memory vs. targeted search and context injection pipeline
 Placement: After Hook Section
-Purpose: Show the core architectural distinction between RAG and Fine-Tuning.
+Purpose: Show the conceptual paradigm shift of RAG.
 
 ```
-RAG (What to Say - External Database Library):
-[LLM Brain] ◄───► [ Document Drawer (Dynamic Facts) ]
-(Model reads fresh documents on the fly)
+Closed-Book Model (Only Internal Weights - Risk of Hallucination):
+Prompt: "bKash campaign dynamic rules?" ──► [ LLM Model ] ──► "I think the rules are..." (Wrong!)
 
-Fine-Tuning (How to Behave - Modifying Internal weights):
-[LLM Brain] ──► (Modify Internal Weights & Synapses) ──► [ Speaks in customized tone / JSON Format ]
+Open-Book RAG (Retrieval-Augmented Generation - 100% Fact-based):
+Prompt: "bKash campaign dynamic rules?"
+  │
+  ▼
+[ Search Vector DB ] ──► [ Found: "Doc B: Rules are X, Y" ] ──► [ Inject Context ] ──► [ LLM ] ──► "According to Doc B, rules are X, Y"
 ```
 
-কিন্তু এবার ধরো অন্য একটা পরিস্থিতি।
+আর যদি এটা একটা Open-Book Exam হয়?
 
-ডাক্তার সব মেডিকেল বই জানেন, কিন্তু তিনি কথা বলেন খুব অভদ্র ও কর্কশ ভাষায়।
+তাহলে শিক্ষক তোমাকে পরীক্ষার হলে সব বই আর কোম্পানির পলিসি ফাইল সাথে নিয়ে বসার অনুমতি দিলেন।
 
-তুমি চাও তিনি যেন রোগীদের সাথে নরম বাংলায় ও পোলাইট Persona-য় কথা বলেন।
+এখন তোমার কাজ কী?
 
-এখন টেবিলে নতুন বই খুলে দিলে কি তার আচরণ পরিবর্তন হবে?
+খুব সহজ! প্রশ্নটা পড়ে প্রথমে বইয়ের সূচিপত্র ঘেঁটে সঠিক পাতা আর প্যারাগ্রাফ খুঁজে বের করবে।
 
-একদমই না!
+এই খুঁজে নেওয়াকেই বলে Retrieval।
 
-তার আচরণ বদলাতে হলে তাকে কয়েক মাস Custom বিহেভিয়ার ট্রেনিং দিতে হবে।
+এরপর সেই পৃষ্ঠা চোখের সামনে খোলা রেখে একদম সঠিক আর সত্য উত্তরটা তৈরি করবে।
 
-যাতে তার মস্তিষ্কের কথা বলার টোন ও স্টাইল সম্পূর্ণ বদলে যায়।
+এই উত্তর বানিয়ে দেওয়াকে বলে Generation।
 
-এই ট্রেনিংটাই হলো Fine-Tuning বা SFT।
+RAG হলো LLM-এর জন্য ঠিক এই ওপেন-বুক পরীক্ষার মতো।
 
-RAG এবং Fine-Tuning-এর মূল তফাতটি ঠিক এখানেই।
+এখানে Model নিজে কিছু মুখস্থ করে রাখে না।
 
-সহজ কথায়, মডেলকে কোনো Dynamic বা রিয়েল-টাইম ডাটা দিতে হলে RAG ব্যবহার করবে।
-
-আর মডেলকে নির্দিষ্ট টোন, স্টাইল বা Custom Output Format যেমন JSON বা SQL শেখাতে হলে Fine-Tuning-ই একমাত্র পথ। Deal?
+সে শুধু Vector Database নামের বড় "বই" থেকে দরকারি পাতা খুঁজে এনে উত্তর দেয়।
 
 
-## ২. Supervised Fine-Tuning এবং Data স্ট্রাকচার
+## ২. RAG আর Chunking কীভাবে কাজ করে?
 
-### কখন Fine-Tune করবে আর কখন RAG?
-
-চলো সিদ্ধান্ত নেওয়ার জন্য একটি Decision Table দেখে নিই:
-
-| Criteria | RAG (Retrieval-Augmented) | Fine-Tuning (SFT) |
-| :--- | :--- | :--- |
-| **মূল লক্ষ্য** | External রিয়েল-টাইম ফ্যাক্টস ও ইনফরমেশন দেওয়া | নির্দিষ্ট টোন, স্টাইল বা Format (JSON/SQL) শেখানো |
-| **Data আপডেট** | instant (Vector ডাটাবেসে File পুশ করলেই হয়) | ধীর (আবার Training রান করতে হয়) |
-| **Hallucination** | খুব কম (সোর্স পেজের রেফারেন্স থাকে) | মাঝারি (Model নিজে বানিয়ে লিখতে পারে) |
-| **Compute খরচ** | কম (শুধুমাত্র Inference ও Vector Search কস্ট) | উচ্চ (GPU Training কস্ট) |
-
-### Supervised Fine-Tuning কী?
-
-SFT আসলে কী?
-
-সহজ কথায়, এটি হলো মডেলকে প্রচুর পরিমাণে Instruction-Response জোড়া দেখিয়ে ট্রেইন করা।
-
-এর Mechanism কী?
-
-মডেলকে আমরা ১ হাজার থেকে ১ লাখ কাস্টম বাংলা কথোপকথনের স্যাম্পল দেখাই।
-
-যেমন: `User: [Question] -> Assistant: [Bengali customized answer]`।
-
-ট্রেনিংয়ের সময় Loss Optimization কীভাবে হয়?
-
-মডেল যখন কাস্টম উত্তরের সাথে ম্যাচ করতে ভুল Token Predict করে, তখন Loss Calculate করা হয়।
-
-তারপর Backpropagation-এর মাধ্যমে Model-এর Weights পরিবর্তন বা Modify করা হয়।
-
-### Dataset Format
-
-#### Alpaca Format
-
-এটি সবচেয়ে সহজ এবং সরল Format।
-
-এখানে প্রতিটি Data নোডে ৩টি কিওয়ার্ড থাকে।
-
-কী কী সেগুলো?
-
-প্রথমটি হলো `instruction`, অর্থাৎ ইউজার কী টাস্ক দিয়েছে।
-
-দ্বিতীয়টি `input`, যা টাস্কের সাথে কোনো অতিরিক্ত Context দিতে ব্যবহার করা হয়। এটি অপশনাল।
-
-আর শেষটি হলো `output`, অর্থাৎ AI কী উত্তর দেবে।
-
-```json
-{
-  "instruction": "নিচের বাক্যটি বাংলায় অনুবাদ করো।",
-  "input": "I love AI engineering.",
-  "output": "আমি AI ইঞ্জিনিয়ারিং ভালোবাসি।"
-}
-```
-
-#### ShareGPT Format
-
-মডার্ন চ্যাট মডেলগুলোর জন্য এটি সবচেয়ে জনপ্রিয় Format।
-
-এটি ইউজারের সাথে মাল্টি-টার্ন Conversation তৈরি করে।
-
-```json
-{
-  "conversations": [
-    {"from": "human", "value": "বিকাশ পিন লক হলে কী করব?"},
-    {"from": "gpt", "value": "তোমার পিন লক হলে দয়া করে *247# ডায়াল করে সেলফ-রিসেট করো।"}
-  ]
-}
-```
-
-🧠 Remember
-
-Dataset তৈরি করার সময় সর্বদা Data Quality-কে Data Quantity-এর চেয়ে বেশি গুরুত্ব দেবে।
-
-১০ হাজার আজেবাজে Data-এর চেয়ে ১ হাজার হাই-Quality নির্ভুল Data মডেলকে অনেক ভালো বানাতে পারে।
-
-একেই বলে "Less is More" রুল।
-
-
-## ৩. SFT Training Loop
-
-এসএফটি ট্রেনিংয়ের সময় Model কীভাবে শুধু Assistant Token-এর ওপর Loss Calculate করে, চলো নিচে তা দেখে নিই:
+একটি পুরো RAG Architecture মূলত দুটি আলাদা Pipeline-এ কাজ করে:
 
 [VISUAL]
-Title: SFT Target Token Loss Calculation
-Illustration: Visual breakdown of prompt tokens (ignored loss) and response tokens (active loss calculation)
-Placement: After SFT section
-Purpose: Visually demonstrate the mathematical formatting of causal language modeling during tuning.
+Title: Two Pipelines of RAG Architecture
+Illustration: High-quality flowchart mapping the Offline Ingestion Pipe versus the Online Retrieval-Generation Pipe
+Placement: After Core Concepts section
+Purpose: Visually separate the static database preparation from the live user query flow.
 
 ```
-Input Tokens (Loss Ignored):           Output Target Tokens (Active Loss 계산):
-┌──────┬──────┬──────┬──────┐         ┌──────┬──────┬──────┬──────┐
-│ User │ :    │ PIN  │ Lock │  ──►   │ Pls  │ dial │ *    │ 247  │
-└──────┴──────┴──────┴──────┘         └──────┴──────┴──────┴──────┘
-   │      │      │      │                │      │      │      │
-[ Loss Masked - No Weights Update ]   [ Loss Active - Weights Updated via Backprop ✓ ]
+Offline Ingestion Pipeline (একবার রান হয়):
+Raw PDF/Docs ──► [ Chunking ] ──► [ Embedding ] ──► [ Upsert to Vector DB ]
+
+Online Query Pipeline (প্রতিটি ইউজার রিকোয়েস্টে রান হয়):
+User Query ──► [ Embed Query ] ──► [ Semantic Search Vector DB ] ──► [ Inject Context to Prompt ] ──► [ LLM Generation ]
 ```
 
-ট্রেনিংয়ের সময় আমরা কিন্তু ইউজারের প্রশ্নের Token-এর ওপর Loss Calculate করি না।
+### Ingestion Pipeline
 
-একে -100 index দিয়ে Mask করা হয়।
+তো এই Ingestion Pipeline জিনিসটা কী?
 
-মডেল কেবল Assistant-এর উত্তর Prediction-এ ভুল করলে Weights আপডেট হয়।
+সহজ কথায়, এটা একটা ব্যাকগ্রাউন্ড প্রসেস।
+
+ধাপগুলো একটু সহজ করে দেখি চলো:
+
+প্রথম ধাপ হলো Document Loading।
+
+এখানে আমরা PDF, Word ফাইল বা Database থেকে Raw Text রিড করি।
+
+দ্বিতীয় ধাপ হলো Chunking।
+
+ধরা যাক, তোমার টেক্সট ফাইলটা অনেক বড়, যেমন ৫০ পৃষ্ঠার একটা ম্যানুয়াল।
+
+এত বড় ফাইল তো Model-এর Context Window-তে আটবে না!
+
+তাই পুরো টেক্সটকে ছোট ছোট টুকরো বা Chunk-এ ভাগ করা হয়।
+
+তৃতীয় ধাপ হলো Embedding।
+
+এখানে প্রতিটি ছোট Chunk-কে Vector-এ convert করা হয়।
+
+চর্থ ধাপ হলো Vector Database Store।
+
+সবশেষে এই Vector-গুলোকে দ্রুত সার্চ করার জন্য Vector Database-এ Indexing করে সেভ রাখা হয়।
 
 
-## ৪. Real World Example: Cursor ও .cursorrules
+### Retrieval & Generation Pipeline
 
-Cursor যখন তোমার Project-এর স্পেসিফিক নিয়মে Code লেখে, তখন আসলে কী ঘটে?
+তাহলে Retrieval আর Generation কীভাবে কাজ করে?
 
-প্রথমত, তারা তাদের ওপেন-সোর্স বেস মডেলকে হাজার হাজার Coding কনভেনশন এবং Project রুলস দিয়ে Fine-Tuning করেছে।
+এটা চলে যখন ইউজার লাইভ কোনো প্রশ্ন করে।
 
-একে বলে System Prompt Alignment।
+চলো এর ভেতরের কাজগুলো একটু বুঝে নিই:
 
-দ্বিতীয়ত, এর ফলে মডেলটি তোমার প্রজেক্টের `.cursorrules` ফাইলটি পড়া মাত্রই তোমার টোন এবং স্টাইল বুঝে ফেলে।
+প্রথমেই আসে Retrieve করার পালা।
 
-সে অনুযায়ী একদম নিখুঁত Code তৈরি করে দেয়।
+ইউজারের প্রশ্নটাকে এম্বেড করে Vector Database থেকে সবচেয়ে মিল থাকা $K$ সংখ্যক (যেমন: সেরা ৩টি) Chunk খুঁজে আনা হয়।
+
+এরপরের কাজ হলো Augment করা।
+
+খুঁজে পাওয়া Chunk-গুলোকে মূল Prompt-এর সাথে Context হিসেবে জুড়ে দেওয়া হয়।
+
+সবশেষে হলো Generate করা।
+
+এখন LLM Model এই জুড়ে দেওয়া Context পড়ে একদম সত্য উত্তর লিখে দেয়।
 
 
-## ৫. Developer Perspective: Dataset লোড করা
+### Chunking Strategies
+
+মজার ব্যাপার হলো, RAG কতটা ভালো কাজ করবে তার ৮০% নির্ভর করে তুমি কীভাবে Data-কে Chunk করছো তার ওপর!
+
+চলো দেখি কী কী উপায়ে Chunk করা যায়:
+
+প্রথম উপায় হলো Character Chunking।
+
+এখানে ধরো প্রতি ৫০০ ক্যারেক্টার পর পর টেক্সট কেটে দেওয়া হয়।
+
+কিন্তু এতে একটা বড় সমস্যা আছে।
+
+হুট করে লাইনের মাঝখানে কেটে গেলে কিন্তু বাক্যের অর্থটাই নষ্ট হয়ে যায়!
+
+দ্বিতীয় উপায় হলো Token Chunking।
+
+এখানে প্রতি ২০০ Token পর পর টেক্সট কাটা হয়।
+
+কস্ট কন্ট্রোল করার জন্য এটা ভালো হলেও, তথ্যের অর্থ হারিয়ে যাওয়ার ভয় থাকে।
+
+তৃতীয় উপায় হলো Recursive Character Chunking।
+
+ইন্ডাস্ট্রিতে সবচেয়ে বেশি ব্যবহার করা হয় এই স্ট্যান্ডার্ড পদ্ধতিটি।
+
+এটি প্রথমে প্যারাগ্রাফ, তারপর নতুন লাইন আর সবশেষে স্পেস দেখে খুব বুদ্ধি খাটিয়ে টেক্সট কাটে।
+
+ফলে বাক্যের আসল অর্থ আর প্যারাগ্রাফের পূর্ণতা একদম বজায় থাকে।
+
+চলো দেখি চতুর্থ উপায়, যা হলো Semantic Chunking।
+
+এটি হলো সবচেয়ে অ্যাডভান্সড পদ্ধতি।
+
+এটি পুরো টেক্সটের Embeddings Vector-এর পরিবর্তন মেপে কাজ করে।
+
+যখনই দেখে টেক্সটের টপিক বা অর্থ বদলে যাচ্ছে, অমনি সে নতুন Chunk তৈরি করে ফেলে।
+
+
+## ৩. Chunk Overlap কেন দরকার?
+
+Chunk তৈরি করার সময় আমরা সাধারণত দুটি Chunk-এর মাঝখানে কিছুটা Overlap রাখি।
+
+চলো নিচের ডায়াগ্রাম থেকে এর মেকানিজমটা একটু দেখে নিই:
+
+[VISUAL]
+Title: Sliding Window Chunk Overlap
+Illustration: Visual representation of Text Chunks sharing boundary tokens to preserve sentence context
+Placement: After Chunking section
+Purpose: Ground the intuitive necessity of boundary preservation.
+
+```
+Text: "The user has blocked his PIN. He must visit bKash office to reset it."
+Chunk Size: 40 characters, Overlap: 10 characters
+
+Chunk 1: [ The user has blocked his PIN. He must vi ]
+                                     ▲───────▲ (Overlap tokens)
+Chunk 2:                            [ He must visit bKash office to reset it. ]
+```
+
+তো এই Overlap রেখে আমাদের লাভটা কী হলো?
+
+যদি Overlap না থাকতো, তবে `"He must visit"` লেখাটি মাঝখান থেকে কেটে যেত।
+
+ফলে সার্চ করে যখন দ্বিতীয় Chunk-টি পাওয়া যেত, তখন সে তার আগের Context হারিয়ে ফেলত।
+
+
+## ৪. Real World Example: Perplexity-র RAG
+
+Perplexity.ai বা ChatGPT-এর ব্রাউজিং ফিচার কীভাবে কাজ করে জানো?
+
+চলো ধাপে ধাপে দেখে নিই:
+
+প্রথমে তারা Search Engine থেকে পাওয়া ৫টি ওয়েব পেজ স্ক্র্যাপ করে Semantic Chunking করে।
+
+এরপর আসে Cosine Retrieval-এর পালা।
+
+তোমার প্রশ্নের সাথে যে Chunk-গুলোর মিল ৯০%-এর বেশি, সেগুলোকে ছেঁকে নিয়ে Prompt-এ সাজানো হয়।
+
+সবশেষে করা হয় Context Injection আর Citation।
+
+Prompt-এর ভেতর কড়া নির্দেশ দেওয়া থাকে: "নিচের Context ছাড়া অন্য কিছু বলবে না এবং সোর্স সাইটেশন দিয়ে দেবে।"
+
+ব্যস! এর ফলে AI কোনো Hallucination ছাড়াই একদম perfect উত্তর আর সোর্স লিংক তৈরি করে দেয়।
+
+
+## ৫. Developer Perspective: Recursive Splitter
 
 💻 Developer View
 
-ডেভলপার হিসেবে পাইথনে `datasets` লাইব্রেরি ব্যবহার করে কাস্টম Alpaca Format-এর Dataset লোড করার উপায়টি চলো দেখে নিই।
+পাইথনে `langchain` লাইব্রেরি ব্যবহার করে কীভাবে Custom রিকিউরসিভ স্প্লিটার আর Overlap তৈরি করবে, চলো সেই কোডটা দেখে নিই:
 
 ```python
-from datasets import Dataset
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-# ১. র অ্যান্ড কাস্টম Dataset লিস্ট (Alpaca Format)
-raw_data = [
-    {
-        "instruction": "বিকাশ পিন লক হলে কী করব?",
-        "output": "নিকটস্থ কাস্টমার কেয়ার সেন্টারে যোগাযোগ করো।"
-    },
-    {
-        "instruction": "পিন রিসেট করতে কী কী Document লাগবে?",
-        "output": "তোমার অরিজিনাল এনআইডি (NID) কপি এবং সিম কার্ড প্রয়োজন।"
-    }
-]
+# ১. র টেক্সট ম্যানুয়াল
+corporate_policy = """
+bKash PIN Reset Policy:
+1. Customer can dial *247# to reset PIN using NID.
+2. In case of verification failure, customer must visit nearest Customer Care Center.
+3. Bring original NID copy and active SIM card for biometrics.
+"""
 
-# ২. Hugging Face Dataset অবজেক্টে রূপান্তর
-dataset = Dataset.from_list(raw_data)
+# ২. Recursive Text Splitter ইনিশিয়ালাইজ করো
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=100,      # প্রতি চাঙ্কের সর্বোচ্চ দৈর্ঘ্য
+    chunk_overlap=20,    # দুই চাঙ্কের মধ্যকার ওভারল্যাপ
+    length_function=len,
+    separators=["\n\n", "\n", " ", ""] # অগ্রাধিকার তালিকা
+)
 
-# ৩. টেমপ্লেটিং Function (Formatting function for training)
-def format_prompts(batch):
-    formatted_texts = []
-    for i in range(len(batch['instruction'])):
-        prompt = f"### Instruction:\n{batch['instruction'][i]}\n\n### Response:\n{batch['output'][i]}"
-        formatted_texts.append(prompt)
-    return {"text": formatted_texts}
+# ৩. টেক্সট স্প্লিট করো
+chunks = text_splitter.split_text(corporate_policy)
 
-# ৪. ম্যাপ Function প্রয়োগ
-tokenized_dataset = dataset.map(format_prompts, batched=True)
+# ৪. Output প্রিন্ট করো
+print(f"মূল পলিসির দৈর্ঘ্য: {len(corporate_policy)} ক্যারেক্টার।")
+print(f"তৈরি হওয়া মোট চাঙ্ক সংখ্যা: {len(chunks)}\n")
 
-print("--- FORMATTED DATASET FOR TRAINING ---")
-print(tokenized_dataset[0]['text'])
+for idx, chunk in enumerate(chunks):
+    print(f"Chunk {idx+1} ({len(chunk)} chars):")
+    print(f"'{chunk}'")
+    print("-" * 30)
 ```
 
 
-## ৬. Production Perspective: Data Anonymization
+## ৬. Production Perspective: Security Filter
 
 🏭 Production Reality
 
-Dataset রেডি করার সময় সবচেয়ে বড় সিকিউরিটি রিস্ক হলো PII Leakage বা ব্যক্তিগত তথ্য ফাস হয়ে যাওয়া।
+আসল প্রোডাকশন সিস্টেমে কাজ করার সময় সবচেয়ে বিপজ্জনক রিস্ক হলো Context Leakage বা অনধিকার অ্যাক্সেস।
 
-PII কী?
+এটা আবার কী জিনিস?
 
-এটি হলো Personally Identifiable Information, যেমন মানুষের নাম, ফোন নাম্বার, ইমেইল ইত্যাদি।
+ধরা যাক, একজন সাধারণ কাস্টমার চ্যাটবটে এমনভাবে প্রশ্ন করল যাতে কোম্পানির ইন্টারনাল AI হ্যাক হয়ে গেল!
 
-এর ঝুঁকি বা Risk কী?
-
-লাইভ চ্যাট Log থেকে যদি সরাসরি ফোন নাম্বার বা ইমেইল দিয়ে Model ট্রেইন করে ফেলো, তবে সেই তথ্য Model-এর ব্রেইনে সেভ হয়ে যাবে।
-
-পরবর্তীতে চ্যাট করার সময় Model সেই গোপন তথ্য অন্য কারও সামনে ফাস করে দিতে পারে!
+আর এর ফলে সে কোনো অ্যাডমিনের স্যালারি শিট বা সিক্রেট প্রোজেক্টের তথ্য জেনে গেল।
 
 তাহলে এর সমাধান কী?
 
-খুব সহজ, ট্রেইনিংয়ের আগে ডেটাকে Anonymize বা মাস্ক করে ফেলতে হবে।
+খুব সহজ! ডাটাবেজে প্রতিটি Vector সেভ করার সময় তার Metadata-তে Access Control List বা ACL ট্যাগ করে দেওয়া হয়।
 
-যেমন Regular Expression বা `presidio` লাইব্রেরি ব্যবহার করে ফোন নাম্বারকে `<PHONE>` এবং নামকে `<NAME>` দিয়ে বদলে দেওয়া।
+যেমন: `{"role_allowed": "admin"}`।
+
+কাস্টমার যখন চ্যাট করবে, তখন সার্চ করার সময় মেটাডেটা ফিল্টার অ্যাপ্লাই করা হয়।
+
+এর ফলে সাধারণ ইউজারের সার্চে কোনো অ্যাডমিন ডকুমেন্ট কখনোই আসবে না।
 
 
-## ৭. Common Mistakes
+## ७. Common Mistakes
 
 🔴 Common Mistake
 
 ভুল ধারণা:
 
-ডেটাসেটে ব্যাকরণ বা তথ্যের ভুল থাকলেও সমস্যা নেই, Model নিজে নিজেই সব ঠিক করে নেবে।
+RAG প্রজেক্টে Chunk Size যত বড় রাখা যাবে, উত্তর তত ভালো হবে।
 
 বাস্তবতা:
 
-Model কিন্তু ট্রেইনিং ডেটাসেটের স্টাইল হুবহু অনুকরণ করে।
+অতিরিক্ত বড় Chunk ব্যবহার করলে Prompt-এর ভেতর অপ্রাসঙ্গিক তথ্য ঢুকে যায়।
 
-তাই ডেটাসেটে বানান ভুল থাকলে ফাইন-টিউনড Model-ও ভুল বানানই জেনারেট করবে।
+এতে LLM উল্টো বিভ্রান্ত হয়ে পড়ে।
 
-এজন্য Dataset সবসময় একদম পরিষ্কার ও নির্ভুল রাখতে হবে।
+তা ছাড়া বড় Chunk-এর কারণে VRAM ব্লো-আপ হতে পারে আর Latency-ও বেড়ে যায়।
 
-
-## ৮. Mental Model: অ্যাক্টিং স্কুল
-
-RAG এবং Fine-Tuning-এর পার্থক্য বোঝার জন্য একটি সহজ Mental Model ব্যবহার করা যাক।
-
-RAG হলো অনেকটা Memory কার্ড রিডার-এর মতো।
-
-এখানে Model-এর ব্রেইনে কোনো পরিবর্তন হয় না।
-
-তুমি তাকে একটা External Memory ড্রাইভ কানেক্ট করে দিলে, সে শুধু রিড করে উত্তর দিল।
-
-আর Fine-Tuning হলো অ্যাক্টিং স্কুলে ক্যারেক্টার ট্রেনিং নেওয়ার মতো।
-
-তুমি একজন অভিনেতাকে অ্যাক্টিং স্কুলে পাঠালে সে কিন্তু নতুন কোনো ইতিহাস বা তথ্য শিখছে না।
-
-সে শুধু শিখছে কীভাবে একজন মিষ্টি স্বভাবের ডাক্তারের মতো অভিনয় করতে হয় বা কথা বলতে হয়।
+RAG-এর গোল্ডেন রুল মনে রেখো: "Retrieve only what is essential"। অর্থাৎ শুধু দরকারি অংশটুকুই নাও, বেশি নয়।
 
 
-## ৯. Mini Project: Custom Dataset এবং PII Filter
+## ৮. Mental Model: লাইব্রেরিয়ান আর তোতাপাখি
 
-চলো পাইথনে Regex ব্যবহার করে কোনো লাইব্রেরি ছাড়াই একটি কাস্টম Data Anonymizer তৈরি করে ফেলি।
+RAG পাইপলাইন সহজে মনে রাখার জন্য চলো একটা মজার গল্প ভাবি।
 
-এর মাধ্যমে আমরা সহজেই Fine-Tuning ডেটাসেট থেকে গোপন তথ্য ফিল্টার করতে পারব।
+এখানে আমাদের কাছে দুটি চরিত্র আছে:
+
+প্রথম চরিত্র হলো Vector DB, যে আসলে একজন স্মার্ট লাইব্রেরিয়ান!
+
+সে পুরো লাইব্রেরির বইগুলোর পাতা আর অর্থ খুব সুন্দর করে সাজিয়ে রেখেছে।
+
+কোনো প্রশ্ন আসার সাথে সাথে সে একদম পারফেক্ট ৫টি পৃষ্ঠা খুঁজে বের করে নিয়ে আসে।
+
+দ্বিতীয় চরিত্র হলো LLM, যে আসলে একটি বাচাল তোতাপাখি!
+
+তোতাপাখি নিজে থেকে কিন্তু কোনো তথ্য জানে না।
+
+কিন্তু সে অসম্ভব সুন্দর করে কথা বলতে পারে।
+
+লাইব্রেরিয়ান যখন তাকে সেই ৫টি পৃষ্ঠা এনে দেয়, তোতাপাখি তখন লাইভ রিড করে চমৎকার মিষ্টি ভাষায় উত্তর বুঝিয়ে দেয়।
+
+
+## ৯. Mini Project: স্ক্র্যাচ থেকে RAG পাইপলাইন
+
+চলো, পাইথনে NumPy ব্যবহার করে কোনো ML Framework ছাড়াই একটা মিনি RAG পাইপলাইন বানিয়ে ফেলি!
 
 ```python
-import re
+import numpy as np
 
-# ১. র কাস্টমার কনভারসেশন Log (ফোন নাম্বার ও ইমেইলসহ গোপন Data)
-customer_logs = [
-    {
-        "instruction": "আমার অ্যাকাউন্ট নম্বর ০১৮১২৩৪৫৬৭৮ এর পিন লক হয়ে গেছে।",
-        "output": "প্রিয় কাস্টমার, তোমার নম্বর ০১৮১২৩৪৫৬৭৮ এর পিন রিসেট করার জন্য NID নিয়ে অফিসে এসো।"
-    },
-    {
-        "instruction": "যেকোনো জিজ্ঞাসায় karim123@gmail.com এ মেইল করতে পারো কি?",
-        "output": "হ্যাঁ, karim123@gmail.com এ আমাদের সাপোর্ট টিম ২৪ ঘণ্টা একটিভ থাকে।"
-    }
+# ১. কোম্পানির পলিসি Database (আমাদের বইয়ের পৃষ্ঠা)
+docs = [
+    "dial *247# to reset your PIN code with NID verification.",
+    "for verification failure, visit the nearest bKash center.",
+    "bring your original NID copy and active SIM card for biometrics."
 ]
 
-# ২. কাস্টম PII অ্যানোনিমাইজার Function
-def anonymize_text(text):
-    # ফোন নাম্বার মাস্কিং (বাংলা মোবাইল ১০-১১ ডিজিট)
-    phone_pattern = r'(?:০১৮|০১৭|০১৫|০১৬|০১৯|০১৩)\d{৮}|\b01[3-9]\d{8}\b'
-    text = re.sub(phone_pattern, "<PHONE_NUMBER>", text)
-    
-    # ইমেইল মাস্কিং
-    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-    text = re.sub(email_pattern, "<EMAIL_ADDRESS>", text)
-    
-    return text
+# ২. মক এম্বেডিংস ডিকশনারি (৩-ডাইমেনশন Vector)
+# [পিন/ভেরিফিকেশন, ফিজিক্যাল ভিজিট/সেন্টার, প্রয়োজনীয় Document]
+doc_embeddings = np.array([
+    [0.9, 0.1, 0.0],  # doc 1: PIN reset
+    [0.2, 0.95, 0.1], # doc 2: Visit center
+    [0.1, 0.3, 0.95]  # doc 3: Bring documents
+])
 
-# ৩. Dataset স্যানিটাইজ ও রূপান্তর করো
-sanitized_dataset = []
+# ৩. কাস্টমার কুয়্যারি: "NID Verification fail hole kothay jabo?"
+query = "NID Verification fail hole kothay jabo?"
+# কুয়্যারি Vector এম্বেডিংস (মক রিপ্রেজেন্টেশন)
+query_vector = np.array([0.15, 0.9, 0.1])
 
-for log in customer_logs:
-    clean_instruction = anonymize_text(log["instruction"])
-    clean_output = anonymize_text(log["output"])
-    
-    sanitized_dataset.append({
-        "instruction": clean_instruction,
-        "output": clean_output
-    })
+# ৪. Cosine Similarity রিট্রিভাল
+def cosine_similarity(v1, v2):
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
-# ৪. Output প্রিন্ট করো
-print("--- SANITIZED DATASET FOR SECURE FINE-TUNING ---")
-for idx, data in enumerate(sanitized_dataset):
-    print(f"Data {idx+1}:")
-    print(f"Instruction: '{data['instruction']}'")
-    print(f"Output:      '{data['output']}'")
-    print("-" * 50)
+print("Searching Vector DB for relevant context...")
+scores = []
+for idx, doc_vec in enumerate(doc_embeddings):
+    score = cosine_similarity(query_vector, doc_vec)
+    scores.append((score, docs[idx]))
+    print(f"Similarity with Doc {idx+1}: {score:.4f}")
+
+# টপ ১টি বেস্ট ডক সিলেক্ট করো
+scores.sort(reverse=True, key=lambda x: x[0])
+best_context = scores[0][1]
+
+print(f"\n[RETRIEVED CONTEXT] '{best_context}'\n")
+
+# ৫. LLM Prompt ইনজেকশন (Augmented Prompt Generation)
+augmented_prompt = f"""
+You are a helpful bKash customer assistant. Use the following context to answer the user query.
+If you don't know the answer, say "আমি জানি না"। Do not make up facts.
+
+Context:
+{best_context}
+
+User Query:
+{query}
+
+Answer:
+"""
+
+print("--- AUGMENTED PROMPT SENT TO LLM ---")
+print(augmented_prompt)
 ```
 
 #### Code Breakdown:
 
-এখানে Input হিসেবে আমরা কী দিচ্ছি?
-
-কাস্টমারদের গোপন ফোন নাম্বার ও ইমেইলসহ র চ্যাট হিস্টোরি।
-
-Output হিসেবে কী পাচ্ছি?
-
-PII ফিল্টার করা একদম নিরাপদ Fine-Tuning Dataset।
-
-এটি কীভাবে কাজ করছে?
-
-আমাদের Custom Regex Pattern খুব সহজেই ফোন এবং ইমেইল খুঁজে বের করে ট্যাগ দিয়ে বদলে দিচ্ছে।
-
-এর ফলে আমাদের প্রোডাকশন ডেটা লিক হওয়ার কোনো সম্ভাবনাই থাকছে না।
-
-আমরা এটি কখন ব্যবহার করব?
-
-রিয়েল ইউজার ডেটা ব্যবহার করে Fine-Tuning Dataset রেডি করার সময়।
+* **Input:** কাস্টমারের Query Vector আর ৩-ডাইমেনশনের পলিসি Embeddings।
+* **Output:** সবচেয়ে ভালো ম্যাচ হওয়া ডকুমেন্ট রিট্রিভ করে তৈরি করা ফাইনাল Prompt।
+* **Why it works:** কোসাইন সিমিলারিটি মেপে `visit the nearest bKash center` ডকুমেন্টটি নিখুঁতভাবে খুঁজে বের করে Prompt-এ ইনজেক্ট করা হয়েছে।
+* **When to use:** নিজের মতো করে কাস্টম RAG পাইপলাইন একদম স্ক্র্যাচ থেকে বানাতে চাইলে এটি ব্যবহার করবে।
 
 
 ## ১০. Interview Questions
 
 ### Beginner
 
-**প্রশ্ন:** কখন RAG বনাম Fine-Tuning-এর মধ্যে সঠিক Architectural সিদ্ধান্ত নিতে হবে?
+১. **প্রশ্ন:** RAG কী আর এটি কেন ব্যবহার করা হয়?
 
-**উত্তর:** যখন প্রজেক্টের লক্ষ্য রিয়েল-টাইম এবং নির্ভুল Factual তথ্য দেওয়া, তখন RAG সেরা চয়েস।
-
-আর যখন লক্ষ্য Model-কে নির্দিষ্ট টোন বা Custom Output Format (যেমন JSON বা SQL) শেখানো, তখন Fine-Tuning একমাত্র সমাধান।
+* **উত্তর:** RAG হলো Retrieval-Augmented Generation। এটি Model-এর নিজস্ব মেমোরির ওপর নির্ভর না করে বাইরের কোনো Vector Database থেকে রিয়েল-টাইমে একদম সঠিক তথ্য খুঁজে আনে। এরপর তা Prompt-এর সাথে জুড়ে দিয়ে উত্তর তৈরি করে। এটি Hallucination কমাতে আর কোম্পানির কাস্টম ডাটা মডেলে ব্যবহার করতে দারুণ সাহায্য করে।
 
 ### Intermediate
 
-**প্রশ্ন:** Fine-Tuning Dataset তৈরির সময় PII Masking কেন আবশ্যক?
+২. **প্রশ্ন:** Recursive Character Chunking কেন সাধারণ ক্যারেক্টার চাংকিংয়ের চেয়ে ভালো?
 
-**উত্তর:** PII মাস্কিং না করলে কাস্টমারের গোপন ফোন নাম্বার বা ইমেইল চিরতরে Model-এর ব্রেইনে সেভ হয়ে যাবে।
-
-পরবর্তীতে Prompt হ্যাকিংয়ের মাধ্যমে AI সেই গোপন ডাটা সবার সামনে ফাস করে দিতে পারে।
-
-এটি একটি বড় সিকিউরিটি লিক ঘটাবে।
+* **উত্তর:** সাধারণ ক্যারেক্টার চাংকিং লাইনের মাঝখানেই টেক্সট কেটে ফেলে বাক্যের অর্থ নষ্ট করতে পারে। কিন্তু Recursive Character Splitter বুদ্ধি খাটিয়ে প্যারাগ্রাফ, নতুন লাইন আর স্পেস দেখে কাটে। ফলে প্রতিটি খণ্ডের অর্থ একদম অক্ষুণ্ণ থাকে।
 
 ### Advanced
 
-**প্রশ্ন:** SFT ট্রেনিংয়ের সময় Loss Calculation-এ কেন Target Prompt Masking বা Index -100 ব্যবহার করা হয়?
+৩. **প্রশ্ন:** প্রোডাকশনে Document Leakage কীভাবে আটকানো হয়?
 
-**উত্তর:** SFT ট্রেনিংয়ে আমাদের মূল লক্ষ্য হলো সঠিক উত্তর দিতে শেখানো।
-
-ইউজার কী প্রশ্ন করবে তার ওপর মডেলের কোনো হাত নেই।
-
-Prompt Token-এর ওপর Loss Calculate করলে মেমরি ও Gradient Optimization নষ্ট হয়।
-
-টার্গেট মাস্কিং চেইন রুলকে শুধুমাত্র Assistant Response-এর ওপর Weights আপডেট করতে সাহায্য করে।
+* **উত্তর:** এর জন্য প্রতিটি Vector ডাটাবেজে রাখার সময় তার Metadata-তে Access Control List বা ACL ট্যাগ করে দেওয়া হয়। ইউজার যখন প্রশ্ন করে, তখন সার্চে মেটাডেটা ফিল্টার অ্যাপ্লাই করা হয়। এর ফলে ইউজারের রোল আইডির বাইরে কোনো সিক্রেট ডকুমেন্ট কখনোই রিট্রিভ হতে পারে না।
 
 
-## Chapter Summary
+## ১১. Summary
 
-চলো সংক্ষেপে পুরো চ্যাপ্টারটি রিভিশন দিয়ে নিই:
+তো এই চ্যাপ্টারে আমরা কী কী শিখলাম?
 
-SFT হলো মডেলের আচরণ ও কথা বলার টোন পরিবর্তন করার মূল গাণিতিক পদ্ধতি।
+চলো এক নজরে দেখে নিই:
 
-মনে রাখবে, RAG হলো রিয়েল-টাইম ডাটার রাজা, আর Fine-Tuning হলো Format ও Persona-র রাজা।
+প্রথমত, RAG মূলত একটি ক্লোজড-বুক AI মডেলকে ওপেন-বুক ফ্যাট-বেসড সিস্টেমে রূপান্তর করে।
 
-আমরা ডেটাসেট তৈরির জন্য Alpaca এবং ShareGPT—এই দুটি জনপ্রিয় Format ব্যবহার করি।
+দ্বিতীয়ত, Ingestion Pipeline অফলাইনে Chunking আর Embedding করে আমাদের Vector Database তৈরি করে।
 
-আর হ্যাঁ, প্রোডাকশন ডেটাসেট তৈরির সময় PII Masking করা কিন্তু একদম বাধ্যতামুলক!
+তৃতীয়ত, ডকের আসল অর্থ ধরে রাখতে Recursive Chunking আর Overlap সবচেয়ে বেশি কাজে আসে।
+
+সবশেষে, প্রোডাকশন সিস্টেমে ডাটার সিকিউরিটি নিশ্চিত করতে ACL Filtering ব্যবহার করা জরুরি।
 
 
-## What's Next?
+## ১২. What's Next?
 
-দারুণ! আমরা Supervised Fine-Tuning-এর মূল বিষয়গুলো শিখে ফেলেছি।
+দারুণ! RAG আর Chunking-এর মূল বিষয়গুলো আমরা শিখে ফেলেছি।
 
-পরের চ্যাপ্টারে আমরা এই প্রসেসকে আরও সহজ ও কম খরচে করার ম্যাজিক শিখব।
+পরের চ্যাপ্টারে আমরা দেখবো কীভাবে এই পাইপলাইনকে আরও নিখুঁত ও প্রোডাকশন-রেডি করা যায়।
 
-চলো তাহলে দেখে নিই: **Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)**।
+সেখানে আমরা HyDE, Parent-Document Retrieval এবং Re-ranking নিয়ে আলোচনা করবো।
 
-কম খরচে কীভাবে ল্যাপটপেই বড় মডেল ফাইন-টিউন করা যায়, সেটাই দেখব সেখানে। Deal?
+চলো তাহলে, পরের চ্যাপ্টারে যাওয়া যাক!
 
 **Chapter 15 শেষ।**
