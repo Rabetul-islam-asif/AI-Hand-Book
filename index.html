@@ -1572,7 +1572,7 @@
             headerTitle.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Chapter ${chNum} Loading...`;
             
             try {
-                const response = await fetch(`/handbook/chapter_${chNum}.md`);
+                const response = await fetch(`/handbook/chapter_${chNum}.md?v=${Date.now()}`);
                 if (!response.ok) throw new Error("Chapter file not found");
                 
                 let text = await response.text();
@@ -1815,7 +1815,7 @@
             const chapterNumsToSearch = flatChapters.map(ch => ch.num);
             for (let i of chapterNumsToSearch) {
                 try {
-                    const resp = await fetch(`/handbook/chapter_${i}.md`);
+                    const resp = await fetch(`/handbook/chapter_${i}.md?v=${Date.now()}`);
                     if (resp.ok) {
                         const text = await resp.text();
                         const lines = text.split("\n");
