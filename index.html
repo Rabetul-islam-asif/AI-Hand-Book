@@ -311,6 +311,12 @@
             justify-content: center;
         }
 
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 20px 16px;
+            }
+        }
+
         article {
             width: 100%;
             max-width: 820px;
@@ -807,10 +813,27 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive Mobile Layouts */
+        /* Responsive Mobile Layouts & Sidebar Backdrop overlay */
+        .sidebar-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 9;
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-backdrop.open {
+            display: block;
+        }
+
         @media (max-width: 900px) {
             aside {
-                position: absolute;
+                position: fixed;
                 left: -100%;
                 top: 0;
                 bottom: 0;
@@ -820,8 +843,145 @@
             aside.open {
                 left: 0;
             }
+        }
 
-            /* Inherits circular desktop style, stays visible */
+        /* Desktop vs Mobile Controls Visibility */
+        .mobile-settings-btn {
+            display: none;
+        }
+
+        .desktop-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-settings-btn {
+                display: flex !important;
+            }
+            .desktop-controls {
+                display: none !important;
+            }
+        }
+
+        /* Settings Sheet (Bottom Sheet for Mobile, Floating Panel for Desktop) */
+        .settings-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-radius: 24px 24px 0 0;
+            z-index: 200;
+            padding: 24px 24px 32px 24px;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
+            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .settings-sheet.open {
+            bottom: 0;
+        }
+
+        .settings-sheet-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 199;
+            display: none;
+        }
+
+        .settings-sheet-backdrop.open {
+            display: block;
+        }
+
+        .settings-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-sheet-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .close-sheet-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .settings-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+
+        .option-label {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sheet-btn {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .sheet-btn:hover {
+            border-color: var(--accent-purple);
+        }
+
+        /* Responsive table wrapping */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 24px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+        }
+        .table-container table {
+            margin: 0 !important;
+            border: none !important;
         }
 
         /* PREMIUM CHAPTER NAVIGATION BUTTONS */
@@ -924,6 +1084,7 @@
     </style>
 </head>
 <body>
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
     <!-- SIDEBAR CHAPTER DIRECTORY -->
     <aside id="sidebar">
@@ -969,35 +1130,42 @@
             </div>
             
             <div class="header-actions">
-                <!-- CODE BLOCK THEME SWITCHER -->
-                <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="Code ব্যাকগ্রাউন্ড থিম (Black, Sage Green #ACAEA2, Soft Brown, Soft Whitish Blue)">
-                    <i class="fa-solid fa-code"></i>
+                <!-- Mobile Preferences toggle -->
+                <button class="action-btn mobile-settings-btn" onclick="toggleSettingsSheet()" title="Reader Preferences">
+                    <i class="fa-solid fa-sliders"></i>
                 </button>
 
-                <!-- BOLD +/- WEIGHT CONTROL GROUP -->
-                <div class="btn-group" title="লেখার গাঢ়তা (Bold Weight) কমান/বাড়ান">
-                    <button class="action-btn" style="border:none;" onclick="adjustBold(-1)">
-                        <i class="fa-solid fa-bold" style="font-size: 10px;"></i><span class="btn-label-small">-</span>
+                <div class="desktop-controls">
+                    <!-- CODE BLOCK THEME SWITCHER -->
+                    <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="Code ব্যাকগ্রাউন্ড থিম (Black, Sage Green #ACAEA2, Soft Brown, Soft Whitish Blue)">
+                        <i class="fa-solid fa-code"></i>
                     </button>
-                    <button class="action-btn" style="border:none;" onclick="adjustBold(1)">
-                        <i class="fa-solid fa-bold"></i><span class="btn-label-small">+</span>
+
+                    <!-- BOLD +/- WEIGHT CONTROL GROUP -->
+                    <div class="btn-group" title="লেখার গাঢ়তা (Bold Weight) কমান/বাড়ান">
+                        <button class="action-btn" style="border:none;" onclick="adjustBold(-1)">
+                            <i class="fa-solid fa-bold" style="font-size: 10px;"></i><span class="btn-label-small">-</span>
+                        </button>
+                        <button class="action-btn" style="border:none;" onclick="adjustBold(1)">
+                            <i class="fa-solid fa-bold"></i><span class="btn-label-small">+</span>
+                        </button>
+                    </div>
+
+                    <!-- DIAGRAM PALETTE THEME CONTROL -->
+                    <button class="action-btn" onclick="cycleVisualTheme()" id="diagramThemeBtn" title="Diagramের নিওন থিম টগল (৩টি কালার থিম)">
+                        <i class="fa-solid fa-palette"></i>
+                    </button>
+
+                    <!-- FONT SIZE CONTROL -->
+                    <button class="font-size-btn" onclick="toggleFontSize()" title="ফন্ট সাইজ পরিবর্তন">
+                        <i class="fa-solid fa-font"></i>
+                    </button>
+
+                    <!-- THEME DAY/DARK TOGGLE -->
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" title="থিম পরিবর্তন (দিন/রাত)">
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
                     </button>
                 </div>
-
-                <!-- DIAGRAM PALETTE THEME CONTROL -->
-                <button class="action-btn" onclick="cycleVisualTheme()" id="diagramThemeBtn" title="Diagramের নিওন থিম টগল (৩টি কালার থিম)">
-                    <i class="fa-solid fa-palette"></i>
-                </button>
-
-                <!-- FONT SIZE CONTROL -->
-                <button class="font-size-btn" onclick="toggleFontSize()" title="ফন্ট সাইজ পরিবর্তন">
-                    <i class="fa-solid fa-font"></i>
-                </button>
-
-                <!-- THEME DAY/DARK TOGGLE -->
-                <button class="theme-toggle-btn" onclick="toggleTheme()" title="থিম পরিবর্তন (দিন/রাত)">
-                    <i class="fa-solid fa-moon" id="themeIcon"></i>
-                </button>
             </div>
         </header>
         
@@ -1153,13 +1321,32 @@
         // Toggle Sidebar for both Desktop and Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById("sidebar");
+            const backdrop = document.getElementById("sidebarBackdrop");
             if (window.innerWidth <= 900) {
-                sidebar.classList.toggle("open");
+                const isOpen = sidebar.classList.toggle("open");
                 sidebar.classList.remove("collapsed");
+                if (backdrop) {
+                    if (isOpen) {
+                        backdrop.classList.add("open");
+                    } else {
+                        backdrop.classList.remove("open");
+                    }
+                }
             } else {
                 sidebar.classList.toggle("collapsed");
                 sidebar.classList.remove("open");
+                if (backdrop) {
+                    backdrop.classList.remove("open");
+                }
             }
+        }
+
+        // Toggle Mobile Bottom Settings Sheet
+        function toggleSettingsSheet() {
+            const sheet = document.getElementById("settingsSheet");
+            const backdrop = document.getElementById("settingsBackdrop");
+            if (sheet) sheet.classList.toggle("open");
+            if (backdrop) backdrop.classList.toggle("open");
         }
 
         // Toggle Theme Day/Night
@@ -1311,7 +1498,12 @@
 
         // Cycle Font Size
         function toggleFontSize() {
-            fontSizeMode = (fontSizeMode + 1) % 3;
+            adjustFontSize(1);
+        }
+
+        // Adjust Font Size (direction +1 or -1)
+        function adjustFontSize(direction) {
+            fontSizeMode = (fontSizeMode + direction + 3) % 3;
             const article = document.getElementById("markdownContent");
             if (fontSizeMode === 0) {
                 article.style.fontSize = "16px";
@@ -1328,6 +1520,14 @@
             populateSidebar();
             
             document.getElementById("sidebar").classList.remove("open");
+            const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+            if (sidebarBackdrop) sidebarBackdrop.classList.remove("open");
+            
+            // Also close settings sheet on chapter load
+            const sheet = document.getElementById("settingsSheet");
+            const settingsBackdrop = document.getElementById("settingsBackdrop");
+            if (sheet) sheet.classList.remove("open");
+            if (settingsBackdrop) settingsBackdrop.classList.remove("open");
             
             const headerTitle = document.getElementById("chapterTitleHeader");
             headerTitle.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Chapter ${chNum} Loading...`;
@@ -1397,6 +1597,14 @@
                 // Render Markdown
                 const contentDiv = document.getElementById("markdownContent");
                 contentDiv.innerHTML = marked.parse(text);
+                
+                // Wrap all tables in a table-container for horizontal scrolling on mobile
+                contentDiv.querySelectorAll('table').forEach(table => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-container';
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                });
                 
                 // Set Header title
                 const mainH1 = contentDiv.querySelector("h1");
@@ -1766,5 +1974,47 @@
         loadChapter(1);
         updateSidebarProgress();
     </script>
+    <!-- MOBILE READER PREFERENCES BOTTOM SHEET -->
+    <div id="settingsBackdrop" class="settings-sheet-backdrop" onclick="toggleSettingsSheet()"></div>
+    <div id="settingsSheet" class="settings-sheet">
+        <div class="settings-sheet-header">
+            <h3>Reader Preferences</h3>
+            <button class="close-sheet-btn" onclick="toggleSettingsSheet()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="settings-sheet-content">
+            <div class="settings-option">
+                <span class="option-label"><i class="fa-solid fa-circle-half-stroke"></i> Color Mode</span>
+                <div class="option-controls">
+                    <button class="sheet-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> Day/Night</button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <span class="option-label"><i class="fa-solid fa-font"></i> Text Size</span>
+                <div class="option-controls btn-group" style="border:none; background:none;">
+                    <button class="sheet-btn" onclick="adjustFontSize(-1)"><i class="fa-solid fa-minus"></i></button>
+                    <button class="sheet-btn" onclick="adjustFontSize(1)"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <span class="option-label"><i class="fa-solid fa-bold"></i> Text Weight</span>
+                <div class="option-controls btn-group" style="border:none; background:none;">
+                    <button class="sheet-btn" onclick="adjustBold(-1)"><i class="fa-solid fa-minus"></i></button>
+                    <button class="sheet-btn" onclick="adjustBold(1)"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <span class="option-label"><i class="fa-solid fa-code"></i> Code Block Theme</span>
+                <div class="option-controls">
+                    <button class="sheet-btn" onclick="cycleCodeTheme()"><i class="fa-solid fa-palette"></i> Cycle</button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <span class="option-label"><i class="fa-solid fa-diagram-project"></i> Diagram Theme</span>
+                <div class="option-controls">
+                    <button class="sheet-btn" onclick="cycleVisualTheme()"><i class="fa-solid fa-palette"></i> Cycle</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

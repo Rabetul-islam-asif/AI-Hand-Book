@@ -1,20 +1,56 @@
 # Chapter 7: Transformers — The Architecture That Changed Everything
 
 
+তুমি কি কখনো ভেবেছো — আজকে তুমি যে ChatGPT, Claude, Llama বা Midjourney ব্যবহার করছো, এদের সবার পেছনে কোন ম্যাজিক কাজ করছে?
 
-তুমি কি কখনো ভেবেছো — আজকে তুমি যে ChatGPT, Claude, Llama বা Midjourney ব্যবহার করছো, এদের সবার পেছনে কোন ম্যাজিক কাজ করছে? উত্তর হলো, "Transformer"। ২০১৭ সালে গুগলের রিসার্চ পেপার *"Attention Is All You Need"* বের হওয়ার পর পুরো AI দুনিয়া ওলট-পালট হয়ে গেছে। এই আর্কিটেকচারটা যদি তুমি না বোঝো, তবে আধুনিক Generative AI-এর আসল শক্তির রহস্যটা তোমার কাছে সবসময়ই একটা রহস্য থেকে যাবে।
+উত্তর হলো — Transformer।
 
-তো চলো এই চ্যাপ্টারে আধুনিক AI বিপ্লবের মূল ভিত্তি Transformer-এর মূল অংশটা একদম ডিকোড করে ফেলি। আমরা দেখবো কীভাবে পুরনো RNN বা LSTM-এর একটার পর একটা (Sequential) প্রসেস করার ঝামেলা ভেঙে সেলফ-অ্যাটেনশন (Self-Attention) আর মাল্টি-হেড অ্যাটেনশন (Multi-Head Attention) আমাদের সমান্তরালে বা Parallel প্রসেস করার স্বাধীনতা দিয়েছে। চলো একজন সাধারণ পাঠক বনাম একজন স্পিড রিডারের গল্প দিয়ে শুরু করা যাক!
+২০১৭ সালে Google-এর একটা Research Paper বের হয়। নাম ছিল *"Attention Is All You Need"*।
+
+এই একটা Paper পুরো AI দুনিয়া ওলট-পালট করে দিয়েছে।
+
+আগে AI Model-গুলো শব্দ একটার পর একটা পড়তো। ধীরে ধীরে। আর লম্বা বাক্য হলে আগের কথা ভুলে যেতো।
+
+Transformer এসে বললো — "আমি সব শব্দ একসাথে পড়বো। এক নজরে পুরো বাক্য বুঝবো।"
+
+এই Chapter-এ আমরা ঠিক সেটাই ভাঙবো।
+
+Self-Attention কী? Multi-Head Attention কেন দরকার? আর কীভাবে এই Architecture পুরো AI Revolution-এর ভিত্তি হয়ে গেলো?
+
+চলো একটা গল্প দিয়ে শুরু করি।
 
 
+## ১. দুই ধরনের পাঠকের গল্প
 
-### ১. Hook: ট্র্যাডিশনাল রিডার বনাম স্পিড রিডারের পার্থক্য
+তোমার সামনে একটি ৩০০ পৃষ্ঠার বই।
 
-তোমার সামনে একটি ৩০০ পৃষ্ঠার বই দেওয়া হলো এবং বলা হলো বইয়ের ভেতর থেকে একটি নির্দিষ্ট প্রশ্নের উত্তর দিতে।
+বলা হলো — এই বইয়ের ভেতর থেকে একটি প্রশ্নের উত্তর খুঁজে বের করো।
 
-দুটি পড়ার স্টাইল তুলনা করো:
-* **স্টাইল ১ (The RNN Reader):** সে বইয়ের প্রথম পাতার প্রথম শব্দ থেকে পড়া শুরু করলো। সে প্রতিটি শব্দ একটার পর একটা (Sequential) পড়ে আগের লাইনের স্মৃতি মাথায় রেখে সামনে যাচ্ছে। সে যখন ১৫০ পৃষ্ঠায় পৌঁছাবে, সে প্রথম ১০ পৃষ্ঠার কথা প্রায় ভুলে যাবে। একেই বলে **RNN (Recurrent Neural Network) এর Vanishing Memory সমস্যা**।
-* **স্টাইল ২ (The Transformer/Attention Reader):** সে পুরো বইটি এক সেকেন্ডে টেবিলের উপর মেলে ধরলো। সে তার চোখের পলকে (Attention) পুরো পৃষ্ঠার কী-ওয়ার্ড বা মূল শব্দের সাথে অন্যান্য শব্দের সম্পর্ক (Self-Attention) এক নজরে স্ক্যান করে নিলো এবং নিমিষেই উত্তর খুঁজে বের করলো। এটি হলো **Transformer এবং Parallel প্রসেসিং**।
+এখন দুটো পড়ার Style দেখো।
+
+### Style ১ — The RNN Reader
+
+সে বইয়ের প্রথম পাতার প্রথম শব্দ থেকে পড়া শুরু করলো।
+
+প্রতিটা শব্দ একটার পর একটা পড়ছে।
+
+আগের লাইনের কথা মাথায় রেখে সামনে যাচ্ছে।
+
+কিন্তু যখন সে ১৫০ পৃষ্ঠায় পৌঁছালো, তখন প্রথম ১০ পৃষ্ঠার কথা প্রায় ভুলে গেছে।
+
+এটাই RNN-এর সবচেয়ে বড় সমস্যা — Vanishing Memory।
+
+### Style ২ — The Transformer Reader
+
+সে পুরো বইটা এক সেকেন্ডে টেবিলের উপর মেলে ধরলো।
+
+এক নজরে পুরো পৃষ্ঠার Keyword স্ক্যান করলো।
+
+প্রতিটা শব্দের সাথে অন্যান্য শব্দের সম্পর্ক বুঝে নিলো।
+
+নিমিষেই উত্তর খুঁজে বের করলো।
+
+এটাই Transformer। এটাই Parallel Processing।
 
 [VISUAL]
 Title: RNN Bottleneck vs. Transformer Parallel Attention
@@ -33,44 +69,109 @@ Transformer Parallel Attention (Instant, O(1) step):
 ```
 
 
-### ২. Core Concepts: Transformer ও সেলফ-Attention-এর ভেতরের কাজ
+## ২. RNN/LSTM কেন ব্যর্থ হলো?
 
-#### ক. RNN/LSTM-এর বোতলনাক (The Sequential Bottleneck)
-Transformerের আগে সব টেক্সট প্রসেসিং হতো RNN বা LSTM দিয়ে।
-* **সমস্যা ১:** তারা Parallel প্রসেস করতে পারতো না। মানে, আগের শব্দ প্রসেস না করে পরের শব্দ প্রসেস করা অসম্ভব ছিল। GPU-এর বিশাল ক্ষমতা অলস বসে থাকতো।
-* **সমস্যা ২:** বাক্য দীর্ঘ হলে প্রথম দিকের শব্দের Context বা Memory শেষের দিকে হারিয়ে যেতো (Vanishing Gradient in Sequence)।
+Transformer আসার আগে Text Processing হতো RNN আর LSTM দিয়ে।
 
-#### খ. Self-Attention (সেলফ-Attention - নিজের প্রতি মনোযোগ)
-সেলফ-Attention হলো বাক্যের প্রতিটি শব্দের সাথে বাক্যের অন্যান্য প্রতিটি শব্দের গভীর সম্পর্ক বা ব্যাকরণগত ডিপেনডেন্সি হিসেব করা।
+কিন্তু দুটো বড় সমস্যা ছিল।
 
-ধুন একটি বাক্য:
+প্রথম সমস্যা — Parallel Processing সম্ভব ছিল না।
+
+আগের শব্দ Process না করলে পরের শব্দে যাওয়া যেতো না।
+
+GPU-র বিশাল ক্ষমতা অলস বসে থাকতো।
+
+দ্বিতীয় সমস্যা — বাক্য লম্বা হলে প্রথম দিকের শব্দ ভুলে যেতো।
+
+এটাকেই বলে Vanishing Gradient।
+
+Transformer এই দুটো সমস্যাই একবারে সমাধান করেছে।
+
+
+## ৩. Self-Attention কীভাবে কাজ করে?
+
+Self-Attention-এর কাজ হলো — বাক্যের প্রতিটা শব্দের সাথে বাক্যের অন্যান্য শব্দের সম্পর্ক বের করা।
+
+একটু খোলাসা করি।
+
+ধরো একটা বাক্য:
+
 *"The animal didn't cross the street because **it** was too tired."*
 
-এখানে **it** বলতে কী বোঝানো হচ্ছে? বিড়াল নাকি রাস্তা?
-মানুষ খুব সহজে বোঝে যে **it** হলো animal। কিন্তু Computeার কীভাবে বুঝবে?
-সেলফ-Attention Mechanism বাক্যের প্রতিটি শব্দের সম্পর্ক স্কোর ক্যালকুলেট করে দেখে যে **it** এর সাথে **animal** এর সম্পর্ক ৯৫%, আর **street** এর সাথে মাত্র ৫%।
+এখানে **it** বলতে কী বোঝানো হচ্ছে?
 
-#### গ. Query, Key, and Value ($Q, K, V$ Vector-এর বিষয়)
-সেলফ-Attention ক্যালকুলেট করতে প্রতিটি শব্দ তিনটি কাল্পনিক Vector-এ convertিত হয় (Database কুয়েরির মতো):
-* **Query ($Q$):** তুমি যা খুঁজছেন। (যেমন: *"it"* শব্দটি অন্যান্যদের জিজ্ঞেস করছে: *"আমি কে?"*)
-* **Key ($K$):** প্রতিটি শব্দের পরিচয়পত্র। (বাক্যের অন্যান্য শব্দ বলছে: *"আমি animal"*, *"আমি street"*)
-* **Value ($V$):** প্রতিটি শব্দের আসল অর্থ বা Context Value।
+Animal? নাকি Street?
 
-##### সেলফ-Attention Equation:
+মানুষ সহজেই বোঝে — **it** মানে Animal।
+
+কিন্তু Computer কীভাবে বুঝবে?
+
+Self-Attention এখানেই কাজ করে।
+
+সে বাক্যের প্রতিটা শব্দের সম্পর্ক Score Calculate করে।
+
+দেখে — **it**-এর সাথে **animal**-এর সম্পর্ক ৯৫%।
+
+আর **street**-এর সাথে মাত্র ৫%।
+
+তাই Model বুঝে যায় — **it** মানে **animal**।
+
+
+## ৪. Q, K, V — তিনটা Vector-এর গল্প
+
+Self-Attention Calculate করতে প্রতিটা শব্দ তিনটা Vector-এ Convert হয়।
+
+এটা অনেকটা Database Query-এর মতো কাজ করে।
+
+**Query কী?**
+
+তুমি যা খুঁজছো।
+
+যেমন — "it" শব্দটা জানতে চাইছে: "আমি আসলে কে?"
+
+**Key কী?**
+
+প্রতিটা শব্দের পরিচয়পত্র।
+
+বাক্যের অন্যান্য শব্দ বলছে: "আমি animal", "আমি street"।
+
+**Value কী?**
+
+প্রতিটা শব্দের আসল অর্থ বা Context।
+
+সহজ কথায় — Query জিজ্ঞেস করে, Key পরিচয় দেয়, আর Value আসল তথ্য বহন করে।
+
+### Attention-এর Equation
+
 $$Attention(Q, K, V) = Softmax\left(\frac{Q \cdot K^T}{\sqrt{d_k}}\right) \cdot V$$
 
-* $\sqrt{d_k}$ হলো Scaling ফ্যাক্টর (Scaling Factor) যা গ্র্যাডিয়েন্টকে স্থিতিশীল রাখতে সাহায্য করে।
+এখানে $\sqrt{d_k}$ হলো Scaling Factor।
 
-#### ঘ. Multi-Head Attention (মাল্টি-হেড Attention)
-Model যদি বাক্যের সম্পর্কের দিকে শুধু এক নজরে তাকায়, তবে সে অনেক সূক্ষ্ম বিষয় মিস করতে পারে। তাই Transformer Model একই সাথে একাধিক কোণ বা চোখ দিয়ে বাক্যের দিকে তাকায়। একেই বলে **Multi-Head Attention**।
-* **Head 1:** ব্যাকরণগত বা সাবজেক্ট-ভার্ব সম্পর্কের দিকে ফোকাস করে।
-* **Head 2:** সর্বনাম বা প্রোনাউনের দিকে ফোকাস করে।
-* **Head 3:** টাইম বা লোকেশনের সম্পর্কের দিকে ফোকাস করে।
+এটা Gradient-কে স্থিতিশীল রাখতে সাহায্য করে।
 
 
-### ৩. Visual Explanation: $Q, K, V$ Attention Matrix Loop
+## ৫. Multi-Head Attention কেন দরকার?
 
-Attention কীভাবে দুটি শব্দের ডট প্রোডাক্ট দিয়ে স্কোর বের করে তা দেখে নাও:
+Model যদি বাক্যের দিকে শুধু এক নজরে তাকায়, তাহলে অনেক সূক্ষ্ম বিষয় মিস করতে পারে।
+
+তাই Transformer একই সাথে একাধিক চোখ দিয়ে বাক্যের দিকে তাকায়।
+
+এটাই Multi-Head Attention।
+
+প্রতিটা Head আলাদা জিনিস দেখে।
+
+একটা Head হয়তো Subject-Verb-এর সম্পর্ক দেখছে।
+
+আরেকটা Head দেখছে Pronoun কার দিকে Point করছে।
+
+আরেকটা Head দেখছে Time বা Location-এর সম্পর্ক।
+
+সব Head-এর ফলাফল একসাথে জোড়া লাগিয়ে Model একটা Complete Picture পায়।
+
+
+## ৬. Attention Matrix দেখে বোঝো
+
+Attention কীভাবে দুটো শব্দের Dot Product দিয়ে Score বের করে, সেটা দেখো:
 
 ```
           K ("animal")    K ("street")
@@ -88,19 +189,32 @@ Q ("it") ──────┼───────────────┼�
 ```
 
 
-### ৪. Real World Example: রিয়েল-টাইম Language ট্রান্সলেশন
+## ৭. Real World Example — Google Translate কীভাবে ভুল এড়ায়?
 
-গুগল ট্রান্সলেটে যখন তুমি লেখেন:
+Google Translate-এ যখন তুমি লেখো:
+
 *"The bank of the river is beautiful."*
-এখানে **bank** মানে নদীর পার, ব্যাংক ডাকাতির ব্যাংক নয়।
-Transformer সেলফ-Attention-এর মাধ্যমে **bank** শব্দের সাথে **river** শব্দের ৯৮% রিলেশন ডিটেক্ট করে সাথে সাথে সঠিক বাংলা অনুবাদ করে: *"নদীর তীরটি সুন্দর।"*
+
+এখানে **bank** মানে কী?
+
+নদীর পার? নাকি যেখানে টাকা রাখা হয়?
+
+Transformer Self-Attention দিয়ে **bank** আর **river**-এর সম্পর্ক ধরে ফেলে।
+
+Score আসে ৯৮%।
+
+তাই সঠিক বাংলা অনুবাদ হয়: *"নদীর তীরটি সুন্দর।"*
+
+ভুল করে "ব্যাংক" বলে না।
 
 
-### ৫. Developer Perspective: PyTorch দিয়ে Custom Self-Attention লেয়ার Coding
+## ৮. Developer View — PyTorch দিয়ে Self-Attention তৈরি করো
 
 💻 Developer View
 
-চলো পাইথনে PyTorch Library ব্যবহার করে একটি Custom Scaled Dot-Product Attention লেয়ার স্ক্র্যাচ থেকে ডিজাইন করি যা $Q, K, V$ Projection করে Output দেয়।
+চলো PyTorch দিয়ে একটা Custom Scaled Dot-Product Attention Layer স্ক্র্যাচ থেকে তৈরি করি।
+
+এটা $Q$, $K$, $V$ Projection করে Output দেবে।
 
 ```python
 import torch
@@ -141,35 +255,76 @@ print("Attention Weights Matrix:\n", weights[0])
 ```
 
 
-### VI. Production Perspective: ফ্ল্যাশ Attention (FlashAttention)
+## ৯. Production Reality — FlashAttention
 
 🏭 Production Reality
 
-Transformer মডেলে সেলফ-Attention রান করার সময় একটি বড় চ্যালেঞ্জ হলো এর Compute কস্ট এবং Memory খরচ বাক্যের দৈর্ঘ্যের সাথে square-এ বৃদ্ধি পায় ($O(N^2)$ Complexity)। তোমার বাক্য যদি দ্বিগুণ দীর্ঘ হয়, তবে জিপিউ মেমরি খরচ হবে ৪ গুণ!
+Self-Attention-এর একটা বড় সমস্যা আছে।
 
-প্রোডাকশন সলিউশন:
-আধুনিক এলএলএম হোস্টিং এবং Serving Engines (যেমন vLLM, TensorRT) ব্যাকগ্রাউন্ডে **FlashAttention** ব্যবহার করে। এটি GPU-এর দ্রুত মেমরি (SRAM) এবং স্লো Memory-এর (HBM) মধ্যে Data ট্রান্সফার Optimize করে Compute স্পীড ৩ থেকে ৫ গুণ বুস্ট করে এবং মেমরি ফুটপ্রিন্ট Drastically কমায়।
+বাক্য যত লম্বা হয়, Compute Cost আর Memory খরচ Square-এ বাড়ে।
+
+মানে $O(N^2)$ Complexity।
+
+বাক্য দ্বিগুণ লম্বা হলে GPU Memory খরচ হবে ৪ গুণ!
+
+তাহলে Production-এ কী করে?
+
+আধুনিক LLM Serving Engine যেমন vLLM, TensorRT — এরা FlashAttention ব্যবহার করে।
+
+FlashAttention Math-এর Equation বদলায় না।
+
+সে GPU-র দ্রুত Memory (SRAM) আর ধীর Memory (HBM)-এর মধ্যে Data Transfer Optimize করে।
+
+ফলে Compute Speed ৩ থেকে ৫ গুণ বাড়ে।
+
+আর Memory Footprint অনেক কমে যায়।
 
 
-### VII. Common Mistakes
+## ১০. Common Mistake
 
-🔴 Common Mistake
+ভুল ধারণা:
 
-**ভুল ধারণা:** Transformer Model নিজে নিজেই শব্দের অর্ডার বা কোন শব্দ আগে এবং কোন শব্দ পরে এসেছে তা বুঝতে পারে।
+Transformer নিজে নিজেই বোঝে কোন শব্দ আগে এসেছে, কোনটা পরে।
 
-**বাস্তবতা:** যেহেতু সেলফ-Attention-এ বাক্যের সব শব্দকে এক সাথে Matrix আকারে Parallel প্রসেস করা হয়, তাই Model শব্দের Positional অর্ডার ভুলে যায় (যেমন: *"Cat chased Dog"* এবং *"Dog chased Cat"* Model-এর কাছে একই মনে হবে)। এই সমস্যা সমাধানের জন্য আমাদের Input Embeddingয়ের সাথে ম্যানুয়ালি **Positional Encoding (যেমন সাইন-কোসাইন সাইন তরঙ্গ Vector)** যোগ করে দিতে হয়, যাতে Model শব্দের Positional সিকোয়েন্স বুঝতে পারে।
+বাস্তবতা:
+
+Self-Attention-এ সব শব্দ একসাথে Parallel Process হয়।
+
+তাই Model শব্দের Order ভুলে যায়।
+
+*"Cat chased Dog"* আর *"Dog chased Cat"* — Model-এর কাছে দুটো একই মনে হবে।
+
+এটা সমাধান করতে Input Embedding-এর সাথে Positional Encoding যোগ করতে হয়।
+
+Positional Encoding হলো সাইন-কোসাইন তরঙ্গের Vector।
+
+এটা যোগ করলে Model বুঝতে পারে কোন শব্দ বাক্যের কোথায় আছে।
 
 
-### VIII. Mental Model: ককটেল পার্টি
+## ১১. Mental Model — ককটেল পার্টি
 
-সেলফ-Attention-এর মেন্টাল Model:
+Self-Attention বুঝতে একটা সহজ উদাহরণ দিই।
 
-**"সেলফ-Attention হলো একটি শোরগোলপূর্ণ ককটেল পার্টি। তুমি (Query) যখন কারো সাথে কথা বলতে চান, তুমি ঘরের সবার কণ্ঠস্বর (Keys) স্ক্যান করো এবং যার কণ্ঠ ও Personaলিটি তোমার সাথে সবচেয়ে বেশি মিলে যায় (Highest Attention Score), তুমি কেবল তার কথার দিকেই তোমার কান পাতেন (Values) এবং বাকিদের নয়েজ ফিল্টার আউট করে দেন।"**
+ধরো তুমি একটা শোরগোলপূর্ণ ককটেল পার্টিতে আছো।
+
+তুমি হলে Query।
+
+ঘরের সবার কণ্ঠস্বর হলো Key।
+
+তুমি সবার কণ্ঠ স্ক্যান করছো।
+
+যার কণ্ঠ আর Personality তোমার সাথে সবচেয়ে বেশি মেলে, তার Attention Score সবচেয়ে বেশি।
+
+তুমি শুধু তার কথাই শুনছো — সেটা হলো Value।
+
+বাকি সবার কথা Noise হিসেবে Filter হয়ে যাচ্ছে।
+
+Self-Attention ঠিক এভাবেই কাজ করে।
 
 
-### IX. Mini Project: NumPy দিয়ে স্ক্র্যাচ Attention স্কোর ক্যালকুলেটর
+## ১২. Mini Project — NumPy দিয়ে Attention Score Calculate করো
 
-চলো কোনো Framework ছাড়া র NumPy ব্যবহার করে একটি ৩ শব্দের বাক্যের Attention Matrix ও সফটম্যাক্স স্কোর স্ক্র্যাচ থেকে Code করি।
+চলো কোনো Framework ছাড়া শুধু NumPy দিয়ে একটা ৩ শব্দের বাক্যের Attention Matrix তৈরি করি।
 
 ```python
 import numpy as np
@@ -177,7 +332,7 @@ import numpy as np
 # ৩টি শব্দের এম্বেডিংস (Sequence Length=3, Dimension=2)
 # বাক্য: "I love AI"
 Q = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
-K = Q # Self-Attention এ Q এবং K সমান হয়
+K = Q # Self-Attention এ Q এবং K সমান হয়
 
 # ১. ডট প্রোডাক্ট স্কোর (Q * K^T)
 scores = np.dot(Q, K.T)
@@ -197,28 +352,42 @@ print(attention_matrix)
 ```
 
 
-### X. Interview Questions
+## ১৩. Interview Questions
 
-#### Beginner
-1. **প্রশ্ন:** কেন পুরোনো RNN/LSTM-এর পরিবর্তে আধুনিক AI-তে Transformer ব্যবহার করা হয়?
-   * **উত্তর:** RNN/LSTM সিকোয়েনশিয়াল প্রসেসিং এ চলায় Parallel GPU Compute করতে পারতো না এবং বাক্য বড় হলে পেছনের শব্দ ভুলে যেতো। Transformer সেলফ-Attention ব্যবহার করে বাক্যের সব শব্দ এক সাথে Parallel প্রসেস করতে পারে এবং কোনো Memory অবক্ষয় ছাড়াই লং Context হ্যান্ডেল করতে পারে।
+### Beginner
 
-#### Intermediate
-2. **প্রশ্ন:** সেলফ-Attention-এর $Query (Q)$, $Key (K)$ এবং $Value (V)$ Vector-এর সম্পর্ক ও কাজ কী?
-   * **উত্তর:** Query ($Q$) হলো একটি নির্দিষ্ট শব্দের Search Query যা অন্যান্য শব্দের সম্পর্কে জানতে চায়। Key ($K$) হলো বাক্যের প্রতিটি শব্দের আইডেন্টিটি বা পরিচয় Vector যা Query এর সাথে ডট প্রোডাক্ট করে রিলেশন স্কোর বের করে। আর Value ($V$) হলো শব্দের মূল ইনফরমেশন বা Context Value যা Attention Weight দিয়ে গুণ হয়ে ফাইনাল Output Representation তৈরি করে।
+**প্রশ্ন:** কেন পুরোনো RNN/LSTM-এর বদলে এখন Transformer ব্যবহার করা হয়?
 
-#### Advanced
-3. **প্রশ্ন:** ফ্ল্যাশ Attention (FlashAttention) কীভাবে Transformerের $O(N^2)$ মেমরি Constraint দূর করে?
-   * **উত্তর:** ফ্ল্যাশ Attention Math-এর Equation চেঞ্জ করে না। এটি মূলত Memory Optimization টেকনিক। এটি জিপিউর স্লো এবং বড় Memory (HBM) থেকে দ্রুত এবং ছোট অন-চিপ মেমোরিতে (SRAM) ব্লক বাই ব্লক Data লোড করে Computation চালায় এবং সফটম্যাক্স অন-দ্য-ফ্লাই ক্যালকুলেট করে Memory রিড/রাইট ওভারহেড Drastically কমায়।
+**উত্তর:** RNN/LSTM Sequential Processing-এ চলে। তাই Parallel GPU Compute করা যেতো না। আর বাক্য বড় হলে পেছনের শব্দ ভুলে যেতো। Transformer Self-Attention ব্যবহার করে সব শব্দ একসাথে Parallel Process করে। কোনো Memory ক্ষয় ছাড়াই Long Context Handle করতে পারে।
+
+### Intermediate
+
+**প্রশ্ন:** Self-Attention-এর $Query (Q)$, $Key (K)$ আর $Value (V)$ কী কাজ করে?
+
+**উত্তর:** Query হলো একটা শব্দের Search Query — সে জানতে চায় অন্য শব্দগুলোর সাথে তার সম্পর্ক কী। Key হলো প্রতিটা শব্দের Identity Vector — Query-এর সাথে Dot Product করে Relation Score বের করে। আর Value হলো শব্দের আসল Information — Attention Weight দিয়ে গুণ হয়ে Final Output তৈরি করে।
+
+### Advanced
+
+**প্রশ্ন:** FlashAttention কীভাবে Transformer-এর $O(N^2)$ Memory সমস্যা সমাধান করে?
+
+**উত্তর:** FlashAttention Math-এর Equation বদলায় না। এটা মূলত Memory Optimization Technique। GPU-র ধীর বড় Memory (HBM) থেকে দ্রুত ছোট On-chip Memory (SRAM)-তে Block by Block Data Load করে Computation চালায়। Softmax On-the-fly Calculate করে Memory Read/Write Overhead কমিয়ে দেয়।
 
 
-### XI. Chapter Summary
-* **Transformers** Parallel প্রসেসিং সম্ভব করে AI-তে revolutionary স্পীড ও স্কেল এনেছে।
-* **Self-Attention** বাক্যের প্রতিটি শব্দের সাথে অন্যান্য শব্দের geometric ও ব্যাকরণগত সম্পর্ক ম্যাপ করে।
-* $Q, K, V$ Vector-এর ডট প্রোডাক্ট ও সফটম্যাক্স ক্যালকুলেশনই হলো Transformerের মূল চালিকাশক্তি।
+## Chapter Summary
+
+Transformer Parallel Processing সম্ভব করে AI-তে Revolutionary Speed আর Scale এনেছে।
+
+Self-Attention বাক্যের প্রতিটা শব্দের সাথে অন্যান্য শব্দের সম্পর্ক বের করে।
+
+$Q$, $K$, $V$ Vector-এর Dot Product আর Softmax-ই Transformer-এর মূল চালিকাশক্তি।
 
 
-### XII. What's Next
-আমরা Transformer বিপ্লবের মূল Architecture ভালোভাবে সম্পন্ন করেছি। পরের chapter-এ আমরা এই Transformerের Input Data লেয়ারের একদম মাইক্রোস্কোপিক Mechanics ভাঙবো: **Part 4 — Modern AI Foundations এর Chapter 8: Under the Hood — Tokens, Embeddings & Context Window**। কীভাবে র টেক্সট ভেঙে Token তৈরি হয়, কীভাবে সেই Token হাই-ডাইমেনশনাল Embeddings Vector-এ রূপ নেয় এবং Context Window কীভাবে কাজ করে, তা আমরা নিজের হাতে ভাঙবো।
+## What's Next?
+
+পরের Chapter-এ আমরা Transformer-এর Input Layer ভাঙবো।
+
+কীভাবে Raw Text ভেঙে Token তৈরি হয়? কীভাবে Token High-dimensional Embedding Vector-এ রূপ নেয়? আর Context Window কীভাবে কাজ করে?
+
+**Chapter 8: Under the Hood — Tokens, Embeddings & Context Window**-এ দেখা হচ্ছে।
 
 **Chapter 7 শেষ।**
