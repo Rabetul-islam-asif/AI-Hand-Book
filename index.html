@@ -1009,6 +1009,7 @@
             text-align: left;
             max-width: 48%;
             flex-grow: 1;
+            min-width: 0; /* Prevents flex items from expanding beyond container width */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
@@ -1035,6 +1036,7 @@
             font-size: 18px;
             color: var(--accent-purple);
             transition: transform 0.2s ease;
+            flex-shrink: 0; /* Prevent arrow icon from shrinking */
         }
 
         .nav-prev-btn:hover .nav-arrow {
@@ -1071,14 +1073,28 @@
         }
 
         /* Responsive Chapter Nav */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .chapter-navigation {
                 flex-direction: column;
-                gap: 16px;
+                gap: 12px;
+                margin-top: 40px;
+                padding-top: 24px;
             }
             .nav-prev-btn, .nav-next-btn {
-                max-width: 100%;
-                width: 100%;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 10px 16px !important;
+                gap: 12px !important;
+                border-radius: 8px !important;
+            }
+            .nav-chapter-title {
+                font-size: 13px !important;
+            }
+            .nav-dir-sub {
+                font-size: 9.5px !important;
+            }
+            .nav-arrow {
+                font-size: 15px !important;
             }
         }
     </style>
