@@ -1,12 +1,12 @@
 # Chapter 22: AI Observability & Monitoring
 
----
+
 
 ধরো, তোমার AI চ্যাটবট ল্যাবে দারুণ চলছে। কিন্তু প্রোডাকশনে দিলে হঠাৎ CFO এসে বলল, "মাত্র ১০০টা রিকোয়েস্টে ৫০০ ডলার বিল কীভাবে?" অথবা Customার চেঁচাচ্ছে, "চ্যাটবট লোড হতে ১০ সেকেন্ড লাগে!" — তুমি কিন্তু কিছুই বুঝতে পারছো না। কারণ তোমার কাছে কোনো ড্যাশবোর্ড নেই। কোন টুলে Latency খাচ্ছে, কোথায় Token ওয়েস্ট হচ্ছে — সব অন্ধকার।
 
 তো চলো, এই চ্যাপ্টারে আমরা সেই অন্ধকার দূর করি। AI Observability, LangSmith দিয়ে Tracing, Cost ও Latency Tracking, আর Ragas দিয়ে RAG Evaluation — এই পুরো মনিটরিং পাইপলাইন তুমি নিজের হাতে বসাবে। আগের চ্যাপ্টারে আমরা Safety Harness শিখেছি। এবার সেই Architecture-এর জন্য একটা হাই-ডেফিনিশন ক্যামেরা লাগাবো — যাতে প্রতিটা Token খরচ আর Error স্পট তুমি রিয়েল-টাইমে দেখতে পাও। Deal?
 
----
+
 
 ### ১. Hook: ব্ল্যাকবক্স ইঞ্জিনের ভেতরে ফাইবার অপটিক্যাল ক্যামেরা ইনজেক্ট করা
 
@@ -71,7 +71,7 @@ Purpose: Define the metrics of RAG evaluation.
 └───────────────────────────────────────┴───────────────────────────────────────┘
 ```
 
-🧠 Remember
+ Remember
 
 **Faithfulness = Hallucination Detector!**  
 Ragas এর `Faithfulness` স্কোর ০ মানে Model সোর্স ডক ইগনোর করে সম্পূর্ণ নিজের মতো মনগড়া বা Hallucinateেড উত্তর জেনারেট করেছে। ১ মানে উত্তর ১০০% সোর্সের তথ্যের ওপর ভিত্তি করে তৈরি।
@@ -199,7 +199,7 @@ Purpose: Ground the intuitive dashboard control space.
 ```
        [ ATC Radar Observability Dashboard ]
    ✈ Flight 101 (Embedding)  ──► Latency: 45ms  ──► Status: Safe Landing ✓
-   ✈ Flight 202 (Vector DB)  ──► Latency: 8.0s ──► Status: ALERT! Ground Hold 🔴
+   ✈ Flight 202 (Vector DB)  ──► Latency: 8.0s ──► Status: ALERT! Ground Hold 
    ✈ Flight 303 (LLM Gener.) ──► Latency: 1.1s  ──► Status: Safe Landing ✓
 ```
 
@@ -239,7 +239,7 @@ score_B = calculate_faithfulness(answer_B_embedding, source_embedding)
 
 print("--- RAGAS FAITHFULNESS (HALLUCINATION CHECK) ---")
 print(f"Answer A Faithfulness Score: {score_A:.4f} (100% Faithful / Correct ✓)")
-print(f"Answer B Faithfulness Score: {score_B:.4f} (Hallucination Detected! 🔴)")
+print(f"Answer B Faithfulness Score: {score_B:.4f} (Hallucination Detected! )")
 ```
 
 #### Code Breakdown:

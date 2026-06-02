@@ -1,6 +1,6 @@
 # Chapter 15: Supervised Fine-Tuning (SFT) & Dataset Preparation
 
----
+
 
 ধরো, তোমার হাতে একটা বেস Model আছে। সে অনেক কিছু জানে, কিন্তু কথা বলে একদম নিজের মতো করে। তুমি চাচ্ছো সে তোমার কাস্টমারদের সাথে মিষ্টি বাংলায় কথা বলুক, বা JSON Format-এ Output দিক। সেটা শেখাবে কীভাবে? সেটাই হলো Supervised Fine-Tuning (SFT)।
 
@@ -8,7 +8,7 @@
 
 তো চলো দেখি কীভাবে Instruction Dataset (Alpaca, ShareGPT formats) তৈরি করতে হয়, কখন RAG বনাম Fine-Tuning বেছে নিতে হয়, আর SFT Training Pipeline কীভাবে কাজ করে। এটা বুঝলে পরের চ্যাপ্টারের LoRA/QLoRA আর RLHF সব পানির মতো সহজ লাগবে। Deal?
 
----
+
 
 ### ১. Hook: ডাক্তারকে নতুন বই পড়ানো বনাম তার আচরণের প্রেসক্রিপশন পরিবর্তন
 

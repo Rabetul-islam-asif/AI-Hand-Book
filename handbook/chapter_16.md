@@ -1,6 +1,6 @@
 # Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)
 
----
+
 
 তুমি কি জানো ৭ বিলিয়ন Parameter-এর একটা Model ফুল Fine-Tuning করতে কমপক্ষে ৪টা A100 GPU লাগে? মানে প্রায় ১৬০ GB VRAM! বেশিরভাগ মানুষের পক্ষে এটা afford করা অসম্ভব। কিন্তু ধরো, তোমাকে যদি বলি তুমি তোমার নিজের RTX 3090/4090 কার্ডেই একই কাজ করতে পারবে? সেটাই করে দেখিয়েছে LoRA আর QLoRA।
 
@@ -8,7 +8,7 @@
 
 তো চলো দেখি কীভাবে PEFT, LoRA আর QLoRA-র Math কাজ করে, আর কীভাবে মিলিয়ন ডলারের ইনফ্রাস্ট্রাকচারকে তোমার পার্সোনাল ল্যাপটপে নামিয়ে আনা যায়। এটা শিখলে পরের চ্যাপ্টারের RLHF/DPO আর Agentic AI বুঝতে কোনো সমস্যাই হবে না।
 
----
+
 
 ### ১. Hook: পুরো দেওয়াল ভেঙে নতুন রঙ করা বনাম স্টিকার লাগানো
 
@@ -79,7 +79,7 @@ LoRA মেমরি কমায়, কিন্তু ওরিজিনা�
 * **Double Quantization:** এটি Quantizationের Scaling Parameter গুলোকেও পুনরায় কোয়ান্টাইজ করে আরও মেমরি সেভ করে।
 * **Paged Optimizers:** GPU Memory যদি কখনো স্পাইক করে ওভারফ্লো হয়, এটি ওওএম (OOM) Error না দিয়ে অতিরিক্ত মেমরি টেম্পোরারিলি Computeারের নরমাল র‌্যাম (CPU RAM)-এ পাঠিয়ে Training alive রাখে।
 
-🧠 Remember
+Remember
 
 **LoRA** = বেস Model ফ্রিজ রেখে দুটি ছোট Matrix (A ও B) ট্রেইন করে মেমরি save করে।  
 **QLoRA** = বেস মডেলকে ৪-বিটে (NF4) কম্প্রেস করে এবং ওপরে LoRA Adapter জোড়া লাগিয়ে সর্বকালের সর্বোচ্চ মেমরি save করে।
@@ -97,7 +97,7 @@ Cursor বা যেকোনো Custom Coding Assistant যখন ব্যা�
 
 ### ৪. Developer Perspective: Hugging Face PEFT & LoraConfig Code
 
-💻 Developer View
+ Developer View
 
 Developer হিসেবে পাইথনে `peft` Library ব্যবহার করে Custom LoRA Configuration ডিফাইন করার রিয়েল ও গোল্ড Standard প্রোডাকশন Code:
 
@@ -138,7 +138,7 @@ lora_model.print_trainable_parameters()
 
 ### ৫. Production Perspective: Adapter Merging & Inference Speed
 
-🏭 Production Reality
+ Production Reality
 
 Inference চালানোর সময় প্রোডাকশনে LoRA Adapter ডাইরেক্ট রান করলে GPU-তে Latency বেড়ে যায়। কারণ সিগন্যালকে বেস Model এবং Adapter Matrix দুটির ভেতর দিয়ে আলাদা আলাদাভাবে ক্যালকুলেট হতে হয়।
 

@@ -1,6 +1,6 @@
 # Chapter 17: Alignment — RLHF, DPO & Safety Tuning
 
----
+
 
 তুমি তোমার Model-কে Fine-Tune করেছো, সে সুন্দর করে কথাও বলে। কিন্তু এখন কেউ যদি তাকে জিজ্ঞেস করে `"কীভাবে বোমা বানাব?"`— সে কি থামবে? নাকি হাসিমুখে উত্তর দিয়ে দেবে? এখানেই আসে Alignment-এর গল্প।
 
@@ -8,7 +8,7 @@
 
 তো চলো দেখি কীভাবে AI-কে ক্ষতিকর কথা বলা থেকে আটকাতে হয়, Red Teaming কী জিনিস, আর প্রোডাকশনে Guardrails কীভাবে সেট করতে হয়। এটা না জানলে তোমার AI প্রডাক্ট প্রথম দিনেই হ্যাকারদের শিকার হবে।
 
----
+
 
 ### ১. Hook: বন্য ঘোড়াকে শান্ত পোষ মানানো
 
@@ -30,7 +30,7 @@ Safety Alignment (RLHF / DPO - Ethical Boundary & Self-Correction):
 [ Safe Zone ]  ◄── (Model evaluates ethical safety before responding)
      ▲
      │ (Avoids dangerous cliffs/hallucinations)
-[ Danger Pit (PII Leak/Hacks) ] (Hard Blocked 🚫)
+[ Danger Pit (PII Leak/Hacks) ] (Hard Blocked )
 ```
 
 * **Alignment (RLHF / DPO):** কিন্তু ঘোড়াটি যদি সামনে একটি খাদ বা গভীর গর্ত দেখে, সে কিন্তু তার ওপর দিয়ে ঝাঁপ দিয়ে মরে যাবে। কারণ সে নিজের সুরক্ষার ভালোলাগা-মন্দলাগা বোঝে না। তাকে খাদের বিপদ এড়ানো এবং মানুষের রাইডারের সুরক্ষার এলাইনমেন্ট শেখাতে হলে তোমাকে তাকে **পুরস্কার (Reward) ও শাস্তি (Penalty)** Mechanism-এ ট্রেইন করতে হবে।
@@ -81,7 +81,7 @@ $$L_{\text{DPO}}(\theta; \pi_{\text{ref}}) = -E_{(x, y_w, y_l)} \left[ \log \sig
 * $\pi_\theta$ হলো আমাদের অ্যাক্টিভ ট্রেইনেবল Model।
 * $\pi_{\text{ref}}$ হলো আমাদের ফ্রিজড রেফারেন্স Model (যাতে Training ডিভিয়েট না করে)।
 
-🧠 Remember
+ Remember
 
 **RLHF** = ৩টি আলাদা Model ও আরএল Loop লাগে (জটিল ও আনস্ট্যাবল)।  
 **DPO** = সরাসরি ডিরেক্ট প্রেফারেন্স Loss দিয়ে এক স্টেপেই এলাইনমেন্ট সম্পন্ন করে (সহজ, স্ট্যাবল ও প্রোডাকশন ফ্রেন্ডলি)।
@@ -165,7 +165,7 @@ print("DPO Trainer Initialized! ready to align the model on safety policies...")
 
 ### ৬. Production Perspective: Red Teaming & Guardrails
 
-🏭 Production Reality
+ Production Reality
 
 AI Model এলাইন করার পরও হ্যাকাররা বিভিন্ন কায়দায় Prompt জেইলব্রেক (Jailbreak) বা ইনজেকশনের মাধ্যমে সেফটি লেয়ার ক্র্যাশ করতে পারে। প্রোডাকশনে এর সমাধান হিসেবে **Red Teaming** এবং **Guardrails** ব্যবহার করা হয়।
 

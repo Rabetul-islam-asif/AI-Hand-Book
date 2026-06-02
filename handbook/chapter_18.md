@@ -1,6 +1,6 @@
 # Chapter 18: AI Agents — From Chatbots to Autonomous Workers
 
----
+
 
 তোমার চ্যাটবটকে বলো, *"আমার Project-এর বাগ ফিক্স করে দাও।"* কী করবে সে? উত্তর দেবে: *"এইভাবে ফিক্স করতে পারো..."* — ব্যস, এইটুকুই। তুমি নিজে Code কপি করবে, পেস্ট করবে, Error আসলে আবার তাকে দেখাবে। তুমি হলে কপি-পেস্ট ড্রাইভার!
 
@@ -8,7 +8,7 @@
 
 তো চলো দেখি ReAct Pattern (Think → Act → Observe) কীভাবে কাজ করে, Planning আর Self-Correction Loop কীভাবে Implement করতে হয়। এটা বুঝলে পরের চ্যাপ্টারের Tool Calling, MCP Protocol আর Harness Engineering— সব জায়গায় তুমি কমফোর্টেবল থাকবে।
 
----
+
 
 ### ১. Hook: বাচাল ডিকটেশন সহকারী বনাম দায়িত্বশীল কর্মী
 
@@ -192,7 +192,7 @@ run_agent("আমার পেমেন্ট আটকে গেছে কে�
 
 ### ৬. Production Perspective: Infinite Loop Protection & Safety Gates
 
-🏭 Production Reality
+ Production Reality
 
 Agentic AI প্রোডাকশনে Deploy করার সময় সবচেয়ে বিপজ্জনক বিপদ হলো **Infinite Loop / VRAM Blow-up**।
 

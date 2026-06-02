@@ -1,6 +1,6 @@
 # Chapter 20: Model Context Protocol (MCP) — The USB-C of AI
 
----
+
 
 নোকিয়ার চার্জার দিয়ে কি স্যামসাং চার্জ হতো? হতো না। প্রতিটা ফোনের জন্য আলাদা চার্জার। AI-এর টুল কলিংয়েও ঠিক একই সমস্যা ছিল— Claude-এর জন্য লেখা টুল OpenAI-তে চলে না, Gemini-তে আবার আলাদা Format! প্রতিবার নতুন করে Code লেখো। বিশৃঙ্খলা!
 
@@ -8,7 +8,7 @@
 
 তো চলো দেখি MCP-র তিনটা পিলার (Resources, Prompts, Tools) কী, JSON-RPC 2.0 কীভাবে কাজ করে, আর কীভাবে নিজের Custom MCP Server ডিজাইন করতে হয়। এটা জানলে পরের চ্যাপ্টারের Harness Engineering আর Production Architecture বুঝতে একদম সুবিধা হবে।
 
----
+
 
 ### ১. Hook: চার্জারের বিশৃঙ্খলা বনাম একটিমাত্র ইউনিভার্সাল ক্যাবল
 
@@ -70,7 +70,7 @@ Host (Client: Cursor / Claude Desktop)
        └◄─ Response: {"jsonrpc": "2.0", "result": {"tools": [...]}, "id": 1} ◄── MCP Server
 ```
 
-🧠 Remember
+ Remember
 
 **MCP is Open Source!**  
 অ্যানথ্রপিক এটি তৈরি করলেও এটি সম্পূর্ণ ওপেন Standard। Gemini বা জিপিটি ডেভেলপাররাও এই একই প্রোটোকল ফ্রেমওয়ার্ক ব্যবহার করে Custom আরএজি ও এজেন্ট কোডবেস Integrate করতে পারো।
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
 ### ৫. Production Perspective: JSON-RPC over stdio Security
 
-🏭 Production Reality
+ Production Reality
 
 প্রোডাকশন সিস্টেমে এমসিপি Server Deploy করার সময় সবচেয়ে ক্রুশিয়াল ফোকাস এরিয়া হলো **Host Process Isolation**।
 

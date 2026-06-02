@@ -1,14 +1,14 @@
 # Chapter 2: The Core Mechanics — Machine Learning & Deep Learning
 
----
+
 
 তুমি কি কখনো ভেবেছো — ক্রেডিট কার্ডের ফ্রড ট্রানজেকশন ধরা আর সেলফ-ড্রাইভিং কার চালানো, এই দুটি সম্পূর্ণ ভিন্ন কাজ কীভাবে AI করে? উত্তর হলো, AI-এর আলাদা আলাদা হাতিয়ার আছে। কাস্টমারদের ভাগ করা (Customer Segmentation), ছবি দেখে মুখ চেনা (Face Recognition) কিংবা গেম খেলা — সব কাজের জন্য একই টেকনিক খাটানো বোকামি। ভুল জায়গায় ভুল হাতিয়ার ব্যবহার করলে তোমার প্রজেক্টের কস্ট আর রিসোর্স পুরোটাই নষ্ট হবে।
 
 তো চলো এই চ্যাপ্টারে AI-এর মূল তিনটা স্তম্ভ — Machine Learning, Deep Learning আর Neural Network-এর ভেতরের Mechanics খুব সহজে বুঝে নিই। আমরা দেখবো Supervised, Unsupervised আর Reinforcement Learning-এর বাস্তব উদাহরণ এবং এদের আসল পার্থক্য। চলো শুরু করা যাক!
 
----
 
-### ১. Hook: Face Recognition বনাম Excel Sheet Analysis
+
+### ১. Face Recognition বনাম Excel Sheet Analysis
 
 তোমাকে দুটি ভিন্ন AI টাস্ক দেওয়া হলো:
 1. **টাস্ক ১:** একটি ব্যাংক Transaction-এর Database (যেখানে Transaction এমাউন্ট, লোকেশন, ব্যালেন্স দেওয়া আছে) Analysis করে বের করতে হবে কোনটি ফ্রড আর কোনটি সেফ।
@@ -66,10 +66,10 @@ AI Training-এর মূলত তিনটি পথ রয়েছে:
 
 #### খ. Machine Learning বনাম Deep Learning এর আসল পার্থক্য
 
-এদের মধ্যে মূল পার্থক্য হলো **Feature Engineerিং (Feature Engineering)**।
+এদের মধ্যে মূল পার্থক্য হলো **Feature Engineering (Feature Engineering)**।
 
 * **Machine Learning:** তোমাকে ম্যানুয়ালি Feature Extract করে দিতে হয়। যেমন: বাড়ি বিক্রির Prediction মডেলে তোমাকে আলাদা করে রুমের সংখ্যা, লোকেশনের রেটিং Input Feature হিসেবে গুছিয়ে দিতে হবে।
-* **Deep Learning:** Model Image বা র টেক্সটের Pixel লেভেল থেকে নিজেই অবজেক্টের কনট্যুর, এজ, চোখ, নাক ইত্যাদি Automatically Extract বা লার্ন করে। মানুষের helpের প্রয়োজন হয় না।
+* **Deep Learning:** Model Image বা র টেক্সটের Pixel লেভেল থেকে নিজেই অবজেক্টের কনট্যুর, এজ, চোখ, নাক ইত্যাদি Automatically Extract বা লার্ন করে। মানুষের help-র প্রয়োজন হয় না।
 
 #### গ. Train / Validation / Test Split (মডেলের পরীক্ষার প্রস্তুতি)
 
@@ -87,7 +87,7 @@ Model বানানোর পর সবচেয়ে গুরুত্বপ�
 
 ---
 
-### ৩. Visual Explanation: Feature Engineerিংয়ের Paradigm
+### ৩. Visual Explanation: Feature Engineering র Paradigm
 
 নিচের চিত্রটি দেখলে বুঝতে পারবে কীভাবে Deep Learning মানুষের ম্যানুয়াল Feature ডেভেলপমেন্টের খাটুনি বাঁচিয়ে দেয়:
 

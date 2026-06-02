@@ -1339,12 +1339,31 @@
                 let text = await response.text();
                 
                 // Parse custom visual callouts inside our chapter files into 3-theme controllable pre blocks!
-                text = text.replace(/\[VISUAL\]([\s\S]*?)(?=---|\n\n###)/g, (match, content) => {
+                // Handles \r\n (CRLF) line endings, extracts Title for header, strips metadata lines
+                text = text.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n---|\r?\n\r?\n###)/g, (match, content) => {
+                    // Extract title from "Title: ..." line
+                    const titleMatch = content.match(/Title:\s*(.+)/);
+                    const title = titleMatch ? titleMatch[1].trim() : 'Visual Explanation / Architecture Map';
+                    
+                    // Strip metadata lines (Title, Illustration, Placement, Purpose)
+                    let diagram = content
+                        .replace(/^Title:\s*.+$/gm, '')
+                        .replace(/^Illustration:\s*.+$/gm, '')
+                        .replace(/^Placement:\s*.+$/gm, '')
+                        .replace(/^Purpose:\s*.+$/gm, '')
+                        .trim();
+                    
+                    // Extract content inside ``` code fences if present
+                    const codeBlockMatch = diagram.match(/```[\w]*\r?\n([\s\S]*?)```/);
+                    if (codeBlockMatch) {
+                        diagram = codeBlockMatch[1].trimEnd();
+                    }
+                    
                     return `<div class="callout-box developer">
                         <div class="callout-title">
-                            <span><i class="fa-solid fa-image"></i> Visual Explanation / Architecture Map</span>
+                            <span><i class="fa-solid fa-diagram-project"></i> ${title}</span>
                         </div>
-                        <pre class="visual-pre theme-${currentVisualTheme}"><code class="language-plaintext">${content.trim()}</code></pre>
+                        <pre class="visual-pre theme-${currentVisualTheme}"><code class="language-plaintext">${diagram}</code></pre>
                     </div>`;
                 });
                 

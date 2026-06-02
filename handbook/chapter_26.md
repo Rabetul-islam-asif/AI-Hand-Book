@@ -1,12 +1,12 @@
 # Chapter 26: Blueprint 3 — Agentic CLI Code Writer with Auto-Test Healing
 
----
+
 
 তুমি কি কখনো ভেবেছো — সায়েন্স-ফিকশন সিনেমার মতো এমন একটা AI এজেন্ট বানানো কি সত্যিই সম্ভব, যে নিজে নিজে কোড লিখবে, কোড লিখে নিজেই টার্মিনালে রান করে টেস্ট করবে, আর কোডে কোনো ভুল বা বাগ থাকলে নিজেই সেই এরর লগ রিড করে কোড শুধরে নেবে? উত্তর হলো, হ্যাঁ! Devin কিংবা Cursor Agent-এর মতো আধুনিক AI কো-পাইলটগুলোর পেছনের মূল ম্যাজিকটাই হলো এই সেলফ-টেস্টিং ও অটো-হিলিং লুপ।
 
 তো চলো এই চ্যাপ্টারে AI এজেন্টের সবচেয়ে রোমাঞ্চকর প্যাটার্ন — ReAct (Reason + Act) আর অটো-টেস্ট হিলিং (Auto-Test Healing) নিজের হাতে ডিজাইন করে ফেলি। আমরা দেখবো কীভাবে ইউজার কমান্ড শুনে এজেন্টের মাধ্যমে ফাইল তৈরি করা যায়, লোকাল টার্মিনালে pytest দিয়ে কোড টেস্ট করা যায়, আর টেস্ট ফেইল করলে সেই এরর মেসেজ পড়ে কোড ঠিক করা যায়। চলো অন্ধ কোডারের ছটফটানি আর এরর হিলিংয়ের এক দারুণ বাস্তব সমস্যা দিয়ে শুরু করা যাক!
 
----
+
 
 ### ১. The Problem: অন্ধ কোডারের ছটফটানি ও Error হিলিং
 
@@ -34,13 +34,13 @@ Purpose: Provide architectural mapping of the self-correcting agent loop.
           ┌────────────────────────────────────────┐
           ▼                                        │
     ┌───────────┐       ┌────────────┐             │
-    │🧠  Think  │ ────► │ 🛠️ Act:    │             │
+    │  Think     │ ────►│ Act:       │             │
     │   (LLM)   │       │ Write Code │             │
     └───────────┘       └────────────┘             │ (If test fails,
           ▲                    │                   │  feed error back)
           │                    ▼                   │
           │             ┌────────────┐             │
-          │             │ 💻 Run     │             │
+          │             │  Run       │             │
           │             │ Pytest     │             │
           │             └────────────┘             │
           │                    │                   │
@@ -184,7 +184,7 @@ def run_self_healing_agent():
         elif agent_code.startswith("```"):
             agent_code = agent_code[3:-3].strip()
             
-        print(f"[📝 Action] Writing generated code to {TARGET_FILE}...")
+        print(f"[ Action] Writing generated code to {TARGET_FILE}...")
         with open(TARGET_FILE, "w", encoding="utf-8") as f:
             f.write(agent_code)
             
@@ -192,7 +192,7 @@ def run_self_healing_agent():
         test_passed, test_log = run_pytest()
         
         if test_passed:
-            print("\n[🎉 SUCCESS] All tests passed! Agent has successfully healed and written the perfect code!")
+            print("\n[ SUCCESS] All tests passed! Agent has successfully healed and written the perfect code!")
             print("--- FINAL CODE ---")
             print(agent_code)
             break
@@ -225,7 +225,7 @@ def run_self_healing_agent():
 
 ### VI. Production Perspective: স্যান্ডবক্সিং ও সিকিউরিটি পলিসি
 
-🏭 Production Reality
+ Production Reality
 
 প্রোডাকশন লেভেলে যখন তুমি গ্রাহকদের জন্য Code এডিটিং System ডেপ্লয় করবে, তখন তোমাকে নিচের কড়া সিকিউরিটি Architecture মেনে চলতে হবে:
 
@@ -276,7 +276,7 @@ try:
     # Timeout strictly locked at 3 seconds
     result = subprocess.run(["python", "infinite_trap.py"], capture_output=True, text=True, timeout=3.0)
 except subprocess.TimeoutExpired:
-    print("\n[🚨 SECURED] Process took more than 3 seconds. TimeoutExpired triggered!")
+    print("\n[ SECURED] Process took more than 3 seconds. TimeoutExpired triggered!")
     print("The infinite loop was successfully KILLED to save CPU resources!")
 ```
 

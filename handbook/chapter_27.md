@@ -1,12 +1,12 @@
 # Chapter 27: Blueprint 4 — Production AI SaaS with Rate Limiting & Usage Billing
 
----
+
 
 তুমি কি কখনো ভেবেছো — তোমার তৈরি করা দারুণ AI প্রোডাক্টটা যদি হুট করে ভাইরাল হয়ে যায়, আর সেখানে কোনো রেট লিমিট (Rate Limiting) বা সাবস্ক্রিপশন চার্জ বসানো না থাকে, তবে কী ঘটতে পারে? উত্তর হলো, কোনো দুষ্টু হ্যাকার বট দিয়ে প্রতি সেকেন্ডে লাখ লাখ টোকেনের কুয়েরি পাঠিয়ে মাত্র এক দিনেই তোমার হাজার হাজার ডলারের API বিল পুড়িয়ে তোমাকে দেউলিয়া বানিয়ে দেবে! AI দুনিয়ায় এটি অন্যতম বড় এক দুঃস্বপ্ন।
 
 তো চলো এই চ্যাপ্টারে AI কোডের সুরক্ষাকবচ আর মুনাফা অর্জনকারী বৈশ্বিক বিজনেসে রূপ দেওয়ার সম্পূর্ণ প্রোডাকশন ইনফ্রাস্ট্রাকচারটা নিজের হাতে ডিজাইন করে ফেলি। আমরা দেখবো কীভাবে অতিরিক্ত কুয়েরি বোমা ঠেকানোর জন্য Redis-ভিত্তিক Token Bucket রেট-লিমিটিং ব্যবহার করা যায়, আর কীভাবে Stripe Metered Billing ইন্টিগ্রেট করে গ্রাহকের ব্যবহার অনুযায়ী বিলিং সেট করা যায়। চলো AI কুয়েরি বোমা আর দেউলিয়া হওয়ার এক বাস্তব ট্র্যাজেডি দিয়ে শুরু করা যাক!
 
----
+
 
 ### ১. The Problem: AI কুয়েরি বোমা ও দেউলিয়া হওয়ার ট্র্যাজেডি
 
@@ -41,7 +41,7 @@ Purpose: Show business-grade SaaS billing architecture.
 └────────────────────────────────────────────────────────┘
                              │ (Allowed)
                              ▼
-                 🧠 [ Run AI Generation ] ──► Compute Tokens Used
+                  [ Run AI Generation ] ──► Compute Tokens Used
                              │
                              ▼
 ┌────────────────────────────────────────────────────────┐
@@ -158,9 +158,9 @@ def report_usage_to_stripe(stripe_sub_item_id, tokens_used):
             timestamp=int(time.time()),
             action="increment"
         )
-        print("[🎉 Stripe API] Usage reported successfully!")
+        print("[ Stripe API] Usage reported successfully!")
     except Exception as e:
-        print("[🔴 Stripe Error] Failed to report usage:", e)
+        print("[ Stripe Error] Failed to report usage:", e)
 
 # ৪. প্রোডাকশন SaaS API রিকোয়েস্ট হ্যান্ডলার Loop
 def process_saas_ai_request(user_id, stripe_sub_item_id, user_prompt):
@@ -188,7 +188,7 @@ def process_saas_ai_request(user_id, stripe_sub_item_id, user_prompt):
     prompt_tokens = response.usage.prompt_tokens
     completion_tokens = response.usage.completion_tokens
     total_tokens = response.usage.total_tokens
-    print(f"[📊 Token Log] Prompt: {prompt_tokens}, Completion: {completion_tokens}, Total: {total_tokens}")
+    print(f"[ Token Log] Prompt: {prompt_tokens}, Completion: {completion_tokens}, Total: {total_tokens}")
     
     # Step D: Report to Stripe Billing
     report_usage_to_stripe(stripe_sub_item_id, total_tokens)

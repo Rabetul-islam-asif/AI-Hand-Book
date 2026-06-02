@@ -1,6 +1,6 @@
 # Chapter 21: Harness Engineering — Constitutional Guides & Evaluator Sensors
 
----
+
 
 তোমার কাছে দুনিয়ার সবচেয়ে শক্তিশালী Engine আছে। কিন্তু সেই Engine-কে চাকার ওপর বসিয়ে ব্রেক ছাড়া, স্টিয়ারিং ছাড়া হাইওয়েতে ছেড়ে দিলে কী হবে? ক্র্যাশ। AI-এর ক্ষেত্রেও ঠিক তাই। মজার ব্যাপার হলো— ৬৫% এন্টারপ্রাইজ AI Project ফেইল করে Model-এর দোষে না, বরং তার চারপাশের Harness ভাঙা থাকায়।
 
@@ -8,7 +8,7 @@
 
 তো চলো দেখি কীভাবে `AGENTS.md` কনফিগার করতে হয়, Probabilistic বনাম Deterministic গার্ডরেইলের তফাত কী, আর Cascade Sensor Pipeline কীভাবে ডিজাইন করতে হয়। এটা বুঝলে পরের চ্যাপ্টারের Observability, Tracing আর প্রোডাকশন Blueprint সব ক্লিয়ার হয়ে যাবে।
 
----
+
 
 ### ১. Hook: শক্তিশালী ইঞ্জিনের রেসিং কার বনাম নিরাপত্তা বেষ্টনী
 
@@ -23,7 +23,7 @@ Purpose: Show that a production Agent is a complete car, not just an engine.
 
 ```
 Model Alone (High Risk Engine):
-[ Massive GPU Engine (LLM) ] ──► (No steering/breaks) ──► Crash / Wallet Drainage 💥
+[ Massive GPU Engine (LLM) ] ──► (No steering/breaks) ──► Crash / Wallet Drainage 
 
 Agent = Model + Harness (Flagship Safe Racing Car ✓):
 [ Host Client ] ──► [ Guides (AGENTS.md) ] ──► [ Model Engine ] ──► [ Sensors (Evals) ] ──► Safe Response
@@ -79,7 +79,7 @@ Purpose: Define the structural layers of a Harness.
 * **Computational Sensors:** লিন্টার, টাইপ চেকার বা ইউনিট Test। এগুলো **Deterministic** (১০০% পাস অথবা ফেইল, কোনো AI দ্বিধা নেই)।
 * **LLM-as-a-Judge:** চ্যাট টোন, সাবজেক্টিভ মিনিং বা বাংলায় কথার শালীনতা ইভালুয়েশন করার জন্য Custom লাইটওয়েট জাজ Model (যেমন: GPT-4o-mini) ডিক্লেয়ার করা।
 
-🧠 Remember
+ Remember
 
 **Probabilistic Guide (Constitutional instructions)** = Model রুলস ফলো করার চেষ্টা করে (সাধারণত ৭০% সময়)।  
 **Deterministic Sensor (Linter/Tests/ACL)** = System রুলস মানতে বাধ্য করে (১০০% সময়)।  
@@ -150,7 +150,7 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 
 ### ৬. Production Perspective: Sensor Pruning & Optimization
 
-🏭 Production Reality
+ Production Reality
 
 Inference-এর স্পিড বুস্ট করার জন্য প্রোডাকশন হারনেস ইঞ্জিনে **Sensor Pruning** নিশ্চিত করতে হয়।
 
@@ -225,7 +225,7 @@ def run_cascade_sensors(code_response, text_response):
         return False
     print("Step 3 Pass ✓\n")
     
-    print("[ALL SENSORS PASSED] Response is certified for Production! 🎉")
+    print("[ALL SENSORS PASSED] Response is certified for Production! ")
     return True
 
 # ৩. মক Test রান

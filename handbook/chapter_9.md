@@ -1,12 +1,12 @@
 # Chapter 9: The LLM Ecosystem — Decoder-only, Encoder-only & Encoder-Decoder
 
----
+
 
 ধরো তোমার ই-কমার্স সাইটে Customারদের কমেন্ট Positive না Negative সেটা বুঝতে হবে। তুমি কি এই কাজে GPT-4 API কল করবে? সেটা করলে প্রতি মাসে হাজার ডলার বিল আসবে। অথচ একটা ছোট্ট BERT Model একদম ফ্রিতে, ১ মিলি-সেকেন্ডে এই কাজটা করে দিতে পারে! সহজ কথায় — সব কাজের জন্য একই Model ব্যবহার করা চরম অপচয়।
 
 তো চলো দেখি AI-এর তিন ধরনের Architecture কীভাবে কাজ করে — Encoder-only (BERT) যে ইনফরমেশন খুঁজে বের করে, Decoder-only (GPT/Llama) যে গল্প লেখে, আর Encoder-Decoder (T5) যে অনুবাদ করে। সাথে দেখব Vision Model, Diffusion Model আর Audio Model-এর ভেতরের Mechanism। এটা আমাদের প্রথম ৮টি তাত্ত্বিক চ্যাপ্টারের ফাইনাল ম্যাপ — এরপর থেকে সরাসরি Vector Database, RAG, Fine-Tuning আর প্রোডাকশন Blueprint-এর কাজ শুরু!
 
----
+
 
 ### ১. Hook: তিন কারিগরের এক অদ্ভুত গল্প
 
