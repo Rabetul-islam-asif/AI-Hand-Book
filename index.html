@@ -1215,21 +1215,28 @@
                 ]
             },
             {
-                part: "Part 6 — AI Data Layer (Vector Data)",
+                part: "Part 6 — Prompt Engineering (প্রম্পট ইঞ্জিনিয়ারিং)",
+                chapters: [
+                    { num: 29, title: "Prompt Engineering Fundamentals" },
+                    { num: 30, title: "Advanced Prompt Engineering" }
+                ]
+            },
+            {
+                part: "Part 7 — AI Data Layer (Vector Data)",
                 chapters: [
                     { num: 11, title: "Vector & Distance Metrics" },
                     { num: 12, title: "Vector Databases & Indexing" }
                 ]
             },
             {
-                part: "Part 7 — RAG (Retrieval Augmented Generation)",
+                part: "Part 8 — RAG (Retrieval Augmented Generation)",
                 chapters: [
                     { num: 13, title: "RAG Fundamentals" },
                     { num: 14, title: "Advanced Retrieval & Hybrid Search" }
                 ]
             },
             {
-                part: "Part 8 — Fine-Tuning (Model Fine-Tuning)",
+                part: "Part 9 — Fine-Tuning (Model Fine-Tuning)",
                 chapters: [
                     { num: 15, title: "SFT & Dataset Template" },
                     { num: 16, title: "PEFT (LoRA & QLoRA)" },
@@ -1237,7 +1244,7 @@
                 ]
             },
             {
-                part: "Part 9 — Agentic AI & Tool Calling (এজেন্ট)",
+                part: "Part 10 — Agentic AI & Tool Calling (এজেন্ট)",
                 chapters: [
                     { num: 18, title: "AI Agents & ReAct" },
                     { num: 19, title: "Tool Calling Contracts" },
@@ -1245,7 +1252,7 @@
                 ]
             },
             {
-                part: "Part 10 — Production AI (প্রোডাকশন-গ্রেড)",
+                part: "Part 11 — Production AI (প্রোডাকশন-গ্রেড)",
                 chapters: [
                     { num: 21, title: "Constitutional Safety Harness" },
                     { num: 22, title: "Observability & Tracing" },
@@ -1253,7 +1260,7 @@
                 ]
             },
             {
-                part: "Part 11 — Building Real AI Products (বাস্তব Blueprint)",
+                part: "Part 12 — Building Real AI Products (বাস্তব Blueprint)",
                 chapters: [
                     { num: 24, title: "Blueprint 1: Multi-Session Memory" },
                     { num: 25, title: "Blueprint 2: Enterprise PDF Search" },
@@ -1262,12 +1269,20 @@
                 ]
             },
             {
-                part: "Part 12 — AI Career Roadmap (ক্যারিয়ার গাইড)",
+                part: "Part 13 — AI Career Roadmap (ক্যারিয়ার গাইড)",
                 chapters: [
                     { num: 28, title: "Transitioning to an AI Architect" }
                 ]
             }
         ];
+
+        // Flat array of chapters in logical reading order
+        const flatChapters = [];
+        syllabus.forEach(part => {
+            part.chapters.forEach(ch => {
+                flatChapters.push(ch);
+            });
+        });
 
         let currentChapterNum = 1;
         let isLight = false; // Restore default Dark Mode (#0F0F12 page background)!
@@ -1651,14 +1666,9 @@
                 const navDiv = document.createElement("div");
                 navDiv.className = "chapter-navigation";
                 
-                let prevCh = null;
-                let nextCh = null;
-                syllabus.forEach(part => {
-                    part.chapters.forEach(ch => {
-                        if (ch.num === chNum - 1) prevCh = ch;
-                        if (ch.num === chNum + 1) nextCh = ch;
-                    });
-                });
+                const currentIndex = flatChapters.findIndex(ch => ch.num === chNum);
+                const prevCh = currentIndex > 0 ? flatChapters[currentIndex - 1] : null;
+                const nextCh = currentIndex < flatChapters.length - 1 ? flatChapters[currentIndex + 1] : null;
                 
                 let prevBtnHtml = "";
                 if (prevCh) {
@@ -1778,7 +1788,8 @@
             `;
             
             let matches = [];
-            for (let i = 1; i <= 28; i++) {
+            const chapterNumsToSearch = flatChapters.map(ch => ch.num);
+            for (let i of chapterNumsToSearch) {
                 try {
                     const resp = await fetch(`/handbook/chapter_${i}.md`);
                     if (resp.ok) {
@@ -1922,13 +1933,14 @@
                 return;
             }
             
+            const currentIndex = flatChapters.findIndex(ch => ch.num === currentChapterNum);
             if (e.key === "ArrowLeft") {
-                if (currentChapterNum > 1) {
-                    loadChapter(currentChapterNum - 1);
+                if (currentIndex > 0) {
+                    loadChapter(flatChapters[currentIndex - 1].num);
                 }
             } else if (e.key === "ArrowRight") {
-                if (currentChapterNum < 28) {
-                    loadChapter(currentChapterNum + 1);
+                if (currentIndex < flatChapters.length - 1) {
+                    loadChapter(flatChapters[currentIndex + 1].num);
                 }
             }
         });
@@ -1959,7 +1971,7 @@
 
         function updateSidebarProgress() {
             const completed = getCompletedChapters();
-            const total = 28;
+            const total = flatChapters.length;
             const percentage = Math.round((completed.length / total) * 100);
             
             const progressText = document.getElementById("progressText");
