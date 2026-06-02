@@ -458,10 +458,14 @@ Math বা Reasoning-এর ভুল কমে যায়।
 
 ## ১২. What's Next?
 
-Reasoning Model-এর জগৎটা আমরা বুঝে ফেললাম।
+Reasoning Model-এর চমৎকার জগৎটা আমরা বুঝে ফেললাম।
 
-পরের Chapter-এ আমরা ঢুকছি AI-এর Data Layer-এ — **Embeddings & Vector Mathematics**।
+পরবর্তী চ্যাপ্টারে আমরা শিখবো কীভাবে এই শক্তিশালী লার্জ ল্যাঙ্গুয়েজ মডেলগুলোকে সঠিক নির্দেশনা দিয়ে তাদের সর্বোচ্চ পারফরম্যান্স আদায় করা যায়।
 
-সেখানে দেখবো Cosine Similarity, Dot Product আর Geometric Angle কীভাবে Search Engine-কে Guide করে।
+আমরা প্রবেশ করছি প্রম্পট ইঞ্জিনিয়ারিংয়ের দুনিয়ায়!
+
+**Chapter 29: Prompt Engineering Fundamentals — Zero-Shot, Few-Shot & Persona Prompting।**
+
+সেখানে দেখবো কীভাবে সামান্য ইনস্ট্রাকশন আর উদাহরণ বদলে দিয়ে মডেলের রেসপন্স নিখুঁত করা যায়।
 
 **Chapter 10 শেষ।**
