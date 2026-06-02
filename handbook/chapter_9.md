@@ -32,7 +32,6 @@ Encoder-Decoder (T5 - Translation Seq2Seq):
 [ Input Sequence ] ───► [ Encoder Block ] ───► [ Latent States ] ───► [ Decoder Block ] ───► [ Output Sequence ]
 ```
 
----
 
 ### ২. Core Concepts: Model পরিবারের ভেতরের কাজ
 
@@ -61,7 +60,6 @@ Encoder-Decoder (T5 - Translation Seq2Seq):
 ##### ৩. Audio & Speech Models (যেমন: Whisper)
 * **Mechanism:** এরা র অডিও ফ্রিকোয়েন্সিকে Spectrogram ইমেজে convert করে সিকোয়েন্স টু সিকোয়েন্স Transformer দিয়ে সরাসরি র টেক্সট Predict করে।
 
----
 
 ### ৩. Visual Explanation: ভিশন Language Model-এর প্রজেকশন পাইপলাইন
 
@@ -77,7 +75,6 @@ Encoder-Decoder (T5 - Translation Seq2Seq):
                             "এটি একটি সুন্দর বিড়াল..."
 ```
 
----
 
 ### ৪. Real World Example: সেন্টিমেন্ট Classifier ডিউটি
 
@@ -85,7 +82,6 @@ Encoder-Decoder (T5 - Translation Seq2Seq):
 * **ভুল সিদ্ধান্ত:** প্রতি সেকেন্ডে প্রতিটি Customার কমেন্টের সেন্টিমেন্ট (Positive / Negative) বের করার জন্য OpenAI-এর GPT-4 API কল করা। এতে তোমার Latency ও বিলিং আকাশে উঠবে।
 * **সঠিক সিদ্ধান্ত:** Hugging Face থেকে একটি ১০০ মিলিয়ন Parameter-এর ফ্রী **DeBERTa (Encoder-only)** Model ডাউনলোড করে লোকাল সার্ভারে Deploy করা। এটি ১ মিলি-সেকেন্ডে ফ্রীতে ১০০% perfectly সেন্টিমেন্ট ক্লাসিফাই করে ডাটাবেসে সেভ করবে।
 
----
 
 ### ৫. Developer Perspective: Hugging Face Transformers Library ব্যবহার
 
@@ -116,7 +112,6 @@ detector = pipeline("image-classification", model="google/vit-base-patch16-224")
 # print("Detected Object:", res_image)
 ```
 
----
 
 ### VI. Production Perspective: Serving Frameworks (vLLM vs. Ollama)
 
@@ -128,7 +123,6 @@ detector = pipeline("image-classification", model="google/vit-base-patch16-224")
 * **vLLM (Virtual LLM):** এটিতে **PagedAttention** Mechanism রয়েছে। এটি অপারেটিং সিস্টেমের ভার্চুয়াল Memory-এর মতো Model-এর KV-Cache Memory পেজ আকারে এলোকেট করে, যা GPU সার্ভিং স্পীড ও Concurrency ১০ গুণ বুস্ট করে।
 * **Ollama / llama.cpp:** CPU বা Personaল ম্যাকবুক/উইন্ডোজ Computeারে quantized GGUF Model লোকালি ফাস্ট রান করার জন্য এটিই বেস্ট চয়েস।
 
----
 
 ### VII. Common Mistakes
 
@@ -138,7 +132,6 @@ detector = pipeline("image-classification", model="google/vit-base-patch16-224")
 
 **বাস্তবতা:** একে বলে **Lost in the Middle** ফেনোমেনন। গবেষণায় দেখা গেছে, Decoder মডেলগুলো বিশাল Context-এর শুরুর অংশ এবং শেষের অংশ খুব ভালো মনে রাখতে পারে, কিন্তু Context-এর ঠিক মাঝখানের কোনো ইনফরমেশন সে মিস বা ফিল্টার আউট করে ফেলে। তাই প্রোডাকশনে বড় Document-এর ক্ষেত্রে অন্ধভাবে Context ফিড না করে RAG এবং রি-র‍্যাঙ্কিং করাই বুদ্ধিমানের কাজ।
 
----
 
 ### VIII. Mental Model: তিন লেখকের এডিটিং প্যানেল
 
@@ -146,7 +139,6 @@ detector = pipeline("image-classification", model="google/vit-base-patch16-224")
 
 **"Encoder-only হলো তোমার কড়া প্রুফ-রিডার যে খাতার সব লেখা একসাথে দেখে বানান ভুল ধরে। Decoder-only হলো সেই কবি যিনি খাতার ডান পৃষ্ঠা হাত দিয়ে ঢেকে রেখে বারবার বাম থেকে ডানে সুন্দর কবিতা লিখে যাও। আর Encoder-Decoder হলো দক্ষ দোভাষী যিনি পুরো বাক্য মন দিয়ে শুনে তার খসড়া ট্রান্সলেশন Produce করো।"**
 
----
 
 ### IX. Mini Project: স্ক্র্যাচ নেক্সট Token প্রবাবিলিটি জেনারেটর
 
@@ -178,7 +170,6 @@ next_token_id = np.argmax(probabilities)
 print(f"\nPredicted next token: '{vocab[next_token_id]}' with {probabilities[next_token_id]*100:.2f}% confidence!")
 ```
 
----
 
 ### X. Interview Questions
 
@@ -194,14 +185,12 @@ print(f"\nPredicted next token: '{vocab[next_token_id]}' with {probabilities[nex
 3. **প্রশ্ন:** লার্জ Language মডেলে "Lost in the Middle" সমস্যাটি কী এবং এটি কীভাবে RAG সিস্টেমকে প্রভাবিত করে?
    * **উত্তর:** Lost in the Middle সমস্যাটি হলো—Model-এর Context Window যতই বড় হোক না কেন, সে Input করা বিশাল Document-এর একদম মাঝখানের তথ্যগুলো সহজে Attention-এ রিড করতে পারে না, শুরুতে ও শেষে মনোযোগ বেশি থাকে। RAG সিস্টেমে আমরা যখন প্রচুর Document ডাম্প করি, তখন প্রয়োজনীয় উত্তরটি যদি Document-এর মাঝখানে পড়ে যায়, Model Hallucinate করতে পারে। এই সমস্যা দূর করতে Cohere বা BGE Re-ranker Model ব্যবহার করে সেরা ৫টি রিলেভেন্ট Document একদম শুরুতে পুশ করতে হয়।
 
----
 
 ### XI. Chapter Summary
 * **BERT (Encoder-only)** গোয়েন্দার মতো ইনফরমেশন রিড ও ক্লাসিফাই করে।
 * **GPT (Decoder-only)** লেখকের মতো Autoregressive স্টাইলে টেক্সট জেনারেট করে।
 * **vLLM** এবং **Ollama** প্রোডাকশন Model সার্ভিংয়ের আধুনিক গোল্ড Standard।
 
----
 
 ### XII. What's Next
 আমরা প্রথম ৯টি চ্যাপ্টারের মাধ্যমে Machine Learning, Deep Learning, Neural Network, Backpropagation, Transformer এবং লার্জ Language Model Ecosystem-এর তত্ত্ব ও গণিতের সমস্ত গ্যাপ বা ফাউন্ডেশন ভালোভাবে জয় করে ফেলেছি! 
@@ -210,5 +199,4 @@ print(f"\nPredicted next token: '{vocab[next_token_id]}' with {probabilities[nex
 
 এখন আমরা সরাসরি মুভ করবো আমাদের পরবর্তী অ্যাক্টিভ ফেজ— মানে **Part 11 — Building Real AI Products এর বাস্তব ৪টি flagship blueprints বা Chapter 24 থেকে Chapter 28** এর বিশাল Practical Coding সেশনে। চলো সোজাসুজি AI প্রোডাক্ট ডেভেলপমেন্টের দুনিয়ায় ঝাঁপিয়ে পড়ি!
 
----
 **Chapter 9 শেষ।**

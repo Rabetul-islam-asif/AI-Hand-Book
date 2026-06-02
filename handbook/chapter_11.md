@@ -41,7 +41,6 @@ Purpose: Provide a strong visual mental model for high-dimensional vector spaces
 হুবহু `"Queen"` এর পজিশনে! 
 এটি কোনো ম্যাজিক বা Language লজিক Code নয়; এটি স্রেফ রিয়েল Mathematical **Vector Coordinate Addition and Subtraction**। Embeddings মূলত এই ত্রিমাত্রিক ঘরটিকে ১৫৩৬ বা ৪০৯৬টি ডাইমেনশনের একটি হাইপার-স্পেসে (Hyper-space) convert করে।
 
----
 
 ### ২. Core Concepts: Vector দূরত্ব পরিমাপের ত্রয়ী Equation
 
@@ -87,7 +86,6 @@ $$\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^{n} a_i b_i = \|\mathbf{a}\| \|\mathb
 Cosine Similarity = Dot Product।  
 এটি প্রোডাকশন সার্ভারে মেমরি ও GPU Computational খরচ প্রায় ৫০% save করে।
 
----
 
 ### ৩. Real World Example: স্পটিফাই মিউজিক রেকমেন্ডেশন Engine
 
@@ -97,7 +95,6 @@ Cosine Similarity = Dot Product।
 2. **Normalized DB:** স্পটিফাই তাদের কোটি কোটি গানের Embeddings Vector ডাটাবেসে নরমালাইজড করে সেভ রাখে।
 3. **Dot Product Search:** তুমি যে গানটি শুনছেন, তার Vector-এর সাথে Database-এর অন্য সব গানের ডট প্রোডাক্ট মেপে চোখের পলকে টপ ১০টি ক্লোজ রিলেটেড গান সাজিয়ে তোমার প্লেলিস্টে অটো-পুশ করে দেয়।
 
----
 
 ### ৪. Developer Perspective: pgvector এবং কোয়েরি মেট্রিক সিলেকশন
 
@@ -126,7 +123,6 @@ CREATE INDEX ON document_embeddings USING hnsw (embedding vector_l2_ops);
 CREATE INDEX ON document_embeddings USING hnsw (embedding vector_ip_ops);
 ```
 
----
 
 ### ৫. Production Perspective: GPU Normalization ট্রিক
 
@@ -137,7 +133,6 @@ CREATE INDEX ON document_embeddings USING hnsw (embedding vector_ip_ops);
 * **কেন অ্যান্টি-Pattern:** কোসাইন সিমিলারিটির Equationে থাকা স্কয়ার রুট ($\sqrt{x}$) এবং ডিভিশন GPU Computeকে খুব স্লো করে দেয়।
 * **প্রোডাকশন ট্রিক:** Data যখন ইনজেস্ট হয়, তখনই Vectorগুলোকে আগে থেকেই নরমালাইজড (L2 Normalization) করে ডাটাবেসে সেভ করা হয়। ফলে Inference বা কুয়্যারির সময় GPU শুধুমাত্র খুব fast **Dot Product** রান করে কোসাইন সিমিলারিটির সমমানের রেজাল্ট মিলি-সেকেন্ডে Produce করে।
 
----
 
 ### ৬. Common Mistakes
 
@@ -147,7 +142,6 @@ CREATE INDEX ON document_embeddings USING hnsw (embedding vector_ip_ops);
 
 **বাস্তবতা:** যদি তোমার Document-এর সাইজ আন-ইকুয়াল হয় (যেমন: একটি Paragraph অনেক বড় এবং আরেকটি লাইন খুব ছোট), তবে ইউক্লিডিয়ান ডিস্ট্যান্স বড় প্যারাগ্রাফের Vectorকে দূরে ঠেলে দেবে (ম্যাগনিচিউড এফেক্ট)। এই ক্ষেত্রে কোণের ওরিয়েন্টেশন বা **Cosine Similarity** ব্যবহার করা বাধ্যতামূলক।
 
----
 
 ### ৭. Mental Model: টর্চের আলো ও ছায়া
 
@@ -157,7 +151,6 @@ Vector দূরত্ব মেট্রিকের মেন্টাল Mode
 * **Cosine Similarity = দুই টর্চের আলোর কোণ:** টর্চের আলোর তীব্রতা (Magnitude) যতই কম-বেশি হোক না কেন, তাদের ছড়ানোর কোণ যদি একই দিকে হয়, তবে তারা সমমানের অর্থ বহন করে।
 * **Dot Product = প্রজেকশন ব্রাইটনেস:** এটি টর্চের কোণ এবং তীব্রতা দুটিই একসাথে মাপে। টর্চ কাছে এনে তীব্রতা বাড়ালে ডট প্রোডাক্ট Value রকেটের গতিতে বাড়ে।
 
----
 
 ### ৮. Mini Project: পাইথনে কোসাইন সিমিলারিটি বনাম ইউক্লিডিয়ান ডিস্ট্যান্স Classifier
 
@@ -204,7 +197,6 @@ for name, vec in database.items():
 * **Why it works:** `Payment Success` Vector-এর সাথে কোসাইন স্কোর সর্বোচ্চ ($0.9995$) এবং L2 দূরত্ব সর্বনিম্ন ($0.2121$) হওয়ায় এটি বেস্ট ম্যাচ হিসেবে নির্বাচিত হয়েছে।
 * **When to use:** Custom Vector সিমিলারিটি Classifier Architect করার জন্য।
 
----
 
 ### ৯. Interview Questions
 
@@ -220,7 +212,6 @@ for name, vec in database.items():
 3. **প্রশ্ন:** কোন ধরণের Data Distributionে ডট প্রোডাক্ট কোসাইন সিমিলারিটির চেয়ে পারফরম্যান্স ডিগ্রেড করবে এবং এর কারণ কী?
    * **উত্তর:** যদি তোমার Data Vector-এর দৈর্ঘ্য বা ম্যাগনিচিউড আন-বাউন্ডেড বা বিশাল তারতম্যপূর্ণ হয় (যেমন: ছোট Paragraph বনাম পুরো উইকিপিডিয়া পেজ), তবে ডট প্রোডাক্ট বড় ডকের Vectorকে হিউজ ম্যাগনিচিউড স্কোরের কারণে ভুল ম্যাচ হিসেবে বুস্ট করবে। এই ক্ষেত্রে ম্যাগনিচিউড-নিউট্রাল কোসাইন সিমিলারিটি ব্যবহার করা আবশ্যক।
 
----
 
 ### ১০. Chapter Summary
 * **Vector Embeddings** শব্দকে high-dimensional geometric স্থানাঙ্কে convert করে।
@@ -228,10 +219,8 @@ for name, vec in database.items():
 * **L2 Distance** পরম মান মেপে Image বা ফেসিয়াল ডিটেকশনে সেরা।
 * প্রোডাকশন সিস্টেমে Latency কমাতে **L2 Normalization + Dot Product** রুল ব্যবহার করা গোল্ড Standard।
 
----
 
 ### ১১. What's Next
 দারুণ! আমরা Vector জ্যামিতির কোর ম্যাথমেটিক্স শেষ করে ফেলেছি। পরের chapter-এ আমরা এই Vectorগুলোকে মিলিয়ন স্কেলে মেমোরিতে ধরে রাখার Engine নিয়ে আলোচনা করব: **Chapter 12: Vector Databases — The AI Memory Engine**। pgvector, Chroma, HNSW এবং IVF-FLAT Indexিং কীভাবে কোটি কোটি Vector-এর মিলি-সেকেন্ডে Search কমপ্লিট করে, তা আমরা Diagramসহ গভীরভাবে শিখব।
 
----
 **Chapter 11 শেষ।**

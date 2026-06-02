@@ -37,7 +37,6 @@ Tool C ──┘
 
 Model Context প্রোটোকল (MCP) হলো AI-এর সেই **USB-C** Standard। এটি একবার Data বা টুলস এক্সপোজ করে এবং যেকোনো এলএলএম হোস্ট ও ক্লায়েন্ট সেই Data রিড ও প্রসেস করতে পারে।
 
----
 
 ### ২. Core Concepts: এমসিপি প্রোটোকলের তিন স্তম্ভ
 
@@ -75,7 +74,6 @@ Host (Client: Cursor / Claude Desktop)
 **MCP is Open Source!**  
 অ্যানথ্রপিক এটি তৈরি করলেও এটি সম্পূর্ণ ওপেন Standard। Gemini বা জিপিটি ডেভেলপাররাও এই একই প্রোটোকল ফ্রেমওয়ার্ক ব্যবহার করে Custom আরএজি ও এজেন্ট কোডবেস Integrate করতে পারো।
 
----
 
 ### ৩. Real World Example: Cursor-এর গ্লোবাল টুল Integration
 
@@ -85,7 +83,6 @@ Cursor বা Claude Desktop-এ যখন তুমি Custom Feature File Sear
 2. **Directory Map:** এমসিপি সার্ভারটি উইন্ডোজ ওএস-এর পাথ রিড করে Resource হিসেবে Vector ম্যাপ হোস্ট ক্লায়েন্টকে পাস করে।
 3. **Auto Search:** AI হোস্টটি সেই Resource এনালাইসিস করে সরাসরি তোমার Computeারের ফাইলে Code চেঞ্জ ও ব্যাশ Test রান করতে পারে, যা আগে প্রতিটি মডেলে আলাদা স্ক্রিপ্ট ছাড়া অসম্ভব ছিল।
 
----
 
 ### ৪. Developer Perspective: পাইথনে Custom এমসিপি Server ডিজাইন
 
@@ -124,7 +121,6 @@ if __name__ == "__main__":
     mcp_server.run()
 ```
 
----
 
 ### ৫. Production Perspective: JSON-RPC over stdio Security
 
@@ -135,7 +131,6 @@ if __name__ == "__main__":
 * **The Security Threat:** যেহেতু এমসিপি Server সাধারণত `stdio` (Standard Input/Output) পাইপ ব্যবহার করে হোস্টের রুট পারমিশনে উইন্ডোজ ওএস কমান্ড বা ব্যাশ রান করে, তাই একটি ক্ষতিকর AI Prompt জেইলব্রেকের মাধ্যমে এমসিপি Server হ্যাক করে তোমার পুরো ওএস ড্যামেজ করে দিতে পারে।
 * **সমাধান:** প্রোডাকশনে ডিরেক্ট লোকাল হোস্ট রান না করে এমসিপি সার্ভারকে সর্বদা আইসোলেটেড **Docker Container**-এ রান করানো হয় এবং শুধুমাত্র স্পেসিফিক ডিরেক্টরি পারমিশন ভলিউম মাউন্ট করে এক্সেস দেওয়া হয়, যা ওএস-এর নিরাপত্তা ১০০% প্রটেক্ট করে।
 
----
 
 ### ৬. Common Mistakes
 
@@ -145,7 +140,6 @@ if __name__ == "__main__":
 
 **বাস্তবতা:** এমসিপি Server সম্পূর্ণ স্বায়ত্তশাসিত। ক্লায়েন্ট বা হোস্ট এডিটর (যেমন: Cursor) যখন তোমার ওএস-এর `mcpConfig.json` রিড করে রান হয়, সে নিজে থেকেই সার্ভারকে কুয়্যারি করে তার এভেলেবল টুলস অটো-ডিসকভার (Auto-discover) করে নেয়। তোমার AI Code ফাইলে কোনো ম্যানুয়াল Integration করতে হয় না।
 
----
 
 ### ৭. Mental Model: ইউএসবি হাব ও মাউস-কিবোর্ড
 
@@ -169,7 +163,6 @@ Purpose: Create an intuitive map for MCP dynamic discovery.
 * **The Hub:** তুমি একটি ইউনিভার্সাল ইউএসবি হাব (MCP Server) Computeারে কানেক্ট করলে। 
 * **The Discovery:** এখন তুমি হাবে মাউস, কিবোর্ড বা প্রিন্টার (Tools/Resources) যাই প্লাগ-ইন করো না কেন, Computeার সাথে সাথে অটো-ডিটেক্ট করে সেগুলো ড্রাইভার ছাড়া চালাতে পারে। তোমাকে Computeারের মাদারবোর্ড চেঞ্জ করতে হয় না।
 
----
 
 ### ৮. Mini Project: পাইথনে Custom JSON-RPC ২.০ এমসিপি কমিউনিকেশন Simulateর
 
@@ -234,7 +227,6 @@ print(res_call)
 * **Why it works:** JSON-RPC Standard মেনে ডিক্লেয়ার্ড মেথড ও আইডি বাইন্ডিং ভালোভাবে ভৌত প্রোটোকল Simulate করেছে।
 * **When to use:** Custom এমসিপি প্রোটোকল ও স্টুডিও পাইপলাইন স্ক্র্যাচ থেকে ডেভেলপ ও Debug করার জন্য।
 
----
 
 ### ৯. Interview Questions
 
@@ -250,7 +242,6 @@ print(res_call)
 3. **প্রশ্ন:** এন্টারপ্রাইজ প্রোডাকশনে stdio-ভিত্তিক MCP Server Deploy করার প্রধান সিকিউরিটি থ্রেট কী এবং এর Standard মিটিগেশন Strategy ব্যাখ্যা করো।
    * **উত্তর:** প্রধান থ্রেট হলো Prompt ইনজেকশন অ্যাটাকের মাধ্যমে হ্যাকার হোস্ট ক্লায়েন্টকে হ্যাক করে stdio পাইপ ব্যবহার করে ওএস রুট কমান্ড রান করিয়ে Server Data ক্র্যাশ করতে পারে। এর মিটিগেশন হলো এমসিপি সার্ভারকে ডিরেক্ট লোকাল ওএস-এ রান না করে আইসোলেটেড **Docker Sandbox**-এ রান করানো এবং শুধুমাত্র রিড-অনলি ভলিউম মাউন্ট করে পারমিশন লিমিট করা।
 
----
 
 ### ১০. Chapter Summary
 * **MCP** হলো AI টুল ও Data Integrationের ওপেন-Standard ইউনিভার্সাল চার্জার (USB-C)।
@@ -258,10 +249,8 @@ print(res_call)
 * **JSON-RPC 2.0** প্রোটোকল stdio পাইপের সাহায্যে হোস্ট ও Server হ্যান্ডশেক সম্পন্ন করে।
 * প্রোডাকশন লেভেলে Data সেফটি নিশ্চিত করতে **Docker Isolation** ব্যবহার করা জরুরি।
 
----
 
 ### ১১. What's Next
 দারুণ! আমরা ভালোভাবে পার্ট ৯ এর Agentic AI, টুল কলিং ও ইউনিভার্সাল এমসিপি প্রোটোকলের রোমাঞ্চকর chapter সম্পন্ন করেছি। পরবর্তী চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে AI প্রোডাকশন Engineerিংয়ের সবচেয়ে অ্যাডভান্সড chapter: **Part 10 — Production AI Systems এর Chapter 21: Harness Engineering — Constitutional Guides & Evaluator Sensors**। কীভাবে সিনিয়র AI Engineerরা AI এজেন্টের চারপাশে কড়া লিন্টার, `AGENTS.md` ও Validation সেন্সর Architect করো, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 20 শেষ।**

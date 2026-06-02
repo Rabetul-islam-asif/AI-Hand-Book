@@ -35,7 +35,6 @@ Inputs      Weights
   Bias ─────────────┘
 ```
 
----
 
 ### ২. Core Concepts: নিউরনের ভেতরের Equation
 
@@ -74,7 +73,6 @@ Bias হলো একটি Constant বা constant যা Linear লাইন�
 * **রেঞ্জ:** $0$ থেকে $1$ (এবং সব Output-এর sum ১.০)।
 * **কখন ব্যবহার করবে:** মাল্টি-ক্লাস Classification বা এলএলএমের নেক্সট Token Prediction-এর last Output লেয়ারে।
 
----
 
 ### ৩. Visual Explanation: Activation কার্ভের geometric shape
 
@@ -89,7 +87,6 @@ Sigmoid (0 to 1):             ReLU (Max 0, X):             tanh (-1 to 1):
                                    0.0                           │'
 ```
 
----
 
 ### ৪. Real World Example: স্মার্টওয়াচের স্লিপ ডিটেকশন
 
@@ -97,7 +94,6 @@ Sigmoid (0 to 1):             ReLU (Max 0, X):             tanh (-1 to 1):
 * ঘুমন্ত অবস্থায় হার্ট রেটের Weight অনেক হাই থাকে।
 * যদি সব Input-এর product বায়াসের বাধা পার করে Activation Function (Sigmoid) পার করে এবং এর মান `০.৮৫` দেখায়, তবে স্মার্টওয়াচ ডিসিশন নেয় যে তুমি ঘুমিয়ে গেছো এবং স্ক্রিনের লাইট অফ করে দেয়।
 
----
 
 ### ৫. Developer Perspective: NumPy দিয়ে Custom Activation Function Library Coding
 
@@ -143,7 +139,6 @@ print("Sigmoid Output:", sigmoid(test_input))
 print("Softmax Probabilities:", softmax(test_input))
 ```
 
----
 
 ### ৬. Production Perspective: Dying ReLU রোগ ও তার ভ্যাকসিন
 
@@ -157,7 +152,6 @@ print("Softmax Probabilities:", softmax(test_input))
 * **Leaky ReLU:** $f(z) = max(0.01z, z)$। এটি Negative ইনপুটে পুরোপুরি শূন্য না দিয়ে হালকা একটু সিগন্যাল পাস হতে দেয়, ফলে নিউরন কখনো পুরোপুরি মারা যায় না।
 * **GELU:** আধুনিক এলএলএম ও Transformer (যেমন GPT-4, Llama) মডেলে GELU-কে Standard হিডেন Activation হিসেবে ব্যবহার করা হয়।
 
----
 
 ### ৭. Common Mistakes
 
@@ -167,7 +161,6 @@ print("Softmax Probabilities:", softmax(test_input))
 
 **বাস্তবতা:** যদি মডেলকে ৩ বা ততোধিক ভিন্ন ক্লাসের মধ্যে একটি বেছে নিতে বলা হয় (যেমন ফলের ছবি দেখে আম, জাম নাকি কাঁঠাল তা বলা), তবে অবশ্যই last লেয়ারে **Softmax** Activation ব্যবহার করতে হবে। Sigmoid বা ReLU ব্যবহার করলে Output গুলোর sum ১.০ হবে না, ফলে Probability হিসেব করা যাবে না।
 
----
 
 ### ৮. Mental Model: ক্যাসিনোর সিকিউরিটি গার্ড
 
@@ -175,7 +168,6 @@ Activation Function-এর মেন্টাল Model:
 
 **"Activation Function হলো ক্লাবের কড়া সিকিউরিটি গার্ড। সে Input সিগন্যালের Weight চেক করে। যদি Input তার পছন্দসই Value পার করে, তবে সে গেট খুলে সিগন্যাল ভেতরে পাঠিয়ে দেয়। আর যদি Input ক্রাইটেরিয়া ফিল না করে, সে সিগন্যালকে গেটেই ব্লক করে দেয়।"**
 
----
 
 ### ৯. Mini Project: NumPy দিয়ে স্ক্র্যাচ একক নিউরন Forward পাস
 
@@ -206,7 +198,6 @@ print(f"Linear Sum (Z): {Z:.4f}")
 print(f"Neuron Final Output: {Out:.4f}")
 ```
 
----
 
 ### ১০. Interview Questions
 
@@ -222,17 +213,14 @@ print(f"Neuron Final Output: {Out:.4f}")
 3. **প্রশ্ন:** "Dying ReLU" রোগটি কী এবং কীভাবে Leaky ReLU বা GELU এটি সমাধান করে?
    * **উত্তর:** ReLU এর Input Negative হলে তার Output ও গ্র্যাডিয়েন্ট শূন্য হয়ে যায়, যার ফলে নিউরনটি forever ডেড হয়ে যায় এবং কোনো Weight আপডেট করতে পারে না। Leaky ReLU Negative ইনপুটে জিরো না দিয়ে খুব ছোট স্লোপ ($0.01 \cdot z$) দেয়, যা Backpropagation-এ সিগন্যাল পাস চালু রাখে এবং নিউরনকে alive রাখে।
 
----
 
 ### ১১. Chapter Summary
 * **Artificial Neuron** হলো Input-এর সাথে Weight-এর product ও বায়াসের sumের total।
 * **Activation Function** নন-লিনিয়ারিটি যোগ করে জটিল Pattern লার্নিং সম্ভব করে।
 * **ReLU** হিডেন লেয়ারের সবচেয়ে popular, এবং **Softmax** মাল্টি-ক্লাসের last লেয়ারের মূল ড্রাইভার।
 
----
 
 ### XII. What's Next
 আমরা ভালোভাবে Deep Learning-এর সবচেয়ে ছোট building block একক নিউরনের বুঝে ফেলেছি। পরের chapter-এ আমরা এই কোটি কোটি নিউরনকে লেয়ারে লেয়ারে সাজিয়ে এক বিশাল Neural Network দাঁড় করাবো এবং Backpropagation-এর চেইন রুল Math-এর বুঝবো: **Chapter 6: Deep Feedforward Networks & Backpropagation**। সেখানে আমরা আমাদের হ্যান্ডবুকের অন্যতম চ্যালেঞ্জিং Backpropagation Mechanism Practically NumPy স্ক্রিপ্ট দিয়ে সলভ করে Verify করবো।
 
----
 **Chapter 5 শেষ।**

@@ -35,7 +35,6 @@ Agent = Model + Harness (Flagship Safe Racing Car ✓):
 * **Model** হলো স্রেফ Engine (Token in, token out)।
 * **Harness** হলো ওরিজিনাল Code-এর চারপাশের নিরাপত্তা ও কন্ট্রোল বডি, যা তোমার প্রডাক্টটিকে প্রোডাকশন-রেডি করে।
 
----
 
 ### ২. Core Concepts: হারনেস Architecture-এর তিন স্তর
 
@@ -85,7 +84,6 @@ Purpose: Define the structural layers of a Harness.
 **Deterministic Sensor (Linter/Tests/ACL)** = System রুলস মানতে বাধ্য করে (১০০% সময়)।  
 নিরাপত্তা ও Data ইন্টিগ্রিটির জন্য ক্রুশিয়াল রুলস সবসময় **Deterministic Sensor** লেয়ারে Implement করা আবশ্যক।
 
----
 
 ### ৩. Visual Explanation: Validation Loop এবং Error ফিডব্যাক
 
@@ -106,7 +104,6 @@ Agent: "I added the feature, done!" ──► [ POST-SENSOR (Linter/tsc) ] ─�
 Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──► PASS ✓ ──► Final User Output
 ```
 
----
 
 ### ৪. Real World Example: Claude Code-এর বিল্ট-ইন হারনেস Engine
 
@@ -115,7 +112,6 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 1. **Constitutional Alignment:** এটি ওপেন হওয়ার সময় তোমার Project-এর `CLAUDE.md` এবং `AGENTS.md` রিড করে।
 2. **Deterministic Safety:** তুমি যখন Code চেঞ্জ করতে বলো, সে Code লিখে সেভ করে এবং ব্যাকগ্রাউন্ডে Automatically তোমার Project-এর `pnpm test` বা `npm run lint` সেন্সর রান করে। Test ফেইল করলে সে নিজে থেকেই Error ডিটেক্ট করে Code রি-রাইট করে ফিক্স করে।
 
----
 
 ### ৫. Developer Perspective: Project রুট `AGENTS.md` Configuration
 
@@ -146,7 +142,6 @@ Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──�
 - Lint check: `pnpm lint`
 ```
 
----
 
 ### ৬. Production Perspective: Sensor Pruning & Optimization
 
@@ -161,7 +156,6 @@ Inference-এর স্পিড বুস্ট করার জন্য প�
   3. সব পাস করলে final সাবজেক্টিভ চেক করতে সবচেয়ে দামি ও ধীরগতির **LLM-as-a-Judge** (<১ সেকেন্ড) রান করা।
   এর ফলে ফাস্ট ফেইলিউর অপ্টিমাইজড থাকে।
 
----
 
 ### ৭. Common Mistakes
 
@@ -171,7 +165,6 @@ Inference-এর স্পিড বুস্ট করার জন্য প�
 
 **বাস্তবতা:** Prompt Instruction হলো **Probabilistic** (প্রায়ই হ্যাকারদের Custom জেইলব্রেক Prompt-এর কাছে এটি হেরে যায়)। সিকিউরিটি-ক্রিটিক্যাল Data প্রটেক্ট করতে হলে Prompt-এর পাশাপাশি ব্যাকএন্ড কোডে **Deterministic Filter/ACL Sensor** দিয়ে রিকোয়েস্ট হার্ড ব্লক করা বাধ্যতামূলক।
 
----
 
 ### ৮. Mental Model: ফুটবল খেলার রেফারী ও বাউন্ডারি লাইন
 
@@ -182,7 +175,6 @@ Inference-এর স্পিড বুস্ট করার জন্য প�
 * **Sensors = রেফারি (The Judge):**
   রেফারি প্লেয়ারের মনের ভালো ইচ্ছা বোঝে না। প্লেয়ার যদি ফাউল করে বা বল লাইনের বাইরে মারেন, রেফারি সাথে সাথে বাঁশি বাজিয়ে খেলা থামিয়ে দেয় (Deterministic Action)। ভুল করলে রেফারি হলুদ কার্ড দেখিয়ে নিয়ম মানতে বাধ্য করে (Validation/Retry)।
 
----
 
 ### ৯. Mini Project: পাইথনে স্ক্র্যাচ থেকে একটি মাল্টি-স্টেপ ক্যাসকেড সেন্সর পাইপলাইন
 
@@ -242,7 +234,6 @@ run_cascade_sensors("print('Success')", "প্রিয় কাস্টম�
 * **Why it works:** সস্তা থেকে দামি (Cascade) অর্ডারিং নিশ্চিত করে Latency ও API কস্ট মিনিমাইজ করে সাকসেসফুল ফিল্টারিং সম্পন্ন করেছে।
 * **When to use:** AI এজেন্টের প্রোডাকশন গেটওয়ে ভ্যালিডেট করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -258,7 +249,6 @@ run_cascade_sensors("print('Success')", "প্রিয় কাস্টম�
 3. **প্রশ্ন:** প্রোডাকশনে Latency এবং Compute কস্ট অপ্টিমাইজ করতে ইভালুয়েশন সেন্সরগুলোর অর্ডারিং বা "Cascade Flow" কীভাবে ডিজাইন করা উচিত?
    * **উত্তর:** ক্যাসকেড ফ্লো-তে প্রথমে সবচেয়ে দ্রুত এবং সস্তা **Computational Sensor** (যেমন: Linter, Regex - <১ মিলি-সেকেন্ড) রান করতে হবে। সেটি পাস করলে সেকেন্ডারি **Unit Tests/tsc** (<৫ সেকেন্ড) এবং সবশেষে ডমিন্যান্ট চেক করতে সবচেয়ে দামি ও ধীরগতির **LLM-as-a-Judge** (<১ সেকেন্ড) রান করা উচিত। এতে শুরুর কোনো ধাপে Error ডিটেক্ট হলে দামি API কল এড়িয়ে ইনস্ট্যান্ট ফাস্ট ফেইলিউর অপ্টিমাইজড থাকে।
 
----
 
 ### ১১. Chapter Summary
 * **Harness Engineering** প্রোডাকশনে AI প্রডাক্টের নিরাপত্তা ও স্থায়িত্বের গোল্ড Standard।
@@ -266,10 +256,8 @@ run_cascade_sensors("print('Success')", "প্রিয় কাস্টম�
 * **Cascade Sensors** সস্তা থেকে দামি ক্রমানুসারে AI Output স্ক্যান করে Latency বাঁচায়।
 * প্রোডাকশন এন্টারপ্রাইজে ৬৫% AI ফেইলিউর স্রেফ **Harness Defect**-এর কারণে ঘটে।
 
----
 
 ### ১২. What's Next
 দারুণ! আমরা ভালোভাবে হারনেস Engineerিং ও নিরাপত্তা সেন্সরের কোর Architecture শেষ করে ফেলেছি। পরের chapter-এ আমরা এই প্রোডাকশন সিস্টেমের Window বা চোখের Mechanism নিয়ে আলোচনা করব: **Chapter 22: AI Observability & Monitoring**। ল্যাংস্মিথ (LangSmith), ফিনিক্স এবং ওপেন-টেলিমেন্ট্রি কীভাবে Agentic Loop-এর প্রতি মিলি-সেকেন্ডের API খরচ ও Latency ট্র্যাক করে, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 21 শেষ।**

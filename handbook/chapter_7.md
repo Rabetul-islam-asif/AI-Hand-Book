@@ -32,7 +32,6 @@ Transformer Parallel Attention (Instant, O(1) step):
    "sat"  ─────┘
 ```
 
----
 
 ### ২. Core Concepts: Transformer ও সেলফ-Attention-এর ভেতরের কাজ
 
@@ -68,7 +67,6 @@ Model যদি বাক্যের সম্পর্কের দিকে �
 * **Head 2:** সর্বনাম বা প্রোনাউনের দিকে ফোকাস করে।
 * **Head 3:** টাইম বা লোকেশনের সম্পর্কের দিকে ফোকাস করে।
 
----
 
 ### ৩. Visual Explanation: $Q, K, V$ Attention Matrix Loop
 
@@ -89,7 +87,6 @@ Q ("it") ──────┼───────────────┼�
                Final Attention Weights multiplied by Values (V)
 ```
 
----
 
 ### ৪. Real World Example: রিয়েল-টাইম Language ট্রান্সলেশন
 
@@ -98,7 +95,6 @@ Q ("it") ──────┼───────────────┼�
 এখানে **bank** মানে নদীর পার, ব্যাংক ডাকাতির ব্যাংক নয়।
 Transformer সেলফ-Attention-এর মাধ্যমে **bank** শব্দের সাথে **river** শব্দের ৯৮% রিলেশন ডিটেক্ট করে সাথে সাথে সঠিক বাংলা অনুবাদ করে: *"নদীর তীরটি সুন্দর।"*
 
----
 
 ### ৫. Developer Perspective: PyTorch দিয়ে Custom Self-Attention লেয়ার Coding
 
@@ -144,7 +140,6 @@ print("Attention Output Shape:", output.shape) # Expected: [1, 3, 4]
 print("Attention Weights Matrix:\n", weights[0])
 ```
 
----
 
 ### VI. Production Perspective: ফ্ল্যাশ Attention (FlashAttention)
 
@@ -155,7 +150,6 @@ Transformer মডেলে সেলফ-Attention রান করার সম
 প্রোডাকশন সলিউশন:
 আধুনিক এলএলএম হোস্টিং এবং Serving Engines (যেমন vLLM, TensorRT) ব্যাকগ্রাউন্ডে **FlashAttention** ব্যবহার করে। এটি GPU-এর দ্রুত মেমরি (SRAM) এবং স্লো Memory-এর (HBM) মধ্যে Data ট্রান্সফার Optimize করে Compute স্পীড ৩ থেকে ৫ গুণ বুস্ট করে এবং মেমরি ফুটপ্রিন্ট Drastically কমায়।
 
----
 
 ### VII. Common Mistakes
 
@@ -165,7 +159,6 @@ Transformer মডেলে সেলফ-Attention রান করার সম
 
 **বাস্তবতা:** যেহেতু সেলফ-Attention-এ বাক্যের সব শব্দকে এক সাথে Matrix আকারে Parallel প্রসেস করা হয়, তাই Model শব্দের Positional অর্ডার ভুলে যায় (যেমন: *"Cat chased Dog"* এবং *"Dog chased Cat"* Model-এর কাছে একই মনে হবে)। এই সমস্যা সমাধানের জন্য আমাদের Input Embeddingয়ের সাথে ম্যানুয়ালি **Positional Encoding (যেমন সাইন-কোসাইন সাইন তরঙ্গ Vector)** যোগ করে দিতে হয়, যাতে Model শব্দের Positional সিকোয়েন্স বুঝতে পারে।
 
----
 
 ### VIII. Mental Model: ককটেল পার্টি
 
@@ -173,7 +166,6 @@ Transformer মডেলে সেলফ-Attention রান করার সম
 
 **"সেলফ-Attention হলো একটি শোরগোলপূর্ণ ককটেল পার্টি। তুমি (Query) যখন কারো সাথে কথা বলতে চান, তুমি ঘরের সবার কণ্ঠস্বর (Keys) স্ক্যান করো এবং যার কণ্ঠ ও Personaলিটি তোমার সাথে সবচেয়ে বেশি মিলে যায় (Highest Attention Score), তুমি কেবল তার কথার দিকেই তোমার কান পাতেন (Values) এবং বাকিদের নয়েজ ফিল্টার আউট করে দেন।"**
 
----
 
 ### IX. Mini Project: NumPy দিয়ে স্ক্র্যাচ Attention স্কোর ক্যালকুলেটর
 
@@ -204,7 +196,6 @@ print("Scratch Attention Matrix (Row sums to 1.0):")
 print(attention_matrix)
 ```
 
----
 
 ### X. Interview Questions
 
@@ -220,17 +211,14 @@ print(attention_matrix)
 3. **প্রশ্ন:** ফ্ল্যাশ Attention (FlashAttention) কীভাবে Transformerের $O(N^2)$ মেমরি Constraint দূর করে?
    * **উত্তর:** ফ্ল্যাশ Attention Math-এর Equation চেঞ্জ করে না। এটি মূলত Memory Optimization টেকনিক। এটি জিপিউর স্লো এবং বড় Memory (HBM) থেকে দ্রুত এবং ছোট অন-চিপ মেমোরিতে (SRAM) ব্লক বাই ব্লক Data লোড করে Computation চালায় এবং সফটম্যাক্স অন-দ্য-ফ্লাই ক্যালকুলেট করে Memory রিড/রাইট ওভারহেড Drastically কমায়।
 
----
 
 ### XI. Chapter Summary
 * **Transformers** Parallel প্রসেসিং সম্ভব করে AI-তে revolutionary স্পীড ও স্কেল এনেছে।
 * **Self-Attention** বাক্যের প্রতিটি শব্দের সাথে অন্যান্য শব্দের geometric ও ব্যাকরণগত সম্পর্ক ম্যাপ করে।
 * $Q, K, V$ Vector-এর ডট প্রোডাক্ট ও সফটম্যাক্স ক্যালকুলেশনই হলো Transformerের মূল চালিকাশক্তি।
 
----
 
 ### XII. What's Next
 আমরা Transformer বিপ্লবের মূল Architecture ভালোভাবে সম্পন্ন করেছি। পরের chapter-এ আমরা এই Transformerের Input Data লেয়ারের একদম মাইক্রোস্কোপিক Mechanics ভাঙবো: **Part 4 — Modern AI Foundations এর Chapter 8: Under the Hood — Tokens, Embeddings & Context Window**। কীভাবে র টেক্সট ভেঙে Token তৈরি হয়, কীভাবে সেই Token হাই-ডাইমেনশনাল Embeddings Vector-এ রূপ নেয় এবং Context Window কীভাবে কাজ করে, তা আমরা নিজের হাতে ভাঙবো।
 
----
 **Chapter 7 শেষ।**

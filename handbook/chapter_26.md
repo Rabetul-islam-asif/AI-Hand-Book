@@ -55,7 +55,6 @@ Purpose: Provide architectural mapping of the self-correcting agent loop.
                         [ Done & Saved! ]
 ```
 
----
 
 ### ২. Core Concepts: এজেন্ট ইঞ্জিনের মূল ভিত্তি
 
@@ -69,7 +68,6 @@ Purpose: Provide architectural mapping of the self-correcting agent loop.
 এজেন্টকে কমান্ড রান করার ক্ষমতা দিতে পাইথনের `subprocess` মডিউল ব্যবহার করা হয়।
 * **নিরাপত্তা সতর্কীকরণ (Sandbox Warning):** প্রোডাকশন লেভেলে এজেন্টকে তোমার লোকাল উইন্ডোজ বা ম্যাক Computeারে সরাসরি ডিরেক্ট কমান্ড রান করতে দেওয়া চরম বিপজ্জনক! কোনো ম্যালিসিয়াস Prompt-এর কারণে এজেন্ট পুরো হার্ডডিস্ক Format বা ডিলিট করার কমান্ড (`rm -rf /` বা `rd /s /q c:\`) চালিয়ে দিতে পারে। তাই সবসময় এই এজেন্টগুলোকে একটি আইসোলেটেড ডকার কন্টেইনার (Docker Sandbox Context) বা ভার্চুয়াল মেশিনে রান করানো আবশ্যক।
 
----
 
 ### ৩. Visual Explanation: ডকার স্যান্ডবক্স আইসোলেশন লেয়ার
 
@@ -89,7 +87,6 @@ Purpose: Provide architectural mapping of the self-correcting agent loop.
                 └───────────────────────────────────┘
 ```
 
----
 
 ### ৪. Real World Example: স্বয়ংক্রিয় AI সিকিউরিটি প্যাচিং
 
@@ -98,7 +95,6 @@ Purpose: Provide architectural mapping of the self-correcting agent loop.
 2. প্যাচ করার পর সে তার সিকিউরিটি Regression Test রান করে দেখে কোনো System ডাউন হয়েছে কি না।
 3. টেস্টে যদি দেখা যায় ইউজার লগইন ফেইল করছে, এজেন্ট সাথে সাথে কোডটি আবার রোলব্যাক করে বা Modify করে Test পাস করিয়ে নিমিষেই গিটহাবে পিআর (Pull Request) সাবমিট করে দেয়।
 
----
 
 ### ৫. Developer Perspective: CLI Code Writer with Auto-Test Healing সম্পূর্ণ পাইপলাইন Implementation
 
@@ -221,7 +217,6 @@ def run_self_healing_agent():
 # run_self_healing_agent()
 ```
 
----
 
 ### VI. Production Perspective: স্যান্ডবক্সিং ও সিকিউরিটি পলিসি
 
@@ -232,7 +227,6 @@ def run_self_healing_agent():
 * **Resource Limiting (Compute লকিং):** কোনো হ্যাকার যদি Promptে একটি ইনফিনিটি Loop Code লিখে তোমার সার্ভারে Test রান করায়, তবে তোমার CPU ক্র্যাশ করবে। তাই প্রতিটি সাব-প্রসেস এক্সিকিউশনে অবশ্যই `timeout=10.0` Parameter ব্যবহার করতে হবে যাতে ১০ সেকেন্ডের বেশি কোনো স্ক্রিপ্ট চললে তা সাথে সাথে কিল হয়ে যায়।
 * **Read-only Filesystem:** এজেন্টের স্যান্ডবক্স ডিরেক্টরি ছাড়া অন্য কোনো সিস্টেমে রিড বা রাইট অ্যাক্সেস থাকা যাবে না।
 
----
 
 ### VII. Common Mistakes
 
@@ -242,7 +236,6 @@ def run_self_healing_agent():
 
 **বাস্তবতা:** `eval()` ব্যবহার করা পাইথনের সবচেয়ে বড় সিকিউরিটি লিকেজ। এর ফলে রানিং পাইথন প্রসেসের সম্পূর্ণ Memory ও ভেরিয়েবল AI স্ক্রিপ্ট ডাইনামিকালি ম্যানিপুলেট বা হ্যাক করে ফেলতে পারে। Code সবসময় সম্পূর্ণ আলাদা ফাইলে সেভ করে সাব-প্রসেস হিসেবে হোস্ট করাই একমাত্র প্রোডাকশন-গ্রেড সিদ্ধান্ত।
 
----
 
 ### VIII. Mental Model: অভিজ্ঞ মিস্ত্রি ও তার সহকারী
 
@@ -250,7 +243,6 @@ def run_self_healing_agent():
 
 **"আমাদের সেলফ-হিলিং এজেন্ট হলো একজন মিস্ত্রি যে পাইপ বসায়। আর Test রানার হলো সেই খিটখিটে Assistant যে বারবার পাইপের ভেতরে জল ঢেলে (Test cases) লিক খোঁজে। যখনই লিক পাওয়া যায়, Assistant চেঁচিয়ে বলে লিক কোথায়, আর মিস্ত্রি সাথে সাথে প্লাস্টার বা ওয়েল্ডিং করে পাইপ perfect করে দেয়।"**
 
----
 
 ### IX. Mini Project: পাইথনে Custom সাব-প্রসেস টাইমআউট ট্র্যাপার
 
@@ -280,7 +272,6 @@ except subprocess.TimeoutExpired:
     print("The infinite loop was successfully KILLED to save CPU resources!")
 ```
 
----
 
 ### X. Interview Questions
 
@@ -296,17 +287,14 @@ except subprocess.TimeoutExpired:
 3. **প্রশ্ন:** প্রোডাকশনে Devin বা Cursor-এর মতো Code জেনারেটর এজেন্ট ডিজাইনে "Docker Sandbox Container" এর প্রয়োজনীয়তা Math-এর ও Architectural দিক থেকে ব্যাখ্যা করো।
    * **উত্তর:** AI বা ম্যালিসিয়াস Prompt যদি লোকাল ওএসে সরাসরি অ্যাক্সেস পায়, সে তোমার Computeারের সব পার্সোনাল File রিড করতে পারে বা ক্ষতিকর কমান্ড রান করে Database মুছে দিতে পারে। ডকার স্যান্ডবক্স কন্টেইনার একটি আলাদা লাইটওয়েট ভার্চুয়াল ফাইলসিস্টেম তৈরি করে যার সাথে লোকাল ওএসের কোনো Memory বা নেটওয়ার্ক শেয়ার থাকে না। ফলে এজেন্ট ডকারের ভেতরে কোনো ক্ষতি করলেও কন্টেইনারটি বন্ধ করার সাথে সাথে Database ও System রিবুট হয়ে ফ্রেশ স্টেটে ফিরে আসে, যা লোকাল ওএসকে ১০০% সিকিউর রাখে।
 
----
 
 ### XI. Chapter Summary
 * **ReAct Framework** এজেন্টকে মানুষের মতো ধাপে ধাপে চিন্তা ও অ্যাকশন নেওয়ার ক্ষমতা দেয়।
 * **Auto-Test Healing** ভুল Error Log রিড করে স্বয়ংক্রিয়ভাবে Code বাগ fix করে।
 * প্রোডাকশন AI এজেন্ট ডিজাইনের প্রধান শর্ত হলো **Strict Security Isolation (Docker Sandbox)**।
 
----
 
 ### XII. What's Next
 আমরা Deep Learning ও AI Ecosystem-এর কঠিনতম ও রোমাঞ্চকর এজেন্ট Loop Architecture ভালোভাবে শেষ করেছি। পরের chapter-এ আমরা প্রবেশ করতে যাচ্ছি আমাদের ফাইনাল বা শেষ টেকনিক্যাল Project Blueprintে: **Part 11 — Building Real AI Products এর Chapter 27: Blueprint 4 — Production AI SaaS with Rate Limiting & Usage Billing**। কীভাবে একটি বিশ্বমানের AI সফটওয়্যারকে Subscription বা পেইড সার্ভিসে convert করে Redis রেট-লিমিটিং, API Token ব্যবহার ট্র্যাকিং এবং স্ট্রাইপ (Stripe) ইউসেজ-বেসড বিলিং Integration করা হয়, তা আমরা বিশদ Source Code ও Architecture দিয়ে নিজের হাতে ডিজাইন করবো।
 
----
 **Chapter 26 শেষ।**

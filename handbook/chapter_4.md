@@ -33,7 +33,6 @@ Underfitting (High Bias):    Optimal (Balanced):          Overfitting (High Vari
       (Straight Line)             (Smooth Fit)                 (Squiggly Line)
 ```
 
----
 
 ### ২. Core Concepts: Bias, ভ্যারিয়েন্স ও মুখস্থ রোগ
 
@@ -64,7 +63,6 @@ Model যেন মুখস্থ করতে না পারে, তার �
 ##### আর্লি স্টপিং (Early Stopping - অসময়ে থামা)
 * **কনসেপ্ট:** Training করার সময় বারবার Validation Loss (Validation Loss) ট্র্যাক করা হয়। যখন দেখা যায় Training Loss কমছে কিন্তু Validation Loss বাড়া শুরু করেছে, তখনই Training Loop জোরপূর্বক অফ করে দেওয়া হয়।
 
----
 
 ### ৩. Visual Explanation: আর্লি স্টপিংয়ের টার্নিং পয়েন্ট
 
@@ -85,7 +83,6 @@ Loss
 
 ★ চিহ্নিত স্থানটিই হলো আমাদের সুইট স্পট। এর পরে Training চালালে Model Overfit হতে শুরু করবে।
 
----
 
 ### ৪. Real World Example: নেটফ্লিক্স মুভি রিকমেন্ডেশন
 
@@ -93,7 +90,6 @@ Loss
 তুমি গতকাল ভুল করে একটি হরর মুভিতে ক্লিক করেছিলে। Overfit Model ভাববে তুমি শুধু হররই পছন্দ করো এবং তোমার পুরো ড্যাশবোর্ড হরর মুভি দিয়ে ভরিয়ে ফেলবে।
 কিন্তু নেটফ্লিক্সের জেনারেলাইজড Model জানে যে মানুষ ভুল ক্লিক করতে পারে (Noise)। সে ড্রপআউট ও Bias কন্ট্রোল করে তোমার দীর্ঘদিনের দেখার অভ্যাস Analysis করে একটি ব্যালেন্সড রিকমেন্ডেশন ফিড জেনারেট করে।
 
----
 
 ### ৫. Developer Perspective: PyTorch দিয়ে Dropout ও Early Stopping Implementation
 
@@ -145,7 +141,6 @@ for epoch in range(100):
         break
 ```
 
----
 
 ### ৬. Production Perspective: Data অগমেন্টেশন (Data Augmentation)
 
@@ -160,7 +155,6 @@ Image Training-এর ক্ষেত্রে আমরা **Data Augmentation*
 
 এর ফলে একটি ছবি থেকেই ১০টি ভিন্ন ভ্যারিয়েশনের ছবি তৈরি হয় এবং Model-এর পক্ষে কোনো একক ছবি মুখস্থ করা অসম্ভব হয়ে দাঁড়ায়।
 
----
 
 ### ৭. Common Mistakes
 
@@ -170,7 +164,6 @@ Image Training-এর ক্ষেত্রে আমরা **Data Augmentation*
 
 **বাস্তবতা:** ড্রপআউট শুধুমাত্র Training-এর জন্য। Test বা প্রোডাকশন সার্ভিংয়ের সময় সব নিউরন ১০০% সচল থাকা আবশ্যক। PyTorch-এ Training শেষে তাই অবশ্যই `model.eval()` কল করতে হবে, যা Automatically সব ড্রপআউট লেয়ার নিষ্ক্রিয় করে দেয়।
 
----
 
 ### ৮. Mental Model: কড়া ট্রেইনার
 
@@ -178,7 +171,6 @@ Regularizationের মেন্টাল Model:
 
 **"Regularization বা ড্রপআউট হলো একজন কড়া ট্রেইনার যিনি তার খেলোয়াড়কে অন্ধভাবে কোনো নির্দিষ্ট রুটিন মুখস্থ করতে দেন না। তিনি বারবার খেলোয়াড়ের প্র্যাকটিস Condition বদলান (কখনো কাদা, কখনো বৃষ্টিতে প্র্যাকটিস), যাতে খেলোয়াড় যেকোনো কঠিন বা নতুন পিচেও সেরা খেলা খেলতে পারে।"**
 
----
 
 ### ৯. Mini Project: স্ক্র্যাচ L2 Regularization Loss Calculator
 
@@ -207,7 +199,6 @@ print(f"L2 Penalty: {l2_penalty:.4f} (Sum of Squares: {np.sum(weights**2)})")
 print(f"Final regularised Loss sent to optimizer: {final_loss:.4f}")
 ```
 
----
 
 ### ১০. Interview Questions
 
@@ -223,17 +214,14 @@ print(f"Final regularised Loss sent to optimizer: {final_loss:.4f}")
 3. **প্রশ্ন:** PyTorch-এ `model.train()` এবং `model.eval()` কেন খুব গুরুত্বপূর্ণ?
    * **উত্তর:** `model.train()` Model-এর ড্রপআউট (Dropout) এবং ব্যাচ Normalization (Batch Normalization) লেয়ারগুলোকে সচল করে Training-এর জন্য রেডি করে। আর `model.eval()` Model-এর সব ড্রপআউট ও ব্যাচ নরম লেয়ারগুলোকে ফ্রিজ বা নিষ্ক্রিয় করে দেয় যাতে Test বা প্রোডাকশনে Prediction Deterministic ও perfect হয়।
 
----
 
 ### ১১. Chapter Summary
 * **Generalization** হলো AI-এর আসল লক্ষ্য—মুখস্থ না করে ভেতরের রুলস শেখা।
 * L1/L2 Regularization এবং **Dropout** Model-এর অতিরিক্ত Weight কন্ট্রোল করে Overfitting ব্লক করে।
 * **Early Stopping** Training ও Test Loss-এর মধ্যে সুইট স্পট ফিক্স করে Training থামিয়ে দেয়।
 
----
 
 ### XII. What's Next
 আমরা সাকসেসফুলি Machine Learning-এর অন্যতম মূল চালিকাশক্তি Regularization ও সুইট স্পটের Mechanism শিখে ফেলেছি। পরের chapter-এ আমরা প্রবেশ করতে যাচ্ছি Deep Learning-এর আসল ম্যাজিকে: **Part 3 — Deep Learning & Neural Networks এর Chapter 5: Artificial Neurons — The Building Blocks of DL**। কীভাবে মানুষের ব্রেইনের বায়োLogical নিউরনকে গণিতে convert করে আর্টিফিশিয়াল Perceptron ও Activation Function (Sigmoid, ReLU, Softmax) Architect করা হয়, তা আমরা বাস্তব Code দিয়ে সলভ করবো।
 
----
 **Chapter 4 শেষ।**

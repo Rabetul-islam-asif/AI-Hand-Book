@@ -33,7 +33,6 @@ User ──► [ Set Goal: "Fix payment bug" ] ──► [ Think ] ──► [ A
 
 AI এজেন্ট হলো এই দায়িত্বশীল কর্মী। সে কেবল ওয়ার্ড Predict করে না; সে নিজের কাজের ফলাফল ট্র্যাক করে Loop চালিয়ে গোল এচিভ করে।
 
----
 
 ### ২. Core Concepts: Agentic Loop ও রিঅ্যাক্ট Pattern
 
@@ -85,7 +84,6 @@ Purpose: Visually define the structural blocks of an AI Agent.
 **Agent = LLM + Tools + Loop**  
 এজেন্ট নিজে কোনো নতুন Engineerিং টেকনোলজি নয়; এটি হলো লার্জ Language Model-এর চারপাশে Custom Loop ও টুল Integration করে তৈরি করা একটি স্বয়ংক্রিয় System।
 
----
 
 ### ৩. Visual Explanation: Agentic রিফ্লেকশন (Self-Correction) Loop
 
@@ -116,7 +114,6 @@ Purpose: Show the robustness of self-evaluating agents.
      [ Act 2: Fix Code & Run Test ] ──► [ Success ✓ ]
 ```
 
----
 
 ### ৪. Real World Example: Claude Code ও Devin-এর স্বয়ংক্রিয় বাগ ফিক্সিং
 
@@ -126,7 +123,6 @@ Purpose: Show the robustness of self-evaluating agents.
 2. **ReAct Execution Loop:** সে Custom ব্যাশ (Bash) কমান্ড এবং File রিডার টুল ব্যবহার করে Code চেঞ্জ করে এবং আক্রান্ত Test ফাইলগুলো রান করে।
 3. **Healing on Failures:** Test ফেইল করলে সে ভয়ে পিছিয়ে যায় না। Test Error Log নিজে রিড করে সেলফ-অ্যারর হিলিং (Auto-heal) Mechanism-এ Code Modify করে সাকসেসফুল হওয়ার পর মার্জ রিকোয়েস্ট ক্রিয়েট করে।
 
----
 
 ### ৫. Developer Perspective: পাইথনে স্ক্র্যাচ থেকে একটি সম্পূর্ণ Agentic Loop Implementation
 
@@ -188,7 +184,6 @@ def run_agent(user_query, trx_id):
 run_agent("আমার পেমেন্ট আটকে গেছে কেন?", "TRX999")
 ```
 
----
 
 ### ৬. Production Perspective: Infinite Loop Protection & Safety Gates
 
@@ -199,7 +194,6 @@ Agentic AI প্রোডাকশনে Deploy করার সময় স�
 * **Infinite Loop:** এজেন্ট যখন কোনো একটি বাগ ফিক্স করতে গিয়ে বারবার একই ভুল Code লেখে এবং Test ফেইল করে, সে বারবার API কল করতে থাকে। ১০ মিনিটে সে হাজার হাজার ডলারের API বিল বা Token কস্ট জেনারেট করে Companyর বড় আর্থিক ক্ষতি করতে পারে।
 * **সমাধান:** প্রোডাকশন হারনেস ইঞ্জিনে strictly **Max Iterations Limit** (যেমন: সর্বোচ্চ ১০ বার Loop ঘুরবে) সেট করা থাকে। একই সাথে ডেসট্রাকটিভ বা বিপজ্জনক টুল (যেমন: `rm -rf` বা `git push --force`) কল করার আগে **Human-in-the-loop (HITL)** গেটওয়ে সচল রাখা হয়, যা ডেভেলপারের অনুমতি ছাড়া কমান্ড রান করে না।
 
----
 
 ### ७. Common Mistakes
 
@@ -209,7 +203,6 @@ Agentic AI প্রোডাকশনে Deploy করার সময় স�
 
 **বাস্তবতা:** এজেন্ট খুবprobabilistic। তাকে ডাইনামিকলি সঠিক পথে রাখতে কড়া **Constitutional Guides (AGENTS.md)** এবং Input-Output Validation লেয়ার ব্যবহার করা বাধ্যতামূলক। অন্যথায় এজেন্ট ভুল কমান্ড রান করে Server Data ক্র্যাশ করে দিতে পারে।
 
----
 
 ### ৮. Mental Model: স্বায়ত্তশাসিত রোবট ভ্যাকুয়াম ক্লিনার
 
@@ -231,7 +224,6 @@ Purpose: Ground the autonomous navigation feedback loop.
 
 তুমি তাকে ঘরের রুলস ও বাউন্ডারি ট্যাগ করে দিয়ে শুধু একটি লক্ষ্য দিলে: `"ঘর পরিষ্কার করো"`। সে নিজে পুরো ঘরের নকশা মেপে নেয় (Planning)। সে আসবাবপত্রে ধাক্কা খেলে বা বাধা পেলে বিভ্রান্ত হয়ে কান্নাকা্টি করে না। সে তার সেন্সর দিয়ে ব্যাকট্র্যাক করে অন্য পথে এগিয়ে কাজ সম্পন্ন করে চার্জে ফিরে যায় (Self-correction & Completion)।
 
----
 
 ### ৯. Mini Project: পাইথনে স্ক্র্যাচ থেকে একটি Custom File এডিটিং AI এজেন্ট উইথ ব্যাকট্র্যাকিং
 
@@ -286,7 +278,6 @@ agent.heal_code()
 * **Why it works:** এজেন্টের ভেতরের `run_tests` ফিডব্যাক লুপটি ভুল ডিটেক্ট করে Code হিলিং লেয়ারে সিগন্যাল পাস করেছে।
 * **When to use:** Custom Coding Assistant এবং সেলফ-কারেক্টিং AI অটোমেশন এজেন্ট Architect করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -302,7 +293,6 @@ agent.heal_code()
 3. **প্রশ্ন:** প্রোডাকশনে একটি স্বায়ত্তশাসিত Coding এজেন্টের "Infinite Loop & Wallet Drainage" রিস্ক কীভাবে প্রতিহত করা যায়?
    * **উত্তর:** এটি প্রতিহত করতে ব্যাকঅ্যান্ড হারনেস ইঞ্জিনে strictly **Max Iterations Limit** (যেমন: ৫ বা ১০ বারের বেশি Loop ঘুরবে না) এবং **Max Token/Cost Budget Limit** সেট করে দেওয়া হয়। একই সাথে যেকোনো ডেসট্রাকটিভ বা হাই-রিস্ক কমান্ড এক্সিকিউট করার আগে **Human-in-the-loop (HITL)** কনফার্মেশন গেটওয়ে সচল রাখা হয়, যা ইউজারের ডিরেক্ট পারমিশন ছাড়া টুল রান করে না।
 
----
 
 ### ১১. Chapter Summary
 * **AI Agent** হলো নির্দিষ্ট গোল এচিভ করার জন্য ডিজাইন করা স্বায়ত্তশাসিত AI System।
@@ -310,10 +300,8 @@ agent.heal_code()
 * **Self-Correction** ব্যর্থ Test Log নিজে রিড করে ভুল fixের ক্ষমতা এচিভ করায়।
 * প্রোডাকশন সিস্টেমে AI এজেন্টকে সুরক্ষিত রাখতে **HITL Gateways** এবং **Iteration Bounds** সেট করা বাধ্যতামূলক।
 
----
 
 ### ১২. What's Next
 দারুণ! আমরা ভালোভাবে AI এজেন্টের কোর ফাউন্ডেশন ও সেলফ-কারেকশন Loop শেষ করে ফেলেছি। পরের chapter-এ আমরা এই এজেন্টের সবচেয়ে গুরুত্বপূর্ণ হাত-পা বা অ্যাকশন লেয়ার নিয়ে আলোচনা করব: **Chapter 19: Tool Calling & Function Integration**। কীভাবে JSON স্কিমা ব্যবহার করে টুল কনট্র্যাক্ট ডিজাইন করা হয় এবং AI কীভাবে Dynamically সঠিক Parameter জেনারেট করে Custom API কল করে, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 18 শেষ।**

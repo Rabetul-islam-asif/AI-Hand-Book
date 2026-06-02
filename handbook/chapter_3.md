@@ -41,7 +41,6 @@ Loss
  ──────────────────────────────────────────────────────────► Weight (W)
 ```
 
----
 
 ### ২. Core Concepts: লার্নিং গণিতের ভেতরের বিষয়
 
@@ -69,7 +68,6 @@ Learning Rate হলো আমাদের Optimization Algorithm প্রত�
 * **খুব ছোট Learning Rate (Too Small):** Model খুব ধীর গতিতে শিখবে। পাহাড় থেকে নামতে যদি পিঁপড়ার মতো পা ফেলো, তবে চূড়া থেকে নিচে নামতে কয়েক মাস লেগে যাবে।
 * **খুব বড় Learning Rate (Too Large):** Model-এর Loss কার্ভ লাফালাফি করতে থাকবে (Diverge)। পা ফেলার সাইজ যদি পাহাড়ের সমান হয়, তবে তুমি এক পাহাড় থেকে লাফ দিয়ে পাশের পাহাড়ে চলে যাবে, কোনোদিনও নিচু valley-তে পৌঁছাতে পারবে না।
 
----
 
 ### ৩. Visual Explanation: লার্নিং রেটের জটিলতা
 
@@ -85,7 +83,6 @@ Large Learning Rate (Over-shooting):
   \  *            /
 ```
 
----
 
 ### ৪. Real World Example: Learning Rate শিডিউলার (Learning Rate Scheduler)
 
@@ -93,7 +90,6 @@ Large Learning Rate (Over-shooting):
 * **শুরুর দিকে:** Learning Rate বড় রাখা হয় যাতে Model দ্রুত বেসিক লজিকগুলো শিখে পাহাড়ের কাছাকাছি নেমে আসতে পারে।
 * **শেষের দিকে:** লার্নিং রেটকে আস্তে আস্তে একদম ছোট করে ফেলা হয়, যাতে Model পাহাড়ের সর্বনিম্ন খাদে গিয়ে একদম perfect অবস্থানে থিতু হতে পারে। একেই বলে Learning Rate শিডিউলিং।
 
----
 
 ### ৫. Developer Perspective: PyTorch দিয়ে স্বয়ংক্রিয় গ্র্যাডিয়েন্ট ও Optimization Loop
 
@@ -138,7 +134,6 @@ for epoch in range(20):
 print(f"\nFinal Learned Weight: {W.item():.2f} (Target was 2.00)")
 ```
 
----
 
 ### ৬. Production Perspective: Optimizerের বিবর্তন ও ব্যবহার
 
@@ -152,7 +147,6 @@ print(f"\nFinal Learned Weight: {W.item():.2f} (Target was 2.00)")
 | **Adam (Adaptive Moment Estimation)** | প্রতিটি Parameter-এর জন্য Dynamically Learning Rate অ্যাডজাস্ট করে। | টেক্সট, এলএলএম, এবং Transformer Fine-Tuningয়ের সবচেয়ে জনপ্রিয় Default পছন্দ। |
 | **AdamW** | Adam এর সাথে L2 Regularization (Weight Decay) যুক্ত করে। | বৃহৎ ভাষার Model (LLMs) প্রি-Training বা Fine-Tuningয়ের আধুনিক গোল্ড Standard। |
 
----
 
 ### ৭. Common Mistakes
 
@@ -162,7 +156,6 @@ print(f"\nFinal Learned Weight: {W.item():.2f} (Target was 2.00)")
 
 **বাস্তবতা:** Loss শূন্য হওয়ার মানে হলো তোমার Model Distribution মুখস্থ বা Overfit (Overfit) করে ফেলেছে। সে Training ডেটাতে ১০০% স্কোর করলেও নতুন বাস্তব Data দিলে চরম Hallucinate বা ভুল করবে। প্রোডাকশনের আদর্শ নিয়ম হলো লসকে একটি হেলদি মিনিমামে আনা, শূন্যতে নেওয়া নয়।
 
----
 
 ### ৮. Mental Model: অভিজ্ঞ গলফার
 
@@ -170,7 +163,6 @@ print(f"\nFinal Learned Weight: {W.item():.2f} (Target was 2.00)")
 
 **"গ্র্যাডিয়েন্ট ডিসেন্ট হলো একজন গলফার যিনি বলটি গর্তে (Minimum Loss) ফেলার চেষ্টা করছেন। শুরুর দিকে তিনি দূর থেকে বড় শট (High Learning Rate) খেলেন যাতে বল গর্তের কাছে পৌঁছায়। বলটি গর্তের খুব কাছে চলে আসলে তিনি হালকা টোকা (Low Learning Rate) দিয়ে বলটি গর্তে প্রবেশ করান।"**
 
----
 
 ### ৯. Mini Project: স্ক্র্যাচ থেকে গ্র্যাডিয়েন্ট ডিসেন্ট ভিজুয়ালাইজার
 
@@ -207,7 +199,6 @@ for step in range(10):
     print(f"Step {step}: Loss = {avg_loss:.2f}, Weight W = {W:.2f}")
 ```
 
----
 
 ### ১০. Interview Questions
 
@@ -223,14 +214,12 @@ for step in range(10):
 3. **প্রশ্ন:** কেন Adam Optimizer Classical SGD এর চেয়ে বেশি জনপ্রিয়? এর Math-এর কারণ বলো।
    * **উত্তর:** SGD-তে একটি নির্দিষ্ট Learning Rate সবার জন্য প্রযোজ্য হয়। কিন্তু Adam প্রতিটি Parameter-এর হিস্টোরিকাল গ্র্যাডিয়েন্টের প্রথম ও দ্বিতীয় মোমেন্ট (Mean and Variance) ক্যালকুলেট করে প্রতিটি Weight-এর জন্য আলাদা Adaptive Learning Rate সেট করে। ফলে Data-এর স্পার্স Feature-এর Weight দ্রুত আপডেট হতে পারে এবং Model দ্রুত Optimal লসে পৌঁছায়।
 
----
 
 ### ১১. Chapter Summary
 * **Loss Function** মাপে Model-এর ভুলের গভীরতা (MSE ফর Regression, Cross-Entropy ফর Classification)।
 * **Gradient Descent** হলো ঢাল অনুসরণ করে পাহাড়ের চূড়া থেকে lowest valleyয় নেমে আসার লজিক।
 * **Learning Rate** হলো Model-এর Training-এর গতি ও লাফানোর পরিমাপক যা খুব সতর্কতার সাথে সেট করতে হয়।
 
----
 
 ### ১২. What's Next
 আমরা লার্নিংয়ের Math-এর ভিত্তি ভালোভাবে আয়ত্ত করে ফেলেছি। পরের chapter-এ আমরা শিখবো মডেলকে কীভাবে রিয়েল ওয়ার্ল্ডের জন্য ট্রেন করতে হয় এবং Overfitting নামক মারাত্মক রোগ থেকে বাঁচাতে হয়: **Chapter 4: Generalization — Overfitting, Underfitting & Regularization**। সেখানে আমরা ড্রপআউট ও Bias-ভ্যারিয়েন্স ট্রেডঅফের Mechanism সুন্দরভাবে ভাঙবো।

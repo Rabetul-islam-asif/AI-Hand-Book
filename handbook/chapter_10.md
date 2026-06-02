@@ -34,7 +34,6 @@ Prompt: "23 * 47" ──► [ Hidden Scratchpad: 20 * 47 = 940 ... 3 * 47 = 141 
 
 আগের সব জিপিটি Model ছিল কেবল System ১ থিংকিং চালিত। কিন্তু **OpenAI o1/o3** এবং **DeepSeek R1** AI-তে প্রথমবারের মতো ভালোভাবে **System 2 Thinking** Integrate করেছে। তারা সরাসরি উত্তর দেয় না; তারা ব্যাকগ্রাউন্ডে একটি Invisible Scratchpadে (Scratchpad) চেইন অফ থট জেনারেট করে নিজের ভুল নিজে জাজ করে final উত্তর Produce করে।
 
----
 
 ### ২. Core Concepts: রিজনিং ইঞ্জিনের ভেতরের কাজ
 
@@ -57,7 +56,6 @@ DeepSeek R1 দেখিয়েছে কীভাবে কড়া তা�
 * **RL Loop (পুরস্কার ও শাস্তি):** এরপর মডেলকে হাজার হাজার প্রবলেম সলভ করতে দেওয়া হয়। Model যদি সঠিক উত্তর দেয়, তবে সে Reward (Reward) পায়। আর যদি চেইন অফ থটে Logical ভুল করে বা ভুল উত্তর দেয়, সে Penalty পায়।
 * **Self-Correction:** এই ট্রায়াল ও Error Loop-এর মাধ্যমে Model নিজে নিজেই শেখে কীভাবে ভুল পথে হাঁটা শুরু করলে সাথে সাথে ব্যাকট্র্যাক (Backtrack) করে সঠিক ট্র্যাকে ফিরে আসতে হয়।
 
----
 
 ### ৩. Visual Explanation: Monte Carlo Search ট্রি (MCTS) Loop
 
@@ -79,7 +77,6 @@ Purpose: Visually demonstrate how reasoning models evaluate multiple logical ste
 
 Model প্রতিটি Logical পথের Value স্কোর মেপে দেখে। সে দেখে `Step B` থেকে `Step B2` তে গেলে প্রবলেম সলভ হওয়ার সম্ভাবনা ৯২%, আর `Step A` তে গেলে মাত্র ১৫%। Model সাথে সাথে `Step A` বাদ দিয়ে `Step B` এর চেইন ধরে এগিয়ে যায়।
 
----
 
 ### ৪. Real World Example: Cursor Agent-এর Source Code Debugging
 
@@ -90,7 +87,6 @@ Cursor বা Devin যখন তোমার রিপোজিটরিতে 
 3. **Self-Correction:** মাইগ্রেশন রান করতে গিয়ে Error আসলে সে বিভ্রান্ত হয় না। সে Error লক স্ক্যান করে বলে: *"মাইগ্রেট ফেল করেছে কারণ Database পোর্ট কনফ্লিক্ট। লেটস চেক ডকার..."*
 4. **Final Action:** ডকার পোর্ট ফিক্স করে ভালোভাবে বাগ রিসলভ করে তোমাকে সলিউশন প্রপোজ করে।
 
----
 
 ### ৫. Developer Perspective: Ollama দিয়ে DeepSeek R1 locally রান করা
 
@@ -133,7 +129,6 @@ if thinking_start != -1 and thinking_end != -1:
     print(final_answer)
 ```
 
----
 
 ### ৬. Production Perspective: API Pricing & Latency Tradeoff
 
@@ -144,7 +139,6 @@ if thinking_start != -1 and thinking_end != -1:
 * **Latency (সময়):** সাধারণ Model যেখানে ৫০০ মিলি-সেকেন্ডে উত্তর দেয়, রিজনিং Model সেখানে ৫ থেকে ৩০ সেকেন্ড পর্যন্ত থিংকিং লুপে থাকতে পারে। তাই চ্যাটের ফ্রন্টঅ্যান্ডে অবশ্যই **Streaming UI** এবং **Loading State** গাইডলাইন নিশ্চিত করতে হবে।
 * **Pricing (খরচ):** যেহেতু থিংকিং Token জেনারেট হতে বেশি মেমরি ও GPU Compute লাগে, তাই এর API কস্ট সাধারণ জেনারেশন API-এর চেয়ে ৩ থেকে ৫ গুণ বেশি হয়।
 
----
 
 ### ৭. Common Mistakes
 
@@ -154,7 +148,6 @@ if thinking_start != -1 and thinking_end != -1:
 
 **বাস্তবতা:** সাধারণ জেনারেল নলেজ বা ফactual প্রশ্নের জন্য রিজনিং Model ব্যবহার করা চরম অপচয়। সেখানে Latency ও কস্ট কমাতে **Flash/Lite** Model (যেমন: Gemini 2.5 Flash বা GPT-4o-mini) ব্যবহার করাই প্রোডাকশন-গ্রেড বেস্ট Architectural ডিসিশন।
 
----
 
 ### ৮. Mental Model: অভিজ্ঞ গণিতবিদ
 
@@ -164,7 +157,6 @@ if thinking_start != -1 and thinking_end != -1:
 
 তাকে কোনো জটিল প্রশ্ন দিলে সে হুট করে মুখ দিয়ে উত্তর ফাঁকা করে না। সে তার ড্রয়িং খাতায় (Scratchpad) খসড়া কাটে। সে প্রথমে একটি ইকুয়েশন লেখে, ভুল হলে ইরেজার দিয়ে মুছে আবার লেখে। সব হিসাব মিলিয়ে একদম শেষ মাথায় সে তার ফাইনাল ডেসিশনটি তোমাকে খাতা থেকে রিড করে জানায়।
 
----
 
 ### ৯. Mini Project: চেইন অফ থট Prompting Classifier
 
@@ -199,7 +191,6 @@ print(formatted_prompt)
 * **Why it works:** এটি Model-এর এটেনশন হেডকে জোরপূর্বক Sequential Logical এনালাইসিসে আবদ্ধ করতে সাহায্য করে, যা ইনস্ট্যান্ট Hallucination ব্লক করে।
 * **When to use:** প্রোডাকশনে সাধারণ এলএলএম মডিউল দিয়ে জটিল Logical Output perfectly এচিভ করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -215,7 +206,6 @@ print(formatted_prompt)
 3. **প্রশ্ন:** DeepSeek R1 কীভাবে কোল্ড স্টার্ট Data ও Reinforcement Learning (RL) ব্যবহার করে মডেলকে নিজে নিজে ভুল fix করা (Self-correction) শিখিয়েছে?
    * **উত্তর:** R1 প্রথমে কিছু হাই-Quality চেইন অফ থট Data দিয়ে Supervised Fine-Tuning (SFT) সম্পন্ন করে। এরপর আরএল (RL) Loop-এর মাধ্যমে মডেলকে ক্রমাগত প্রসেস রান করতে দেওয়া হয় এবং উত্তরের সঠিকতা ও Logical ফ্লো মেপে Dynamically Reward ও Penalty দেওয়া হয়। এই Loop-এর মাধ্যমে Model নিজেই চেইন অফ থটের ভেতর ভুল পথ ডিটেক্ট করে ব্যাকট্র্যাকিং বা সেলফ-কারেকশন করার ক্ষমতা অর্জন করে।
 
----
 
 ### ১১. Chapter Summary
 * **Reasoning Models** AI-তে System ২ (System 2) analytical চিন্তন Mechanism Integrate করেছে।
@@ -223,10 +213,8 @@ print(formatted_prompt)
 * **Reinforcement Learning** এবং **MCTS** রিজনিং Model সেলফ-অপ্টিমাইজেশনের মূল Math-এর চাবিকাঠি।
 * প্রোডাকশন Deploymentের সময় **Latency** এবং **VRAM/API Price** ট্রেডঅফ খুব সতর্কতার সাথে ব্যালেন্স করতে হবে।
 
----
 
 ### ১২. What's Next
 পার্ট ৫ এর Language ও রিজনিং Model-এর চমৎকার world আমরা ভালোভাবে আয়ত্ত করেছি। পরবর্তী চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে AI-এর সবচেয়ে গুরুত্বপূর্ণ Data Management লেয়ার: **Part 6 — AI Data Layer এর Chapter 11: Embeddings & Vector Mathematics**। কীভাবে Embeddings Vector-এর কোসাইন সিমিলারিটি, ডট প্রোডাক্ট এবং geometric কোণ আমাদের Search Engine গাইড করে, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 10 শেষ।**

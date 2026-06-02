@@ -35,7 +35,6 @@ LoRA Adapter Tuning (Only updates A and B matrices - 99% Memory Saved!):
 
 লো-র‍্যাংক অ্যাডাপটেশন (LoRA) ঠিক এই কাজটিই করে। এটি এলএলএম Model-এর বিলিয়ন ওরিজিনাল Parameter সম্পূর্ণ ফ্রিজ বা লক করে রাখে এবং পাশে দুটি খুব ছোট লো-র‍্যাংক Matrix জোড়া লাগিয়ে কেবল সেগুলোর মান আপডেট করে, যা মেমরি কস্ট Drastically কমিয়ে দেয়।
 
----
 
 ### ২. Core Concepts: লো-র‍্যাংক অ্যাডাপটেশন ও Quantizationের জ্যামিতি
 
@@ -84,7 +83,6 @@ Remember
 **LoRA** = বেস Model ফ্রিজ রেখে দুটি ছোট Matrix (A ও B) ট্রেইন করে মেমরি save করে।  
 **QLoRA** = বেস মডেলকে ৪-বিটে (NF4) কম্প্রেস করে এবং ওপরে LoRA Adapter জোড়া লাগিয়ে সর্বকালের সর্বোচ্চ মেমরি save করে।
 
----
 
 ### ৩. Real World Example: Cursor ও Coding Model-এর Dynamic Persona
 
@@ -93,7 +91,6 @@ Cursor বা যেকোনো Custom Coding Assistant যখন ব্যা�
 1. **Frozen Foundation:** তাদের মেইন লার্জ Coding Model-এর বেস ওয়েটস (Base Weights) সার্ভারে লক থাকে।
 2. **Dynamic Adapters Loading:** তুমি যখন পাইথন Project ওপেন করো, তারা পাইথনের Custom LoRA Adapterটি মিলি-সেকেন্ডে লোড করে বেস Model-এর সাথে মার্জ করে দেয়। আবার যখন তুমি জাভাস্ক্রিপ্ট Project ওপেন করো, ওরিজিনাল Model-এর কোনো পরিবর্তন না করেই পাইথন Adapter আনলোড করে জাভাস্ক্রিপ্ট Adapter জোড়া লাগিয়ে দেয়। এটি একই GPU Clusterে মাল্টি-ইউজার মাল্টি-Language সাপোর্ট দেওয়ার সবচেয়ে রেভোলিউশনারি Practical পদ্ধতি।
 
----
 
 ### ৪. Developer Perspective: Hugging Face PEFT & LoraConfig Code
 
@@ -134,7 +131,6 @@ lora_model.print_trainable_parameters()
 # Output: trainable params: 65,536 || all params: 16,842,752 || trainable%: 0.389%
 ```
 
----
 
 ### ৫. Production Perspective: Adapter Merging & Inference Speed
 
@@ -147,7 +143,6 @@ Inference চালানোর সময় প্রোডাকশনে LoRA
   $$W_{\text{final}} = W_{\text{base}} + (B \times A)$$
 * পাইটর্চে আমরা জাস্ট `model.merge_and_unload()` কল করি। এর ফলে Adapterের অতিরিক্ত Computational ওভারহেড জিরো হয়ে যায় এবং Inference স্পিড হুবহু ওরিজিনাল Model-এর মতো আল্ট্রা-ফাস্ট রান করে।
 
----
 
 ### ৬. Common Mistakes
 
@@ -157,7 +152,6 @@ Inference চালানোর সময় প্রোডাকশনে LoRA
 
 **বাস্তবতা:** র‍্যাংক অতিরিক্ত বড় সেট করলে মেমরি ও Compute কস্ট Drastically বেড়ে যায় এবং সবচেয়ে বিপজ্জনকভাবে Model নতুন ডেটাসেটে Overfit (Overfit) করে ফেলে। AI পেপারগুলোর বেঞ্চমার্ক দেখিয়েছে, $r=8$ বা $r=16$ হলো সুইট স্পট, যা সবচেয়ে স্ট্যাবল Generalization দেয়।
 
----
 
 ### ৭. Mental Model: সাউন্ড ট্র্যাক টিউনিং
 
@@ -180,7 +174,6 @@ Purpose: Ground the mathematical intuition of frozen base weights vs. tiny param
 
 ভাবো তোমার সামনে একটি বিশাল অর্কেস্ট্রা দল দাঁড়িয়ে গান গাচ্ছে (Base Weights Frozen)। তুমি তাদের মূল সুরের কোনো পরিবর্তন করতে পারবে না। কিন্তু তুমি চাচ্ছেন ব্যাকগ্রাউন্ডে একটু মিষ্টি বাঁশির টিউন যোগ করতে। এর জন্য অর্কেস্ট্রা ভেঙে নতুন প্লেয়ার আনার দরকার নেই। তুমি তাদের পাশে স্রেফ একজন ছোট বাঁশি বাদক (LoRA Adapter) দাঁড় করিয়ে দিলে, যে অর্কেস্ট্রার মূল তালের সাথে সুর মিলিয়ে Dynamically মিষ্টি সুর যোগ করে দিল।
 
----
 
 ### ৮. Mini Project: পাইথনে স্ক্র্যাচ থেকে LoRA Matrix ফ্যাক্টরাইজেশন ইমুলেটর
 
@@ -222,7 +215,6 @@ print(f"Parameter সাশ্রয়:          {saving_ratio:.4f}% (Ultra Sav
 * **Why it works:** লিনিয়ার অ্যালজেব্রার লো-র‍্যাংক প্রজেকশনের কারণে মাত্র ৬৫ হাজার ওজনের Matrix হিউজ ১৬.৭ মিলিয়ন ওজনের ডাইমেনশনাল স্পেস কভার করেছে।
 * **When to use:** ব্যাকঅ্যান্ডে Custom PEFT অপ্টিমাইজেশন Loop ও মেমরি ম্যাপিং এনালাইসিস করার জন্য।
 
----
 
 ### ৯. Interview Questions
 
@@ -238,7 +230,6 @@ print(f"Parameter সাশ্রয়:          {saving_ratio:.4f}% (Ultra Sav
 3. **প্রশ্ন:** কেন প্রোডাকশন Deploymentের সময় LoRA মডেলকে ডাইরেক্ট সার্ভিস না করে `merge_and_unload()` করা আবশ্যক?
    * **উত্তর:** ডাইরেক্ট সার্ভ করলে Inference-এর সময় Input সিগন্যালকে বেস Model এবং লোর‍্যাংক Adapter উভয় Matrix-এর ভেতর দিয়ে Parallelি রান করতে হয়, যা Computational ওভারহেড ও Latency বাড়িয়ে দেয়। `merge_and_unload()` Adapterের ওজনকে ডিরেক্ট লিনিয়ার অ্যালজেব্রা sum হিসেবে বেস Model-এর সাথে ব্লেন্ড করে দেয়, ফলে অতিরিক্ত মেমরি ওভারহেড জিরো হয় এবং Model হুবহু ওরিজিনাল স্পিডে রান করে।
 
----
 
 ### ১০. Chapter Summary
 * **PEFT** এবং **LoRA** Model Training খরচ ও GPU ভির‍্যাম স্পাইক কমানোর প্রধান Mechanism।
@@ -246,10 +237,8 @@ print(f"Parameter সাশ্রয়:          {saving_ratio:.4f}% (Ultra Sav
 * **QLoRA** ৪-বিট NF4 Quantizationের সাহায্যে মাত্র ১৬ জিবি VRAM কার্ডে বিলিয়ন স্কেলের Model ফাইন-টিউন করতে পারে।
 * প্রোডাকশন লেভেলে আল্ট্রা-ফাস্ট স্পিড নিশ্চিত করতে **Inference Adapter Merging** করা জরুরি।
 
----
 
 ### ১১. What's Next
 দারুণ! আমরা ভালোভাবে Fine-Tuning-এর সবচেয়ে গুরুত্বপূর্ণ GPU অপ্টিমাইজেশন ও লো-র‍্যাংক অ্যাডাপ্টেশন Mechanism শেষ করে ফেলেছি। পরের chapter-এ আমরা এই ট্রেইনড মডেলগুলোকে মানুষের নৈতিকতা ও সেফটি রুলস শেখানোর ফাইনাল সোপান নিয়ে আলোচনা করব: **Chapter 17: Alignment — RLHF, DPO & Safety Tuning**। Reinforcement Learning (RLHF) এবং ডিরেক্ট প্রেফারেন্স অপ্টিমাইজেশন (DPO) কীভাবে AI-কে মিথ্যা ও ক্ষতিকর কথা বলা থেকে বিরত রাখে, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 16 শেষ।**

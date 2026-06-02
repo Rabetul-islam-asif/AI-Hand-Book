@@ -36,7 +36,6 @@ Fine-Tuning (How to Behave - Modifying Internal weights):
 * মডেলকে কোনো Dynamic বা রিয়েল-টাইম ফ্যাক্টস দিতে হলে **RAG** সেরা।
 * মডেলকে নির্দিষ্ট টোন, স্টাইল বা Custom Output Format (যেমন: JSON/SQL জেনারেট করা) শেখাতে হলে **Fine-Tuning** ই একমাত্র সমাধান।
 
----
 
 ### ২. Core Concepts: Supervised Fine-Tuning ও Data স্ট্রাকচার
 
@@ -85,7 +84,6 @@ SFT হলো মডেলকে প্রচুর পরিমাণে Instru
 
 Dataset প্রিপারেশনের সময় সর্বদা **Data Quality**-কে **Data Quantity** এর ওপরে স্থান দাও। ১০ হাজার আজেবাজে Data-এর চেয়ে ১ হাজার হাই-Quality নির্ভুল টোনড Data মডেলকে অনেক বেশি অপ্টিমাইজড করতে পারে। একেই বলে **"Less is More"** রুল।
 
----
 
 ### ৩. Visual Explanation: SFT ট্রেনিং Matrix Loop
 
@@ -108,7 +106,6 @@ Input Tokens (Loss Ignored):           Output Target Tokens (Active Loss 계산)
 
 * **Loss Masking:** ট্রেনিংয়ের সময় আমরা ইউজারের কোশ্চেনের Token-এর ওপর Loss ক্যালকুলেট করি না (Masked with -100 index)। Model কেবল Assistant বা জিপিটি-র উত্তর Prediction-এ ভুল করলে Gradient Backpropagate হয়।
 
----
 
 ### ৪. Real World Example: Cursor-এর `.cursorrules` Custom টোন টিউনিং
 
@@ -117,7 +114,6 @@ Cursor যখন তোমার Project স্পেসিফিক নিয�
 1. **System Prompt Alignment:** তারা তাদের ওপেন-সোর্স বেস মডেলকে (যেমন LLaMA) হাজার হাজার Coding কনভেনশন এবং Project রুলস Instruction Dataset দিয়ে Fine-Tuning (SFT) করেছে।
 2. **Behavior Control:** এর ফলে মডেলটি তোমার Project-এর `.cursorrules` File রিড করে Instantly তোমার টোন ও স্টাইল বুঝতে পারে এবং তোমার স্পেসিফিক Format-এ Code Produce করে।
 
----
 
 ### ৫. Developer Perspective: Hugging Face `Dataset` লোড ও প্রিপারেশন Code
 
@@ -158,7 +154,6 @@ print("--- FORMATTED DATASET FOR TRAINING ---")
 print(tokenized_dataset[0]['text'])
 ```
 
----
 
 ### ৬. Production Perspective: Data Anonymization (Data Anonymization)
 
@@ -169,7 +164,6 @@ Fine-Tuning-এর Dataset রেডি করার সময় এন্ট�
 * **The Risk:** Customার চ্যাটের লাইভ Log থেকে যদি তুমি সরাসরি নাম, ইমেইল, ফোন নাম্বার বা বিকাশ ট্রানজ্যাকশন আইডি দিয়ে Model ট্রেইন করে ফেলেন, তবে Model-এর ভেতরের Weights-এ সেই secret Data এনকোড হয়ে যাবে। পরবর্তীতে Prompt হ্যাক বা র্যান্ডম চ্যাটিংয়ে Model সেই secret Customার Data অন্য ইউজারের সামনে ফাস (Leak) করে দেবে।
 * **সমাধান:** প্রোডাকশন Dataset পাইপলাইনে ট্রেইনিংয়ের আগে ডেটাকে strictly **Anonymize** করতে হয় (যেমন: স্পেশাল Regular Expression বা পাইথন `presidio` Library ব্যবহার করে ফোন নাম্বারকে `<PHONE>` এবং নামকে `<NAME>` দিয়ে মাস্ক করা)।
 
----
 
 ### ৭. Common Mistakes
 
@@ -179,7 +173,6 @@ Fine-Tuning-এর Dataset রেডি করার সময় এন্ট�
 
 **বাস্তবতা:** Model Fine-Tuning-এর সময় তোমার ডেটাসেটে যা পাবে, সে হুবহু সেই স্টাইল ও তথ্যই হুবহু অনুকরণ করবে। তোমার ডেটাসেটে বানান ভুল থাকলে ফাইন-টিউনড Model-ও প্রোডাকশনে বানান ভুল Produce করবে। তাই Dataset ক্লিন রাখা Fine-Tuning-এর সবচেয়ে গুরুত্বপূর্ণ কাজ।
 
----
 
 ### ৮. Mental Model: অ্যাক্টিং স্কুলে ভর্তি করা
 
@@ -190,7 +183,6 @@ Fine-Tuning বনাম আরএজি-র মেন্টাল Model:
 * **Fine-Tuning = অ্যাক্টিং স্কুলে ক্যারেক্টার ট্রেনিং (Synaptic change):**
   তুমি একটি অভিনেতাকে অ্যাক্টিং স্কুলে পাঠালেন। সে সেখানে কোনো নতুন ইতিহাস বা ফ্যাক্টস শিখছে না। সে শিখছে কীভাবে একজন রাগী পুলিশের মতো অভিনয় করতে হয়, বা কীভাবে একজন মিষ্টি ডাক্তারের Persona ধারণ করে কথা বলতে হয়।
 
----
 
 ### ৯. Mini Project: পাইথনে Custom Alpaca Dataset জেনারেটর ও সিকিউরিটি পিআইআই ফিল্টার
 
@@ -250,7 +242,6 @@ for idx, data in enumerate(sanitized_dataset):
 * **Why it works:** Custom Regular Expression Pattern perfectly ফোন ও ইমেইল ডিটেক্ট করে Placeholder ট্যাগ দিয়ে replace করেছে, যা প্রোডাকশন Data লিক হওয়ার ঝুঁকি ১০০% দূর করে।
 * **When to use:** রিয়েল ইউজার Database থেকে Fine-Tuning Dataset Preparation করার সময়।
 
----
 
 ### ১০. Interview Questions
 
@@ -266,7 +257,6 @@ for idx, data in enumerate(sanitized_dataset):
 3. **প্রশ্ন:** SFT ট্রেনিংয়ের সময় Loss ক্যালকুলেশনে কেন "Target Prompt Masking (Index -100)" ব্যবহার করা হয়? এর গুরুত্ব কী?
    * **উত্তর:** এসএফটি (SFT) ট্রেনিংয়ে আমাদের লক্ষ্য মডেলকে ইউজারের প্রশ্নের পর কীভাবে সঠিক উত্তর দিতে হয় তা শেখানো। ইউজার কী প্রশ্ন করবে তার ওপর Model-এর কোনো নিয়ন্ত্রণ নেই, তাই Prompt Token-এর ওপর Loss ক্যালকুলেট করা মেমরি ও Gradient অপ্টিমাইজেশন ব্যাহত করে। টার্গেট মাস্কিং (-100 Index) চেইন রুলকে শুধুমাত্র Assistant Response Token-এর ওপর ওয়েটস আপডেট করতে গাইড করে।
 
----
 
 ### ১১. Chapter Summary
 * **Supervised Fine-Tuning (SFT)** Model-এর আচরণ ও টোন পরিবর্তনের মূল Mathematical method।
@@ -274,10 +264,8 @@ for idx, data in enumerate(sanitized_dataset):
 * **Alpaca** এবং **ShareGPT** Instruction Dataset-এর প্রধান দুটি গোল্ড Standard Format।
 * প্রোডাকশন Dataset প্রিপারেশনে strictly **PII Masking** ensure করা must।
 
----
 
 ### biographies.md
 দারুণ! আমরা ভালোভাবে Supervised Fine-Tuning-এর Data প্রিপারেশন ও থিওরি শেষ করে ফেলেছি। পরের chapter-এ আমরা এই Fine-Tuning মেমরি ও GPU Compute কস্ট save করার জন্য সবচেয়ে revolutionary Mechanism নিয়ে আলোচনা করব: **Chapter 16: Parameter-Efficient Fine-Tuning (LoRA & QLoRA)**। Low-Rank Adapter (LoRA) এর Mathematical Intuition এবং ৪-বিট Quantization (QLoRA) কীভাবে কনজিউমার ল্যাপটপে এলএলএম ফাইন-টিউন করতে সাহায্য করে, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 15 শেষ।**

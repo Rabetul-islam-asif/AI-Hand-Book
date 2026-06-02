@@ -35,7 +35,6 @@ User Query: "Check account balance TRX999" (Total: 1.2s, Cost: $0.003)
 
 AI অবজারভেবিলিটি হলো AI-এর সেই ড্যাশবোর্ড ক্যামেরা। এটি ব্ল্যাকবক্স চ্যাট API-এর প্রতি ইনার Token ও টুল কলের মেমরি ফ্লো রিয়েল-টাইমে ভিজ্যুয়ালাইজ করে।
 
----
 
 ### ২. Core Concepts: ট্রেসিং, মেট্রিদ ও ইভালুয়েশন
 
@@ -76,7 +75,6 @@ Purpose: Define the metrics of RAG evaluation.
 **Faithfulness = Hallucination Detector!**  
 Ragas এর `Faithfulness` স্কোর ০ মানে Model সোর্স ডক ইগনোর করে সম্পূর্ণ নিজের মতো মনগড়া বা Hallucinateেড উত্তর জেনারেট করেছে। ১ মানে উত্তর ১০০% সোর্সের তথ্যের ওপর ভিত্তি করে তৈরি।
 
----
 
 ### ৩. Visual Explanation: Loop ও বটলনেক ডিটেকশন
 
@@ -101,7 +99,6 @@ Request Lifetime: 10.0 seconds (High Latency!)
 
 ড্যাশবোর্ডের এই টাইমলাইন চার্ট স্ক্যান করে Developer সাথে সাথে বুঝতে পারো Latencyর মূল অপরাধী এলএলএম নয়; অপরাধী হলো Indexবিহীন স্লো Vector Database Search, যা ৮ সেকেন্ড সময় নষ্ট করেছে।
 
----
 
 ### ৪. Real World Example: Perplexity-র গ্লোবাল অবজারভেবিলিটি ড্যাশবোর্ড
 
@@ -110,7 +107,6 @@ Perplexity.ai বা Cursor যখন লক্ষ কোটি Concurrent র�
 1. **Auto Tracing:** প্রতি সেকেন্ডে জেনারেট হওয়া প্রতিটি Code-এর পেছনের Computation গ্রাফ ওপেন-টেলিমেন্ট্রি (OpenTelemetry) দিয়ে প্রসেস করে ড্যাশবোর্ডে লাইভ স্টিমিং রেকর্ড করা হয়।
 2. **Anomaly Alert:** কোনো নির্দিষ্ট ক্লায়েন্টের কস্ট যদি ১ মিনিটে ১০ ডলার ক্রস করে, ড্যাশবোর্ডের এনোমালি ডিটেক্টর (Anomaly Detector) অ্যালার্ট রেইজ করে সেই ক্লায়েন্টের Custom সেশন রেট-লিমিট লক করে দেয়।
 
----
 
 ### ৫. Developer Perspective: PyTorch & Python standard SDK তে Custom লগার Code
 
@@ -161,7 +157,6 @@ print("\n--- FLAGSHIP OBSERVABILITY TRACING JSON ---")
 print(json.dumps(logger.trace, indent=2))
 ```
 
----
 
 ### ৬. Production Perspective: PII Masking over Trace Logs
 
@@ -172,7 +167,6 @@ print(json.dumps(logger.trace, indent=2))
 * **The Threat:** যদি ইউজার চ্যাটে তার ক্রেডিট কার্ড নম্বর বা পাসওয়ার্ড টাইপ করে এবং তোমার ট্রেসিং লগার হুবহু Input-Output ক্লাউড ড্যাশবোর্ডে পাঠিয়ে দেয়, তবে সম্পূর্ণ Data সিকিউরিটি কমপ্লায়েন্স ভেঙে পড়বে (GDPR / HIPAA violations)।
 * **সমাধান:** প্রোডাকশন অবজারভেবিলিটি পাইপলাইনে ক্লাউডে Data পুশ করার আগে একটি Custom **Data Sanitization Filter Middleware** ব্যবহার করা বাধ্যতামূলক, যা সমস্ত সংবেদনশীল Data মাস্ক বা ফিল্টার করে ড্যাশবোর্ডে সেভ করে।
 
----
 
 ### ७. Common Mistakes
 
@@ -182,7 +176,6 @@ print(json.dumps(logger.trace, indent=2))
 
 **বাস্তবতা:** ট্র্যাকিং বা ট্রেসিং লাইব্রেরিগুলো ব্যাকগ্রাউন্ডে নেটওয়ার্ক রিকোয়েস্ট এবং মেমরি বাফার ব্যবহার করে ক্লাউডে Log পাঠায়, যা তোমার অ্যাপ্লিকেশনের ওপর অতিরিক্ত প্রসেসিং প্রেসার তৈরি করে (Latency সামান্য বাড়াতে পারে)। তাই প্রোডাকশনে সর্বদা **Asynchronous Trace Exporter** (যা প্রধান থ্রেডকে ব্লক না করে ব্যাকগ্রাউন্ডে নন-ব্লকিং কোয়েরি করে) ব্যবহার করা Mandatory।
 
----
 
 ### ৮. Mental Model: এয়ার ট্রাফিক কন্ট্রোল টাওয়ার
 
@@ -205,7 +198,6 @@ Purpose: Ground the intuitive dashboard control space.
 
 অন্ধকারে আকাশে শয়ে শয়ে প্লেন (ইউজার কুয়্যারি) উড়ছে। তুমি যদি কন্ট্রোল টাওয়ারের রাডার (Tracing) সচল না রাখেন, তবে কোন প্লেন কার সাথে কনফ্লিক্ট করছে বা কোথায় জট লেগে রানওয়ে ব্লক হচ্ছে তা তুমি কখনোই বুঝবে না। রাডার স্ক্রিন তোমাকে রিয়েল-টাইমে প্রতিটি ফ্লাইটের স্পিড, অল্টিটিউড এবং ফুয়েল কস্ট দেখিয়ে perfect বিমানবন্দর ট্র্যাকিং ম্যানেজ করতে সাহায্য করে।
 
----
 
 ### ৯. Mini Project: পাইথনে Custom ভিক্টরাইজড Ragas Evaluation Simulateর
 
@@ -248,7 +240,6 @@ print(f"Answer B Faithfulness Score: {score_B:.4f} (Hallucination Detected! )")
 * **Why it works:** `Answer B` এর geometric ওরিয়েন্টেশন সোর্স Vector-এর সম্পূর্ণ বিপরীত দিকে হওয়ায় এর স্কোর খুব নিম্ন ($0.089$) এসেছে, যা Hallucination ডিটেক্ট করেছে।
 * **When to use:** ব্যাকঅ্যান্ডে Custom RAG ইভালুয়েশন পাইপলাইন এবং ট্র্যাকিং Algorithm অটোমেট করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -264,7 +255,6 @@ print(f"Answer B Faithfulness Score: {score_B:.4f} (Hallucination Detected! )")
 3. **প্রশ্ন:** প্রোডাকশন গেটওয়েতে AI অবজারভেবিলিটি মনিটর করার সময় PII Leakage বা Data সিকিউরিটি লিক প্রতিহত করার Standard Architectural Pattern কী?
    * **উত্তর:** এটি প্রতিহত করতে ব্যাকঅ্যান্ডে **PII Sanitizer Middleware / Log Exporter Interceptor** Integrate করতে হয়। এই ফিল্টারটি AI ট্র্যাকিং Data ক্লাউড ড্যাশবোর্ডে পুশ করার আগেই রিয়েল-টাইমে Regular Expression বা Custom নেমড এন্টিটি রিকগনিশন (NER) ব্যবহার করে গ্রাহকের ফোন, ইমেইল বা ক্রেডিট কার্ড নম্বর মাস্ক করে নিরাপদ Placeholderে convert করে।
 
----
 
 ### ১১. Chapter Summary
 * **AI Observability** প্রোডাকশন AI এজেন্টের কার্যকারিতা মনিটর করার একমাত্র স্বচ্ছ ড্যাশবোর্ড।
@@ -272,10 +262,8 @@ print(f"Answer B Faithfulness Score: {score_B:.4f} (Hallucination Detected! )")
 * **Ragas** রিট্রিভাল Quality পরিমাপের জন্য সিমান্টিক ও ফ্যাট-ভিত্তিক স্কোরিং করে।
 * লগার সিকিউরিটি গার্ডে সর্বদা **Trace Log PII Masking** ensure করা must।
 
----
 
 ### ১২. What's Next
 দারুণ! আমরা ভালোভাবে প্রোডাকশন অবজারভেবিলিটি ও ডিস্ট্রিবিউটেড ট্র্যাকিং Mechanism শেষ করে ফেলেছি। পরের chapter-এ আমরা এই প্রোডাকশন সিস্টেমের সবচেয়ে গুরুত্বপূর্ণ ফাইন্যান্সিয়াল ও সেফটি লেয়ার নিয়ে আলোচনা করব: **Chapter 23: Cost Optimization & Guardrails**। Context কম্প্যাকশন, Custom Caching, Prompt ইনজেকশন ব্লক ও Output পিআইআই ভ্যালিডেটর কীভাবে তোমার AI Project-এর বাজেট ও নিরাপত্তা নিশ্চিত করে, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 22 শেষ।**

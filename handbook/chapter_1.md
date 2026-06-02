@@ -22,7 +22,6 @@ AI-এর সবচেয়ে বড় শক্তি হলো— আমরা �
 
 এই Paradigm Shift-ই AI Revolution-এর মূল ভিত্তি।
 
----
 
 ## ১. Tools থেকে Models-এর পথে
 
@@ -82,7 +81,6 @@ AI-এর ক্ষেত্রেও একই বিষয় ঘটে।
 
 সেটা বোঝার জন্য আমাদের প্রথমে বুঝতে হবে, কেন কিছু সমস্যা Traditional Programming দিয়ে সমাধান করা এত কঠিন।
 
----
 
 ## ২. Rules কেন ব্যর্থ হয়?
 
@@ -142,7 +140,6 @@ def is_cat(image):
 
 এই সমস্যাটা Rules লিখে সমাধান করা প্রায় অসম্ভব।
 
----
 
 ## Visual: Traditional Programming বনাম Machine Learning
 
@@ -170,7 +167,6 @@ Model
 Answer
 ```
 
----
 
 ## ৩. Paradigm Shift: Rules থেকে Learning
 
@@ -198,7 +194,6 @@ Data + Answers
 
 অনেক AI Engineer এই নতুন পদ্ধতিকে Software 2 (AI Model) নামেও উল্লেখ করেন।
 
----
 
 ## ৪. Real World Example: Spam Filter
 
@@ -239,7 +234,6 @@ fr33 m0ney
 
 সে Pattern শিখেছে।
 
----
 
 ## ৫. Software 1 (Traditional Programming) বনাম Software 2 (AI Model)
 
@@ -251,7 +245,6 @@ fr33 m0ney
 | `if-else` ভিত্তিক | Pattern ভিত্তিক    |
 | Manual Updates    | Training Updates   |
 
----
 
 ## ৬. কখন Traditional Code ব্যবহার করবে, আর কখন AI?
 
@@ -280,7 +273,6 @@ fr33 m0ney
 
 যেখানে Rules লিখে শেষ করা যায় না, সেখানে AI।
 
----
 
 ## 🧠 Remember
 
@@ -292,7 +284,6 @@ AI-এর সবচেয়ে বড় শক্তি হলো Pattern Learning�
 
 আর এই Pattern Learning-এর উপরই দাঁড়িয়ে আছে ChatGPT, Claude, Gemini, Cursor এবং আধুনিক AI-এর পুরো জগৎ।
 
----
 
 ## Common Mistake
 
@@ -306,7 +297,6 @@ AI সম্ভাবনা (Probability) ভিত্তিক সিদ্ধ�
 
 তাই AI অনেক শক্তিশালী হলেও এটি কখনো ১০০% নিখুঁত নয়।
 
----
 
 ## Chapter Summary
 
@@ -327,7 +317,6 @@ AI কোনো জাদু নয়।
 
 আর এই Pattern Learning-ই ChatGPT, Claude, Gemini, Cursor এবং আধুনিক AI-এর ভিত্তি।
 
----
 
 ## What's Next?
 

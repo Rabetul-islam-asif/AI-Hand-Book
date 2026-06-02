@@ -36,7 +36,6 @@ Purpose: Show that the LLM only decides, while the client code executes.
 
 AI টুল কলিং ঠিক এই প্রসেসে কাজ করে। **এলএলএম নিজে কোনো API কল বা Database কোয়েরি করতে পারে না।** সে শুধু তোমার সিস্টেমকে গাইড করে কোন ফাংশনটি কী Parameter দিয়ে রান করতে হবে।
 
----
 
 ### ২. Core Concepts: JSON স্কিমা এবং টুল কলিং Loop
 
@@ -90,7 +89,6 @@ Step 3: Your server executes local function: check_balance("TRX999") ──► R
 Step 4: Server sends database result back to LLM ──► LLM outputs final friendly text response ✓
 ```
 
----
 
 ### ৩. Visual Explanation: মাল্টি-টুল Parallel কলিং
 
@@ -112,7 +110,6 @@ User Query: "Compare prices of Product A and Product B"
   └── Tool Call 2: check_price(product="B") ──► Local Exec B ──┘
 ```
 
----
 
 ### ৪. Real World Example: bKash চ্যাট পেমেন্ট ভেরিফিকেশন
 
@@ -123,7 +120,6 @@ bKash Customার যখন চ্যাটে এসে বলে, `"আমি
 3. **Execution:** bKash Custom ব্যাকঅ্যান্ড API কল করে ট্রানজ্যাকশন স্ট্যাটাস `"Success"` এবং এমাউন্ট `"500 BDT"` মেপে মডেলকে Response দেয়।
 4. **Friendly Response:** Model Customারকে মিষ্টি বাংলায় বলে: `"ধন্যবাদ, তোমার ৫০০ টাকার পেমেন্টটি ভালোভাবে Verifyড হয়েছে এবং অ্যাকাউন্টে যোগ করা হয়েছে।"`
 
----
 
 ### ৫. Developer Perspective: PyTorch / Python standard SDK তে Custom টুল এক্সিকিউটর
 
@@ -199,7 +195,6 @@ mock_response = {
 handle_ai_response(mock_response)
 ```
 
----
 
 ### ৬. Production Perspective: JSON Validation & Schema Guard
 
@@ -210,7 +205,6 @@ Inferenceে AI মাঝে মাঝে কড়া JSON Schema কনট্�
 * **The Risk:** এই ভুল Parameter সরাসরি তোমার Database বা থার্ড-পার্টি ফাংশনে পাস করলে Application Error বা Database এক্সেপশন ক্র্যাশ করবে।
 * **সমাধান:** প্রোডাকশন ব্যাকঅ্যান্ডে AI-এর জেনারেট করা আর্গুমেন্ট সরাসরি ফাংশনে পাস করার আগে strictly **Pydantic** বা **Zod (TypeScript)** দিয়ে টাইপ Validation চেক করা বাধ্যতামূলক। যদি Validation ফেল করে, System সাথে সাথে AI-কে Error ফিডব্যাক পাঠিয়ে আবার ট্রাই করতে বাধ্য করে (Self-correction loop)।
 
----
 
 ### ৭. Common Mistakes
 
@@ -220,7 +214,6 @@ Inferenceে AI মাঝে মাঝে কড়া JSON Schema কনট্�
 
 **বাস্তবতা:** AI প্রসেস লাইফসাইকেলে কোনো নেটওয়ার্ক রিকোয়েস্ট করতে পারে না। সে শুধু টেক্সট জেনারেট করে। API-এর সম্পূর্ণ নেটওয়ার্ক কল, অথেনটিকেশন এবং সিকিউরিটি Token হ্যান্ডেল করার দায়িত্ব তোমার ব্যাকএন্ড Code-এর। AI শুধুমাত্র ডিসিশন মেকার।
 
----
 
 ### ৮. Mental Model: ব্যাংকের টেলার ও ম্যানেজার
 
@@ -231,7 +224,6 @@ Inferenceে AI মাঝে মাঝে কড়া JSON Schema কনট্�
 * **Your Code = ক্যাশিয়ার বা টেলার (The Executor):**
   ম্যানেজার যখন চিরকুটে লিখে ক্যাশিয়ারকে বলো: `"রহিমের অ্যাকাউন্টের ব্যালেন্স মেপে আমাকে জানাও"`, ক্যাশিয়ার Computeারে কোয়েরি করে ব্যালেন্স মেপে ম্যানেজারকে আবার চিরকুট ফেরত দেয়। ম্যানেজার সেই চিরকুট পড়ে final এপ্রুভাল সিগনেচার দেন।
 
----
 
 ### ৯. Mini Project: পাইথনে স্ক্র্যাচ থেকে একটি Custom উইন্ডোজ কমান্ড এক্সিকিউশন সিকিউর এজেন্ট
 
@@ -284,7 +276,6 @@ print(hack_res)
 * **Why it works:** `..` ট্রাভার্সাল Pattern ডিটেক্টর ডিরেক্টরি এক্সেস ব্লক করেছে, যা হোস্ট ও এস ও (OS) সিকিউরিটি ১০০% গ্যারান্টি দেয়।
 * **When to use:** প্রোডাকশন হারনেস ইঞ্জিনে Custom ব্যাশ (Bash) বা ওএস টুল সেভলি এক্সিকিউট করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -300,7 +291,6 @@ print(hack_res)
 3. **প্রশ্ন:** AI-এর জেনারেট করা আর্গুমেন্ট সরাসরি লোকাল Database ফাংশনে পাস করার প্রোডাকশন রিস্কগুলো কী কী এবং এর বেস্ট প্র্যাকটিস সমাধান কী?
    * **উত্তর:** প্রধান রিস্ক হলো টাইপ মিসম্যাচ এবং Custom Code ইনজেকশন/পাথ ট্রাভার্সাল হ্যাকিং। এর সমাধান হলো সরাসরি Parameter পাস না করে প্রথমে **Pydantic** বা **Zod** এর মতো কড়া স্কিমা ভ্যালিডেটর রান করা এবং Input Sanitizeেশন ফিল্টার নিশ্চিত করার পর শুধুমাত্র ক্লিন Data লোকাল ডাটাবেসে সাবমিট করা।
 
----
 
 ### ১১. Chapter Summary
 * **Tool Calling** অন্ধ AI মডেলকে External API ও Database রিড করার ক্ষমতা দেয়।
@@ -308,10 +298,8 @@ print(hack_res)
 * **Parallel Calling** একই ইউজার মেসেজে একাধিক Custom API কাজ সম্পাদন বুস্ট করে।
 * প্রোডাকশন সিকিউরিটি নিশ্চিত করতে **Strict Argument Validation** করা বাধ্যতামূলক।
 
----
 
 ### ১২. What's Next
 দারুণ! আমরা ভালোভাবে টুল কলিং এবং ফাংশনাল Integration প্রসেস শেষ করে ফেলেছি। পরের chapter-এ আমরা এই টুলের ইউনিভার্সাল Standard প্রোটোকল নিয়ে আলোচনা করব: **Chapter 20: Model Context Protocol (MCP) — The USB-C of AI**। অ্যানথ্রপিকের তৈরি করা মডার্ন এমসিপি (MCP) প্রোটোকল কীভাবে AI টুল ও Resource-এর বৈশ্বিক কানেকশন সহজ করে, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 19 শেষ।**

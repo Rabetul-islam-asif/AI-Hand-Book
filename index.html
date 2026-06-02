@@ -1367,17 +1367,32 @@
                     </div>`;
                 });
                 
-                // Convert Developer Views
-                text = text.replace(/💻 Developer View/g, `<div class="callout-box developer"><div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>`);
+                // Wrap Developer Perspective callouts dynamically
+                text = text.replace(/💻 Developer View([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                    return `<div class="callout-box developer">
+                        <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
+                        ${content.trim()}
+                    </div>`;
+                });
                 
-                // Convert Production Reality
-                text = text.replace(/🏭 Production Reality/g, `<div class="callout-box"><div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>`);
+                // Wrap Production Reality callouts dynamically
+                text = text.replace(/🏭 Production Reality([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                    return `<div class="callout-box">
+                        <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
+                        ${content.trim()}
+                    </div>`;
+                });
                 
-                // Convert Common Mistakes
-                text = text.replace(/🔴 Common Mistake/g, `<div class="callout-box warning"><div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>`);
+                // Wrap Common Mistakes callouts dynamically
+                text = text.replace(/🔴 Common Mistake([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                    return `<div class="callout-box warning">
+                        <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
+                        ${content.trim()}
+                    </div>`;
+                });
                 
-                // Close divs at double hr or headers
-                text = text.replace(/(\n---)/g, '</div>$1');
+                // Clean up any remaining '---' horizontal rules so they are completely removed from display
+                text = text.replace(/\r?\n---/g, '');
 
                 // Render Markdown
                 const contentDiv = document.getElementById("markdownContent");

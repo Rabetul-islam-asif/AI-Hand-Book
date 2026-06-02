@@ -42,7 +42,6 @@ Sentence 2: "It is very fun and robust."
 Sentence 3: "Postgres is a SQL database."
 ```
 
----
 
 ### ২. Core Concepts: আরএজি Data লেয়ারের মূল চালিকাশক্তি
 
@@ -59,7 +58,6 @@ pgvector হলো একটি ওপেন-সোর্স এক্সটে�
 * **Sparse Retrieval (Keyword):** Classical BM25 বা Postgres `tsvector` দিয়ে নির্দিষ্ট কিওয়ার্ড (যেমন: *"X-230 Pro"* বা *"Rahim"*) ম্যাচিং করায়।
 * **RRF (Reciprocal Rank Fusion):** এই দুটি সার্চের Output স্কোর ফিউশন বা মার্জ করে টপ ৫টি perfect Document Produce করে।
 
----
 
 ### ৩. Visual Explanation: HNSW গ্রাফ Vector নেটওয়ার্ক
 
@@ -77,7 +75,6 @@ HNSW Index কীভাবে কাজ করে তার Architecture geometr
 
 HNSW মূলত মাল্টি-লেয়ার হাইওয়ে বা এক্সপ্রেসওয়ের মতো কাজ করে। এটি প্রথমে বড় বড় জাম্প দিয়ে Vector-এর কাছাকাছি জোনে পৌঁছায় এবং এরপর লোকাল নেইবার গ্রাফে ট্রাভার্স করে সেকেন্ডে একদম perfect Vector ম্যাচিং লক করে।
 
----
 
 ### ৪. Real World Example: ব্যাংকের লোন পলিসি Search
 
@@ -87,7 +84,6 @@ HNSW মূলত মাল্টি-লেয়ার হাইওয়ে �
 * **ভুল Chunking:** অফিসার কুয়েরি করলে: *"৬০ বছর বয়সীদের লোন পলিসি কী?"* চাঙ্ক মাঝখান থেকে কেটে যাওয়ায় System লোন সুদের মান ১% খুঁজে পেলো, কিন্তু নোটারি বন্ডের ইনফরমেশন ফিল্টার আউট হয়ে গেল।
 * **Semantic আরএজি:** Semantic Chunking পুরো অনুচ্ছেদটিকে একটি সলিড চাঙ্ক হিসেবে ক্যাশ রাখায় অফিসারকে এক সাথে সুদের হার এবং নোটারি বন্ডের প্রয়োজনীয়তা—উভয় ইনফরমেশনই perfect রেসপন্সে প্রেজেন্ট করলো।
 
----
 
 ### ৫. Developer Perspective: Postgres pgvector + Semantic Chunking সম্পূর্ণ পাইপলাইন Implementation
 
@@ -207,7 +203,6 @@ print("Generated Semantic Chunks:\n", semantic_chunks)
 # store_and_search_chunks(semantic_chunks, "লেট করলে এমপ্লয়ীদের কী জরিমানা কাটা হয়?")
 ```
 
----
 
 ### VI. Production Perspective: PGVector অপ্টিমাইজেশন ও মেমরি সাইজিং
 
@@ -218,7 +213,6 @@ print("Generated Semantic Chunks:\n", semantic_chunks)
 * **RAM vs. Vector Storage:** HNSW Indexিংয়ের ক্ষেত্রে পুরো গ্রাফ নেটওয়ার্কটি র‍্যামের (RAM) ওপর স্টোর হয়ে Computation রান করে। তাই তোমার Database সার্ভারের র‍্যাম সাইজ অবশ্যই Index করা টোটাল Vector-এর Memory সাইজের চেয়ে ১.৫ গুণ বেশি হতে হবে।
 * **Dimension Reduction:** API কস্ট এবং Query Latency কমাতে `text-embedding-3-small` এর `dimensions` Parameter ব্যবহার করে ১৫৩৬ ডাইমেনশনকে ডাইনামিকালি সংকুচিত করে ২৫৬ বা ৫১২ ডাইমেনশনে নিয়ে আসা যায়, যা এক্যুরেসির কোনো ক্ষতি ছাড়াই Query স্পীড ৪ গুণ বুস্ট করে।
 
----
 
 ### VII. Common Mistakes
 
@@ -228,7 +222,6 @@ print("Generated Semantic Chunks:\n", semantic_chunks)
 
 **বাস্তবতা:** একে বলে **Lost in the Context window clutter**। Prompt-এর মধ্যে অপ্রয়োজনীয় ও অতিরিক্ত Duplicate টেক্সট ফিড করলে Model-এর মনোযোগ বিঘ্নিত হয় এবং Latency বেড়ে যায়। প্রোডাকশনে সবসময় টপ ৩ বা ৫টি একদম perfect Semantic চাঙ্ক পাঠানোই Architectural বেস্ট প্র্যাকটিস।
 
----
 
 ### VIII. Mental Model: সুনিপুণ কাঁচি বনাম অন্ধ কুড়াল
 
@@ -236,7 +229,6 @@ Semantic চাঙ্কিংয়ের মেন্টাল Model:
 
 **"আগের Character Chunking হলো অন্ধের মতো কুড়াল দিয়ে পেপার কাটা, যা বাক্যের মাঝখান থেকেও টুকরো করে ফেলে। আর Semantic Chunking হলো সুনিপুণ কাঁচি, যা কেবল Paragraph বা বাক্য শেষ হওয়ার অর্থপূর্ণ সন্ধিক্ষণেই ফোল্ডিং কাটে।"**
 
----
 
 ### IX. Mini Project: স্ক্র্যাচ Cosine Similarity ডিস্ট্যান্স ক্যালকুলেটর
 
@@ -266,7 +258,6 @@ print(f"Cosine Similarity (Closer to 1.0 is better): {cosine_sim:.4f}")
 print(f"pgvector Cosine Distance (Closer to 0.0 is better): {cosine_dist:.4f}")
 ```
 
----
 
 ### X. Interview Questions
 
@@ -282,17 +273,14 @@ print(f"pgvector Cosine Distance (Closer to 0.0 is better): {cosine_dist:.4f}")
 3. **প্রশ্ন:** "Reciprocal Rank Fusion (RRF)" কীভাবে হাইব্রিড সার্চের ফলাফলকে perfect করে?
    * **উত্তর:** RRF হলো এমন একটি Algorithm যা ডেন্স Vector সিমিলারিটি সার্চের র‍্যাঙ্কিং পজিশন এবং স্পার্স কিওয়ার্ড সার্চের র‍্যাঙ্কিং পজিশনকে তাদের র‍্যাঙ্কের ব্যস্তানুপাতিক sum ($Score = \sum \frac{1}{k + r}$) দিয়ে ফিউশন করে নতুন র‍্যাঙ্ক ডিফাইন করে। এর ফলে কোনো Document Vector বা কিওয়ার্ড—উভয় সার্চেই ভালো পজিশনে থাকলে সে হাই রেটিং পেয়ে টপ কুয়েরিতে চলে আসে, যা সিঙ্গেল সার্চের চেয়ে দ্বিগুণ নির্ভুল।
 
----
 
 ### XI. Chapter Summary
 * **Semantic Chunking** অর্থগত অমিল মেপে ডাইনামিক স্লিটিং করার revolutionary প্রসেস।
 * **pgvector** ও **HNSW** Indexিং রিলেশনাল Database Postgres-কে AI-নেটিভ Vector স্পেড দেয়।
 * কস্ট ও Quality ব্যালেন্সের জন্য প্রোডাকশনে **Hybrid Search** এবং ডাইমেনশন Optimization খুব গুরুত্বপূর্ণ।
 
----
 
 ### XII. What's Next
 আমরা ভালোভাবে Semantic আরএজি পিডিএফ Search Engine Architecture সম্পন্ন করেছি। পরের chapter-এ আমরা প্রবেশ করতে যাচ্ছি AI এজেন্টের সবচেয়ে জটিল ও রোমাঞ্চকর প্রোজেক্টে: **Part 11 — Building Real AI Products এর Chapter 26: Blueprint 3 — Agentic CLI Code Writer with Auto-Test Healing**। কীভাবে একটি AI এজেন্ট তোমার Computeারে স্বয়ংক্রিয়ভাবে Code লিখবে, Code লিখে নিজেই টার্মিনাল Test রান করবে, Test Error আসলে নিজেই সেই Error Log রিড করে Code সেলফ-কারেকশন বা হিলিং সম্পন্ন করবে, তা আমরা পাইথনে সম্পূর্ণ রানিং রিঅ্যাক্ট এজেন্ট Loop Architect করে নিজের হাতে Test করবো।
 
----
 **Chapter 25 শেষ।**

@@ -37,7 +37,6 @@ User Prompt 2: "What is bKash PIN reset code?"
 
 * **Guardrail & Semantic Cache Gate:** তুমি মলের প্রবেশদ্বারে একটি কড়া মেটাল ডিটেক্টর এবং ডিকশনারি ক্যাশ বসিয়ে দিলে (Guardrail + Cache)। হ্যাকার ক্ষতিকর Prompt ঢোকানোর চেষ্টা করলেই মেটাল ডিটেক্টর সাইরেন বাজিয়ে রিকোয়েস্ট ব্লক করে দেয়। আবার সাধারণ Customার যখন একই পরিচিত প্রশ্ন নিয়ে প্রবেশ করে, গেটের ক্যাশ মেমরি AI মডেলে না পাঠিয়ে গেট থেকেই সাথে সাথে উত্তরটি দিয়ে বিদায় করে দেয়। এতে তোমার API খরচ কমে হয়ে যায় হুবহু শূন্য!
 
----
 
 ### ২. Core Concepts: কস্ট সেভিং ও সিকিউরিটি ফিল্টারস
 
@@ -65,7 +64,6 @@ Remember
 **Semantic Cache = Wallet Saver!**  
 প্রোডাকশন চ্যাট সাপোর্টে প্রায় ৭০% Customার কোয়্যারি সমমানের বা রি-পিটেটিভ হয়। সিমান্টিক ক্যাশ Integrate করলে তোমার API বিল সাথে সাথে প্রায় ৬০% হ্রাস পাবে এবং Customার ২ মিলি-সেকেন্ডে ইনস্ট্যান্ট উত্তর পাবে।
 
----
 
 ### ৩. Visual Explanation: সিমান্টিক ক্যাশ লাইফসাইকেল
 
@@ -90,7 +88,6 @@ User Query ──► [ Embed Query ] ──► [ Search Cache DB ]
                                                        Save Output to Cache DB
 ```
 
----
 
 ### ৪. Real World Example: Perplexity-র গ্লোবাল প্রোডাকশন গার্ডরেইলস
 
@@ -100,7 +97,6 @@ Perplexity.ai বা ChatGPT মনিটর করার সময় কস্
 2. **Semantic Cache Check:** নিরাপদ Promptটি সেকেন্ডারিলি GPT-Cache বা Custom ক্যাশ ডাটাবেসে হিট করে। ক্যাশ হিট হলে জিরো কস্টে Response ফেরত দেয়।
 3. **LLM Generation:** ক্যাশ মিস হলে কেবল তখনই মেন API কল করা হয়, যা তাদের কোটি কোটি টাকা Server কস্ট সেভ করে।
 
----
 
 ### ৫. Developer Perspective: PyTorch & Python standard SDK তে Custom লিনিয়ার গার্ডরেইল Code
 
@@ -168,7 +164,6 @@ print("\n--- TEST 2: Semantic Cache Query Hit ---")
 secure_gateway("আমার পিন লক হয়ে গেছে রিসেট কীভাবে করব?", np.array([0.89, 0.11, 0.0]))
 ```
 
----
 
 ### ৬. Production Perspective: Context Window Compaction algorithm
 
@@ -183,7 +178,6 @@ Conversational Context Window (Token Memory):
 
 * **The Algorithm:** প্রতি ৫টি Conversation টার্ন পর পর, ব্যাকঅ্যান্ড System আগের সব মেসেজকে একটি ছোট ১-Paragraph সামারিতে সংকুচিত (Compress) করে এবং ওরিজিনাল মেসেজগুলো Window থেকে মুছে দেয়। এই টেকনিকটি প্রোডাকশন Context কস্ট ৮০% কমিয়ে দেয় এবং ইনফিনিট মেমরি সাপোর্ট নিশ্চিত করে।
 
----
 
 ### ७. Common Mistakes
 
@@ -193,7 +187,6 @@ Conversational Context Window (Token Memory):
 
 **বাস্তবতা:** হ্যাকাররা প্রতিনিয়ত নতুন ইমোজি, স্পেশাল এনকোডিং বা Prompt এনালজি ব্যবহার করে Code হ্যাক করে। তাই প্রোডাকশন এন্টারপ্রাইজে সিকিউরিটি নিশ্চিত করতে **Dual Gate** (ইনপুটে Llama Guard এবং Output-এ PII/JSON ভ্যালিডেটর) বসানো সবচেয়ে নির্ভরযোগ্য Architectural Pattern।
 
----
 
 ### ৮. Mental Model: ব্যাংকের সিকিউরিটি গার্ড ও রেডিমেড Token
 
@@ -204,7 +197,6 @@ Conversational Context Window (Token Memory):
 * **Semantic Cache = মেজবানের হাতের Token বক্স:**
   গেটে Customার প্রবেশ করেই যদি এমন কোনো সাধারণ সার্ভিস চায় (যেমন: টয়লেট কোথায়?), গেটের হোস্ট মলের ভেতরে ম্যানেজারকে না ডেকে তার হাতের Token বক্স থেকে রেডিমেড ডিরেকশন স্লিপটি সাথে সাথে Customারকে দিয়ে বিদায় করে দেয়। এতে ম্যানেজারের সময় বাঁচে এবং মলের কস্ট সেভ হয়।
 
----
 
 ### ৯. Mini Project: পাইথনে Custom Token কস্ট মনিটর এবং এলার্ট ট্র্যাকার
 
@@ -254,7 +246,6 @@ if status:
 * **Why it works:** ভিউ কস্ট Integrateেড ট্র্যাকার রিয়েল-টাইমে ডলার Value হিসাব করে গেটওয়ে লক করেছে, যা প্রোডাকশন ক্লাউড বিল ব্লো-আপ হওয়া রোধ করে।
 * **When to use:** ব্যাকঅ্যান্ড API গেটওয়ে এবং কস্ট-লিমিট অপ্টিমাইজেশন Loop সচল করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -270,7 +261,6 @@ if status:
 3. **প্রশ্ন:** প্রোডাকশন লেভেলে Context Window VRAM কস্ট ও Latency অপ্টিমাইজেশনের জন্য "Context Compaction / Summarization" Algorithm কীভাবে কাজ করে?
    * **উত্তর:** Conversation Window যখন একটি নির্দিষ্ট Token লিমিট ক্রস করে, ব্যাকঅ্যান্ড থ্রেডটি আগের Conversationের প্রথম ৬০-৮০% পুরনো মেসেজ স্ক্যান করে একটি ছোট ১-Paragraph সামারিতে সংকুচিত (Compress) করে এবং র মেসেজগুলো মেমরি থেকে ডিলিট করে দেয়। নতুন Context উইন্ডোটি শুধুমাত্র সেই সামারি এবং সবচেয়ে রিসেন্ট ৩-৫টি মেসেজ ধারণ করে, যা VRAMComputations এবং API খরচ অবিশ্বাস্যভাবে কমায়।
 
----
 
 ### ১১. Chapter Summary
 * **Guardrails** AI Input ও Output-এর সিকিউরিটি মেটাল ডিটেক্টর (Llama Guard / Regex)।
@@ -278,10 +268,8 @@ if status:
 * **Context Compaction** আগের Conversation সংকুচিত করে Context Window-এর VRAM প্রটেক্ট করে।
 * প্রোডাকশন সিস্টেমে API বিলের বিস্ফোরণ এড়াতে সর্বদা **Token Cost Monitors** গেটওয়ে সচল রাখা বাধ্যতামূলক।
 
----
 
 ### ১২. What's Next
 অভিনন্দন! আমরা ভালোভাবে এই হ্যান্ডবুকের সবচেয়ে জটিল ও হাই-Valueয়ড **Production AI Systems** পার্টটি সম্পূর্ণ করেছি। পরবর্তী চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে AI দুনিয়ার সবচেয়ে revolutionary ও হ্যান্ডস-অন chapter: **Part 11 — Building Real Products এর Chapter 24: Blueprint 1 — Multi-Session Chatbot with Fact Memory (Redis + Mem0)**। কীভাবে কমপ্লিট Customার Database ও মেমরি Integrate করে ৩টি চ্যাপ্টারের Code একসাথে সচল করে রিয়েল চ্যাটবট বানাতে হয়, তা আমরা লাইন বাই লাইন কোডসহ গভীরভাবে শিখব।
 
----
 **Chapter 23 শেষ।**

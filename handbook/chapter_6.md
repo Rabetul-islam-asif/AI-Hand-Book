@@ -34,7 +34,6 @@ Backward Pass (Error/Gradient Flow):
 [Input X] ◄─── ( Update W1, B1 ) ◄─── [ Hidden Gradients ] ◄─── ( Update W2, B2 ) ◄─── [ Loss Gradient dL/dY ] ◄─── [ Loss ]
 ```
 
----
 
 ### ২. Core Concepts: ফিডForward ও চেইন রুল anatomy
 
@@ -64,7 +63,6 @@ $$\frac{\partial z}{\partial x} = \frac{\partial z}{\partial y} \cdot \frac{\par
 * Loss $L$-এর সাপেক্ষে Layer 1-এর ওয়েইট $W_1$ এর Gradient হবে:
 $$\frac{\partial L}{\partial W_1} = \frac{\partial L}{\partial Y_{pred}} \cdot \frac{\partial Y_{pred}}{\partial A_1} \cdot \frac{\partial A_1}{\partial Z_1} \cdot \frac{\partial Z_1}{\partial W_1}$$
 
----
 
 ### ৩. Visual Explanation: চেইন রুল গিয়ার Mechanism
 
@@ -76,7 +74,6 @@ $$\frac{\partial L}{\partial W_1} = \frac{\partial L}{\partial Y_{pred}} \cdot \
 
 গিয়ার ৩ একটু ঘুরলে গিয়ার ২ কতটুকু ঘুরবে এবং তার জন্য গিয়ার ১-এ কতটুকু ঘূর্ণন বল তৈরি হবে, তা নিমিষেই গুণ হয়ে ট্রান্সফার হয়ে যায়। চেইন রুল এভাবেই Output-এর ভুলের সিগন্যালকে প্রতিটি লেয়ারে perfectly রি-ডিস্ট্রিবিউট করে।
 
----
 
 ### ৪. Real World Example: স্বয়ংক্রিয় গাড়ি (Autonomous Driving)
 
@@ -85,7 +82,6 @@ $$\frac{\partial L}{\partial W_1} = \frac{\partial L}{\partial Y_{pred}} \cdot \
 2. **Error Calculation:** কিন্তু জিপিএস Data বলে ওটা আসলে একটি কংক্রিটের ব্যারিকেড ছিল। সিস্টেমের Loss জেনারেট হয়।
 3. **Backpropagation:** ভুলটি সাথে সাথে Backpropagate করে Model-এর কোটি কোটি Image-এর ওয়েইট Parameter আপডেট করে দেয়, যাতে পরবর্তীতে ওই ধরনের আলোতে Model আর কোনো কংক্রিটের ব্যারিকেডকে ভুল করে ট্রাফিক কোণ না ভাবে।
 
----
 
 ### ৫. Developer Perspective: NumPy দিয়ে স্ক্র্যাচ থেকে ২-লেয়ার Backpropagation Engine Coding
 
@@ -145,7 +141,6 @@ for epoch in range(5):
 * **Epoch 1:** Model-এর গেস ছিল `২.৪` (Loss ছিল `১.২৮`)। গ্র্যাডিয়েন্ট Backpropagate করে Weight আপডেট করলো।
 * **Epoch 5:** ৫ ইপক শেষেই Model-এর Prediction `৩.৯৯` ছাড়িয়ে যায় (Loss ড্রপ করে `০.০০০০`)! মডেলটি Math-এরভাবে perfectly লার্ন করেছে।
 
----
 
 ### ৬. Production Perspective: Gradients Vanishing ও এক্সপ্লোডিং সমস্যা
 
@@ -158,7 +153,6 @@ for epoch in range(5):
 * **Exploding Gradients (গ্র্যাডিয়েন্ট বিস্ফোরণ রোগ):** যখন চেইন রুলে একের পর এক বড় সংখ্যা (যেমন: $2.5 \times 3.0 \times 4.0$) গুণ হতে থাকে, তখন গ্র্যাডিয়েন্ট ইনফিনিটি বা `NaN` হয়ে যায়।
   * **ভ্যাকসিন:** **Gradient Clipping** ব্যবহার করে গ্র্যাডিয়েন্টের সর্বোচ্চ সীমা লক করে দেওয়া।
 
----
 
 ### ৭. Common Mistakes
 
@@ -168,7 +162,6 @@ for epoch in range(5):
 
 **বাস্তবতা:** প্রতিটি ছবির জন্য আলাদা Weight আপডেট করলে তা খুব ধীরগতির হবে এবং Compute কস্ট GPU-কে পুড়িয়ে দেবে। প্রোডাকশনে তাই আমরা **Mini-batch Gradient Descent** ব্যবহার করি, যেখানে একবারে ৩২ বা ৬৪টি ছবির গ্রুপ (Batch) দিয়ে ফরোয়ার্ড পাস করা হয় এবং তাদের এভারেজ Loss দিয়ে একবার Backpropagation চালানো হয়।
 
----
 
 ### ৮. Mental Model: প্রতিধ্বনি বা ইকো
 
@@ -176,7 +169,6 @@ Backpropagation-এর মেন্টাল Model:
 
 **"Forward পাস হলো তোমার পাহাড়ের গুহায় জোরে চিৎকার করা (Sound Propagation)। আর Backpropagation হলো সেই চিৎকারের গুহায় ধাক্কা খেয়ে ফিরে আসা প্রতিধ্বনি (Echo) শুনে তোমার চিৎকার কতটা perfect বা বিকৃত ছিল তা পরিমাপ করা এবং তোমার গলার টিউনিং অ্যাডজাস্ট করা।"**
 
----
 
 ### ৯. Interview Questions
 
@@ -192,17 +184,14 @@ Backpropagation-এর মেন্টাল Model:
 3. **প্রশ্ন:** Vanishing গ্র্যাডিয়েন্ট (Vanishing Gradient) সমস্যা কীভাবে ডিপ Transformer বা গভীর নেটওয়ার্কে সলভ করা হয়?
    * **উত্তর:** এটি মূলত দুইভাবে সলভ করা হয়। প্রথমত, ReLU বা GELU Activation ব্যবহার করা, যার পজিটিভ স্লোপ ১.০ হওয়ায় গ্র্যাডিয়েন্ট স্কুইজ বা ছোট হয় না। দ্বিতীয়ত, **Residual Connections (Skip Connections)** ব্যবহার করা, যা Math-এরভাবে $x + f(x)$ Architectureে চলে, ফলে Backpropagation-এর সময় Derivative নেওয়ার পর অন্তত ১.০ বা ফুল সিগন্যাল কোনো অবক্ষয় ছাড়াই আগের লেয়ারে চলে যায়।
 
----
 
 ### ১০. Chapter Summary
 * **Forward Pass** তথ্যের সম্মুখ যাত্রা এবং **Backward Pass** ভুলের Math-এর পশ্চাদযাত্রা।
 * **Chain Rule** চেইন গিয়ারের মতো ভুলের দায়ভার প্রতিটি হিডেন ওয়েইটে বন্টন করে।
 * প্রোডাকশন লেভেলে Vanishing ও এক্সপ্লোডিং গ্র্যাডিয়েন্ট ডিটেক্ট ও প্রিভেন্ট করা AI ইঞ্জিনিয়ারিংয়ের মূল চ্যালেঞ্জ।
 
----
 
 ### XI. What's Next
 আমরা Deep Learning ও Neural Network-এর কঠিনতম Math-এর মাইলফলক Backpropagation ভালোভাবে শেষ করে ফেলেছি। পরবর্তী চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে আধুনিক বিশ্বকে ওলট-পালট করে দেওয়া AI Architecture: **Part 4 — Modern AI Foundations এর Chapter 7: Transformers — The Architecture That Changed Everything**। কীভাবে RNN/LSTM এর Sequential স্লোনেস ভেঙে Self-Attention এবং Multi-Head Attention Parallel প্রসেসিং বিপ্লব ঘটিয়েছে, তা আমরা ভিজুয়াল ও Practical Code দিয়ে ভাঙবো।
 
----
 **Chapter 6 শেষ।**

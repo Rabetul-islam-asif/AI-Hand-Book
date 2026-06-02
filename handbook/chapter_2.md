@@ -40,7 +40,6 @@ Purpose: Instantly clarify the relationship and boundaries of these terms.
 └────────────────────────────────────────────────────────┘
 ```
 
----
 
 ### ২. Core Concepts: লার্নিং টাইপস ও anatomy
 
@@ -85,7 +84,6 @@ Model বানানোর পর সবচেয়ে গুরুত্বপ�
 
 > 🧠 **গোল্ডেন রুল:** নিজের করা হোমওয়ার্কের প্রবলেম সলভ করে নিজেকে জিনিয়াস ভাবা বোকামি। তেমনি, Training Data-তে ১০০% accuracy পেলেই Model ভালো নয়। আসল পরিচয় লুকিয়ে আছে Test Set-এর পরীক্ষার রেজাল্টে!
 
----
 
 ### ৩. Visual Explanation: Feature Engineering র Paradigm
 
@@ -100,7 +98,6 @@ Deep Learning Pipeline:
                           (Auto-learns: Edges ──► Shapes ──► Faces)
 ```
 
----
 
 ### ৪. Real World Example: ই-কমার্স রিকমেন্ডেশন System
 
@@ -108,7 +105,6 @@ Deep Learning Pipeline:
 * **ML লেয়ার:** তোমার বয়স, কান্ট্রি এবং ব্রাউজিং Category ব্যবহার করে Classical লজিস্টিক Regression মডেলে দেখে তোমার কেনাকাটার সম্ভাবনা কতটুকু।
 * **DL লেয়ার:** তুমি পূর্বে কোন আইটেমের ছবিতে কত সেকেন্ড তাকিয়ে ছিলে, কী ধরণের কমেন্ট লিখেছো, তার আনস্ট্রাকচারড Image ও টেক্সট সিকোয়েন্স এনালাইসিস করে একদম perfect Personaলাইজড প্রোডাক্ট ফিড তৈরি করে।
 
----
 
 ### ৫. Developer Perspective: Classical এমএল (Scikit-Learn) বনাম Deep Learning (Keras/PyTorch)
 
@@ -162,7 +158,6 @@ loss, accuracy = dl_model.evaluate(X_test, y_test, verbose=0)
 print(f"Deep Learning Neural Network Accuracy: {accuracy * 100:.2f}%")
 ```
 
----
 
 ### ৬. Production Perspective: কস্ট ও Resource সিলেকশন
 
@@ -173,7 +168,6 @@ Developer হিসেবে বড় ভুল হলো সাধারণ ক�
 * **সার্ভিং কস্ট:** সাধারণ এমএল Model সিপইউতেই (CPU) মাইক্রো-সেকেন্ডে রান করে। আর Deep Learning বা Transformer Model-এর জন্য GPU (GPU) ও Memory কস্ট প্রতি মাসে হাজার ডলার ছাড়িয়ে যেতে পারে।
 * **Data-এর ঘাটতি:** তোমার কাছে যদি মাত্র ৫০০ লাইনের Database থাকে, তবে Neural Network ট্রেইন করতে গেলে তা চরম Overfit হবে। এমতাবস্থায় এমএল Algorithm (যেমন Random Forest বা SVM) অনেক ভালো জেনারেলাইজ করবে।
 
----
 
 ### ৭. Common Mistakes
 
@@ -183,7 +177,6 @@ Developer হিসেবে বড় ভুল হলো সাধারণ ক�
 
 **বাস্তবতা:** Tabular বা Excel Sheet Data-এর ক্ষেত্রে Deep Learning অনেক সময় বুস্টেড ট্রিস (যেমন XGBoost বা LightGBM) এর চেয়ে খারাপ পারফর্ম করে। Neural Network তৈরিই হয়েছে Image, টেক্সট এবং অডিওর মতো চরম Non-linear আনস্ট্রাকচারড Data-এর ভেতরের হিডেন Relationship বোঝার জন্য।
 
----
 
 ### ৮. Mental Model: সাধারণ কারিগর বনাম বৈজ্ঞানিক গবেষক
 
@@ -191,7 +184,6 @@ Developer হিসেবে বড় ভুল হলো সাধারণ ক�
 
 **"Machine Learning হলো একজন সাধারণ দর্জি যিনি তোমার হাতের মাপ, ঝুলের মাপ (Manual Features) ফিতায় মেপে জামা কাটেন। আর Deep Learning হলো থ্রিডি স্ক্যানার (Neural Network) যা নিজে থেকেই তোমার শরীরের perfect থ্রিডি স্ট্রাকচার তৈরি করে জামা তৈরি করে ফেলে।"**
 
----
 
 ### ৯. Mini Project: Customার রিটেনশন Classifier
 
@@ -223,7 +215,6 @@ test_user = np.array([7, 12])
 print(f"Prediction for active user (7 logins, $12): {'Retained' if predict(test_user) == 1 else 'Churned'}")
 ```
 
----
 
 ### ১০. Interview Questions
 
@@ -239,17 +230,14 @@ print(f"Prediction for active user (7 logins, $12): {'Retained' if predict(test_
 3. **প্রশ্ন:** Tabular Database Analysis করতে তুমি XGBoost নাকি Custom Multi-Layer Perceptron (Neural Network) সিলেক্ট করবে? কেন?
    * **উত্তর:** Tabular Data-এর জন্য XGBoost বা LightGBM সিলেকশনই প্রোডাকশন-গ্রেড সিদ্ধান্ত। কারণ Tabular ডেটাতে Feature গুলো অলরেডি স্ট্রাকচারড থাকে, যার জন্য বুস্টেড ট্রিস অনেক দ্রুত Converge করে এবং Computational খরচ ও Overfitting রিস্ক অনেক কম হয়। Neural Network সাধারণত Image বা আনস্ট্রাকচারড সিকোয়েনশিয়াল Data-এর জন্য বেশি উপযোগী।
 
----
 
 ### ১১. Chapter Summary
 * **Machine Learning** Tabular Data-এর জন্য এবং **Deep Learning** আনস্ট্রাকচারড Data-এর (Image, টেক্সট, অডিও) জন্য উপযোগী।
 * Supervised Learning **লেবেলড Data** ব্যবহার করে, Unsupervised Learning **হিডেন Pattern** খোঁজে, এবং Reinforcement Learning **রিওয়ার্ড-Penalty** সিস্টেমে চলে।
 * প্রোডাকশন লেভেলে কস্ট ও Data-এর সাইজ বিবেচনা করে Model সিলেক্ট করতে হবে।
 
----
 
 ### XII. What's Next
 আমরা ভালোভাবে Machine Learning ও Deep Learning-এর ভেতরের Mechanics ও তাদের পার্থক্য শিখে ফেলেছি। পরের chapter-এ আমরা ঢুকবো Machine Learning-এর Math-এর প্রাণকেন্দ্রে: **Part 2 — Machine Learning এর Chapter 3: The Math of Learning — Loss Functions & Optimization**। কীভাবে গণিতের Loss Function আর গ্র্যাডিয়েন্ট ডিসেন্ট আমাদের Model-এর অ্যাডজাস্টেবল Parameter গুলোকে perfectly Optimize করে, তা আমরা নিজের হাতে ভাঙবো।
 
----
 **Chapter 2 শেষ।**

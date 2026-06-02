@@ -31,7 +31,6 @@ Parent-Document Retrieval (Complete Context ✓):
 
 অ্যাডভান্সড রিট্রিভাল ঠিক এই স্মার্ট লাইব্রেরিয়ানের মতো কাজ করে। এটি সার্চের জন্য ছোট Vector ব্যবহার করে স্পিড বাড়ায়, কিন্তু Decoderে পাঠানোর সময় পুরো চ্যাপ্টার ইনজেক্ট করে Quality ম্যাক্সিমাইজ করে।
 
----
 
 ### ২. Core Concepts: হাইব্রিড Search ও রির‍্যাঙ্কিং Engine
 
@@ -91,7 +90,6 @@ Vector Search Database থেকে টপ ১০টি সম্ভাব্য
 **Semantic (Dense)** = শব্দের অর্থ ও ভাবার্থ খোঁজে।  
 **Reranker (Cross-Encoder)** = এই দুইয়ের Output ছেঁকে সেরা হিরের টুকরোটি বের করে।
 
----
 
 ### ৩. Visual Explanation: ক্রস-Encoder রির‍্যাঙ্কিং Mechanism
 
@@ -115,7 +113,6 @@ Cross-Encoder (Reranker - Slow & Ultra-Accurate):
 
  Standard Vector Search প্রতিটি Vector আলাদাভাবে প্রসেস করে ডট প্রোডাক্ট করে (Bi-Encoder)। কিন্তু রির‍্যাঙ্কার ইউজার কুয়্যারি এবং ডক টেক্সট একসাথে জোড়া লাগিয়ে ট্রান্সফরমার লেয়ারে ডিপ জয়েন্ট Attention রান করে রিলেশন ম্যাপ করে, যা চরম perfect স্কোর দেয়।
 
----
 
 ### ৪. Real World Example: Perplexity-র হাইব্রিড Inference পাইপলাইন
 
@@ -125,7 +122,6 @@ Perplexity.ai যখন তোমার কোয়্যারির জন্
 2. **First-Stage Retrieval:** তোমার কুয়্যারির ওপর স্পার্স ও ডেন্স হাইব্রিড Search রান করে ফার্স্ট স্টেজে ১০০টি সম্ভাব্য সোর্স পেজ তুলে আনা হয়।
 3. **Reranking:** একটি শক্তিশালী রির‍্যাঙ্কার Model (Cohere Rerank) ৩ মিলি-সেকেন্ডে ১০০টি পেজ স্ক্যান করে বেস্ট ৫টি পেজ Promptে ফিড করে, যা ইনস্ট্যান্ট হাই-Quality সোর্সিং গ্যারান্টি দেয়।
 
----
 
 ### ৫. Developer Perspective: PyTorch & Cohere Custom রির‍্যাঙ্কার Code
 
@@ -166,7 +162,6 @@ for idx, result in enumerate(response.results):
     print(f"Rank {idx+1}: Score = {score:.4f} -> '{documents[doc_index]}'")
 ```
 
----
 
 ### ৬. Production Perspective: Two-Stage Retrieval Optimization
 
@@ -178,7 +173,6 @@ for idx, result in enumerate(response.results):
 * **Stage 2 (Fine Re-ranking):** এই ৫০টি ডকের ওপর রির‍্যাঙ্কার Model রান করে টপ ৩টি Document Promptে ইনজেক্ট করা হয়। (Latency ~৫০ মিলি-সেকেন্ড)।
 * এই টু-স্টেজ অপ্টিমাইজেশন স্পিড ও এক্যুরেসির সেরা প্রোডাকশন ব্যালেন্স দেয়।
 
----
 
 ### ৭. Common Mistakes
 
@@ -188,7 +182,6 @@ for idx, result in enumerate(response.results):
 
 **বাস্তবতা:** লাখ লাখ ডকের ওপর সরাসরি ক্রস-Encoder রির‍্যাঙ্ক রান করলে একটি সিঙ্গেল কোয়্যারি কমপ্লিট হতে কয়েক মিনিট লেগে যাবে এবং Server ক্র্যাশ করবে। রির‍্যাঙ্কার শুধুমাত্র প্রথম স্টেজের ফাস্ট ফিল্টারড Document-এর (সর্বোচ্চ ৫০-১০০টি) ওপর প্রয়োগ করার জন্য ডিজাইন করা হয়েছে।
 
----
 
 ### ৮. Mental Model: নিয়োগ পরীক্ষার ইন্টারভিউ বোর্ড
 
@@ -199,7 +192,6 @@ for idx, result in enumerate(response.results):
 * **Reranker = ভাইভা বোর্ড (Cross-Encoder):**
   এই ১০০০ জনের মধ্য থেকে টপ ১০ জনকে ভাইভা বোর্ডে মুখোমুখি ডেকে (Deep Joint Attention) ইন-ডেপথ কোশ্চেন করে ফাইনাল সেরা ৩ জনকে চাকরি দেওয়া হলো।
 
----
 
 ### ৯. Mini Project: পাইথনে Custom স্পার্স (Keyword) + ডেন্স (Vector) হাইব্রিড Search এগ্রিগেটর
 
@@ -256,7 +248,6 @@ print(f"\n[BEST MATCH RETRIEVED] '{hybrid_results[0][1]}' with Score {hybrid_res
 * **Why it works:** `PIN lock issue...` ডকটিতে কিওয়ার্ড ম্যাচ ও Vector সিমান্টিক উভয় স্কোর হাই থাকায় এটি বেস্ট র্যাঙ্ক স্কোর লাভ করেছে।
 * **When to use:** ব্যাকঅ্যান্ডে Custom হাইব্রিড Search মার্জার ও র্যাঙ্কিং এগ্রিগেটর মডিউল অপ্টিমাইজ করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -272,7 +263,6 @@ print(f"\n[BEST MATCH RETRIEVED] '{hybrid_results[0][1]}' with Score {hybrid_res
 3. **প্রশ্ন:** HyDE (Hypothetical Document Embeddings) কীভাবে রিট্রিভাল এক্যুরেসি উন্নত করে এবং কোন প্রজেক্টে এটি ব্যবহার করলে রিট্রিভাল Quality হ্রাস পাওয়ার ঝুঁকি থাকে?
    * **উত্তর:** HyDE ইউজার কুয়্যারির ওপর ভিত্তি করে প্রথমে একটি কাল্পনিক উত্তর জেনারেট করে এবং সেটি এম্বেড করে Search করে। যেহেতু কাল্পনিক উত্তর এবং আসল ডকের রাইটিং Format হুবহু মিলে যায়, রিট্রিভাল বুস্ট হয়। তবে Project যদি রিয়েল-টাইম ফ্যাট বা Dynamic সংখ্যার ওপর নির্ভরশীল হয়, তবে কাল্পনিক উত্তরের কাল্পনিক Data সার্চকে সম্পূর্ণ অন্যদিকে ডাইভার্ট করে দিতে পারে (Hallucinated retrieval risk)।
 
----
 
 ### ১১. Chapter Summary
 * **Advanced Retrieval** আরএজি-র এক্যুরেসি ও ইনফরমেশন সিকিউরিটি প্রোডাকশন গ্রেডে উন্নীত করে।
@@ -280,10 +270,8 @@ print(f"\n[BEST MATCH RETRIEVED] '{hybrid_results[0][1]}' with Score {hybrid_res
 * **Re-ranking** ক্রস-Encoderের সাহায্যে টপ ক্যান্ডিডেটগুলোর গভীর অর্থ স্ক্যান করে ফাইনাল সোর্স সিলেক্ট করে।
 * প্রোডাকশন এন্টারপ্রাইজ আরএজি-তে Latency মিনিমাইজ করতে সর্বদা **Two-Stage Retrieval** ব্যবহার করা Mandatory।
 
----
 
 ### ১২. What's Next
 দারুণ! আমরা ভালোভাবে আরএজি-র সব এডভান্সড টেকনিক ও Architecture শেষ করে ফেলেছি। পরবর্তী চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে Model পোষ মানানো বা AI টিউনিংয়ের সবচেয়ে ক্রুশিয়াল chapter: **Part 8 — Fine-Tuning এর Chapter 15: Supervised Fine-Tuning (SFT) & Dataset Preparation**। আরএজি বনাম Fine-Tuning-এর গাইডলাইন এবং Custom ডেসক্রিপটিভ Dataset কীভাবে প্রিপেয়ার করতে হয়, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 14 শেষ।**

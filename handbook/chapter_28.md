@@ -40,7 +40,6 @@ Purpose: Provide visual layout of the multidisciplinary skills required in the m
        ▼
 ```
 
----
 
 ### ২. Core Concepts: AI Architectের স্কিল Matrix
 
@@ -65,7 +64,6 @@ Purpose: Provide visual layout of the multidisciplinary skills required in the m
 * **Constitutional Guides:** `AGENTS.md` বা হার্নেস গাইডের মাধ্যমে এজেন্টের Conditional লিমট লক করা।
 * **Automated Lint Sensors:** এজেন্টের কাজ Deterministic Test Loop দিয়ে ভ্যালিডেট করা।
 
----
 
 ### ৩. Visual Explanation: AI System ডিজাইনের গোল্ডেন রুলস
 
@@ -81,7 +79,6 @@ Purpose: Provide visual layout of the multidisciplinary skills required in the m
     (Cheap, Fast)              (Safe, Local)             (Smartest, Heavy)
 ```
 
----
 
 ### ৪. Real World Example: ব্যাংকিং আরএজি (RAG) Architecture ডিজাইন ইন্টারভিউ
 
@@ -94,7 +91,6 @@ Purpose: Provide visual layout of the multidisciplinary skills required in the m
   3. **Semantic ইনজেকশন:** পিডিএফগুলোকে আমরা Semantic Chunking এবং HNSW Indexিং দিয়ে Postgres-এ সেভ রাখবো।
   4. **সিকিউরিটি হার্নেস:** আমরা API গেটওয়েতে Redis Token Bucket রেট লিমিটিং এবং Output Validationের জন্য হার্নেস লিন্টার Loop লাগাবো যাতে গ্রাহক অন্য গ্রাহকের একাউন্টের তথ্য Prompt ইনজেক্ট করে বের করতে না পারে।
 
----
 
 ### ৫. Developer Perspective: ক্যারিয়ার পোর্টফোলিও গড়ার Practical গাইডলাইন
 
@@ -118,7 +114,6 @@ Developer হিসেবে গিটহাবে কেবল সাধার�
    * *Feature:* Redis দিয়ে TPM/RPM লিমিট করা এবং স্ট্রাইপ মেটা ইভেন্ট সাবমিট করে অটো ইউসেজ বিলিং করা।
 ```
 
----
 
 ### VI. Production Perspective: লাইফ-লং লার্নিং ও AI ট্র্যাকিং
 
@@ -131,7 +126,6 @@ AI Architect হিসেবে নিজেকে আপডেট রাখা�
 * **arXiv Sanity Preserver:** আন্দ্রে কার্পাথির তৈরি করা এই পোর্টালটি কঠিন কঠিন AI রিসার্চ পেপারগুলোকে Category অনুযায়ী সর্ট করে পড়তে সাহায্য করে।
 * **GitHub Trending (Python section):** এখানে চোখ রাখলে নতুন ও revolutionary AI রেপো ও ফ্রেমওয়ার্কের খোঁজ সবার আগে পাওয়া যায়।
 
----
 
 ### VII. Common Mistakes
 
@@ -141,7 +135,6 @@ AI Architect হিসেবে নিজেকে আপডেট রাখা�
 
 **বাস্তবতা:** পিএইচডি গণিত লাগে নতুন AI Architecture বা বেস Model প্রি-ট্রেইন করার সময়। কিন্তু AI Engineer বা AI Architectের কাজ হলো অলরেডি এক্সিস্টিং বেস্ট মডেলগুলোকে একসাথে জুড়ে দিয়ে চমৎকার সব বিজনেস সলিউশন বা প্রোডাক্ট দাঁড় করানো। তোমার প্রয়োজন System ডিজাইন Integration স্কিল, কঠিন ক্যারেক্টার Equation মুখস্থ করার ক্ষমতা নয়।
 
----
 
 ### VIII. Mental Model: ব্রিজ Architect বা সেতু নির্মাতা
 
@@ -149,7 +142,6 @@ AI Architectের মেন্টাল Model:
 
 **"AI Architect হলে সেই সেতু নির্মাতা (Bridge Builder) যিনি কঠিন তাত্ত্বিক ও Math-এর রিসার্চ পেপার (Research) এবং বাস্তব কমার্শিয়াল Software ডেভেলপমেন্ট (Software Engineering) এর মধ্যকার নদী পার হওয়ার জন্য একটি মজবুত সেতু তৈরি করো।"**
 
----
 
 ### IX. Mini Project: AI System কস্ট অ্যান্ড Latency ক্যালকুলেটর
 
@@ -192,7 +184,6 @@ estimate_monthly_api_cost(
 )
 ```
 
----
 
 ### X. Interview Questions
 
@@ -208,19 +199,16 @@ estimate_monthly_api_cost(
 3. **প্রশ্ন:** কোনো AI এজেন্টের টুল কলিং লুপে "Constitutional safety harness definition" কেন সিকিউরিটি গ্যারান্টি দেয়? এর Architecture বলো।
    * **উত্তর:** এজেন্ট যখন স্বয়ংক্রিয়ভাবে Code লিখে এক্সিকিউট করে, তখন সে অসাবধানতাবশত ক্ষতিকর Code বা ডিলিট কমান্ড রান করে ফেলতে পারে। safety harness হলো এজেন্টের টুল এক্সিকিউট লেয়ারের ঠিক আগে লাগানো একটি Deterministic Conditional ফিল্টার (যেমন `AGENTS.md` রুলস ভ্যালিডেটর)। এজেন্ট টুল ফায়ার করার সাথে সাথে এই ফিল্টারটি সিনট্যাক্স ও লিংটিং চেক চালায় এবং যদি কোনো আন-অথরাইজড কমান্ড বা ডাইরেক্ট ওএস Query ডিটেক্ট করে, সে সাথে সাথে কলটি ব্লক করে Error লক এজেন্টের ব্রেইনে ফিড করে রোলব্যাক করতে বাধ্য করে, ফলে System হ্যাক হতে পারে না।
 
----
 
 ### XI. Chapter Summary
 * **AI Architects** AI Ecosystem-এর Math-এর ও প্রযুক্তিগত সেতুর সফল কারিগর।
 * ক্যারিয়ারে টিকে থাকতে হলে ওয়ান-লাইন API কলারের ভিড় এড়ে **Systems and Optimization** স্কিলে দক্ষ হতে হবে।
 * গিটহাবে Custom pgvector RAG, ডকার স্যান্ডবক্স এজেন্ট এবং Redis SaaS Project পোর্টফোলিও তোমার সিভির সবচেয়ে বড় অলঙ্কার।
 
----
 
 ### XII. Epilogue: শুভ বিদায় ও শুভ যাত্রা!
 অভিনন্দন! তুমি ভালোভাবে সম্পূর্ণ **Bangla AI Engineering Handbook & Interactive Documentation** সমাপ্ত করেছো। আমরা AI সূচনা থেকে শুরু করে Deep Learning ম্যাথ, Backpropagation, Transformers, Vector Database, আরএজি এবং ফ্ল্যাগশিপ প্রোডাকশন Blueprint ও ক্যারিয়ার রোডম্যাপের মতো খুব কঠিন ও রোমাঞ্চকর সমস্ত অধ্যায় খুব সহজ ও চমৎকার ভাষায় নিজের হাতে ডিকোড ও সলভ করেছি। 
 
 আজকে থেকে তোমার শুরু হচ্ছে একজন কলার থেকে একজন সফল **AI Architect ও AI Engineer** হিসেবে রাজকীয় যাত্রা। তোমার ভবিষ্যৎ চমৎকার সব AI ইনফ্রাস্ট্রাকচার ও প্রোডাক্ট গড়ার জার্নিতে গুগলের পক্ষ থেকে রইলো অফুরন্ত শুভকামনা। 
 
----
 **Chapter 28 সমাপ্ত এবং সম্পূর্ণ হ্যান্ডবুকের বিশাল সমাপ্তি।**

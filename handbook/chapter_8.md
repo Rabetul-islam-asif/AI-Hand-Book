@@ -40,7 +40,6 @@ Token IDs:   [ 12405, 342, 9821, 4402, 129 ]               (Vocabulary look-up)
 Embeddings:  [ [0.12, -0.89, 0.45, ...], [0.02, 0.54, -0.12, ...] ] (1536-dimensional coordinates)
 ```
 
----
 
 ### ২. Core Concepts: Model-এর Input লেয়ারের বিষয়
 
@@ -66,7 +65,6 @@ Context Window হলো একটি Model এক সাথে সর্বো�
 
 Token এবং ইংরেজি শব্দের অনুপাত সাধারণত **১টি শব্দ = ০.৭৫টি Token**। তবে বাংলা বা নন-ল্যাটিন স্ক্রিপ্টের ক্ষেত্রে ফ্রিকোয়েন্সি কম থাকায় ১টি বাংলা শব্দ লিখতে প্রায় ৩ থেকে ৫টি Token খরচ হতে পারে!
 
----
 
 ### ৩. Visual Explanation: Vector স্পেসে শব্দের geometric Clustering
 
@@ -86,7 +84,6 @@ Dimension Y (Royalty)
 
 খেয়াল করো, লিঙ্গভেদে ম্যান ও ওম্যান এবং কিং ও কুইন-এর দূরত্ব ও কোণ সমান। আবার সম্পূর্ণ ভিন্ন Categoryর ফল (Apple, Banana) সম্পূর্ণ ভিন্ন জোনে Cluster হয়ে আছে।
 
----
 
 ### ৪. Real World Example: Token ইনফ্লেশন এবং বিলিং শক
 
@@ -96,7 +93,6 @@ Dimension Y (Royalty)
 
 তুমি যদি কোনো প্রোডাকশন আরএজি (RAG) পাইপলাইনে বাংলা পিডিএফ ব্যবহার করো, তবে তোমার API খরচ ইংরেজি Project-এর চেয়ে ৪ গুণ বেশি হবে। এই কারণে বড় প্রোজেক্টে Custom বেঙ্গলি Tokenizer বা লোকাল Model হোস্ট করাই বেস্ট ডিজাইন সিদ্ধান্ত।
 
----
 
 ### ৫. Developer Perspective: Tiktoken ও OpenAI Embeddings API ব্যবহার
 
@@ -135,7 +131,6 @@ print(f"\nSimilarity (King, Man): {cosine_similarity(v_king, v_man):.4f}") # Hig
 print(f"Similarity (King, Apple): {cosine_similarity(v_king, v_apple):.4f}") # Low/Negative similarity
 ```
 
----
 
 ### VI. Production Perspective: Context Compaction
 
@@ -147,7 +142,6 @@ print(f"Similarity (King, Apple): {cosine_similarity(v_king, v_apple):.4f}") # L
 * চ্যাট হিস্টোরি যখনই ৪০০০ Token ক্রস করে, ব্যাকগ্রাউন্ডের একটি লাইট Model সম্পূর্ণ হিস্টোরিকে কম্প্যাক্ট বা সামারাইজ করে ফেলে।
 * ফাইনাল চ্যাটে আমরা কেবল সামারি Vector ও লেটেস্ট ৫টি মেসেজ মডেলে পাস করি, যা ৮৫% API কস্ট রিডিউস করে।
 
----
 
 ### VII. Common Mistakes
 
@@ -157,7 +151,6 @@ print(f"Similarity (King, Apple): {cosine_similarity(v_king, v_apple):.4f}") # L
 
 **বাস্তবতা:** ইমোজি এবং যতিচিহ্ন Embeddingsের ক্ষেত্রে খুব গুরুত্বপূর্ণ Context বহন করে (যেমন: `:-)` বা `:-(` Model-এর সেন্টিমেন্ট এনালাইসিস সম্পূর্ণ উল্টে দিতে পারে)। তাই Embeddingsের জন্য সবসময় একদম র অ্যান্ড আনফিল্টারড টেক্সট পাঠানোই বেস্ট প্র্যাকটিস।
 
----
 
 ### VIII. Mental Model: কুইক স্যান্ড বা সংখ্যার নদী
 
@@ -165,7 +158,6 @@ Token ও Embeddingsের মেন্টাল Model:
 
 **"Tokenizer হলো কাগজের কল কারখানা যা তোমার টেক্সটকে ছোট ছোট টুকরোতে কাটে। আর Embeddings হলো একটি মায়াবী সংখ্যার নদী (River of Numbers) যেখানে শব্দগুলো ভেসে চলে। একই অর্থপূর্ণ শব্দগুলো নদীর একই মোহনায় কাছাকাছি সাঁতার কাটে, আর বিপরীত অর্থপূর্ণ শব্দগুলো নদীর বিপরীত পাড়ে ভেসে চলে।"**
 
----
 
 ### IX. Mini Project: স্ক্র্যাচ বাইট পেয়ার এনকোডিং (BPE) Algorithm
 
@@ -211,7 +203,6 @@ print(f"Best pair to merge: {best_pair} (Occurrences: {pairs[best_pair]})")
 print("Updated Vocab after 1 merge:\n", vocab)
 ```
 
----
 
 ### X. Interview Questions
 
@@ -227,17 +218,14 @@ print("Updated Vocab after 1 merge:\n", vocab)
 3. **প্রশ্ন:** Vector স্পেসে Embeddingsের "কোসাইন সিমিলারিটি (Cosine Similarity)" কেন "ইউক্লিডিয়ান দূরত্ব (L2 Distance)" এর চেয়ে বেশি কার্যকর?
    * **উত্তর:** ইউক্লিডিয়ান দূরত্ব ডিরেক্ট ম্যাগনিটিউড বা Vector-এর দৈর্ঘ্যের ওপর প্রভাব ফেলে। যদি দুটি Document-এর বিষয়বস্তু একদম এক হয়, কিন্তু একটি ছোট আর একটি অনেক বড় হয়, তবে Vector-এর দৈর্ঘ্য বেশি হওয়ায় তাদের ইউক্লিডিয়ান দূরত্ব অনেক বেশি দেখাবে। কোসাইন সিমিলারিটি মূলত Vector দুটির মধ্যবর্তী কোণ মাপে, Vector-এর দৈর্ঘ্য বা সাইজ উপেক্ষা করে। তাই এটি অর্থগত মিল বা ডিরেকশন ট্র্যাকিংয়ে অনেক বেশি পারফেক্ট।
 
----
 
 ### XI. Chapter Summary
 * **Byte Pair Encoding (BPE)** ভোকাবুলারির বাইরে কোনো শব্দ ডেড বা ক্র্যাশ হতে দেয় না।
 * **Embeddings** প্রতিটি Tokenকে হাই-ডাইমেনশনাল Vector স্থানাঙ্কে রূপ দিয়ে geometric অর্থ দেয়।
 * কস্ট ও Latency Optimization-এর জন্য প্রোডাকশনে **Context Compaction** ট্যাকটিকস ব্যবহার করা খুব জরুরি।
 
----
 
 ### XII. What's Next
 আমরা ভালোভাবে মডার্ন AI ফাউন্ডেশনের খুব গুরুত্বপূর্ণ তাত্ত্বিক এবং Data লেয়ারের চ্যাপ্টারগুলো শেষ করেছি। পরবর্তী চ্যাপ্টার থেকে আমাদের শুরু হচ্ছে লার্জ Language Model Ecosystem-এর মূল পরিচয়: **Part 5 — LLMs এর Chapter 9: The LLM Ecosystem — Decoder-only, Encoder-only & Encoder-Decoder**। কীভাবে BERT, GPT এবং T5 একে অপরের থেকে সম্পূর্ণ ভিন্ন কাজে ব্যবহৃত হয় এবং কেন Decoderের জয়জয়কার, তা আমরা বিস্তারিত শিখবো।
 
----
 **Chapter 8 শেষ।**

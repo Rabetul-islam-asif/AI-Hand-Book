@@ -34,7 +34,6 @@ Prompt: "bKash campaign dynamic rules?"
 
 আরএজি (RAG) হলো এলএলএম-এর জন্য ঠিক এই ওপেন-বুক পরীক্ষার মতো। Model নিজে কিছু মুখস্থ করে না, সে Vector Database নামক "বই" থেকে রিলেটেড পাতা খুঁজে এনে উত্তর দেয়।
 
----
 
 ### ২. Core Concepts: আরএজি ও চাংকিং Mechanism
 
@@ -76,7 +75,6 @@ User Query ──► [ Embed Query ] ──► [ Semantic Search Vector DB ] ─
 3. **Recursive Character Chunking (পুনরাবৃত্তিমূলক খন্ডন):** এটি ইন্ডাস্ট্রির সবচেয়ে প্রিয় ও Standard পদ্ধতি। এটি প্রথমে Paragraph (`\n\n`), তারপর লাইন (`\n`), তারপর স্পেস দেখে ইন্টেলিজেন্টলি কাটে যাতে বাক্যের অর্থ ও প্যারাগ্রাফের পূর্ণতা বজায় থাকে।
 4. **Semantic Chunking (অর্থগত খন্ডন):** এটি সবচেয়ে অ্যাডভান্সড পদ্ধতি। এটি পুরো টেক্সটের Embeddings Vector-এর পরিবর্তন পরিমাপ করে। যখনই টেক্সটের টপিক বা মিনিং চেঞ্জ হয় (Cosine distance বাড়ে), সে নতুন চাঙ্ক তৈরি করে।
 
----
 
 ### ৩. Visual Explanation: চাঙ্ক ওভারল্যাপের গুরুত্ব
 
@@ -99,7 +97,6 @@ Chunk 2:                            [ He must visit bKash office to reset it. ]
 
 * **ওভারল্যাপের সুবিধা:** যদি ওভারল্যাপ না থাকতো, তবে `"He must visit"` শব্দটি মাঝখান থেকে কেটে যেত, ফলে রিট্রিভালের সময় দ্বিতীয় চাঙ্কটি তার পূর্ববর্তী Context হারিয়ে ফেলত।
 
----
 
 ### ৪. Real World Example: Perplexity-র সোর্স সাইটেশন আরএজি
 
@@ -109,7 +106,6 @@ Perplexity.ai বা চ্যাটজিপিটির ব্রাউজি�
 2. **Cosine Retrieval:** তোমার কুয়্যারির সাথে যে চাঙ্কগুলোর মিল ৯০%-এর বেশি, সেগুলো ছেঁকে নিয়ে Promptে সাজায়।
 3. **Context Injection & Citation:** Prompt-এর ভেতর কড়া System রুল থাকে: `"Answer only using the context below and cite your sources [1], [2]..."`। এর ফলে AI Hallucinationহীন perfect উত্তর ও সাইটেশন Produce করে।
 
----
 
 ### ৫. Developer Perspective: Recursive Character Splitter Implementation
 
@@ -149,7 +145,6 @@ for idx, chunk in enumerate(chunks):
     print("-" * 30)
 ```
 
----
 
 ### ৬. Production Perspective: Context Leakage ও সিকিউরিটি ফিল্টার
 
@@ -160,7 +155,6 @@ for idx, chunk in enumerate(chunks):
 * **Context Leakage:** একজন সাধারণ Customার চ্যাটবটে এমন প্রশ্ন করল যা Companyর ইন্টারনাল AI হ্যাক করে কোনো অ্যাডমিনের স্যালারি শিট বা সিক্রেট Project-এর Vector রিট্রাইভ করে Promptে ইনজেক্ট করে ফেলল।
 * **সমাধান:** প্রোডাকশন সিস্টেমে প্রতিটি Vector ইনজেস্ট করার সময় তার মেটাডেটাতে **Access Control List (ACL)** ট্যাগ করে দেওয়া হয় (যেমন: `{"role_allowed": "admin"}`)। Customার চ্যাট কুয়্যারি রান করার সময় Vector Search ফোর্সেবলি মেটাডেটা ফিল্টার অ্যাপ্লাই করে যাতে সাধারণ ইউজারের কুয়্যারিতে অ্যাডমিন ডক কোনো অবস্থাতেই রিট্রাইভড না হতে পারে।
 
----
 
 ### ৭. Common Mistakes
 
@@ -170,7 +164,6 @@ for idx, chunk in enumerate(chunks):
 
 **বাস্তবতা:** অতিরিক্ত বড় চাঙ্ক ব্যবহার করলে Prompt-এর ভেতর অপ্রাসঙ্গিক (Noise/Irrelevant) তথ্য ইনজেক্ট হয়ে যায়, যা এলএলএম-কে বিভ্রান্ত করে। তাছাড়া বড় চাঙ্ক Context Window-এর VRAM ব্লো-আপ ঘটায় এবং Latency বৃদ্ধি করে। আরএজি-র গোল্ডেন রুল হলো: **"Retrieve only what is essential (প্রাসঙ্গিক টুকু রিট্রাইভ করো, বেশি নয়)"**।
 
----
 
 ### ৮. Mental Model: স্মার্ট লাইব্রেরিয়ান ও তোতাপাখি জুড়ি
 
@@ -179,7 +172,6 @@ for idx, chunk in enumerate(chunks):
 * **Vector DB = স্মার্ট লাইব্রেরিয়ান:** সে পুরো লাইব্রেরির বইয়ের পাতা সূচিপত্র ও মিনিং অনুসারে সাজিয়ে রেখেছে। প্রশ্ন আসার সাথে সাথে সে পারফেক্ট ৫টি পৃষ্ঠা ছিঁড়ে নিয়ে আসে।
 * **LLM = বাচাল তোতাপাখি (The Storyteller):** তোতাপাখি নিজে কিছু জানে না, কিন্তু সে অসম্ভব ভালো কথা বলতে পারে। লাইব্রেরিয়ান যখন তাকে সেই ৫টি পৃষ্ঠা দেয়, সে সেই পৃষ্ঠাগুলো লাইভ রিড করে চমৎকার মিষ্টি ও সত্যবাদী ভাষায় উত্তর লিখে দেয়।
 
----
 
 ### ৯. Mini Project: পাইথনে স্ক্র্যাচ থেকে একটি আরএজি (RAG) পাইপলাইন
 
@@ -249,7 +241,6 @@ print(augmented_prompt)
 * **Why it works:** Vector সিমিলারিটি কোসাইন মেপে `visit the nearest bKash center` ডকটি নির্ভুলভাবে রিট্রাইভ করেছে এবং Promptে ইনজেক্ট করেছে।
 * **When to use:** Custom আরএজি (RAG) Prompt বিল্ডিং ও রিট্রিভাল পাইপলাইন স্ক্র্যাচ থেকে ডিজাইন করার জন্য।
 
----
 
 ### ১০. Interview Questions
 
@@ -265,7 +256,6 @@ print(augmented_prompt)
 3. **প্রশ্ন:** এন্টারপ্রাইজ আরএজি প্রোডাকশনে "Document Leakage / Authorization Bypass" কীভাবে প্রতিহত করা হয়?
    * **উত্তর:** এটি প্রতিহত করতে Data ইনজেস্ট করার সময় প্রতিটি Vector ডকের মেটাডেটাতে **Access Control List (ACL)** ট্যাগ করে দেওয়া হয়। ইউজার চ্যাট কুয়্যারি রান করার সময় Vector Search কুয়েরিতে বাধ্যতামূলক ফিল্টার অ্যাপ্লাই করা হয় যাতে ইউজারের ইউজার-রোল আইডির বাইরে কোনো সিক্রেট Database Vector ইনজেক্ট না হতে পারে।
 
----
 
 ### ১১. Chapter Summary
 * **RAG** ক্লোজড-বুক AI মডেলকে একটি ওপেন-বুক ফ্যাট-বেসড AI সিস্টেমে convert করে।
@@ -273,10 +263,8 @@ print(augmented_prompt)
 * **Recursive Chunking** এবং **Overlap** ডকের সীমানাগত অর্থ রক্ষা করার জন্য সবচেয়ে গুরুত্বপূর্ণ।
 * প্রোডাকশন সিস্টেমে Data সিকিউরিটি নিশ্চিত করতে মেটাডেটা **ACL Filtering** ব্যবহার করা জরুরি।
 
----
 
 ### ১২. What's Next
 দারুণ! আমরা ভালোভাবে আরএজি-র কোর ফাউন্ডেশন এবং চাংকিং Mechanics শেষ করে ফেলেছি। পরের chapter-এ আমরা এই রিট্রিভাল পাইপলাইনকে আরও perfect ও প্রোডাকশন-রেডি করার অ্যাডভান্সড সোপান নিয়ে আলোচনা করব: **Chapter 14: Advanced Retrieval, Hybrid Search & Re-ranking**। HyDE, প্যারেন্ট-Document রিট্রিভাল, BM25 স্পার্স Search ও রির‍্যাঙ্কিং কীভাবে আরএজি-র এক্যুরেসি ৯৯%-এ নিয়ে যায়, তা আমরা বিস্তারিত শিখব।
 
----
 **Chapter 13 শেষ।**
