@@ -1013,6 +1013,11 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
+        .nav-placeholder {
+            flex-grow: 1;
+            max-width: 48%;
+        }
+
         .nav-next-btn {
             text-align: right;
             justify-content: flex-end;
@@ -1086,6 +1091,9 @@
                 padding: 10px 16px !important;
                 gap: 12px !important;
                 border-radius: 8px !important;
+            }
+            .nav-placeholder {
+                display: none !important;
             }
             .nav-chapter-title {
                 font-size: 13px !important;
@@ -1682,7 +1690,7 @@
                 const navDiv = document.createElement("div");
                 navDiv.className = "chapter-navigation";
                 
-                const currentIndex = flatChapters.findIndex(ch => ch.num === chNum);
+                const currentIndex = flatChapters.findIndex(ch => Number(ch.num) === Number(chNum));
                 const prevCh = currentIndex > 0 ? flatChapters[currentIndex - 1] : null;
                 const nextCh = currentIndex < flatChapters.length - 1 ? flatChapters[currentIndex + 1] : null;
                 
@@ -1698,7 +1706,7 @@
                         </button>
                     `;
                 } else {
-                    prevBtnHtml = `<div style="flex-grow: 1; max-width: 48%;"></div>`;
+                    prevBtnHtml = `<div class="nav-placeholder"></div>`;
                 }
                 
                 let nextBtnHtml = "";
@@ -1713,7 +1721,7 @@
                         </button>
                     `;
                 } else {
-                    nextBtnHtml = `<div style="flex-grow: 1; max-width: 48%;"></div>`;
+                    nextBtnHtml = `<div class="nav-placeholder"></div>`;
                 }
                 
                 navDiv.innerHTML = prevBtnHtml + nextBtnHtml;
