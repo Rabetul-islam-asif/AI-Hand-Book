@@ -320,6 +320,10 @@
             article {
                 padding-bottom: 120px !important; /* Guarantee scrolling clearance for navigation buttons */
             }
+            article img {
+                max-width: 100% !important; /* Full width on mobile to maintain text readability */
+                margin: 20px auto;
+            }
         }
 
         article {
@@ -376,14 +380,20 @@
 
         /* Premium Images Styling */
         article img {
-            max-width: 100%;
+            max-width: 75%; /* Balanced, suitable size for reading flow on desktop */
             height: auto;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            margin: 28px auto;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin: 32px auto;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
             display: block;
             background-color: var(--bg-secondary);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+        }
+
+        article img:hover {
+            transform: translateY(-2px) scale(1.01); /* Premium micro-interaction on hover */
+            box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.2); /* Soft purple glow shadow on hover */
         }
 
         /* Fenced Code Highlights */
