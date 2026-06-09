@@ -34,19 +34,7 @@
 
 কিন্তু **Chain of Thought (CoT)** প্রম্পটিংয়ে মডেল প্রথমে ধাপে ধাপে নিজের যৌক্তিক ব্যাখ্যা বা হিসাবগুলো জেনারেট করে, এবং সবশেষে ফাইন্যাল উত্তর দেয়।
 
-[VISUAL]
-Title: Standard Prompting vs. Chain of Thought (CoT) Flow
-Illustration: Comparison of direct output jump vs. step-by-step reasoning tokens before the final token
-Placement: After Chain of Thought introduction
-Purpose: Visually demonstrate how CoT guides neural networks through logical intermediate steps.
-
-```
-Standard Prompting:
-Input ──► [ LLM Net ] ──► "Answer: 42" (Direct jump, highly error-prone)
-
-Chain of Thought (CoT) Prompting:
-Input ──► [ LLM Net ] ──► "Step 1: x = 10..." ──► "Step 2: y = 32..." ──► "Answer: 42" (Reasoning path guided)
-```
+![Standard Prompting vs. Chain of Thought (CoT) Flow](/diagrams/standard_prompting_vs_chain_of_thought_cot_flow.png)
 
 যখন মডেল নিজের আগের জেনারেট করা যৌক্তিক ধাপগুলো দেখতে পায়, তখন সে সেই ধাপগুলোর ওপর ভিত্তি করে পরের সঠিক ধাপটি নির্ধারণ করে।
 

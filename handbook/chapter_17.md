@@ -39,20 +39,7 @@ Fine-Tuning হলো মডেলকে **"কীভাবে কথা বল�
 
 এটাই হলো RAG। অনেকটা Open-Book পরীক্ষার মতো।
 
-[VISUAL]
-Title: When to use RAG vs. Fine-Tuning
-Illustration: Dynamic document drawer (RAG) vs. modifying brain synapses/tone (Fine-Tuning)
-Placement: After Hook Section
-Purpose: Show the core architectural distinction between RAG and Fine-Tuning.
-
-```
-RAG (What to Say - External Database Library):
-[LLM Brain] ◄───► [ Document Drawer (Dynamic Facts) ]
-(Model reads fresh documents on the fly)
-
-Fine-Tuning (How to Behave - Modifying Internal weights):
-[LLM Brain] ──► (Modify Internal Weights & Synapses) ──► [ Speaks in customized tone / JSON Format ]
-```
+![When to use RAG vs. Fine-Tuning](/diagrams/when_to_use_rag_vs_finetuning.png)
 
 কিন্তু এবার ধরো অন্য একটা পরিস্থিতি।
 
@@ -160,20 +147,7 @@ Dataset তৈরি করার সময় সর্বদা Data Quality-ক�
 
 এসএফটি ট্রেনিংয়ের সময় Model কীভাবে শুধু Assistant Token-এর ওপর Loss Calculate করে, চলো নিচে তা দেখে নিই:
 
-[VISUAL]
-Title: SFT Target Token Loss Calculation
-Illustration: Visual breakdown of prompt tokens (ignored loss) and response tokens (active loss calculation)
-Placement: After SFT section
-Purpose: Visually demonstrate the mathematical formatting of causal language modeling during tuning.
-
-```
-Input Tokens (Loss Ignored):           Output Target Tokens (Active Loss 계산):
-┌──────┬──────┬──────┬──────┐         ┌──────┬──────┬──────┬──────┐
-│ User │ :    │ PIN  │ Lock │  ──►   │ Pls  │ dial │ *    │ 247  │
-└──────┴──────┴──────┴──────┘         └──────┴──────┴──────┴──────┘
-   │      │      │      │                │      │      │      │
-[ Loss Masked - No Weights Update ]   [ Loss Active - Weights Updated via Backprop ✓ ]
-```
+![SFT Target Token Loss Calculation](/diagrams/sft_target_token_loss_calculation.png)
 
 ট্রেনিংয়ের সময় আমরা কিন্তু ইউজারের প্রশ্নের Token-এর ওপর Loss Calculate করি না।
 

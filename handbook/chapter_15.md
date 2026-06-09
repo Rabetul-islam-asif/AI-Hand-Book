@@ -167,20 +167,7 @@ Chunk তৈরি করার সময় আমরা সাধারণত দ
 
 চলো নিচের ডায়াগ্রাম থেকে এর মেকানিজমটা একটু দেখে নিই:
 
-[VISUAL]
-Title: Sliding Window Chunk Overlap
-Illustration: Visual representation of Text Chunks sharing boundary tokens to preserve sentence context
-Placement: After Chunking section
-Purpose: Ground the intuitive necessity of boundary preservation.
-
-```
-Text: "The user has blocked his PIN. He must visit bKash office to reset it."
-Chunk Size: 40 characters, Overlap: 10 characters
-
-Chunk 1: [ The user has blocked his PIN. He must vi ]
-                                     ▲───────▲ (Overlap tokens)
-Chunk 2:                            [ He must visit bKash office to reset it. ]
-```
+![Sliding Window Chunk Overlap](/diagrams/sliding_window_chunk_overlap.png)
 
 তো এই Overlap রেখে আমাদের লাভটা কী হলো?
 

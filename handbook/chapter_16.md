@@ -43,19 +43,7 @@
 
 এর ফলে AI মডেল অর্ধেক বা ভুল উত্তর দিয়ে বসে থাকবে।
 
-[VISUAL]
-Title: Basic RAG vs. Parent-Document Retrieval
-Illustration: Small chunk vector matching to index vs. fetching the larger parent document context
-Placement: After Hook Section
-Purpose: Show how advanced retrieval solves the context bottleneck.
-
-```
-Basic Vector RAG (Incomplete Context):
-[Query] ──► [Matches Small Chunk A] ──► "According to rule 4, lock PIN" (Confused LLM: What is rule 4?)
-
-Parent-Document Retrieval (Complete Context ✓):
-[Query] ──► [Matches Small Chunk A] ──► [Fetch Parent Doc of Chunk A] ──► "Rule 4: If 3 wrong PINs are typed, lock PIN"
-```
+![Basic RAG vs. Parent-Document Retrieval](/diagrams/basic_rag_vs_parentdocument_retrieval.png)
 
 আর দ্বিতীয় পদ্ধতিটা হলো **Parent-Document Retrieval**।
 
@@ -88,36 +76,7 @@ Parent-Document Retrieval (Complete Context ✓):
 
 এতে দুই ধরনের সার্চ ইঞ্জিন একসাথে কাজ করে।
 
-[VISUAL]
-Title: Hybrid Search (Sparse + Dense) Pipeline
-Illustration: Block diagram showing Sparse (BM25) and Dense (Vectors) results merging via RRF
-Placement: After Core Concepts section
-Purpose: Visually demonstrate the dual-engine integration of Hybrid Search.
-
-```
-                  ┌───────────────────────────────┐
-                  │          User Query           │
-                  └──────────────┬────────────────┘
-                                 │
-                   ┌─────────────┴─────────────┐
-         ┌─────────▼─────────┐       ┌─────────▼─────────┐
-         │   Sparse Search   │       │   Dense Search    │
-         │ (BM25 Keywords)   │       │(Semantic Vectors) │
-         └─────────┬─────────┘       └─────────┬─────────┘
-                   │                               │
-                   └─────────────┬─────────────────┘
-                                 ▼
-                  ┌───────────────────────────────┐
-                  │    Reciprocal Rank Fusion     │
-                  │         (RRF Merge)           │
-                  └──────────────┬────────────────┘
-                                 ▼
-                  ┌───────────────────────────────┐
-                  │     Reranker Model (BGE)      │
-                  └──────────────┬────────────────┘
-                                 ▼
-                       [ Top 3 Perfect Docs ]
-```
+![Hybrid Search (Sparse + Dense) Pipeline](/diagrams/hybrid_search_sparse_dense_pipeline.png)
 
 **প্রশ্ন:** Sparse Search বা BM25 কী?
 
@@ -189,21 +148,7 @@ Purpose: Visually demonstrate the dual-engine integration of Hybrid Search.
 
 নিচের ডায়াগ্রামটি দেখলে খুব সহজে বুঝতে পারবে কীভাবে এটি কাজ করে:
 
-[VISUAL]
-Title: Bi-Encoder vs. Cross-Encoder (Reranker) Architecture
-Illustration: Comparison of separate embedding dot product versus direct deep joint attention
-Placement: Under Reranker section
-Purpose: Visually explain why Cross-Encoders are far more accurate but computationally heavier than Bi-Encoders.
-
-```
-Bi-Encoder (Standard Vector Search - Fast & Approximated):
-Query Vector ──┐
-               ├─► [ Simple Dot Product ] ──► Score (Approximated)
-Doc Vector ────┘
-
-Cross-Encoder (Reranker - Slow & Ultra-Accurate):
-[ Query + Document Text ] ──► [ Deep Transformer Joint Attention ] ──► Absolute Relevance Score (0 to 1)
-```
+![Bi-Encoder vs. Cross-Encoder (Reranker) Architecture](/diagrams/biencoder_vs_crossencoder_reranker_architecture.png)
 
 সাধারণ ভেক্টর সার্চের সময় প্রতিটি ভেক্টর আলাদাভাবে প্রসেস করে ডট প্রোডাক্ট করা হয়, যাকে বলে `Bi-Encoder`।
 

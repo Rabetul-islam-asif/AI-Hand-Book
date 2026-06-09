@@ -29,23 +29,7 @@
 * **Input Data (ইনপুট ডেটা):** যে নির্দিষ্ট ডেটার ওপর মডেল কাজ করবে (যেমন: একটি কাস্টমার ইমেইল বা আর্টিকেল)।
 * **Output Indicator (আউটপুট নির্দেশক):** উত্তরের ফরম্যাট কেমন হবে (যেমন: JSON, Bullet points, বা Python List)।
 
-[VISUAL]
-Title: Anatomical Structure of a Production-Grade Prompt
-Illustration: Breakdown of prompt components showing instruction, context, input data, and output wrapper
-Placement: After Prompt Anatomy section
-Purpose: Visually explain the structure of a prompt so developers can write systematic inputs.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ PERSONA/CONTEXT: "You are an expert customer support agent" │
-├─────────────────────────────────────────────────────────────┤
-│ INSTRUCTION: "Analyze sentiment and extract key issues"    │
-├─────────────────────────────────────────────────────────────┤
-│ DATA INPUT: "Email: The delivery was 3 days late! Terrible!"│
-├─────────────────────────────────────────────────────────────┤
-│ OUTPUT SPEC: "Format output as raw JSON: {sentiment, issue}"│
-└─────────────────────────────────────────────────────────────┘
-```
+![Anatomical Structure of a Production-Grade Prompt](/diagrams/anatomical_structure_of_a_productiongrade_prompt.png)
 
 বাস্তবে অনেক সময় আমরা এত কিছু না লিখে শুধু এক লাইনে লিখি: "আমাকে একটি কবিতা লিখে দাও।"
 

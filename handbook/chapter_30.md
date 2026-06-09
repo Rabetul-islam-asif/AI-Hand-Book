@@ -61,24 +61,7 @@ Postgres pgvector সেটআপ করছেন, vLLM Server Optimize কর�
 
 কারণ পুরো AI Industry কিন্তু এই Shovel বিক্রেতাদের ওপর ভরসা করেই টিকে থাকবে।
 
-[VISUAL]
-Title: AI Engineering Skill Quadrant
-Illustration: Four quadrants mapping the essential skills for an AI Architect: Core DL/ML, Systems Engineering, Data Architect, and Business/Cost Optimization
-Placement: After Hook Section
-Purpose: Provide visual layout of the multidisciplinary skills required in the market.
-
-```
-       ▲  [ Systems Engineering ]             [ Core DL/ML Foundations ]
-       │  - Docker Sandboxing                 - Transformer Mechanics
-       │  - Redis/vLLM Serving                - Weights & Backpropagation
-       │  - FastAPI APIs                      - SFT & PEFT (LoRA)
- ───────┼──────────────────────────────────────┼─────────────────────────►
-       │  [ Data Layer Architect ]            [ Business & Safety ]
-       │  - pgvector / Postgres               - Cost Compaction
-       │  - Semantic Chunking                 - Constitutional Safety
-       │  - HNSW Graph Indexing               - API Latency Balancing
-       ▼
-```
+![AI Engineering Skill Quadrant](/diagrams/ai_engineering_skill_quadrant.png)
 
 
 ## ২. AI Architect-এর স্কিল Matrix

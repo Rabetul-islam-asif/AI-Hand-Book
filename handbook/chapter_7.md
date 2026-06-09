@@ -52,21 +52,7 @@ Self-Attention কী? Multi-Head Attention কেন দরকার? আর �
 
 এটাই Transformer। এটাই Parallel Processing।
 
-[VISUAL]
-Title: RNN Bottleneck vs. Transformer Parallel Attention
-Illustration: Sequential processing timeline vs. fully connected attention matrix map
-Placement: After Hook Section
-Purpose: Instantly show why RNNs are slow and Transformers are incredibly fast.
-
-```
-RNN Sequential Processing (Slow, O(N)):
-[Word 1] ──► [ RNN Cell ] ──► [Word 2] ──► [ RNN Cell ] ──► [Word 3] (Memory fades over long context)
-
-Transformer Parallel Attention (Instant, O(1) step):
-   "The"  ─────┐
-   "cat"  ─────┼───► [ Self-Attention Matrix ] ◄───► Parallel Context Mapping (All at once)
-   "sat"  ─────┘
-```
+![RNN Bottleneck vs. Transformer Parallel Attention](/diagrams/rnn_bottleneck_vs_transformer_parallel_attention.png)
 
 
 ## ২. RNN/LSTM কেন ব্যর্থ হলো?

@@ -45,23 +45,7 @@ Log দেখলেও শুধু দেখবে যে সে ৫ মিন�
 
 কিন্তু কেন ৫ মিনিট লাগলো? এই প্রশ্নের উত্তর তোমার কাছে নেই।
 
-[VISUAL]
-Title: Standard Single LLM call vs. Nested Trace Tree in Agents
-Illustration: Linear timeline vs. hierarchical call tree mapping subprocess logs, tokens, and latency
-Placement: After Hook Section
-Purpose: Show why traditional logging fails for multi-step AI agents.
-
-```
-Traditional Logging (Linear & Flat):
-[10:01:05] API Request Sent ──► [10:01:15] API Response Received (Total: 10s) - (No details!)
-
-Nested Agentic Tracing Tree (High Definition Observability ✓):
-User Query: "Check account balance TRX999" (Total: 1.2s, Cost: $0.003)
-├── Step 1: Query Embedding (45ms, 15 tokens)
-├── Step 2: HNSW Vector Retrieve (12ms, Score: 0.92)
-└── Step 3: LLM Decision Loop (1.1s, 234 tokens)
-     └── Tool Call: check_balance(trx_id="TRX999") (120ms, Success)
-```
+![Standard Single LLM call vs. Nested Trace Tree in Agents](/diagrams/standard_single_llm_call_vs_nested_trace_tree_in_agents.png)
 
 কিন্তু কেমন হতো যদি তুমি ইঁদুরের মাথায় একটা ক্যামেরা আর GPS ট্র্যাকার লাগিয়ে দিতে পারতে?
 
@@ -122,21 +106,7 @@ Tracing এই পুরো ফ্লো-কে একটি ফ্যামি�
 
 এটি মূলত ৪টি স্কোরের ওপর ভিত্তি করে সিস্টেমকে পরীক্ষা করে।
 
-[VISUAL]
-Title: Ragas Evaluation Quadrant
-Illustration: Matrix showing Context Relevance, Faithfulness, Answer Relevance, and Aspect Critic
-Placement: Under Ragas section
-Purpose: Define the metrics of RAG evaluation.
-
-```
-┌───────────────────────────────────────┬───────────────────────────────────────┐
-│     Context Relevance (0 to 1)        │        Faithfulness (0 to 1)          │
-│   (রিট্রাইভড ডক কি কুয়্যারির সাথে মিলে?)  │  (উত্তর কি সোর্স ডক থেকেই এসেছে নাকি?) │
-├───────────────────────────────────────┼───────────────────────────────────────┤
-│      Answer Relevance (0 to 1)        │        Aspect Critic (Safety)         │
-│     (উত্তর কি কোশ্চেনের সঠিক জবাব?)    │   (উত্তর কি সেফ ও নীতি-অনুমোদিত?)     │
-└───────────────────────────────────────┴───────────────────────────────────────┘
-```
+![Ragas Evaluation Quadrant](/diagrams/ragas_evaluation_quadrant.png)
 
 > **Faithfulness = Hallucination Detector!**
 > 
@@ -149,22 +119,7 @@ Purpose: Define the metrics of RAG evaluation.
 
 ট্রেসিং ড্যাশবোর্ডে কীভাবে একটি স্লো রিকোয়েস্টের আসল কারণ খুঁজে পাওয়া যায়, চলো এই Diagram-এ দেখে নিই:
 
-[VISUAL]
-Title: Visualizing Latency Bottleneck via Tracing Tree
-Illustration: Timeline chart exposing that Vector Database Search took 80% of the request lifetime
-Placement: After Latency section
-Purpose: Ground how tracing isolates latency issues.
-
-```
-Request Lifetime: 10.0 seconds (High Latency!)
-┌────────────────────────────────────────────────────────────────────────┐
-│ [API Gateway]: 10.0s                                                   │
-├──────────────────────────────────┬─────────────────────────────────────┤
-│ [LangChain Chain]: 9.9s          │                                     │
-├──────────────────────────────────┴───────────────────────┬─────────────┤
-│ [Vector DB Retrieval]: 8.0s (🔴 BOTTLENECK DETECTED!)    │ [LLM]: 1.8s │
-└──────────────────────────────────────────────────────────┴─────────────┘
-```
+![Visualizing Latency Bottleneck via Tracing Tree](/diagrams/visualizing_latency_bottleneck_via_tracing_tree.png)
 
 ড্যাশবোর্ডের এই টাইমলাইন চার্ট দেখলেই তুমি এক নজরে বুঝে যাবে সমস্যার আসল কারণ কী।
 
@@ -297,18 +252,7 @@ LangSmith-এর মতো অটোমেটিক লাইব্রেরি�
 
 "AI Observability হলো একটি এয়ারপোর্টের রানওয়ের Air Traffic Control টাওয়ারের মতো।"
 
-[VISUAL]
-Title: Air Traffic Control Room analogy of Observability
-Illustration: Visual radar scanning multiple planes (tasks) landing with flight numbers, coordinates, and delay metrics
-Placement: After Mental Model section
-Purpose: Ground the intuitive dashboard control space.
-
-```
-       [ ATC Radar Observability Dashboard ]
-   ✈ Flight 101 (Embedding)  ──► Latency: 45ms  ──► Status: Safe Landing ✓
-   ✈ Flight 202 (Vector DB)  ──► Latency: 8.0s ──► Status: ALERT! Ground Hold 
-   ✈ Flight 303 (LLM Gener.) ──► Latency: 1.1s  ──► Status: Safe Landing ✓
-```
+![Air Traffic Control Room analogy of Observability](/diagrams/air_traffic_control_room_analogy_of_observability.png)
 
 একতু ভাবো, রাতের অন্ধকারে আকাশে শত শত প্লেন উড়ছে।
 

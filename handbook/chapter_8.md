@@ -44,24 +44,7 @@
 
 সেখানেই আসল কাজ শুরু হয়।
 
-[VISUAL]
-Title: Text to Vector pipeline
-Illustration: Step-by-step transformation of raw text to tokens, to token IDs, to high-dimensional embedding vectors
-Placement: After Hook Section
-Purpose: Provide architectural mapping of the data ingestion pipeline in LLMs.
-
-```
-Raw Text:    "আমি AI ভালোবাসি"
-                   │
-                   ▼
-Tokenizer:   [ "আম", "ি ", "এ", "আই ", "ভাল", "োবাস", "ি" ]  (Sub-word splitting)
-                   │
-                   ▼
-Token IDs:   [ 12405, 342, 9821, 4402, 129 ]               (Vocabulary look-up)
-                   │
-                   ▼
-Embeddings:  [ [0.12, -0.89, 0.45, ...], [0.02, 0.54, -0.12, ...] ] (1536-dimensional coordinates)
-```
+![Text to Vector pipeline](/diagrams/text_to_vector_pipeline.png)
 
 
 ## ২. Model আসলে Input কীভাবে বোঝে?

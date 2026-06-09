@@ -159,19 +159,7 @@ Reasoning Model-গুলো যখন কোনো জটিল দাবার
 
 Model প্রতিটা পথের Value Score মেপে দেখে।
 
-[VISUAL]
-Title: Monte Carlo Tree Search (MCTS) in Reasoning
-Illustration: Decision tree branching out into multiple paths with scoring weights
-Placement: After RL Section
-Purpose: Visually demonstrate how reasoning models evaluate multiple logical steps.
-
-```
-                  [ Root Problem ]
-                   /     │      \
-               Step A  Step B  Step C
-                /        │ (Best Score: 0.92)
-            Step B1   Step B2
-```
+![Monte Carlo Tree Search (MCTS) in Reasoning](/diagrams/monte_carlo_tree_search_mcts_in_reasoning.png)
 
 এখন Model দেখলো — Step B থেকে Step B2-তে গেলে Problem Solve হওয়ার সম্ভাবনা ৯২%।
 

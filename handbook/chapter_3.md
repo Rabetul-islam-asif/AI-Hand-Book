@@ -43,24 +43,6 @@ AI-এর ভাষায় বলতে গেলে —
 
 আর তোমার পা ফেলার সাইজ হলো Learning Rate।
 
-[VISUAL]
-Title: Gradient Descent Valley Optimization
-Illustration: A contour curve illustrating hill descent down to the global minimum
-Placement: After Hook Section
-Purpose: Provide visual context to the concept of optimization and gradient slopes.
-
-```
-Loss
- ▲
- └───► (High Loss Initial Weights)
-     \
-      \  Gradient/Slope (Slope = dLoss/dWeight)
-       \
-        \  ◄── Learning Rate Step Size
-         \
-          └───► [ Global Minimum ] (Optimal Weights & Zero Loss)
- ──────────────────────────────────────────────────────────► Weight (W)
-```
 
 
 ## ২. Loss Function, Gradient আর Learning Rate

@@ -76,36 +76,7 @@ AI সেটা দেখে কোড ঠিক করে দেবে। ত�
 
 দারুণ না?
 
-[VISUAL]
-Title: Agentic Self-Healing Loop Flowchart
-Illustration: Loop cycle between LLM Generator, Write File, Run Subprocess pytest, Catch Failure, Feedback Error, and rewrite
-Placement: After Hook Section
-Purpose: Provide architectural mapping of the self-correcting agent loop.
-
-```
-          ┌────────────────────────────────────────┐
-          ▼                                        │
-    ┌───────────┐       ┌────────────┐             │
-    │  Think     │ ────►│ Act:       │             │
-    │   (LLM)   │       │ Write Code │             │
-    └───────────┘       └────────────┘             │ (If test fails,
-          ▲                    │                   │  feed error back)
-          │                    ▼                   │
-          │             ┌────────────┐             │
-          │             │  Run       │             │
-          │             │ Pytest     │             │
-          │             └────────────┘             │
-          │                    │                   │
-          │                    ▼                   │
-          │             /────────────\             │
-          │            /   Does it    \            │
-          └───────────┤    Pass?       ├───────────┘
-                       \              /
-                        \────────────/
-                               │ Yes
-                               ▼
-                        [ Done & Saved! ]
-```
+![Agentic Self-Healing Loop Flowchart](/diagrams/agentic_selfhealing_loop_flowchart.png)
 
 
 ### ২. মূল কনসেপ্টগুলো কী কী?

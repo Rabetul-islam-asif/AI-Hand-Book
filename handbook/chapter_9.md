@@ -52,22 +52,7 @@
 
 একে বলে **Encoder-Decoder**।
 
-[VISUAL]
-Title: LLM Architectures Taxonomy
-Illustration: Comparison of data direction for Encoder-only (bidirectional), Decoder-only (causal), and Encoder-Decoder (split sequence)
-Placement: After Hook Section
-Purpose: Instantly differentiate BERT, GPT, and T5 pathways.
-
-```
-Encoder-only (BERT - Bidirectional):
-[ Token 1 ] ◄───► [ Token 2 ] ◄───► [ Token 3 ]  (Sees everything at once - Good for Extraction)
-
-Decoder-only (GPT - Causal/Autoregressive):
-[ Token 1 ] ───► [ Token 2 ] ───► [ Token 3 ] ───► [ Next Token ? ] (Masks future - Good for Generation)
-
-Encoder-Decoder (T5 - Translation Seq2Seq):
-[ Input Sequence ] ───► [ Encoder Block ] ───► [ Latent States ] ───► [ Decoder Block ] ───► [ Output Sequence ]
-```
+![LLM Architectures Taxonomy](/diagrams/llm_architectures_taxonomy.png)
 
 
 ## ২. Model পরিবারের ভেতরের কাজ

@@ -41,21 +41,7 @@
 
 ঠিক তেমনি, AI-এর সব Parameter আপডেট করতে গেলে অনেক বেশি Compute Power আর VRAM লাগে।
 
-[VISUAL]
-Title: Full-Parameter Tuning vs. LoRA Adapter Tuning
-Illustration: Heavy weight matrix update versus frozen base weights alongside two small low-rank matrices
-Placement: After Hook Section
-Purpose: Show the mathematical memory saving of Low-Rank Adaptation.
-
-```
-Full-Parameter Tuning (Updates all 7 Billion weights):
-[ Frozen Base Weights (W) ]  ◄── (Modifies and updates every single connection weight)
-
-LoRA Adapter Tuning (Only updates A and B matrices - 99% Memory Saved!):
-[ Frozen Base Weights (W) ]  ───► (No Changes / Fixed)
-       ▲
-       └─► [ Small Matrix A (d x r) ] ──*──► [ Small Matrix B (r x d) ] ──► (Updates only A & B)
-```
+![Full-Parameter Tuning vs. LoRA Adapter Tuning](/diagrams/fullparameter_tuning_vs_lora_adapter_tuning.png)
 
 তাহলে দ্বিতীয় উপায়টা কী?
 

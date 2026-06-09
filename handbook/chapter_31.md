@@ -41,25 +41,6 @@
 
 এই মানচিত্রের কারণে এআই খুব সহজেই মেপে দেখতে পারে দুটো শব্দের অর্থ একে অপরের কতটা কাছাকাছি।
 
-[VISUAL]
-Title: 3D Semantic Vector Space (Embeddings Map)
-Illustration: A 3D coordinate space showing clusters of related words close to each other
-Placement: After Embeddings explanation
-Purpose: Give a clear mental image of vector proximity.
-
-```
-      Y Axis (Animals)
-        ▲
-        │  [Dog]   [Puppy]
-        │    └───────┘ (Close Distance)
-        │
-        │
-        │                       [King]
-        │                         │ (Close Distance)
-        │                       [Queen]
-        │
-        └───────────────────────────────► X Axis (Royalty)
-```
 
 ### Context Windows: মনোযোগের সীমানা বা এটেনশন স্প্যান
 
@@ -156,23 +137,6 @@ Model Routing হলো একটা ট্রাফিক police বা ট্�
 
 কিন্তু ইউজার যখন বলে, "একটা জটিল নিউরাল নেটওয়ার্কের পাইথন কোড লেখো," রাউটার রিকোয়েস্টটি পাঠিয়ে দেয় সবচেয়ে বুদ্ধিমান আর ভারী মডেলের কাছে। এতে তোমার বিল বেঁচে যাবে অনেকখানি!
 
-[VISUAL]
-Title: Model Router Traffic Dispatcher
-Illustration: Visual routing of simple requests to cheap models and complex requests to heavy models
-Placement: Under Model Routing section
-Purpose: Explain cost and performance optimization visually.
-
-```
-                    [ User Prompt ]
-                           │
-                           ▼
-                    [ Model Router ]
-                           │
-             ┌─────────────┴─────────────┐
-             ▼ (Simple Query)            ▼ (Complex Code/Reasoning)
-     [ Gemini 3.5 Flash ]        [ Claude 3.5 Sonnet ]
-     (Cheap, Fast, Light)        (Smart, Heavy-duty)
-```
 
 ### Multi-Agent Systems: স্পেশালিস্টদের টিম
 

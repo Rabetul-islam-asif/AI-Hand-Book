@@ -61,33 +61,7 @@ AI-এর দুনিয়ায় এটা কিন্তু আসলেই এ
 
 যেমন প্রতি ১০০০ Token ব্যবহারের জন্য $০.০০৫$।
 
-[VISUAL]
-Title: Usage Billing & Rate Limiting Pipeline
-Illustration: User request passing through Redis Token Bucket validator, getting logged for OpenAI token usage, and reporting usage event to Stripe Billing
-Placement: After Hook Section
-Purpose: Show business-grade SaaS billing architecture.
-
-```
-                  ┌──────────────────────┐
-                  │    User Request      │
-                  └──────────────────────┘
-                             │
-                             ▼
-┌────────────────────────────────────────────────────────┐
-│  1. REDIS RATE LIMITER (Token Bucket RPM/TPM Check)     │
-│  - If bucket empty ──► Return HTTP 429 Too Many Requests│
-└────────────────────────────────────────────────────────┘
-                             │ (Allowed)
-                             ▼
-                  [ Run AI Generation ] ──► Compute Tokens Used
-                             │
-                             ▼
-┌────────────────────────────────────────────────────────┐
-│  2. USAGE BILLING TRACKER (Stripe API integration)     │
-│  - Log tokens to DB                                    │
-│  - Send metered usage event to Stripe: 'token_used'    │
-└────────────────────────────────────────────────────────┘
-```
+![Usage Billing & Rate Limiting Pipeline](/diagrams/usage_billing_rate_limiting_pipeline.png)
 
 
 ## ২. মূল আইডিয়াগুলো কী কী?

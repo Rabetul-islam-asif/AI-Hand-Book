@@ -85,23 +85,7 @@ Model এই দুটি Chunk-কে একসাথে মেলাতে প
 
 এর ফলে প্রতিটি Chunk একদম স্বাধীন এবং অর্থপূর্ণ থাকে।
 
-[VISUAL]
-Title: Character Splitter vs. Semantic Chunking
-Illustration: Rigid fixed-character slice lines vs. dynamic gap threshold slicing based on similarity vectors
-Placement: After Hook Section
-Purpose: Show why Semantic Chunking provides 100% complete contexts.
-
-```
-Fixed-Character Splitter (Rigid & blind):
-"We love AI engineering. [--- Slice ---] It is very fun and robust." (Splits mid-context)
-
-Semantic Chunking (Dynamic & intelligent):
-Sentence 1: "We love AI engineering."
-                                         ◄─── Cosine Sim = 0.94 (Keep together)
-Sentence 2: "It is very fun and robust."
-                                         ◄─── Cosine Sim = 0.12 (SHARP DROP! Dynamic Slice Here ──✂──)
-Sentence 3: "Postgres is a SQL database."
-```
+![Character Splitter vs. Semantic Chunking](/diagrams/character_splitter_vs_semantic_chunking.png)
 
 ## ২. RAG Data Layer-এর মূল চাবিকাঠি
 

@@ -48,28 +48,7 @@ Neural Network কী।
 
 এখানেই দরকার মিলিয়ন মিলিয়ন Parameter-এর মনস্টার — মানে **Deep Learning**।
 
-[VISUAL]
-Title: AI vs. ML vs. DL Hierarchy
-Illustration: Venn diagram or nested boxes of Artificial Intelligence, Machine Learning, and Deep Learning
-Placement: After Hook Section
-Purpose: Instantly clarify the relationship and boundaries of these terms.
-
-```
-┌────────────────────────────────────────────────────────┐
-│ ARTIFICIAL INTELLIGENCE (AI)                           │
-│   (Rules, search trees, expert systems, chatbot logic) │
-│                                                        │
-│   ┌────────────────────────────────────────────────┐   │
-│   │ MACHINE LEARNING (ML)                          │   │
-│   │   (Tabular Data, Regressions, Decision Trees)  │   │
-│   │                                                │   │
-│   │   ┌────────────────────────────────────────┐   │   │
-│   │   │ DEEP LEARNING (DL)                     │   │   │
-│   │   │   (Neural Networks, Images, LLMs)      │   │   │
-│   │   └────────────────────────────────────────┘   │   │
-│   └────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────┘
-```
+![AI vs. ML vs. DL Hierarchy](/diagrams/ai_vs_ml_vs_dl_hierarchy.png)
 
 
 ## ২. লার্নিং-এর তিনটি পথ

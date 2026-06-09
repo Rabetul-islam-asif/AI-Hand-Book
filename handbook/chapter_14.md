@@ -111,23 +111,7 @@ IVF-FLAT-এর পুরো নাম হলো Inverted File Index।
 
 এই ছোট ছোট এলাকাগুলোকে Voronoi Cells বলা হয়।
 
-[VISUAL]
-Title: IVF-FLAT Voronoi Cells Partitioning
-Illustration: Space partitioned into multiple cells, query vector lands in one cell and only searches that local cluster
-Placement: Under IVF-FLAT section
-Purpose: Ground the mathematical intuition of cluster-based vector pruning.
-
-```
-       IVF-FLAT Space Partitioning
-       ┌───────────┬───────────┐
-       │   Cell A  │  * Cell B │
-       │  *  *  *  │ * [Query] │  ◄── Only search nodes inside Cell B!
-       │   *   *   │  *  *  *  │
-       ├───────────┼───────────┤
-       │   Cell C  │   Cell D  │
-       │ *  *   *  │ *   *   * │
-       └───────────┴───────────┘
-```
+![IVF-FLAT Voronoi Cells Partitioning](/diagrams/ivfflat_voronoi_cells_partitioning.png)
 
 ### IVF-FLAT দিয়ে Search করা হয় কীভাবে?
 

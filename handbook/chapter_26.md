@@ -75,35 +75,7 @@ messages = [
 
 সেশন বদলে গেলেও এই তথ্যগুলো ব্যাকগ্রাউন্ডে ইনজেক্ট করা হয়।
 
-[VISUAL]
-Title: Hybrid Memory Architecture (Redis + Mem0)
-Illustration: User input split into Redis (short term stream) and Mem0 (long term vector fact storage) pipelines feeding to LLM
-Placement: After Hook Section
-Purpose: Provide architectural layout of a production-grade enterprise memory pipeline.
-
-```
-                  ┌──────────────────────┐
-                  │      User Input      │
-                  └──────────────────────┘
-                             │
-            ┌────────────────┴────────────────┐
-            ▼                                 ▼
-┌──────────────────────┐           ┌──────────────────────┐
-│  Redis Cache (RAM)   │           │   Mem0 Engine (AI)   │
-│  - Latest 10 Chat    │           │  - Extracts Facts    │
-│    Messages          │           │  - Stores in Vector  │
-└──────────────────────┘           └──────────────────────┘
-            │                                 │
-            └────────────────┬────────────────┘
-                             ▼
-                    ┌─────────────────┐
-                    │ Prompt Ingest   │
-                    │ + Global Facts  │
-                    └─────────────────┘
-                             │
-                             ▼
-                     [ LLM Engine ] ───► Response
-```
+![Hybrid Memory Architecture (Redis + Mem0)](/diagrams/hybrid_memory_architecture_redis_mem0.png)
 
 ### ২. মূল আইডিয়া: Memory কীভাবে কাজ করে?
 
