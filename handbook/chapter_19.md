@@ -85,11 +85,7 @@ ChatGPT কিন্তু এই পদ্ধতিতেই তৈরি হ�
 
 এটি মূলত তিনটি ধাপে কাজ করে।
 
-[VISUAL]
-Title: Classical RLHF Ingestion Pipeline
-Illustration: Multi-step flowchart from Human Preference to Reward Model tuning, leading to PPO Optimizer
-Placement: After Core Concepts section
-Purpose: Visually demonstrate the 3-stage complexity of RLHF.
+![RLHF Diagram](/diagrams/RLHF separate reward model & PPO loop.png)
 
 ```
 Step 1: SFT Model ──► Generate Multiple Answers
@@ -162,11 +158,7 @@ $\pi_\theta$ হলো আমাদের মূল Model, যাকে আম�
 
 চলো নিচের ডায়াগ্রাম থেকে তা সহজে বুঝে নিই।
 
-[VISUAL]
-Title: DPO Single-Step Weight Update Flow
-Illustration: Visual representation of shifting weight vectors toward the preferred target space while pushing away from the rejected space
-Placement: After DPO Equation section
-Purpose: Ground the mathematical gradient attraction and repulsion of DPO.
+![DPO Diagram](/diagrams/dpo.png)
 
 ```
        DPO Latent Space Shifts

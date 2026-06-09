@@ -86,6 +86,8 @@ Vector Database ঠিক এই লাইব্রেরিয়ানের ম�
 
 ### HNSW কী এবং কীভাবে কাজ করে?
 
+![Vector DB Indexing Diagram](/diagrams/vector_db_indexing.png)
+
 HNSW-এর পুরো নাম হলো Hierarchical Navigable Small World।
 
 এটি Vector Database-এর দুনিয়ায় সবচেয়ে জনপ্রিয় আর শক্তিশালী Graph-ভিত্তিক Indexing।

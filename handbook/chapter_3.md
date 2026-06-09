@@ -99,6 +99,8 @@ $MSE = \frac{1}{N} \sum_{i=1}^{N} (Y_{pred} - Y_{true})^2$
 
 ### Gradient Descent কী?
 
+![Gradient Descent Diagram](/diagrams/gradient_descent.png)
+
 Gradient হলো Calculus-এর Derivative বা ঢাল।
 
 এটা আমাদের বলে — কোনো Parameter-এর মান একটু বাড়ালে বা কমালে Loss কমবে নাকি বাড়বে।

@@ -71,6 +71,8 @@ Transformer Parallel Attention (Instant, O(1) step):
 
 ## ২. RNN/LSTM কেন ব্যর্থ হলো?
 
+![Transformer Architecture Diagram](/diagrams/transformer_architecture.png)
+
 Transformer আসার আগে Text Processing হতো RNN আর LSTM দিয়ে।
 
 কিন্তু দুটো বড় সমস্যা ছিল।

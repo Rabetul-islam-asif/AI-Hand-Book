@@ -82,6 +82,8 @@ LoRA ঠিক এই কাজটাই করে।
 
 ### LoRA কীভাবে কাজ করে?
 
+![LoRA Architecture Diagram](/diagrams/lora_architecture.png)
+
 আমরা জানি, Neural Network যখন শিখতে থাকে, তখন তার ভেতরের ওজনের যে পরিবর্তন হয় তাকে আমরা $\Delta W$ বা Delta W বলি।
 
 ধরো, একটা Linear Layer-এর ডাইমেনশন হলো $4096 \times 4096$। 

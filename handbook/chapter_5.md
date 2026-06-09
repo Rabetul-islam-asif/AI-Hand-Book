@@ -29,6 +29,8 @@
 
 এটাকেই বলা হয় **Perceptron**।
 
+![Perceptron Model Diagram](/diagrams/perceptron_model.png)
+
 এবার Math-এর ভাষায় বলি —
 
 Input Signal মানে হলো তোমার Input Feature ($X_1, X_2, X_3$)।

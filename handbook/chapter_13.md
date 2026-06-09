@@ -35,11 +35,7 @@
 
 আবার `"Queen"` শব্দটাকে রাখলে বাম দিকে (Female), ওপরের দিকে (High Royalty) আর পেছনের দিকে (Old)।
 
-[VISUAL]
-Title: Word Embedding Geometry
-Illustration: 3D coordinate space pointing to King, Queen, Man, and Woman with distance vectors
-Placement: After Hook Section
-Purpose: Provide a strong visual mental model for high-dimensional vector spaces.
+![Embedding Geometry Diagram](/diagrams/embedding.jpeg)
 
 ```
                   Royalty (y)

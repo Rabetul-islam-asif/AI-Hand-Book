@@ -45,6 +45,8 @@
 
 Deep Learning-এর ভাষায় এই ভুল fixের চেইনকেই বলে **Backpropagation**।
 
+![Backpropagation Flow Diagram](/diagrams/backpropagation_flow.png)
+
 আর ভুলের দায়ভার ভাগ করার Math-এর নিয়মটাকে বলে **Chain Rule**।
 
 [VISUAL]

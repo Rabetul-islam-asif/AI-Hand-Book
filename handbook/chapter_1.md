@@ -143,6 +143,8 @@ def is_cat(image):
 
 ## Visual: Traditional Programming বনাম Machine Learning
 
+![Traditional Programming vs Machine Learning Diagram](/diagrams/traditional_vs_ai_programming.png)
+
 ### Traditional Programming
 
 ```text

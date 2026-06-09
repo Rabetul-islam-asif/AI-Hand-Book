@@ -140,11 +140,7 @@ AI Tool Calling ঠিক এভাবেই কাজ করে।
 
 চলো ঝটপট ধাপগুলো দেখে নিই:
 
-[VISUAL]
-Title: 4-Step Tool Calling Iteration
-Illustration: Step 1 Prompt -> Step 2 LLM requests Tool -> Step 3 Local Exec -> Step 4 Inject Result
-Placement: After Tool Execution Loop
-Purpose: Visually map the bidirectional network hops of function calling.
+![Tool Calling Loop Diagram](/diagrams/tool_calling_loop.png)
 
 ```
 Step 1: User says: "আমার TRX999 ব্যালেন্স কত?" ──► [ Prompt sent to LLM ]

@@ -95,6 +95,8 @@ System 2 কী?
 
 ### Chain of Thought — চিন্তার শিকল
 
+![Chain of Thought Diagram](/diagrams/chain_of_thought.png)
+
 Chain of Thought মানে কী?
 
 AI-কে কোনো Problem এক লাইনে Solve করতে না বলে তাকে ধাপে ধাপে Process ভাঙতে বাধ্য করা।
