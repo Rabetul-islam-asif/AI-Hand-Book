@@ -21,6 +21,8 @@
 
 ### Embeddings: এআই এর ত্রিমাত্রিক মানচিত্র
 
+![Embeddings Diagram](/diagrams/embedding.jpeg)
+
 **প্রশ্ন:** এআই তো কম্পিউটার, সে মানুষের ভাষা কীভাবে বোঝে?
 
 **উত্তর:** আসলে কম্পিউটার আমাদের মতো করে "সাদা", "কালো", "রাজা" বা "রানি" এসব কথা বোঝে না।
@@ -61,6 +63,8 @@ Purpose: Give a clear mental image of vector proximity.
 
 ### Context Windows: মনোযোগের সীমানা বা এটেনশন স্প্যান
 
+![Context Window & Token Limits Diagram](/diagrams/context_window_token_limites.png)
+
 **প্রশ্ন:** Context Window জিনিসটা আসলে কী?
 
 **উত্তর:** এটা হলো এআই-এর এক মুহূর্তের মনোযোগের সীমা। সহজ কথায়, তার ব্রেনের "Token Limit"।
@@ -79,6 +83,8 @@ Purpose: Give a clear mental image of vector proximity.
 এআই যাতে কাজ করার সময় নিজের ট্র্যাক হারিয়ে না ফেলে, সেজন্য রয়েছে মেমোরি ও স্টেট।
 
 ### Memory & State: ডায়েরি বনাম কাজের খসড়া
+
+![Memory and State Management Diagram](/diagrams/memory and state management.png)
 
 **প্রশ্ন:** Memory আর State এর মধ্যে পার্থক্য কী?
 
@@ -99,6 +105,8 @@ Purpose: Give a clear mental image of vector proximity.
 
 ### RAG: ওপেন-বুক পরীক্ষা
 
+![RAG Diagram](/diagrams/RAG.png)
+
 **প্রশ্ন:** Retrieval-Augmented Generation (RAG) কী কাজ করে?
 
 **উত্তর:** এআই কিন্তু শুধু তার ট্রেইনিং ডেটা থেকে উত্তর দিতে পারে। সে তোমার কোম্পানির ভেতরের পার্সোনাল ফাইল বা আজকের সকালের খবর জানে না।
@@ -114,6 +122,8 @@ Purpose: Give a clear mental image of vector proximity.
 এতে এআই ভুল উত্তর দেওয়া বা Hallucination করা বন্ধ করে দেয়।
 
 ### MCP: ইউনিভার্সাল পাওয়ার অ্যাডাপ্টার
+
+![MCP Host Diagram](/diagrams/MCP host.jpeg)
 
 **প্রশ্ন:** Model Context Protocol (MCP) কেন এত জনপ্রিয় হচ্ছে?
 
@@ -134,11 +144,13 @@ MCP হলো এআই-এর ইউনিভার্সাল পাওয়া
 
 ### Model Routing: ট্রাফিক পুলিশ
 
+![Model Routing Diagram](/diagrams/model_routing.png)
+
 **প্রশ্ন:** Model Routing কী এবং এটা আমাদের কী বাঁচায়?
 
 **উত্তর:** সব কাজের জন্য কিন্তু আমাদের সবচেয়ে দামি আর বড় মডেল (যেমন Claude 3.5 Sonnet) ব্যবহার করার দরকার নেই।
 
-Model Routing হলো একটা ট্রাফিক পুলিশ বা ট্রাফিক ডিসপ্যাচার। 
+Model Routing হলো একটা ট্রাফিক police বা ট্রাফিক ডিসপ্যাচার। 
 
 ইউজার যখন জিজ্ঞেস করে, "২+২ কত?", রাউটার রিকোয়েস্টটি পাঠিয়ে দেয় একটা ছোট, দ্রুত আর সস্তা মডেলের কাছে (যেমন Gemini Flash)। 
 
@@ -164,6 +176,8 @@ Purpose: Explain cost and performance optimization visually.
 
 ### Multi-Agent Systems: স্পেশালিস্টদের টিম
 
+![Multi-Agent System Diagram](/diagrams/multy_agent_system.png)
+
 **প্রশ্ন:** Multi-Agent System কেন দরকার?
 
 **উত্তর:** একটা এআই মডেলকে দিয়ে সব কাজ করাতে গেলে সে খিচুড়ি বানিয়ে ফেলতে পারে। 
@@ -179,6 +193,8 @@ Purpose: Explain cost and performance optimization visually.
 
 ### A2A (Agent-to-Agent): টিমের গ্রুপ চ্যাট
 
+![Agent-to-Agent Communication Diagram](/diagrams/A2A.png)
+
 **প্রশ্ন:** A2A কমিউনিকেশন কী?
 
 **উত্তর:** Multi-Agent যদি একটা টিম হয়, তবে A2A হলো সেই টিমের নিজেদের ভেতরের গ্রুপ চ্যাট বা চ্যাট গ্রুপ।
@@ -191,6 +207,8 @@ Purpose: Explain cost and performance optimization visually.
 আমাদের কোড এবং প্রম্পট ঠিকমতো কাজ করছে কিনা, তা বোঝার উপায় হলো Evals।
 
 ### Evals: হোমওয়ার্কের খাতা চেক করা
+
+![AI Evals Diagram](/diagrams/Evals.png)
 
 **প্রশ্ন:** Evals জিনিসটা আসলে কী?
 

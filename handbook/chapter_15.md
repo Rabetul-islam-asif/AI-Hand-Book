@@ -74,6 +74,8 @@ Prompt: "bKash campaign dynamic rules?"
 
 RAG হলো LLM-এর জন্য ঠিক এই ওপেন-বুক পরীক্ষার মতো।
 
+![RAG Diagram](/diagrams/RAG.png)
+
 এখানে Model নিজে কিছু মুখস্থ করে রাখে না।
 
 সে শুধু Vector Database নামের বড় "বই" থেকে দরকারি পাতা খুঁজে এনে উত্তর দেয়।

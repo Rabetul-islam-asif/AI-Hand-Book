@@ -154,6 +154,8 @@ Queen-এর Vector-এর একদম কাছে গিয়ে ঠেক�
 
 Context Window হলো AI Model-এর RAM।
 
+![Context Window & Token Limits Diagram](/diagrams/context_window_token_limites.png)
+
 এটা বলে — Model একবারে সর্বোচ্চ কতগুলো Token নিতে পারবে।
 
 যেমন GPT-4o-র Context Window হলো ১,২৮,০০০ Token।
@@ -180,6 +182,8 @@ Context Window হলো AI Model-এর RAM।
 ## ৩. Vector Space-এ শব্দ কোথায় বসে?
 
 নিচের ছবিটা দেখো।
+
+![Embeddings Space Diagram](/diagrams/embedding.jpeg)
 
 এটা একটা ২D Visualization।
 

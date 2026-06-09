@@ -73,6 +73,8 @@ MCP হলো AI জগতের সেই USB-C Standard।
 
 এটি একবার Data আর Tools-কে সবার সামনে তুলে ধরে।
 
+![MCP Host Diagram](/diagrams/MCP host.jpeg)
+
 আর যেকোনো LLM Host ও Client সেই Data অনায়াসে রিড আর প্রসেস করতে পারে।
 
 
