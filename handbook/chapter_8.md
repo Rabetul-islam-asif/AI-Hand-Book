@@ -189,17 +189,7 @@ Context Window হলো AI Model-এর RAM।
 
 এখানে দেখানো হচ্ছে — Embeddings কীভাবে শব্দগুলোর অর্থ Geometric অবস্থান দিয়ে প্রকাশ করে:
 
-```
-Dimension Y (Royalty)
- ▲
- │     [ King ]             [ Queen ]
- │     
- │     
- │     [ Man ]              [ Woman ]
- │                                        [ Apple ]
- │                                                 [ Banana ]
- └───────────────────────────────────────────────────────────► Dimension X (Gender)
-```
+
 
 খেয়াল করো।
 

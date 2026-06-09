@@ -37,17 +37,7 @@
 
 ![Embedding Geometry Diagram](/diagrams/embedding.jpeg)
 
-```
-                  Royalty (y)
-                      │   [King] (0.9, 0.9, 0.2)
-                      │     .
-                      │    /  [Queen] (-0.9, 0.9, 0.2)
-                      │   /
-   ── Gender (x) ─────┼───
-                     /
-                    / [Man] (0.9, 0.1, 0.1)
-                Age (z)
-```
+
 
 **এই জ্যামিতিক মানচিত্রের সুবিধা কী?**
 
@@ -70,21 +60,7 @@ King - Man + Woman = Queen
 
 Vector Database বা Search Engine-এ দুটো Vector-এর মধ্যে কতটা মিল আছে, তা বোঝার জন্য ৩টি প্রধান Metric ব্যবহার করা হয়।
 
-[VISUAL]
-Title: Three Vector Distance Metrics
-Illustration: Comparison of Angle (Cosine), Straight Line (L2), and Projection (Dot Product) between two vectors
-Placement: After Core Concepts section
-Purpose: Visually define the core difference between Cosine, L2, and Dot Product metrics.
-
-```
-Cosine Similarity (Angle θ):        L2/Euclidean Distance (d):        Dot Product (Projection):
-            ▲                                  ▲                                 ▲
-           /                                  / \                               /
-          /                                  /   \                             /
-         / _ θ                              /     \                           /────►
-        /───►                              /───────►                         / (Length matters)
-     (Only Angle)                      (Straight Line)                  (Angle & Magnitude)
-```
+![Vector Distance Metrics](/diagrams/vector_distance_metrics.png)
 
 ### Cosine Similarity
 

@@ -39,23 +39,8 @@ Deal?
 
 এর মানে হলো এর Latency অনেক বেশি আর এর Complexity হলো O(N)।
 
-[VISUAL]
-Title: Exact KNN Search vs. HNSW Graph Search
-Illustration: Linear search bottleneck versus layered graph navigation
-Placement: After Hook Section
-Purpose: Show the paradigm shift from O(N) exhaustive scan to O(log N) graph hop traversal.
+![Exact KNN Search vs. HNSW Graph Search](/diagrams/knn_vs_hnsw.png)
 
-```
-Linear Flat Search (Exhaustive Scan - O(N) Extremely Slow):
-[Query] ──► [Book 1] ──► [Book 2] ──► [Book 3] ──► [Book 4] ... [Book 1,000,000]
-
-HNSW Layered Graph (O(log N) Lightning Fast Hops):
-[Query] ──► [Layer 2 (Coarse Nodes)]
-                  │ (Drop down)
-            [Layer 1 (Medium Dense)] ──► [Next Node]
-                  │ (Drop down)
-            [Layer 0 (Ultra Dense - Target Found ✓)]
-```
 
 ### তাহলে HNSW Graph Search কীভাবে কাজ করে?
 

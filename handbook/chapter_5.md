@@ -41,20 +41,7 @@ Synaptic Strength মানে হলো Weights ($W_1, W_2, W_3$) — কোন
 
 আর Firing Logic হলো Activation Function ($f$) — যেটা Output-কে একটা নির্দিষ্ট রেঞ্জে আটকে দেয়।
 
-[VISUAL]
-Title: Anatomy of an Artificial Neuron (Perceptron)
-Illustration: Structural diagram showing Inputs * Weights sum + Bias passing to Activation Function
-Placement: After Hook Section
-Purpose: Provide absolute visual grounding of the neuron equation.
 
-```
-Inputs      Weights
-  X1 ───► [ W1 ] ──┐
-  X2 ───► [ W2 ] ──┼──► Sum: Σ (Xi * Wi) + B ──► [ Activation Function (f) ] ──► Output (Y)
-  X3 ───► [ W3 ] ──┘
-                    ▲
-  Bias ─────────────┘
-```
 
 
 ## ২. Core Concepts: নিউরনের ভেতরের Equation

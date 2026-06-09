@@ -76,6 +76,9 @@ Purpose: Instantly clarify the relationship and boundaries of these terms.
 
 AI Training-এর মূলত তিনটি পথ আছে। চলো একে একে দেখি।
 
+![Three Families of Machine Learning](/diagrams/ml_families.png)
+
+
 ### Supervised Learning
 
 ধরো, তুমি একটা ক্লাসে বসে আছো। শিক্ষক প্রশ্ন দিচ্ছেন, সাথে সাথে উত্তরও বুঝিয়ে দিচ্ছেন। তুমি সেটা শিখে পরীক্ষা দিচ্ছ।

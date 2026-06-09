@@ -47,19 +47,8 @@
 
 খেয়াল করেছ? এখানে তুমি নিজেই কপি-পেস্ট ড্রাইভার হিসেবে কাজ করছ, আর সে শুধু তোমার Instruction ফলো করছে।
 
-[VISUAL]
-Title: Conversational Chatbot vs. Autonomous AI Agent
-Illustration: Static back-and-forth conversational loop vs. continuous recursive goal-oriented tool loop
-Placement: After Hook Section
-Purpose: Show the paradigm shift from message-driven bots to autonomous goal-driven loops.
+![Conversational Chatbot vs. Autonomous AI Agent](/diagrams/agent_vs_chatbot.png)
 
-```
-Traditional Chatbot (Static Message Loop):
-User ──► [ Prompt ] ──► [ Chatbot Response ] ──► User (Copy-paste driver)
-
-Autonomous AI Agent (Continuous Agentic Loop):
-User ──► [ Set Goal: "Fix payment bug" ] ──► [ Think ] ──► [ Act (Run Tool/Code) ] ──► [ Observe (Test fails) ] ──► [ Loop: Self-Correct ] ──► Done!
-```
 
 তাহলে Agent Mode বা Autonomous Worker কী জিনিস?
 
@@ -94,28 +83,8 @@ User ──► [ Set Goal: "Fix payment bug" ] ──► [ Think ] ──► [ A
 
 সহজ কথায়, এর পেছনে ৪টি প্রধান পিলার বা উপাদান থাকে।
 
-[VISUAL]
-Title: Four Pillars of AI Agent Architecture
-Illustration: High-quality flowchart mapping Profiling, Planning, Tools, and Memory
-Placement: After Core Concepts section
-Purpose: Visually define the structural blocks of an AI Agent.
+![The Four Pillars of AI Agent Architecture](/diagrams/four_pillars_agent.png)
 
-```
-┌────────────────────────────────────────────────────────┐
-│                      AI AGENT ENGINE                   │
-│                                                        │
-│   ┌──────────────────┐          ┌──────────────────┐   │
-│   │    PROFILING     │          │     PLANNING     │   │
-│   │ (Identity/Role)  │          │ (MCTS / ReAct)   │   │
-│   └────────┬─────────┘          └────────┬─────────┘   │
-│            │                             │             │
-│            ▼                             ▼             │
-│   ┌──────────────────┐          ┌──────────────────┐   │
-│   │      MEMORY      │          │      TOOLS       │   │
-│   │(Working/Semantic)│          │ (API/CLI/Bash)   │   │
-│   └──────────────────┘          └──────────────────┘   │
-└────────────────────────────────────────────────────────┘
-```
 
 চলো এই ৪টি পিলার সহজে বুঝে নিই।
 
@@ -188,30 +157,8 @@ Purpose: Visually define the structural blocks of an AI Agent.
 
 চলো নিচের Diagram-টি থেকে এই Self-Correction Flow দেখে নিই:
 
-[VISUAL]
-Title: Agentic Self-Correction Loop
-Illustration: Cyclic flow of Think -> Act -> Test Fails -> Reflection -> Update Plan -> Success
-Placement: After Reflection Section
-Purpose: Show the robustness of self-evaluating agents.
+![Agentic Self-Correction Loop (Code Healing)](/diagrams/agent_self_correction.png)
 
-```
-        [ Goal: "Compile code" ]
-                    │
-                    ▼
-                [ Think ]
-                    │
-                    ▼
-          [ Act: Write Code ]
-                    │
-                    ▼
-         [ Observe: Test Fails! ]
-                    │
-                    ▼
-        [ Reflection & Re-plan ] ──► (Incorporate error log and self-correct)
-                    │
-                    ▼
-      [ Act 2: Fix Code & Run Test ] ──► [ Success ✓ ]
-```
 
 
 ## ४. Claude Code ও Devin কীভাবে কাজ করে?
@@ -360,17 +307,8 @@ AI Agent-কে আমরা সহজে কীভাবে কল্পনা 
 
 এর সবচেয়ে দারুণ মেন্টাল Model হলো একটি ঘরের ভ্যাকুয়াম ক্লিনার রোবট।
 
-[VISUAL]
-Title: Robot Vacuum Cleaner Analogy of AI Agents
-Illustration: High-quality ASCII showing robot mapping rooms, bumping to obstacles, and adjusting paths
-Placement: Under Mental Model
-Purpose: Ground the autonomous navigation feedback loop.
+![Robot Vacuum Cleaner Analogy of Autonomous Agents](/diagrams/vacuum_cleaner_analogy.png)
 
-```
-  [ Goal: Clean Room ] ──► [ Sense Obstacle / Test Fail ] ──► [ Adjust Path / Self-Correct ]
-                                      ▲                                     │
-                                      └─────────────────────────────────────┘
-```
 
 ধরো, তুমি তাকে ঘরের Rules আর Boundary সেট করে দিলে। 
 

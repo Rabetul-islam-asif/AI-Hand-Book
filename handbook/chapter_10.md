@@ -41,19 +41,8 @@
 
 এটা হলো System 2 Thinking — ধীর, Analytical, Logical।
 
-[VISUAL]
-Title: System 1 vs. System 2 AI Architectures
-Illustration: Comparison of immediate prediction vector vs. chain-of-thought scratchpad looping
-Placement: After Hook Section
-Purpose: Ground the psychological and architectural shift in reasoning AIs.
+![System 1 vs. System 2 Reasoning Architectures](/diagrams/system1_vs_system2.png)
 
-```
-Standard LLM (System 1 - Immediate Output):
-Prompt: "23 * 47" ──► [ LLM Neural Nets ] ──► "1081" (Likely to hallucinate on complex math)
-
-Reasoning LLM (System 2 - Chain of Thought):
-Prompt: "23 * 47" ──► [ Hidden Scratchpad: 20 * 47 = 940 ... 3 * 47 = 141 ... Total = 1081 ] ──► "1081" (100% Correct)
-```
 
 তাহলে পুরনো GPT Model-গুলো কোন ক্যাটাগরিতে পড়ে?
 

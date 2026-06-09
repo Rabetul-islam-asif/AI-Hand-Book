@@ -49,22 +49,8 @@ AI সেটা পড়ে বুঝবে কোন Function রান করত
 
 খুব সহজ! বিজ্ঞানীকে সাহায্য করার জন্য তুমি রুমে একটা Custom রোবোটিক আর্ম বা Tools সেটআপ করে দিলে।
 
-[VISUAL]
-Title: LLM Tool Use Decision Loop
-Illustration: Separation between LLM's brain thinking and the client environment's arm executing
-Placement: After Hook Section
-Purpose: Show that the LLM only decides, while the client code executes.
+![LLM Tool Use Decision Loop](/diagrams/tool_use_decision_loop.png)
 
-```
-┌────────────────────────────────────────────────────────┐
-│                      CLIENT ENVIRONMENT                │
-│                                                        │
-│   [ Scientist / LLM ] ──► (Generates JSON: "use arm")  │
-│            ▲                          │                │
-│            │                          ▼                │
-│   [ Receives Result ] ◄── [ Executes: Robot Arm ]      │
-└────────────────────────────────────────────────────────┘
-```
 
 বিজ্ঞানী যখনই কোনো কাজ করতে চান, তিনি মুখে একটা নিখুঁত Instruction দেন।
 
@@ -142,19 +128,8 @@ AI Tool Calling ঠিক এভাবেই কাজ করে।
 
 ![Tool Calling Loop Diagram](/diagrams/tool_calling_loop.png)
 
-```
-Step 1: User says: "আমার TRX999 ব্যালেন্স কত?" ──► [ Prompt sent to LLM ]
-                                                            │
-                                                            ▼
-Step 2: LLM returns structured JSON request ◄───────────────┘
-        (e.g. stop_reason = "tool_use", call = "check_balance")
-                                                            │
-                                                            ▼
-Step 3: Your server executes local function: check_balance("TRX999") ──► Returns database result
-                                                                              │
-                                                                              ▼
-Step 4: Server sends database result back to LLM ──► LLM outputs final friendly text response ✓
-```
+
+
 
 
 ## ৩. একসাথে অনেক টুল চালানো বা Parallel Calling
@@ -169,21 +144,8 @@ Step 4: Server sends database result back to LLM ──► LLM outputs final fri
 
 নিচের ডায়াগ্রামটি দেখলে একদম পরিষ্কার হয়ে যাবে:
 
-[VISUAL]
-Title: Parallel Tool Call Resolution
-Illustration: Single LLM response splitting into 2 local tool execution paths and re-converging in the next turn
-Placement: After parallel calling explanation
-Purpose: Ground how systems handle multiple queries like "compare weather in Dhaka and Tokyo".
+![Parallel Tool Call Resolution](/diagrams/parallel_tool_call_resolution.png)
 
-```
-User Query: "Compare prices of Product A and Product B"
-  │
-  ▼
-[ LLM response: stop_reason = "tool_use" ]
-  ├── Tool Call 1: check_price(product="A") ──► Local Exec A ──┐
-  │                                                            ├──► [ Merge Results ] ──► Final LLM Answer
-  └── Tool Call 2: check_price(product="B") ──► Local Exec B ──┘
-```
 
 
 ## ৪. বাস্তবে যেমন দেখায়: bKash পেমেন্ট ভেরিফিকেশন

@@ -107,25 +107,8 @@ $$\Delta W = B \times A$$
 
 তাহলে আমাদের Parameters লাগবে মাত্র $4096 \times 8 \times 2 = 65,536$ টি!
 
-[VISUAL]
-Title: Mathematical Dimension Reduction of LoRA
-Illustration: Visual representation of a large 4096x4096 matrix being computed as a product of 4096x8 and 8x4096 matrices
-Placement: Under Math Intuition section
-Purpose: Visually demonstrate the parameters reduction from 16M to 65K.
+![Mathematical Dimension Reduction of LoRA](/diagrams/lora_matrix_reduction.png)
 
-```
-Original Weight Update Matrix (ΔW):       LoRA Matrix Factorization (B x A):
-       ┌──────────────┐                             ┌───┐
-       │              │                             │   │
-       │  4096 x 4096 │              =              │ B │ (4096 x 8)
-       │              │                             │   │
-       └──────────────┘                             └───┘
-                                                      *
-                                                    ┌───────────────┐
-                                                    │  A (8 x 4096) │
-                                                    └───────────────┘
-  (Total: 16.7 Million Weights)               (Total: Only 65,536 Weights!)
-```
 
 ভাবো একবার, ১৬.৭ Million Parameters-এর জায়গায় আমরা ট্রেইন করছি মাত্র ৬৫ হাজার Parameters! 
 
@@ -277,18 +260,8 @@ Rank অতিরিক্ত বড় সেট করলে মেমরি আ�
 
 **"LoRA মানে হলো একটা বিশাল অর্কেস্ট্রার তালের সাথে পাশে বসে বাঁশি বাজানো।"**
 
-[VISUAL]
-Title: Orchestra vs. Solo Flute analogy of LoRA tuning
-Illustration: Visual representation of a huge orchestra block alongside a tiny flute player syncing notes
-Placement: After Mental Model section
-Purpose: Ground the mathematical intuition of frozen base weights vs. tiny parameter tuning.
+![LoRA Tuning: Orchestra vs. Solo Flute Analogy](/diagrams/orchestra_analogy.png)
 
-```
-  [ Massive Orchestra: 7 Billion Players ]  ──► (Sound output locked / Frozen)
-                      ▲
-                      │ (Perfect Sync)
-  [ Solo Flute Player: A & B Matrices ] ──────► (Only tunes their small flute)
-```
 
 একবার ভাবো, তোমার সামনে একটা বিশাল অর্কেস্ট্রা দল দাঁড়িয়ে গান পরিবেশন করছে।
 

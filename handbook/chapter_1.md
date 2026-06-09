@@ -145,30 +145,6 @@ def is_cat(image):
 
 ![Traditional Programming vs Machine Learning Diagram](/diagrams/traditional_vs_ai_programming.png)
 
-### Traditional Programming
-
-```text
-Human
-  ↓
-Writes Rules
-  ↓
-Computer
-  ↓
-Answer
-```
-
-### Machine Learning
-
-```text
-Examples
-  ↓
-AI Learns Patterns
-  ↓
-Model
-  ↓
-Answer
-```
-
 
 ## ৩. Paradigm Shift: Rules থেকে Learning
 

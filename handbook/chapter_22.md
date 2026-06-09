@@ -43,23 +43,8 @@ Anthropic এটা তৈরি করেছে ঠিকই, কিন্ত�
 
 Developer হিসেবে প্রতিটি AI Model-এ আলাদা করে Custom Coding করে Tool Calling জোড়া দেওয়াও ঠিক এই রকম ঝামেলার ছিল।
 
-[VISUAL]
-Title: Proprietary Tool Connectors vs. Unified MCP USB-C Standard
-Illustration: Complex point-to-point lines versus a centralized standard USB-C bridge
-Placement: After Hook Section
-Purpose: Show the core architectural simplification of MCP.
+![Proprietary Connectors vs. Unified Model Context Protocol (MCP)](/diagrams/proprietary_vs_mcp.png)
 
-```
-Proprietary Integration (The Old Mess):
-Tool A ──► Claude API Format ──► Claude
-Tool A ──► OpenAI API Format ──► ChatGPT
-Tool A ──► Gemini API Format ──► Gemini
-
-MCP Standard Integration (The USB-C Era ✓):
-Tool A ──┐
-Tool B ──┼─► [ MCP Server (Standard JSON-RPC) ] ◄──► [ Any LLM Host / Client ]
-Tool C ──┘
-```
 
 আর এখন?
 
@@ -124,20 +109,8 @@ MCP মূলত Client-Server Architecture-এর ওপর দাঁড়িয়�
 
 যেমন File Writer, Bash Runner বা Database Query করার Tool।
 
-[VISUAL]
-Title: Internals of an MCP Connection
-Illustration: Bidirectional JSON-RPC messages passing through stdio pipe
-Placement: Under Core Concepts section
-Purpose: Visually demonstrate the clean JSON-RPC handshake of MCP.
+![MCP Connection Handshake (JSON-RPC stdio/SSE)](/diagrams/mcp_json_rpc_handshake.png)
 
-```
-Host (Client: Cursor / Claude Desktop)
-       │
-       ├─► Request:  {"jsonrpc": "2.0", "method": "tools/list", "id": 1} ──┐
-       │                                                                   │ (stdio / SSE Pipe)
-       │                                                                   ▼
-       └◄─ Response: {"jsonrpc": "2.0", "result": {"tools": [...]}, "id": 1} ◄── MCP Server
-```
 
  Remember
 
@@ -265,17 +238,8 @@ MCP Server বানানোর পর প্রতিবার AI Model চে
 
 **"MCP Server = একটি USB Hub"**
 
-[VISUAL]
-Title: USB Hub analogy of MCP architecture
-Illustration: Visual representation of multiple accessories plugging into one USB Hub connected to a PC
-Placement: Under Mental Model section
-Purpose: Create an intuitive map for MCP dynamic discovery.
+![Analogy: MCP Server = USB Hub](/diagrams/mcp_usb_hub_analogy.png)
 
-```
-  [ Keyboard ] ──┐
-  [ Mouse    ] ──┼─► [ USB Hub (MCP Server) ] ◄──► [ PC/Host (Any LLM Client) ]
-  [ Printer  ] ──┘
-```
 
 ধরে নাও তোমার কম্পিউটারটি হলো AI Host (যেমন Claude বা Cursor)।
 

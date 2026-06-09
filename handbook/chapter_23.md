@@ -55,19 +55,8 @@ Deal?
 
 প্রথম বাঁকেই গাড়িটা ক্র্যাশ করবে, তাই না?
 
-[VISUAL]
-Title: Model alone vs. Model + Harness System
-Illustration: Heavy high-speed engine vs. fully structured car chassis with dashboard, brakes, and safety systems
-Placement: After Hook Section
-Purpose: Show that a production Agent is a complete car, not just an engine.
+![Model alone vs. Model + Harness System](/diagrams/model_vs_harness.png)
 
-```
-Model Alone (High Risk Engine):
-[ Massive GPU Engine (LLM) ] ──► (No steering/breaks) ──► Crash / Wallet Drainage 
-
-Agent = Model + Harness (Flagship Safe Racing Car ✓):
-[ Host Client ] ──► [ Guides (AGENTS.md) ] ──► [ Model Engine ] ──► [ Sensors (Evals) ] ──► Safe Response
-```
 
 আর যদি তুমি ইঞ্জিনের চারপাশে একটা মজবুত চেসিস বসাও?
 
@@ -98,31 +87,8 @@ Harness হলো তোমার মেইন অ্যাপ্লিকেশ
 
 চলো এই স্তরগুলো একটু সহজভাবে বুঝে নিই।
 
-[VISUAL]
-Title: 3-Layer Harness Architecture
-Illustration: Directed hierarchy mapping Guides down to the Execution Loop, guarded by Sensors on a Ground Truth context
-Placement: After Core Concepts section
-Purpose: Define the structural layers of a Harness.
+![Three-Layer Agentic Harness Architecture](/diagrams/harness_layers.png)
 
-```
-┌────────────────────────────────────────────────────────┐
-│                      HARNESS CONTAINER                 │
-│                                                        │
-│   ┌────────────────────────────────────────────────┐   │
-│   │   Layer 1: GUIDES (System Prompts, AGENTS.md)  │   │
-│   └───────────────────────┬────────────────────────┘   │
-│                           │                            │
-│                           ▼                            │
-│   ┌────────────────────────────────────────────────┐   │
-│   │   Layer 2: CONTEXT & STATES (Memory, RAG, ACL) │   │
-│   └───────────────────────┬────────────────────────┘   │
-│                           │                            │
-│                           ▼                            │
-│   ┌────────────────────────────────────────────────┐   │
-│   │   Layer 3: SENSORS & EVALS (Linter, Unit Tests)│   │
-│   └────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────┘
-```
 
 প্রথম স্তরটা কী?
 
@@ -187,20 +153,8 @@ Probabilistic Guide বা আমাদের কন্সটিটিউশন�
 
 চলো দেখি এই লুপটা কীভাবে কাজ করে:
 
-[VISUAL]
-Title: Validation Sensor Loop
-Illustration: Block diagram showing code output blocked by sensor, feedback generated, and model retrying
-Placement: After validation loop section
-Purpose: Ground the mathematical intuition of automated error recovery.
+![Validation Sensor Loop (Automated Error Recovery)](/diagrams/validation_sensor_loop.png)
 
-```
-Agent: "I added the feature, done!" ──► [ POST-SENSOR (Linter/tsc) ] ──► FAIL! (Syntax Error)
-                                                    │
-[ Retry Force ] ◄── [ Feedback: "Fix Syntax line 5" ] ◄──┘
-      │
-      ▼
-Agent: "Ah, my bad!" ──► [ Fixes Code ] ──► [ POST-SENSOR ] ──► PASS ✓ ──► Final User Output
-```
 
 
 ### ৪. রিয়েল লাইফ উদাহরণ: Claude Code

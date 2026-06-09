@@ -41,22 +41,8 @@
 
 AI-এর ভাষায় একেই বলে Hallucination!
 
-[VISUAL]
-Title: Closed-Book LLM vs. Open-Book RAG Pipeline
-Illustration: Flat prediction from weight memory vs. targeted search and context injection pipeline
-Placement: After Hook Section
-Purpose: Show the conceptual paradigm shift of RAG.
+![Closed-Book LLM vs. Open-Book RAG Pipeline](/diagrams/closed_vs_open_book_rag.png)
 
-```
-Closed-Book Model (Only Internal Weights - Risk of Hallucination):
-Prompt: "bKash campaign dynamic rules?" ──► [ LLM Model ] ──► "I think the rules are..." (Wrong!)
-
-Open-Book RAG (Retrieval-Augmented Generation - 100% Fact-based):
-Prompt: "bKash campaign dynamic rules?"
-  │
-  ▼
-[ Search Vector DB ] ──► [ Found: "Doc B: Rules are X, Y" ] ──► [ Inject Context ] ──► [ LLM ] ──► "According to Doc B, rules are X, Y"
-```
 
 আর যদি এটা একটা Open-Book Exam হয়?
 
@@ -85,19 +71,8 @@ RAG হলো LLM-এর জন্য ঠিক এই ওপেন-বুক �
 
 একটি পুরো RAG Architecture মূলত দুটি আলাদা Pipeline-এ কাজ করে:
 
-[VISUAL]
-Title: Two Pipelines of RAG Architecture
-Illustration: High-quality flowchart mapping the Offline Ingestion Pipe versus the Online Retrieval-Generation Pipe
-Placement: After Core Concepts section
-Purpose: Visually separate the static database preparation from the live user query flow.
 
-```
-Offline Ingestion Pipeline (একবার রান হয়):
-Raw PDF/Docs ──► [ Chunking ] ──► [ Embedding ] ──► [ Upsert to Vector DB ]
 
-Online Query Pipeline (প্রতিটি ইউজার রিকোয়েস্টে রান হয়):
-User Query ──► [ Embed Query ] ──► [ Semantic Search Vector DB ] ──► [ Inject Context to Prompt ] ──► [ LLM Generation ]
-```
 
 ### Ingestion Pipeline
 

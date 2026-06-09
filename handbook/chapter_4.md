@@ -47,22 +47,8 @@ Model যখন Concept না বুঝে শুধু Training Data মুখ
 
 এটাই **Generalization**।
 
-[VISUAL]
-Title: Overfitting vs Underfitting vs Generalization
-Illustration: Curve fit mapping for three cases: underfitting (straight line), generalization (smooth curve), and overfitting (squiggly line hitting every point)
-Placement: After Hook Section
-Purpose: Provide intuitive geometric comparison of generalization curves.
+![Overfitting vs Underfitting Curves](/diagrams/fitting_curves.png)
 
-```
-Underfitting (High Bias):    Optimal (Balanced):          Overfitting (High Variance):
-      ▲                            ▲                            ▲
-      │   *   *                    │   *   *                    │   *   *
-      │  /                         │  .---.                     │ / \ / \
-      │ /   *                      │ /     \   *                │*   *   \*
-      │/                           │/                           │
-      └──────────────►             └──────────────►             └──────────────►
-      (Straight Line)             (Smooth Fit)                 (Squiggly Line)
-```
 
 
 ## ২. Core Concepts: Bias, Variance আর মুখস্থ রোগ

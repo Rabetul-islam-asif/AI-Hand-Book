@@ -49,19 +49,7 @@ Deep Learning-এর ভাষায় এই ভুল fixের চেইন�
 
 আর ভুলের দায়ভার ভাগ করার Math-এর নিয়মটাকে বলে **Chain Rule**।
 
-[VISUAL]
-Title: Forward Pass vs. Backward Pass Flow
-Illustration: Sequence of operations in forward propagation compared against reverse gradient distribution
-Placement: After Hook Section
-Purpose: Provide architectural layout of a multi-layer deep net.
 
-```
-Forward Pass (Data Flow):
-[Input X] ───► ( Layer 1: W1, B1 ) ───► [ Hidden Activation ] ───► ( Layer 2: W2, B2 ) ───► [ Prediction Y_pred ] ───► [ Loss ]
-
-Backward Pass (Error/Gradient Flow):
-[Input X] ◄─── ( Update W1, B1 ) ◄─── [ Hidden Gradients ] ◄─── ( Update W2, B2 ) ◄─── [ Loss Gradient dL/dY ] ◄─── [ Loss ]
-```
 
 
 ### ২. মূল ধারণা: Feedforward আর Chain Rule

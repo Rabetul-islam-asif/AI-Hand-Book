@@ -41,22 +41,8 @@ Engineers এবং Researchers-দের জন্য এটি বেশ ঝ�
 
 এখানে তুমি তাকে রশি দিয়ে বেঁধে নির্দিষ্ট রাস্তায় সোজা হাঁটা শেখালে। সে এখন কিছুটা বাধ্য।
 
-[VISUAL]
-Title: Alignment Progression: SFT vs. RLHF/DPO
-Illustration: Directed lane walking vs. learning ethics / safety boundaries (pit avoidance)
-Placement: After Hook Section
-Purpose: Show why alignment is needed after SFT.
+![SFT vs. Safety Alignment (Boundaries)](/diagrams/alignment_progression.png)
 
-```
-Supervised Fine-Tuning (Lane Walking - Copies prompts):
-[ Road Target ] ◄── (SFT Model blindly copies exact text patterns)
-
-Safety Alignment (RLHF / DPO - Ethical Boundary & Self-Correction):
-[ Safe Zone ]  ◄── (Model evaluates ethical safety before responding)
-     ▲
-     │ (Avoids dangerous cliffs/hallucinations)
-[ Danger Pit (PII Leak/Hacks) ] (Hard Blocked )
-```
 
 কিন্তু ঘোড়াটার সামনে যদি হঠাৎ একটা গভীর খাদ পড়ে?
 
@@ -87,15 +73,7 @@ ChatGPT কিন্তু এই পদ্ধতিতেই তৈরি হ�
 
 ![RLHF Diagram](/diagrams/RLHF separate reward model & PPO loop.png)
 
-```
-Step 1: SFT Model ──► Generate Multiple Answers
-                               │
-                               ▼
-Step 2: Humans Label Answers ──► [ Train Reward Model ] (লার্নিং মানুষের ভালোলাগা)
-                               │
-                               ▼
-Step 3: PPO Optimizer ──► [ Update LLM Weights ] ──► (Ensures high reward score)
-```
+
 
 ধাপগুলো কেমন চলো দেখি।
 
@@ -160,20 +138,7 @@ $\pi_\theta$ হলো আমাদের মূল Model, যাকে আম�
 
 ![DPO Diagram](/diagrams/dpo.png)
 
-```
-       DPO Latent Space Shifts
-                    ┌────────────────────────┐
-                    │      Active Model      │
-                    └───────────┬────────────┘
-         ┌──────────────────────┴──────────────────────┐
- ┌───────▼───────┐                             ┌───────▼───────┐
- │   Winner Yw   │                             │   Loser Yl    │
- │ (Preferred)   │                             │  (Rejected)   │
- └───────┬───────┘                             └───────┬───────┘
-         │                                             │
-   Gradient Pull ◄── (Attraction)                Gradient Push ──► (Repulsion)
- (Boost Probability)                           (Suppress Probability)
-```
+
 
 
 ## ৪. DeepSeek R1 ও Safety Guardrail
@@ -272,18 +237,8 @@ print("DPO Trainer Initialized! ready to align the model on safety policies...")
 
 ধরে নাও, Alignment হলো AI-এর মাথায় একজন সুশীল নীতি পুলিশ বসিয়ে দেওয়া।
 
-[VISUAL]
-Title: Internal Safety Guard Dog Analogy of Alignment
-Illustration: Inner controller node blocking forbidden vector paths before output generation
-Placement: Under Mental Model
-Purpose: Ground the concept of active internal suppression.
+![Mental Model: Safety Officer (Guard Dog) Analogy](/diagrams/safety_guard_dog_analogy.png)
 
-```
-  [ Raw Thought Generation ] ──► [ Internal Safety Officer (DPO) ] ──► [ Output Response ]
-                                                │
-                                                ▼ (Blocks unsafe/illegal paths)
-                                       "Refusal Message"
-```
 
 ভাবো, মডেলটি হলো দারুণ প্রতিভাবান এক শিশু।
 
