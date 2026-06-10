@@ -119,14 +119,15 @@ Postgres pgvector সেটআপ করছেন, vLLM Server Optimize কর�
 
 ## ৩. AI System ডিজাইনের গোল্ডেন রুলস
 
-```
-                  [ নতুন AI Project রিকোয়ারমেন্ট ]
-                                │
-          ┌─────────────────────┴─────────────────────┐
-          ▼ (Tabular Data?)          ▼ (Text Extraction?)      ▼ (Reasoning?)
-    [ Linear Regression / ]    [ BERT / DeBERTa ]        [ DeepSeek R1 / ]
-    [ XGBoost on CPU      ]    [ Local Serving  ]        [ System 2 APIs ]
-    (Cheap, Fast)              (Safe, Local)             (Smartest, Heavy)
+```mermaid
+flowchart TD
+    Req["নতুন AI Project রিকোয়ারমেন্ট"] --> Decision{"কোন ধরণের Data / Task?"}
+    
+    Decision -->|Tabular Data?| ML["Linear Regression / XGBoost on CPU<br>(Cheap, Fast)"]
+    Decision -->|Text Extraction / Classification?| Encoder["BERT / DeBERTa (Local Serving)<br>(Safe, Local)"]
+    Decision -->|Reasoning / Planning?| Reasoning["DeepSeek R1 / System 2 APIs<br>(Smartest, Heavy)"]
+    
+    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
 
 

@@ -116,17 +116,30 @@ Activation Function নেটওয়ার্কে **Non-linearity** যো�
 
 ## ৩. Activation Function-এর Shape
 
-Activation Function-গুলোর Graph মনে রাখো।
+Activation Function-গুলোর Graph মনে রাখো। এটা তোমার কাজে অনেক আসবে।
 
-এটা তোমার কাজে অনেক আসবে।
-
+```mermaid
+xychart-beta
+    title "Sigmoid Activation Function (Range: 0 to 1)"
+    x-axis "Input (z)" [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+    y-axis "Output" 0.0 --> 1.0
+    line "Sigmoid" [0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98]
 ```
-Sigmoid (0 to 1):             ReLU (Max 0, X):             tanh (-1 to 1):
-      ▲                             ▲                            ▲
-   1.0┼    .---                     │   /                        │    .---
-      │  /                          │  /                      0.0┼───/───
-   0.0┼─'──────►                    ┼────────►                   │  /
-                                   0.0                           │'
+
+```mermaid
+xychart-beta
+    title "ReLU Activation Function (Range: 0 to Infinity)"
+    x-axis "Input (z)" [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+    y-axis "Output" 0.0 --> 4.0
+    line "ReLU" [0, 0, 0, 0, 0, 1, 2, 3, 4]
+```
+
+```mermaid
+xychart-beta
+    title "tanh Activation Function (Range: -1 to 1)"
+    x-axis "Input (z)" [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+    y-axis "Output" -1.0 --> 1.0
+    line "tanh" [-0.99, -0.99, -0.96, -0.76, 0.0, 0.76, 0.96, 0.99, 0.99]
 ```
 
 

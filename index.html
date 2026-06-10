@@ -16,6 +16,9 @@
     <!-- Marked.js (Markdown parser) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- Mermaid.js for Rendering Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
     <!-- Highlight.js (Code Syntax Highlighting) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
@@ -1359,6 +1362,7 @@
         let currentFontWeight = 400; // 300 (Light), 400 (Normal), 500 (Medium), 600 (Bold)
         let currentVisualTheme = 'matrix'; // matrix, cyberpunk, slate
         let currentCodeTheme = 'gray'; // Keep premium Sage Green #ACAEA2 cards by default!
+        let currentRawMarkdown = "";
 
         // Populate sidebar
         function populateSidebar() {
@@ -1446,6 +1450,14 @@
             decorateCodeThemeButton();
             decorateVisualThemeButton();
             localStorage.setItem('themeState', isLight ? 'light' : 'dark');
+            
+            // Re-render markdown to update Mermaid theme seamlessly!
+            if (currentRawMarkdown) {
+                const container = document.querySelector(".content-container");
+                const scrollPos = container.scrollTop;
+                renderMarkdownContent(currentRawMarkdown);
+                container.scrollTop = scrollPos;
+            }
         }
 
         // Adjust Font Boldness Weight step-by-step
@@ -1621,161 +1633,14 @@
                 if (!response.ok) throw new Error("Chapter file not found");
                 
                 let text = await response.text();
+                currentRawMarkdown = text;
                 
-                // Parse custom visual callouts inside our chapter files into 3-theme controllable pre blocks!
-                // Handles \r\n (CRLF) line endings, extracts Title for header, strips metadata lines
-                text = text.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n---|\r?\n\r?\n###)/g, (match, content) => {
-                    // Extract title from "Title: ..." line
-                    const titleMatch = content.match(/Title:\s*(.+)/);
-                    const title = titleMatch ? titleMatch[1].trim() : 'Visual Explanation / Architecture Map';
-                    
-                    // Strip metadata lines (Title, Illustration, Placement, Purpose)
-                    let diagram = content
-                        .replace(/^Title:\s*.+$/gm, '')
-                        .replace(/^Illustration:\s*.+$/gm, '')
-                        .replace(/^Placement:\s*.+$/gm, '')
-                        .replace(/^Purpose:\s*.+$/gm, '')
-                        .trim();
-                    
-                    // Extract content inside ``` code fences if present
-                    const codeBlockMatch = diagram.match(/```[\w]*\r?\n([\s\S]*?)```/);
-                    if (codeBlockMatch) {
-                        diagram = codeBlockMatch[1].trimEnd();
-                    }
-                    
-                    return `<div class="callout-box developer">
-                        <div class="callout-title">
-                            <span><i class="fa-solid fa-diagram-project"></i> ${title}</span>
-                        </div>
-                        <pre class="visual-pre theme-${currentVisualTheme}"><code class="language-plaintext">${diagram}</code></pre>
-                    </div>`;
-                });
-                
-                // Wrap Developer Perspective callouts dynamically
-                text = text.replace(/💻 Developer View([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                    return `<div class="callout-box developer">
-                        <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
-                        ${content.trim()}
-                    </div>`;
-                });
-                
-                // Wrap Production Reality callouts dynamically
-                text = text.replace(/🏭 Production Reality([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                    return `<div class="callout-box">
-                        <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
-                        ${content.trim()}
-                    </div>`;
-                });
-                
-                // Wrap Common Mistakes callouts dynamically
-                text = text.replace(/🔴 Common Mistake([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                    return `<div class="callout-box warning">
-                        <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
-                        ${content.trim()}
-                    </div>`;
-                });
-                
-                // Clean up any remaining '---' horizontal rules so they are completely removed from display
-                text = text.replace(/\r?\n---/g, '');
-
-                // Render Markdown
-                const contentDiv = document.getElementById("markdownContent");
-                contentDiv.innerHTML = marked.parse(text);
-                
-                // Wrap all tables in a table-container for horizontal scrolling on mobile
-                contentDiv.querySelectorAll('table').forEach(table => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'table-container';
-                    table.parentNode.insertBefore(wrapper, table);
-                    wrapper.appendChild(table);
-                });
+                renderMarkdownContent(text);
                 
                 // Set Header title
+                const contentDiv = document.getElementById("markdownContent");
                 const mainH1 = contentDiv.querySelector("h1");
                 headerTitle.innerText = mainH1 ? mainH1.innerText : `Chapter ${chNum}`;
-                
-                // Run Syntax Highlighting
-                contentDiv.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
-                
-                // Inject Estimated Reading Time & Word Count Metadata
-                updateChapterMetadata();
-
-                // Inject Floating "Copy Code" Buttons to each pre block
-                contentDiv.querySelectorAll('pre').forEach((pre) => {
-                    if (!pre.querySelector('.copy-code-btn')) {
-                        const copyBtn = document.createElement('button');
-                        copyBtn.className = 'copy-code-btn';
-                        copyBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            copyCode(copyBtn);
-                        };
-                        copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
-                        copyBtn.title = 'Code কপি করুন';
-                        pre.appendChild(copyBtn);
-                    }
-                });
-                
-                // Render KaTeX Math equations
-                if (window.renderMathInElement) {
-                    renderMathInElement(contentDiv, {
-                        delimiters: [
-                            {left: '$$', right: '$$', display: true},
-                            {left: '$', right: '$', display: false}
-                        ],
-                        throwOnError: false
-                    });
-                }
-                
-                // Transform Interview Questions into Interactive Flashcards!
-                setupInteractiveInterviewQuestions();
-                
-                // Append Next & Previous Chapter Navigation Arrows
-                const navDiv = document.createElement("div");
-                navDiv.className = "chapter-navigation";
-                
-                const currentIndex = flatChapters.findIndex(ch => Number(ch.num) === Number(chNum));
-                const prevCh = currentIndex > 0 ? flatChapters[currentIndex - 1] : null;
-                const nextCh = currentIndex < flatChapters.length - 1 ? flatChapters[currentIndex + 1] : null;
-                
-                let prevBtnHtml = "";
-                if (prevCh) {
-                    prevBtnHtml = `
-                        <button class="nav-prev-btn" onclick="loadChapter(${prevCh.num})">
-                            <span class="nav-arrow"><i class="fa-solid fa-arrow-left"></i></span>
-                            <span class="nav-btn-label">
-                                <span class="nav-dir-sub">পূর্ববর্তী chapter</span>
-                                <span class="nav-chapter-title">Ch ${prevCh.num}: ${prevCh.title}</span>
-                            </span>
-                        </button>
-                    `;
-                } else {
-                    prevBtnHtml = `<div class="nav-placeholder"></div>`;
-                }
-                
-                let nextBtnHtml = "";
-                if (nextCh) {
-                    nextBtnHtml = `
-                        <button class="nav-next-btn" onclick="loadChapter(${nextCh.num})">
-                            <span class="nav-btn-label">
-                                <span class="nav-dir-sub">পরবর্তী chapter</span>
-                                <span class="nav-chapter-title">Ch ${nextCh.num}: ${nextCh.title}</span>
-                            </span>
-                            <span class="nav-arrow"><i class="fa-solid fa-arrow-right"></i></span>
-                        </button>
-                    `;
-                } else {
-                    nextBtnHtml = `<div class="nav-placeholder"></div>`;
-                }
-                
-                navDiv.innerHTML = prevBtnHtml + nextBtnHtml;
-                contentDiv.appendChild(navDiv);
-                
-                // Apply current weights & themes
-                applyFontWeightToPage();
-                applyVisualThemeToPage();
-                applyCodeThemeToPage();
                 
                 // Scroll to top
                 document.querySelector(".content-container").scrollTop = 0;
@@ -1790,6 +1655,189 @@
                     </div>
                 `;
             }
+        }
+
+        // Separate render function to allow seamless re-rendering (e.g. on theme toggle)
+        function renderMarkdownContent(text) {
+            // Parse custom visual callouts inside our chapter files into 3-theme controllable pre blocks!
+            // Handles \r\n (CRLF) line endings, extracts Title for header, strips metadata lines
+            text = text.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n---|\r?\n\r?\n###)/g, (match, content) => {
+                // Extract title from "Title: ..." line
+                const titleMatch = content.match(/Title:\s*(.+)/);
+                const title = titleMatch ? titleMatch[1].trim() : 'Visual Explanation / Architecture Map';
+                
+                // Strip metadata lines (Title, Illustration, Placement, Purpose)
+                let diagram = content
+                    .replace(/^Title:\s*.+$/gm, '')
+                    .replace(/^Illustration:\s*.+$/gm, '')
+                    .replace(/^Placement:\s*.+$/gm, '')
+                    .replace(/^Purpose:\s*.+$/gm, '')
+                    .trim();
+                
+                // Extract content inside ``` code fences if present
+                const codeBlockMatch = diagram.match(/```[\w]*\r?\n([\s\S]*?)```/);
+                if (codeBlockMatch) {
+                    diagram = codeBlockMatch[1].trimEnd();
+                }
+                
+                return `<div class="callout-box developer">
+                    <div class="callout-title">
+                        <span><i class="fa-solid fa-diagram-project"></i> ${title}</span>
+                    </div>
+                    <pre class="visual-pre theme-${currentVisualTheme}"><code class="language-plaintext">${diagram}</code></pre>
+                </div>`;
+            });
+            
+            // Wrap Developer Perspective callouts dynamically
+            text = text.replace(/💻 Developer View([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                return `<div class="callout-box developer">
+                    <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
+                    ${content.trim()}
+                </div>`;
+            });
+            
+            // Wrap Production Reality callouts dynamically
+            text = text.replace(/🏭 Production Reality([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                return `<div class="callout-box">
+                    <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
+                    ${content.trim()}
+                </div>`;
+            });
+            
+            // Wrap Common Mistakes callouts dynamically
+            text = text.replace(/🔴 Common Mistake([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                return `<div class="callout-box warning">
+                    <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
+                    ${content.trim()}
+                </div>`;
+            });
+            
+            // Clean up any remaining '---' horizontal rules so they are completely removed from display
+            text = text.replace(/\r?\n---/g, '');
+
+            // Render Markdown
+            const contentDiv = document.getElementById("markdownContent");
+            contentDiv.innerHTML = marked.parse(text);
+            
+            // Wrap all tables in a table-container for horizontal scrolling on mobile
+            contentDiv.querySelectorAll('table').forEach(table => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-container';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            });
+            
+            // Run Syntax Highlighting
+            contentDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+            
+            // Inject Estimated Reading Time & Word Count Metadata
+            updateChapterMetadata();
+
+            // Inject Floating "Copy Code" Buttons to each pre block
+            contentDiv.querySelectorAll('pre').forEach((pre) => {
+                if (!pre.querySelector('.copy-code-btn')) {
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-code-btn';
+                    copyBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        copyCode(copyBtn);
+                    };
+                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+                    copyBtn.title = 'Code কপি করুন';
+                    pre.appendChild(copyBtn);
+                }
+            });
+            
+            // Render KaTeX Math equations
+            if (window.renderMathInElement) {
+                renderMathInElement(contentDiv, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+            
+            // Transform Interview Questions into Interactive Flashcards!
+            setupInteractiveInterviewQuestions();
+            
+            // Append Next & Previous Chapter Navigation Arrows
+            const navDiv = document.createElement("div");
+            navDiv.className = "chapter-navigation";
+            
+            const currentIndex = flatChapters.findIndex(ch => Number(ch.num) === Number(currentChapterNum));
+            const prevCh = currentIndex > 0 ? flatChapters[currentIndex - 1] : null;
+            const nextCh = currentIndex < flatChapters.length - 1 ? flatChapters[currentIndex + 1] : null;
+            
+            let prevBtnHtml = "";
+            if (prevCh) {
+                prevBtnHtml = `
+                    <button class="nav-prev-btn" onclick="loadChapter(${prevCh.num})">
+                        <span class="nav-arrow"><i class="fa-solid fa-arrow-left"></i></span>
+                        <span class="nav-btn-label">
+                            <span class="nav-dir-sub">পূর্ববর্তী chapter</span>
+                            <span class="nav-chapter-title">Ch ${prevCh.num}: ${prevCh.title}</span>
+                        </span>
+                    </button>
+                `;
+            } else {
+                prevBtnHtml = `<div class="nav-placeholder"></div>`;
+            }
+            
+            let nextBtnHtml = "";
+            if (nextCh) {
+                nextBtnHtml = `
+                    <button class="nav-next-btn" onclick="loadChapter(${nextCh.num})">
+                        <span class="nav-btn-label">
+                            <span class="nav-dir-sub">পরবর্তী chapter</span>
+                            <span class="nav-chapter-title">Ch ${nextCh.num}: ${nextCh.title}</span>
+                        </span>
+                        <span class="nav-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                    </button>
+                `;
+            } else {
+                nextBtnHtml = `<div class="nav-placeholder"></div>`;
+            }
+            
+            navDiv.innerHTML = prevBtnHtml + nextBtnHtml;
+            contentDiv.appendChild(navDiv);
+            
+            // Process and Render Mermaid Diagrams
+            if (window.mermaid) {
+                const mermaidCodes = contentDiv.querySelectorAll('pre code.language-mermaid');
+                mermaidCodes.forEach(codeEl => {
+                    const preEl = codeEl.parentNode;
+                    const div = document.createElement('div');
+                    div.className = 'mermaid';
+                    div.textContent = codeEl.textContent;
+                    preEl.parentNode.replaceChild(div, preEl);
+                });
+                
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: document.documentElement.classList.contains('light') ? 'default' : 'dark',
+                    securityLevel: 'loose',
+                    themeVariables: {
+                        fontFamily: 'Outfit, sans-serif'
+                    }
+                });
+                
+                try {
+                    mermaid.run({
+                        nodes: contentDiv.querySelectorAll('.mermaid')
+                    });
+                } catch (e) {
+                    console.error('Mermaid render error:', e);
+                }
+            }
+
+            // Apply current weights & themes
+            applyFontWeightToPage();
+            applyVisualThemeToPage();
+            applyCodeThemeToPage();
         }
 
         // Custom parser to transform interview questions to collapsible flashcards

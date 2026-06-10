@@ -161,19 +161,24 @@ Model যদি বাক্যের দিকে শুধু এক নজর
 
 Attention কীভাবে দুটো শব্দের Dot Product দিয়ে Score বের করে, সেটা দেখো:
 
-```
-          K ("animal")    K ("street")
-               │               │
-Q ("it") ──────┼───────────────┼───────────► (Dot Product Calculation)
-               ▼               ▼
-          Score: 0.95     Score: 0.05
-               │               │
-               └──────┬────────┘
-                      ▼
-               [ Softmax Activation ]
-                      │
-                      ▼
-               Final Attention Weights multiplied by Values (V)
+```mermaid
+flowchart TD
+    Q["Query (it)"]
+    K1["Key (animal)"]
+    K2["Key (street)"]
+    
+    Q -->|Dot Product| DP1["Score: 0.95"]
+    Q -->|Dot Product| DP2["Score: 0.05"]
+    
+    K1 --> DP1
+    K2 --> DP2
+    
+    DP1 --> Softmax["Softmax Activation"]
+    DP2 --> Softmax
+    
+    Softmax -->|Attention Weights| V["Final Attention Weights multiplied by Values (V)"]
+    
+    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
 
 

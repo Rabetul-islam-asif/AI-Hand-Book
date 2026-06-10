@@ -135,18 +135,24 @@ Mem0 এখান থেকে কী বের করবে?
 
 Mem0 ব্যাকগ্রাউন্ডে কীভাবে ফ্যাক্ট বের করে আর আপডেট করে, চলো তা দেখে নিই:
 
-```
-[ User: "আমি সম্প্রতি নেক্সট জেএস দিয়ে কাজ করছি, লারাভেল আর ভাল্লাগেনা।" ]
-                        │
-                        ▼
-                [ Mem0 Engine ]
-                        │
-                        ├─► 🔎 Detect conflict: User used to love Laravel
-                        ├─► ✂️ Delete/Deprecate fact: Loves Laravel
-                        └─► ➕ Insert new fact: Prefers Next.js
-                                │
-                                ▼
-                   [ Vector Database Memory ]
+```mermaid
+flowchart TD
+    User["User: 'আমি সম্প্রতি নেক্সট জেএস দিয়ে কাজ করছি, লারাভেল আর ভাল্লাগেনা।'"] --> Engine["Mem0 Engine"]
+    
+    subgraph Engine ["Mem0 Engine Operations"]
+        direction TB
+        Detect["🔎 Detect conflict: User used to love Laravel"]
+        Delete["✂️ Delete/Deprecate fact: Loves Laravel"]
+        Insert["➕ Insert new fact: Prefers Next.js"]
+        
+        Detect --> Delete --> Insert
+    end
+    
+    Engine --> DB["Vector Database Memory"]
+    
+    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
+    classDef engine fill:#16161D,stroke:#06B6D4,stroke-width:2px,color:#F3F4F6;
+    class Engine engine;
 ```
 
 ### ৪. একটা বাস্তব উদাহরণ

@@ -97,13 +97,19 @@ AI-এর দুনিয়ায় এটা কিন্তু আসলেই এ
 
 Token বাকেটের Math-এর রিফিল Mechanism ভিজুয়ালি দেখো:
 
-```
-    Refill Water Drops (R = 5 Tokens/Sec)  ──────►  [  *  *  *  ]  (Refills to Max Bucket Capacity B = 100)
-                                                    [  *  *  *  ]
-                                                    [  *  *  *  ]
-                                                          │
-                                                          ▼ (User consumes N tokens on Request)
-                                                    [ HTTP 200 OK ]
+```mermaid
+flowchart TD
+    Refill["Refill: R = 5 Tokens/Sec"] --> Bucket
+    
+    subgraph Bucket ["Bucket (Max Capacity B = 100)"]
+        Tokens["[ *  *  *  *  * ]"]
+    end
+    
+    Bucket -->|User consumes N tokens| Consume{"Is tokens >= N?"}
+    Consume -->|Yes| OK["HTTP 200 OK"]
+    Consume -->|No| Limit["HTTP 429 Too Many Requests"]
+    
+    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
 
 যদি কোনো ইউজার ১ সেকেন্ডে একসাথে ২০০ Token নিতে চায়, তবে কী হবে?

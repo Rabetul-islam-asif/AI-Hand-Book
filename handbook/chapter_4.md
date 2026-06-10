@@ -143,22 +143,16 @@ Training করার সময় বারবার Validation Loss Track ক�
 
 নিচের Graph-টা দেখো। এটা Production-এ Model Training-এর বাইবেল।
 
-```
-Loss
- ▲
- │   \                           /  (Validation Loss starts rising - Overfitting!)
- │    \                         / 
- │     \       Sweet Spot      /
- │      \          ▼          /
- │       \.......[ ★ ]......./
- │        \                 
- └─────────\────────────────────────► Epochs
-            \_______________________ (Training Loss keeps dropping)
+```mermaid
+xychart-beta
+    title "Early Stopping Turning Point (Bias-Variance Tradeoff)"
+    x-axis "Epochs (Time)" [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    y-axis "Loss" 0.0 --> 1.0
+    line "Training Loss (Keeps Dropping)" [0.9, 0.75, 0.6, 0.48, 0.38, 0.3, 0.22, 0.16, 0.11, 0.08]
+    line "Validation Loss (Starts Rising -> Overfitting)" [0.95, 0.82, 0.7, 0.6, 0.52, 0.49, 0.54, 0.62, 0.75, 0.9]
 ```
 
-★ চিহ্নিত জায়গাটাই আমাদের Sweet Spot।
-
-এর পরে Training চালালে Model Overfit হতে শুরু করবে।
+★ চিহ্নিত জায়গাটাই আমাদের Sweet Spot (Epoch ৬-এর কাছাকাছি, যেখানে Validation Loss সর্বনিম্ন)। এর পরে Training চালালে Model Overfit হতে শুরু করবে।
 
 
 ## ৪. Real World Example: Netflix Movie Recommendation

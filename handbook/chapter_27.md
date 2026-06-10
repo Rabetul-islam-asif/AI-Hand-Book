@@ -154,14 +154,33 @@ Hybrid Search আমাদের কেন প্রয়োজন?
 
 HNSW Index কীভাবে কাজ করে, তা নিচের এই Diagram-এ দেখে নাও:
 
-```
-    [ Layer 2 (Express Nodes) ] ───────► [ Jump Node A ] ──────────┐
-                                               │                   │
-                                               ▼                   ▼
-    [ Layer 1 (Medium Density) ] ───────► [ Node B1 ] ─────────► [ Node B2 ]
-                                               │                   │
-                                               ▼                   ▼
-    [ Layer 0 (Dense Vector Space) ] ───► [ Local Neighbor ] ──► [ Destination Vector ]
+```mermaid
+flowchart TD
+    subgraph Layer2 ["Layer 2: Express Nodes (Highway)"]
+        JumpA["Jump Node A"]
+    end
+    
+    subgraph Layer1 ["Layer 1: Medium Density"]
+        NodeB1["Node B1"] --> NodeB2["Node B2"]
+    end
+    
+    subgraph Layer0 ["Layer 0: Dense Vector Space"]
+        Local["Local Neighbor"] --> Dest["Destination Vector"]
+    end
+    
+    JumpA -->|Jump Down| NodeB1
+    JumpA -->|Jump Down| NodeB2
+    NodeB1 -->|Local Step| Local
+    NodeB2 -->|Local Step| Dest
+    
+    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
+    classDef layer2 fill:#16161D,stroke:#FF007F,stroke-width:2px,color:#F3F4F6;
+    classDef layer1 fill:#16161D,stroke:#06B6D4,stroke-width:2px,color:#F3F4F6;
+    classDef layer0 fill:#16161D,stroke:#10B981,stroke-width:2px,color:#F3F4F6;
+    
+    class Layer2 layer2;
+    class Layer1 layer1;
+    class Layer0 layer0;
 ```
 
 সহজ কথায়, HNSW মূলত Multi-layer Highway বা Expressway-এর মতো কাজ করে।

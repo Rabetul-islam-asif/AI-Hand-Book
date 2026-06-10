@@ -165,14 +165,15 @@ Raw Audio Frequency-কে আগে Spectrogram Image-এ convert করে।
 
 কিন্তু আসলে এটা সাধারণ Vector Projection Layer।
 
-```
-[ ছবি Input ] ───► [ Vision Encoder (CLIP) ] ───► [ Image Embedding Vector ]
-                                                           │
-                                                           ▼ (Cross-Attention Projection)
-[ Prompt: "ছবিটি বর্ণন করো" ] ──► [ LLM Decoder Block ] ◄─┘
-                                   │
-                                   ▼
-                            "এটি একটি সুন্দর বিড়াল..."
+```mermaid
+flowchart TD
+    Img["ছবি Input"] --> VE["Vision Encoder (CLIP)"]
+    VE --> ImgEmb["Image Embedding Vector"]
+    Prompt["Prompt: 'ছবিটি বর্ণন করো'"] --> Decoder["LLM Decoder Block"]
+    ImgEmb -->|Cross-Attention Projection| Decoder
+    Decoder --> Output["'এটি একটি সুন্দর বিড়াল...'"]
+    
+    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
 
 

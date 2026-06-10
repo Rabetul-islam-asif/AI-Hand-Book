@@ -124,18 +124,20 @@ AI সেটা দেখে কোড ঠিক করে দেবে। ত�
 
 চলো দেখি প্রোডাকশনে কীভাবে এটা কাজ করে:
 
-```
-[ ইউজার Prompt ] ──► [ AI Agent Engine (LLM) ]
-                             │
-                             ▼ (Restricted Execution API)
-                ┌───────────────────────────────────┐
-                │       DOCKER SANDBOX ENGINE       │
-                │  - No Network Access              │
-                │  - Locked Directory               │
-                │  - Auto-terminate in 10 seconds   │
-                │                                   │
-                │  [ app.py ] ──► [ Run Pytest ]    │
-                └───────────────────────────────────┘
+```mermaid
+flowchart TD
+    User["User Prompt"] --> Agent["AI Agent Engine (LLM)"]
+    Agent -->|Restricted Execution API| Sandbox
+    
+    subgraph Sandbox ["DOCKER SANDBOX ENGINE"]
+        direction TB
+        Config["• No Network Access<br>• Locked Directory<br>• Auto-terminate in 10 seconds"]
+        Code["app.py"] -->|Run Pytest| Test["Run Pytest"]
+    end
+    
+    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
+    classDef sandbox fill:#16161D,stroke:#06B6D4,stroke-width:2px,color:#F3F4F6;
+    class Sandbox sandbox;
 ```
 
 
