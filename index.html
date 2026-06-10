@@ -327,6 +327,9 @@
                 max-width: 65% !important; /* Increased by 25% from 52% */
                 margin: 20px auto;
             }
+            .mermaid {
+                max-width: 80% !important; /* Resized for readability on mobile */
+            }
         }
 
         article {
@@ -396,6 +399,18 @@
         article img:hover {
             transform: translateY(-2px) scale(1.01); /* Premium micro-interaction on hover */
             box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.2); /* Soft purple glow shadow on hover */
+        }
+
+        .mermaid {
+            max-width: 60%; /* 40% smaller (60% width) */
+            margin: 32px auto;
+            display: block;
+            background: transparent;
+        }
+
+        .mermaid svg {
+            width: 100% !important;
+            height: auto !important;
         }
 
         /* Fenced Code Highlights */
