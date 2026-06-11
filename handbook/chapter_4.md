@@ -250,17 +250,20 @@ Color Saturation বা Brightness বদলে দাও।
 
 ## ৭. Common Mistake
 
-🔴 Common Mistake
+🔴 **ভুল ধারণা:** Test বা Inference-এর সময়ও Dropout Layer চালু (Active) রাখা।
 
-**ভুল ধারণা:** Test বা Evaluation-এর সময়ও Dropout Layer Active রাখা।
+**বাস্তবতা ও সমাধান:** 
+Dropout শুধুমাত্র **Training**-এর সময় ব্যবহার করা হয় যাতে Model কোনো নির্দিষ্ট প্যাটার্ন অন্ধভাবে মুখস্থ করতে না পারে। কিন্তু যখন আমরা Model-কে বাস্তবে Test বা Production-এ ব্যবহার করি, তখন সব কয়টি Neuron সচল রাখতে হয় এবং Prediction-কে Deterministic (নির্দিষ্ট) করতে হয়। 
 
-**বাস্তবতা:** Dropout শুধুমাত্র Training-এর জন্য।
+PyTorch-এ Validation বা Testing শুরু করার আগে অবশ্যই `model.eval()` কল করতে হবে:
 
-Test বা Production-এ সব Neuron ১০০% সচল থাকতে হবে।
+```python
+# Validation বা Testing-এর আগে অবশ্যই এটি কল করো
+model.eval()
+```
 
-PyTorch-এ Training শেষে অবশ্যই `model.eval()` Call করো।
+এটি Automatically সব Dropout লেয়ারকে নিষ্ক্রিয় করে দেয়। যদি এটি করতে ভুলে যাও, তবে একই Input-এর জন্য প্রতিবার ভিন্ন ভিন্ন Output আসতে পারে, যা প্রোডাকশনে মারাত্মক সমস্যা তৈরি করবে!
 
-এটা Automatically সব Dropout Layer বন্ধ করে দেয়।
 
 
 ## ৮. Mental Model: কড়া Trainer
@@ -326,7 +329,15 @@ print(f"Final regularised Loss sent to optimizer: {final_loss:.4f}")
 
 **প্রশ্ন:** PyTorch-এ `model.train()` আর `model.eval()` কেন গুরুত্বপূর্ণ?
 
-**উত্তর:** `model.train()` Model-এর Dropout আর Batch Normalization Layer-গুলো সচল করে Training-এর জন্য Ready করে। আর `model.eval()` এগুলো বন্ধ করে দেয় — যাতে Test বা Production-এ Prediction Deterministic আর সঠিক হয়।
+**উত্তর:** 
+
+সংক্ষেপে, এই দুটি কমান্ড Model-এর মোড (Mode) পরিবর্তন করতে ব্যবহৃত হয়:
+
+* **`model.train()` (Training Mode):** এটি Model-কে শেখার জন্য প্রস্তুত করে। এটি Dropout (র্যান্ডমলি নিউরন বন্ধ করা) এবং Batch Normalization-এর মতো লেয়ারগুলোকে **চালু** রাখে।
+* **`model.eval()` (Evaluation/Testing Mode):** এটি Model-কে টেস্ট বা প্রেডিকশনের জন্য প্রস্তুত করে। এটি Dropout এবং Batch Normalization **বন্ধ** করে দেয়, যাতে Model তার সম্পূর্ণ ক্ষমতা ব্যবহার করে একটি নির্দিষ্ট ও সঠিক (Deterministic) রেজাল্ট দিতে পারে।
+
+**কেন গুরুত্বপূর্ণ?** 
+যদি আমরা টেস্ট করার সময় `model.eval()` কল করতে ভুলে যাই, তবে Dropout সচল থাকার কারণে একই ইনপুটের জন্য প্রতিবার ভিন্ন ভিন্ন প্রেডিকশন আসবে। ফলে Model-এর পারফরম্যান্স সঠিকভাবে যাচাই করা যাবে না।
 
 
 ## ১১. Chapter Summary

@@ -51,9 +51,9 @@ Neural Network কী।
 ![AI vs. ML vs. DL Hierarchy](/diagrams/ai_vs_ml_vs_dl_hierarchy.png)
 
 
-## ২. লার্নিং-এর তিনটি পথ
+## ২. AI Model ৩ ভাবে প্যাটার্ন শেখে
 
-AI Training-এর মূলত তিনটি পথ আছে। চলো একে একে দেখি।
+AI Model মূলত ৩ ভাবে প্যাটার্ন শেখে। চলো একে একে দেখি।
 
 ![Three Families of Machine Learning](/diagrams/ml_families.png)
 
@@ -135,17 +135,17 @@ Model কি আসলেই কিছু শিখছে?
 
 ```
 Machine Learning Pipeline:
-[র Image] ──► [👨‍💻 মানুষের ম্যানুয়াল Feature এক্সট্রাকশন (কান, চোখ)] ──► [ML Model] ──► [প্রেডিকশন]
+[Raw Image] ──► [👨‍💻 মানুষের ম্যানুয়াল Feature এক্সট্রাকশন (কান, চোখ)] ──► [ML Model] ──► [প্রেডিকশন]
 
 Deep Learning Pipeline:
-[র Image] ───────────────► 🧠 [ Deep Neural Network ] ──────────────► [প্রেডিকশন]
+[Raw Image] ───────────────► 🧠 [ Deep Neural Network ] ──────────────► [প্রেডিকশন]
                           (Auto-learns: Edges ──► Shapes ──► Faces)
 ```
 
 
 ## ৬. Real World Example: ই-কমার্স Recommendation
 
-আমাজন বা দারাজের Recommendation Engine-এ দুই ধরনের Architecture কাজ করে।
+Amazon বা Daraz-এর Recommendation Engine-এ দুই ধরনের Architecture কাজ করে।
 
 **ML লেয়ার:** তোমার বয়স, দেশ, ব্রাউজিং Category — এসব Structured Data নিয়ে Classical Logistic Regression Model বলে দেয় তোমার কেনাকাটার সম্ভাবনা কতটুকু।
 
