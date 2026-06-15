@@ -1188,7 +1188,8 @@
 
             /* Print Table Layout to reserve space for headers/footers and avoid overlaps */
             .print-table {
-                width: 100%;
+                width: 100% !important;
+                table-layout: fixed !important;
                 border-collapse: collapse;
                 border: none !important;
                 margin: 0 !important;
@@ -1201,6 +1202,12 @@
                 border: none !important;
                 padding: 0 !important;
                 background: transparent !important;
+            }
+
+            .print-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
 
             .print-header {
@@ -1307,8 +1314,9 @@
                 padding: 40px;
                 box-sizing: border-box;
                 border: 3px double #333;
-                margin: 40px 20px;
+                margin: 40px 0 !important;
                 background-color: #fff;
+                max-width: 100% !important;
             }
 
             .print-book-title {
@@ -1441,19 +1449,33 @@
             /* Tables print layout */
             table {
                 border-collapse: collapse;
-                width: 100%;
+                width: 100% !important;
+                table-layout: auto !important;
                 margin: 20px 0;
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
             }
 
             th, td {
                 border: 1px solid #ddd !important;
                 padding: 8px 12px;
                 font-size: 9.5pt;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
             }
 
             th {
                 background-color: #f7f7f7 !important;
                 font-weight: 600;
+            }
+
+            .table-container {
+                width: 100% !important;
+                overflow: visible !important;
+                border: none !important;
+                background: transparent !important;
+                margin: 15px 0 !important;
             }
 
             /* Premium print-friendly Light Code blocks style */
@@ -1466,7 +1488,17 @@
                 font-size: 9pt !important;
                 white-space: pre-wrap !important;
                 word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
                 font-family: var(--font-mono) !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            img {
+                max-width: 100% !important;
+                height: auto !important;
+                display: block !important;
+                margin: 20px auto !important;
             }
 
             pre code, pre .hljs {
