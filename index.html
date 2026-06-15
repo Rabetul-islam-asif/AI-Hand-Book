@@ -1173,6 +1173,10 @@
             }
 
             body {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 overflow: visible !important;
                 height: auto !important;
                 background: #fff !important;
@@ -1258,14 +1262,8 @@
             }
 
             /* Hide UI components */
-            aside, header, #scrollProgress, .chapter-navigation, .copy-code-btn, .mobile-settings-btn, .desktop-controls, .settings-sheet, .settings-sheet-backdrop, #pdfProgressOverlay {
+            aside, header, main, #scrollProgress, .chapter-navigation, .copy-code-btn, .mobile-settings-btn, .desktop-controls, .settings-sheet, .settings-sheet-backdrop, #pdfProgressOverlay {
                 display: none !important;
-            }
-
-            main {
-                overflow: visible !important;
-                height: auto !important;
-                background: #fff !important;
             }
 
             .content-container {
@@ -1286,6 +1284,9 @@
 
             #printContainer {
                 display: block !important; /* Show printed book */
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             /* Page Break Controls */
