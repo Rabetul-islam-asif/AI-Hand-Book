@@ -2107,28 +2107,28 @@
                 </div>`;
             });
             
-            // Wrap Developer Perspective callouts dynamically
-            text = text.replace(/💻 Developer View([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                return `<div class="callout-box developer">
+            // Wrap Developer Perspective callouts dynamically (standalone lines only)
+            text = text.replace(/(?:^|\r?\n)[ \t]*💻 Developer View[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                return `\n<div class="callout-box developer">
                     <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
                     ${content.trim()}
-                </div>`;
+                </div>\n`;
             });
             
-            // Wrap Production Reality callouts dynamically
-            text = text.replace(/🏭 Production Reality([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                return `<div class="callout-box">
+            // Wrap Production Reality callouts dynamically (standalone lines only)
+            text = text.replace(/(?:^|\r?\n)[ \t]*🏭 Production Reality[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                return `\n<div class="callout-box">
                     <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
                     ${content.trim()}
-                </div>`;
+                </div>\n`;
             });
             
-            // Wrap Common Mistakes callouts dynamically
-            text = text.replace(/🔴 Common Mistake([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                return `<div class="callout-box warning">
+            // Wrap Common Mistakes callouts dynamically (standalone lines only)
+            text = text.replace(/(?:^|\r?\n)[ \t]*🔴 Common Mistake[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                return `\n<div class="callout-box warning">
                     <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
                     ${content.trim()}
-                </div>`;
+                </div>\n`;
             });
             
             // Clean up any remaining '---' horizontal rules so they are completely removed from display
@@ -2685,25 +2685,26 @@
                         </div>`;
                     });
                     
-                    markdown = markdown.replace(/💻 Developer View([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                        return `<div class="callout-box developer">
+                    // Format markdown (standalone lines only)
+                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*💻 Developer View[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                        return `\n<div class="callout-box developer">
                             <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
                             ${content.trim()}
-                        </div>`;
+                        </div>\n`;
                     });
                     
-                    markdown = markdown.replace(/🏭 Production Reality([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                        return `<div class="callout-box">
+                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*🏭 Production Reality[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                        return `\n<div class="callout-box">
                             <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
                             ${content.trim()}
-                        </div>`;
+                        </div>\n`;
                     });
                     
-                    markdown = markdown.replace(/🔴 Common Mistake([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                        return `<div class="callout-box warning">
+                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*🔴 Common Mistake[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                        return `\n<div class="callout-box warning">
                             <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
                             ${content.trim()}
-                        </div>`;
+                        </div>\n`;
                     });
                     
                     markdown = markdown.replace(/\r?\n---/g, '');
@@ -2742,6 +2743,17 @@
             
             printContainer.innerHTML = watermarkHTML + titlePageHTML + tableHTML;
                 
+                // Temporarily display printContainer off-screen to give it dimensions for Mermaid/KaTeX rendering
+                const originalDisplay = printContainer.style.display;
+                const originalPosition = printContainer.style.position;
+                const originalLeft = printContainer.style.left;
+                const originalWidth = printContainer.style.width;
+                
+                printContainer.style.display = "block";
+                printContainer.style.position = "absolute";
+                printContainer.style.left = "-9999px";
+                printContainer.style.width = "820px";
+
                 printContainer.querySelectorAll('table:not(.print-table)').forEach(table => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'table-container';
@@ -2790,6 +2802,12 @@
                         console.error('Mermaid render error during print:', e);
                     }
                 }
+                
+                // Restore original styles of printContainer
+                printContainer.style.display = originalDisplay;
+                printContainer.style.position = originalPosition;
+                printContainer.style.left = originalLeft;
+                printContainer.style.width = originalWidth;
                 
                 setupPrintInterviewQuestions(printContainer);
                 
