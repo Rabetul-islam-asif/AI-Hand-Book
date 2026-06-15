@@ -1164,6 +1164,403 @@
                 font-size: 12px !important; /* slightly smaller font for mobile screen */
             }
         }
+
+        /* PRINT STYLES FOR FULL BOOK PDF */
+        @media print {
+            @page {
+                size: A4;
+                margin: 22mm 18mm 22mm 18mm; /* Textbook margins */
+            }
+
+            body {
+                overflow: visible !important;
+                height: auto !important;
+                background: #fff !important;
+                color: #111 !important;
+                font-size: 10.5pt !important;
+                line-height: 1.62 !important;
+                text-align: justify !important;
+            }
+
+            /* Print Table Layout to reserve space for headers/footers and avoid overlaps */
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                border: none !important;
+                margin: 0 !important;
+                background: transparent !important;
+            }
+            
+            .print-table > thead > tr > td,
+            .print-table > tbody > tr > td,
+            .print-table > tfoot > tr > td {
+                border: none !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }
+
+            .print-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                font-family: var(--font-main);
+                font-size: 8.5pt;
+                color: #777 !important;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 6px;
+                margin-bottom: 15px;
+                width: 100%;
+                background: transparent !important;
+            }
+
+            .print-footer {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                font-family: var(--font-main);
+                font-size: 8.5pt;
+                color: #777 !important;
+                border-top: 1px solid #eee;
+                padding-top: 6px;
+                margin-top: 15px;
+                width: 100%;
+                background: transparent !important;
+            }
+
+            /* Repeating Background Watermarks (Anti-Theft) */
+            .print-watermark-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1000;
+                pointer-events: none;
+                display: flex !important;
+                flex-direction: column;
+                justify-content: space-around;
+                align-items: center;
+                opacity: 0.04; /* Very subtle low-opacity so it doesn't block readability */
+                background: transparent !important;
+            }
+
+            .print-watermark-text {
+                font-family: var(--font-main);
+                font-size: 32pt;
+                font-weight: 800;
+                color: #000 !important;
+                transform: rotate(-25deg);
+                white-space: nowrap;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                user-select: none;
+                background: transparent !important;
+            }
+
+            /* Hide UI components */
+            aside, header, #scrollProgress, .chapter-navigation, .copy-code-btn, .mobile-settings-btn, .desktop-controls, .settings-sheet, .settings-sheet-backdrop, #pdfProgressOverlay {
+                display: none !important;
+            }
+
+            main {
+                overflow: visible !important;
+                height: auto !important;
+                background: #fff !important;
+            }
+
+            .content-container {
+                overflow: visible !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+
+            article {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            #markdownContent {
+                display: none !important; /* Hide standard single chapter reader */
+            }
+
+            #printContainer {
+                display: block !important; /* Show printed book */
+            }
+
+            /* Page Break Controls */
+            .print-page {
+                page-break-after: always;
+                break-after: page;
+                clear: both;
+            }
+
+            /* Elegant Title Page design for print */
+            .title-page {
+                height: 90vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                padding: 40px;
+                box-sizing: border-box;
+                border: 3px double #333;
+                margin: 40px 20px;
+                background-color: #fff;
+            }
+
+            .print-book-title {
+                font-size: 38pt !important;
+                font-weight: 800;
+                margin-top: 0;
+                margin-bottom: 12pt;
+                color: #000 !important;
+                background: none !important;
+                -webkit-text-fill-color: initial !important;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+            }
+
+            .print-book-divider {
+                width: 120px;
+                height: 3px;
+                background-color: #000;
+                margin: 24px auto;
+            }
+
+            .print-book-subtitle {
+                font-size: 18pt !important;
+                font-weight: 400;
+                color: #444 !important;
+                margin-bottom: 100px;
+                font-style: italic;
+            }
+
+            .print-book-meta {
+                font-size: 11pt;
+                line-height: 1.8;
+                color: #333;
+                border-top: 1px solid #ccc;
+                padding-top: 20px;
+                width: 80%;
+                max-width: 400px;
+            }
+
+            /* TOC page design */
+            .toc-page {
+                padding: 40px 20px;
+            }
+
+            .print-section-title {
+                font-size: 24pt;
+                font-weight: 700;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .print-toc-list {
+                list-style: none;
+                padding: 0;
+            }
+
+            .print-toc-part {
+                font-size: 12pt;
+                font-weight: 700;
+                margin-top: 20px;
+                margin-bottom: 8px;
+                color: #000;
+                border-bottom: 1.5px solid #bbb;
+                padding-bottom: 3px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .print-toc-chapter {
+                font-size: 10pt;
+                padding-left: 20px;
+                margin-bottom: 6px;
+                color: #333;
+            }
+
+            /* Chapter Page styles */
+            .chapter-page {
+                padding: 40px 0;
+            }
+
+            .chapter-page h1 {
+                font-size: 26pt;
+                border-bottom: 1.5px solid #000;
+                padding-bottom: 10px;
+                margin-top: 0;
+                color: #000 !important;
+                background: none !important;
+                -webkit-text-fill-color: initial !important;
+            }
+
+            /* Heading safety break-avoid */
+            h1, h2, h3, h4, h5, h6 {
+                color: #000 !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+
+            h2 {
+                font-size: 18pt;
+                margin-top: 32pt;
+                margin-bottom: 12pt;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 6px;
+            }
+
+            h3 {
+                font-size: 14pt;
+                margin-top: 22pt;
+                margin-bottom: 10pt;
+            }
+
+            p, li, span, code, td, th {
+                color: #111 !important;
+            }
+
+            a {
+                color: #000 !important;
+                text-decoration: underline;
+            }
+
+            /* Avoid splitting element blocks */
+            pre, blockquote, table, img, .callout-box, .print-flashcard {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Tables print layout */
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin: 20px 0;
+            }
+
+            th, td {
+                border: 1px solid #ddd !important;
+                padding: 8px 12px;
+                font-size: 9.5pt;
+            }
+
+            th {
+                background-color: #f7f7f7 !important;
+                font-weight: 600;
+            }
+
+            /* Premium print-friendly Light Code blocks style */
+            pre {
+                background: #f8f9fa !important;
+                border: 1px solid #e1e4e6 !important;
+                color: #111 !important;
+                padding: 16px !important;
+                border-radius: 6px !important;
+                font-size: 9pt !important;
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                font-family: var(--font-mono) !important;
+            }
+
+            pre code, pre .hljs {
+                color: #111 !important;
+                background: transparent !important;
+            }
+
+            /* Textbook print syntax highlighting overrides */
+            .hljs-keyword, .hljs-built_in, .hljs-selector-tag {
+                color: #0000ff !important;
+                font-weight: bold !important;
+            }
+            .hljs-string, .hljs-attr {
+                color: #036a16 !important;
+            }
+            .hljs-comment {
+                color: #666 !important;
+                font-style: italic !important;
+            }
+            .hljs-number, .hljs-literal {
+                color: #a31515 !important;
+            }
+            .hljs-title, .hljs-section {
+                color: #800080 !important;
+                font-weight: bold !important;
+            }
+
+            /* Callouts printed layout */
+            .callout-box {
+                background: #fafafa !important;
+                border: 1px solid #e1e4e6 !important;
+                border-left: 5px solid #555 !important;
+                padding: 16px !important;
+                margin: 20px 0 !important;
+                border-radius: 6px !important;
+            }
+
+            .callout-box.developer {
+                border-left-color: #0b94b0 !important; /* Elegant teal */
+                background: #f6fcfe !important;
+            }
+
+            .callout-box.warning {
+                border-left-color: #d32f2f !important; /* Soft warning red */
+                background: #fdf5f5 !important;
+            }
+
+            .callout-title {
+                color: #000 !important;
+                font-weight: bold !important;
+                font-size: 10pt !important;
+                border-bottom: 1px dashed #ddd;
+                padding-bottom: 4px;
+                margin-bottom: 10px !important;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .print-flashcard {
+                border: 1px dashed #999;
+                padding: 16px;
+                margin-bottom: 20px;
+                background: #fafafa;
+                border-radius: 8px;
+            }
+
+            .print-flashcard-q {
+                font-weight: 700;
+                font-size: 11pt;
+                margin-bottom: 8px;
+                color: #000;
+            }
+
+            .print-flashcard-a {
+                padding-top: 10px;
+                border-top: 1px dashed #ccc;
+                color: #222;
+            }
+
+            /* Diagrams sizing */
+            .mermaid {
+                max-width: 100% !important;
+            }
+
+            .visual-pre {
+                background: #fafafa !important;
+                color: #111 !important;
+                border: 1px solid #ddd !important;
+            }
+        }
+        
+        /* Non-print style for print container */
+        #printContainer {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -1219,6 +1616,11 @@
                 </button>
 
                 <div class="desktop-controls">
+                    <!-- PDF DOWNLOAD BUTTON -->
+                    <button class="action-btn" onclick="prepareFullBookPDF()" title="সম্পূর্ণ বই PDF হিসেবে ডাউনলোড করুন">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </button>
+
                     <!-- CODE BLOCK THEME SWITCHER -->
                     <button class="action-btn" onclick="cycleCodeTheme()" id="codeThemeBtn" title="Code ব্যাকগ্রাউন্ড থিম (Black, Sage Green #ACAEA2, Soft Brown, Soft Whitish Blue)">
                         <i class="fa-solid fa-code"></i>
@@ -2115,6 +2517,338 @@
             if (progressBar) progressBar.style.width = `${percentage}%`;
         }
 
+        // 6. E-Book PDF Download Compiler
+        let isGeneratingPDF = false;
+        let shouldCancelPDF = false;
+
+        function cancelPDFGeneration() {
+            shouldCancelPDF = true;
+            hidePDFOverlay();
+        }
+
+        function showPDFOverlay() {
+            let overlay = document.getElementById("pdfProgressOverlay");
+            if (!overlay) {
+                overlay = document.createElement("div");
+                overlay.id = "pdfProgressOverlay";
+                overlay.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                    background: rgba(15, 15, 18, 0.85); backdrop-filter: blur(8px);
+                    z-index: 9999; display: flex; flex-direction: column;
+                    align-items: center; justify-content: center; color: #fff;
+                    font-family: var(--font-main); opacity: 0; transition: opacity 0.3s ease;
+                    pointer-events: none;
+                `;
+                overlay.innerHTML = `
+                    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                        <i class="fa-solid fa-file-pdf" id="pdfIconAnim" style="font-size: 48px; color: var(--accent-purple); margin-bottom: 20px; display: inline-block;"></i>
+                        <h3 style="margin-bottom: 10px; font-size: 20px; font-weight: 700; color: var(--text-primary);">Preparing E-Book PDF</h3>
+                        <p id="pdfProgressText" style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">Initializing...</p>
+                        <div style="height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 20px;">
+                            <div id="pdfProgressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan)); transition: width 0.2s ease;"></div>
+                        </div>
+                        <button onclick="cancelPDFGeneration()" class="sheet-btn" style="margin: 0 auto; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #EF4444;">Cancel</button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                
+                const animStyle = document.createElement("style");
+                animStyle.innerHTML = `
+                    @keyframes pulseScale {
+                        0% { transform: scale(1); opacity: 0.8; }
+                        50% { transform: scale(1.1); opacity: 1; }
+                        100% { transform: scale(1); opacity: 0.8; }
+                    }
+                    #pdfIconAnim {
+                        animation: pulseScale 1.5s infinite ease-in-out;
+                    }
+                `;
+                document.head.appendChild(animStyle);
+            }
+            overlay.style.pointerEvents = "auto";
+            overlay.style.opacity = "1";
+        }
+
+        function hidePDFOverlay() {
+            const overlay = document.getElementById("pdfProgressOverlay");
+            if (overlay) {
+                overlay.style.opacity = "0";
+                overlay.style.pointerEvents = "none";
+            }
+        }
+
+        async function prepareFullBookPDF() {
+            if (isGeneratingPDF) return;
+            isGeneratingPDF = true;
+            shouldCancelPDF = false;
+            
+            showPDFOverlay();
+            
+            const progressText = document.getElementById("pdfProgressText");
+            const progressBar = document.getElementById("pdfProgressBar");
+            
+            let printContainer = document.getElementById("printContainer");
+            if (!printContainer) {
+                printContainer = document.createElement("div");
+                printContainer.id = "printContainer";
+                document.body.appendChild(printContainer);
+            }
+            printContainer.innerHTML = "";
+            
+            const totalChapters = flatChapters.length;
+            
+            // Build anti-theft repeating background watermark HTML
+            let watermarkHTML = `
+                <div class="print-watermark-container">
+                    <div class="print-watermark-text">Created by Asif Rabetul</div>
+                </div>
+            `;
+            
+            // Build the title cover page (drawn outside the running header/footer table)
+            let titlePageHTML = `
+                <div class="print-page title-page">
+                    <h1 class="print-book-title">AI Engineering Handbook</h1>
+                    <div class="print-book-divider"></div>
+                    <h2 class="print-book-subtitle">A Complete Technical E-Book Guide</h2>
+                    <div class="print-book-meta">
+                        <p>Created by: <strong>Asif Rabetul</strong></p>
+                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Build the book content table. The thead and tfoot elements will repeat on every page of print.
+            let tableHTML = `
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <td>
+                                <div class="print-header">
+                                    <span style="font-weight: 600;">AI Engineering Handbook</span>
+                                    <span style="float: right; font-style: italic;">Full E-Book Compilation</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="print-content">
+                                    <!-- Table of Contents -->
+                                    <div class="print-page toc-page">
+                                        <h1 class="print-section-title">Table of Contents</h1>
+                                        <ul class="print-toc-list">
+            `;
+            syllabus.forEach(part => {
+                tableHTML += `<li class="print-toc-part">${part.part}</li>`;
+                part.chapters.forEach(ch => {
+                    tableHTML += `<li class="print-toc-chapter">Chapter ${ch.num}: ${ch.title}</li>`;
+                });
+            });
+            tableHTML += `
+                                        </ul>
+                                    </div>
+            `;
+
+            try {
+                for (let i = 0; i < totalChapters; i++) {
+                    if (shouldCancelPDF) {
+                        isGeneratingPDF = false;
+                        return;
+                    }
+                    
+                    const ch = flatChapters[i];
+                    progressText.innerText = `Fetching Chapter ${ch.num} of ${totalChapters}: ${ch.title}...`;
+                    progressBar.style.width = `${Math.round((i / totalChapters) * 100)}%`;
+                    
+                    const response = await fetch(`/handbook/chapter_${ch.num}.md?v=${Date.now()}`);
+                    if (!response.ok) throw new Error(`Chapter ${ch.num} could not be loaded`);
+                    let markdown = await response.text();
+                    
+                    // Format markdown
+                    markdown = markdown.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n---|\r?\n\r?\n###)/g, (match, content) => {
+                        const titleMatch = content.match(/Title:\s*(.+)/);
+                        const title = titleMatch ? titleMatch[1].trim() : 'Visual Explanation';
+                        let diagram = content
+                            .replace(/^Title:\s*.+$/gm, '')
+                            .replace(/^Illustration:\s*.+$/gm, '')
+                            .replace(/^Placement:\s*.+$/gm, '')
+                            .replace(/^Purpose:\s*.+$/gm, '')
+                            .trim();
+                        const codeBlockMatch = diagram.match(/```[\w]*\r?\n([\s\S]*?)```/);
+                        if (codeBlockMatch) {
+                            diagram = codeBlockMatch[1].trimEnd();
+                        }
+                        return `<div class="callout-box developer">
+                            <div class="callout-title"><span><i class="fa-solid fa-diagram-project"></i> ${title}</span></div>
+                            <pre class="visual-pre theme-slate"><code class="language-plaintext">${diagram}</code></pre>
+                        </div>`;
+                    });
+                    
+                    markdown = markdown.replace(/💻 Developer View([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                        return `<div class="callout-box developer">
+                            <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
+                            ${content.trim()}
+                        </div>`;
+                    });
+                    
+                    markdown = markdown.replace(/🏭 Production Reality([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                        return `<div class="callout-box">
+                            <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
+                            ${content.trim()}
+                        </div>`;
+                    });
+                    
+                    markdown = markdown.replace(/🔴 Common Mistake([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                        return `<div class="callout-box warning">
+                            <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
+                            ${content.trim()}
+                        </div>`;
+                    });
+                    
+                    markdown = markdown.replace(/\r?\n---/g, '');
+                    
+                    let parsedHTML = marked.parse(markdown);
+                    
+                    tableHTML += `
+                        <div class="print-page chapter-page" id="print-ch-${ch.num}">
+                            ${parsedHTML}
+                        </div>
+                    `;
+                }
+                
+                progressText.innerText = "Formatting document and rendering equations...";
+                progressBar.style.width = "95%";
+                
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                tableHTML += `
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>
+                                <div class="print-footer">
+                                    <span>AI Engineering Handbook</span>
+                                    <span>Interactive Documentation Portal</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `;
+            
+            printContainer.innerHTML = watermarkHTML + titlePageHTML + tableHTML;
+                
+                printContainer.querySelectorAll('table:not(.print-table)').forEach(table => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-container';
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                });
+                
+                printContainer.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+                
+                if (window.renderMathInElement) {
+                    renderMathInElement(printContainer, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ],
+                        throwOnError: false
+                    });
+                }
+                
+                if (window.mermaid) {
+                    const mermaidCodes = printContainer.querySelectorAll('pre code.language-mermaid');
+                    mermaidCodes.forEach(codeEl => {
+                        const preEl = codeEl.parentNode;
+                        const div = document.createElement('div');
+                        div.className = 'mermaid';
+                        div.textContent = codeEl.textContent;
+                        preEl.parentNode.replaceChild(div, preEl);
+                    });
+                    
+                    try {
+                        mermaid.initialize({
+                            startOnLoad: false,
+                            theme: 'default',
+                            securityLevel: 'loose',
+                            themeVariables: {
+                                fontFamily: 'Outfit, sans-serif'
+                            }
+                        });
+                        
+                        await mermaid.run({
+                            nodes: printContainer.querySelectorAll('.mermaid')
+                        });
+                    } catch (e) {
+                        console.error('Mermaid render error during print:', e);
+                    }
+                }
+                
+                setupPrintInterviewQuestions(printContainer);
+                
+                progressBar.style.width = "100%";
+                progressText.innerText = "Opening print dialog...";
+                
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                hidePDFOverlay();
+                isGeneratingPDF = false;
+                
+                window.print();
+                
+            } catch (err) {
+                console.error(err);
+                progressText.innerHTML = `<span style="color:#EF4444;"><i class="fa-solid fa-circle-exclamation"></i> Error preparing PDF</span>`;
+                isGeneratingPDF = false;
+                setTimeout(hidePDFOverlay, 3000);
+            }
+        }
+
+        function setupPrintInterviewQuestions(container) {
+            const headers = container.querySelectorAll("h4");
+            headers.forEach(h => {
+                if (h.innerText.includes("Beginner") || h.innerText.includes("Intermediate") || h.innerText.includes("Advanced")) {
+                    let sibling = h.nextElementSibling;
+                    let elementsToRemove = [];
+                    
+                    while (sibling && sibling.tagName !== "H2" && sibling.tagName !== "H1") {
+                        if (sibling.tagName === "OL" || sibling.tagName === "UL") {
+                            const listItems = sibling.querySelectorAll("li");
+                            listItems.forEach(li => {
+                                const text = li.innerHTML;
+                                if (text.includes("<strong>প্রশ্ন:</strong>") || text.includes("প্রশ্ন:")) {
+                                    const parts = text.split(/<strong>উত্তর:<\/strong>|উত্তর:/);
+                                    if (parts.length >= 2) {
+                                        const card = document.createElement("div");
+                                        card.className = "print-flashcard";
+                                        card.innerHTML = `
+                                            <div class="print-flashcard-q">
+                                                <strong>Question:</strong> ${parts[0].replace(/<strong>প্রশ্ন:<\/strong>|প্রশ্ন:/, "").trim()}
+                                            </div>
+                                            <div class="print-flashcard-a">
+                                                <strong>Answer:</strong> ${parts[1].trim()}
+                                            </div>
+                                        `;
+                                        sibling.parentNode.insertBefore(card, sibling);
+                                    }
+                                }
+                            });
+                            elementsToRemove.push(sibling);
+                        }
+                        sibling = sibling.nextElementSibling;
+                    }
+                    elementsToRemove.forEach(el => el.remove());
+                }
+            });
+        }
+
         // Initialize App
         populateSidebar();
         loadChapter(1);
@@ -2160,7 +2894,15 @@
                     <button class="sheet-btn" onclick="cycleVisualTheme()"><i class="fa-solid fa-palette"></i> Cycle</button>
                 </div>
             </div>
+            <div class="settings-option">
+                <span class="option-label"><i class="fa-solid fa-file-pdf"></i> Download PDF</span>
+                <div class="option-controls">
+                    <button class="sheet-btn" onclick="prepareFullBookPDF()"><i class="fa-solid fa-download"></i> Get Full Book</button>
+                </div>
+            </div>
         </div>
     </div>
+    <!-- HIDDEN CONTAINERS FOR PRINT COMPILATION -->
+    <div id="printContainer"></div>
 </body>
 </html>
