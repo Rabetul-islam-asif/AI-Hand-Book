@@ -51,7 +51,7 @@ AI Architecture হলো তোমার পুরো AI System-এর **Comple
 
 একটা শহরের Map-এর কথা ভাবো। Map ছাড়া তুমি হয়তো একটা রাস্তা চেনো, কিন্তু পুরো শহর Navigate করতে পারবে না। Architecture হলো তোমার AI System-এর সেই Map — যেটা দেখে তুমি বুঝতে পারো কোন Component কোথায় আছে, কে কার সাথে কথা বলছে, এবং Data কোন পথে যাচ্ছে।
 
-> 🧠 **Remember:** Architecture কোনো Specific Technology না — এটা হলো একটা Design Philosophy। তুমি যেকোনো Tool বা Framework দিয়ে এটা Implement করতে পারো।
+>  **Remember:** Architecture কোনো Specific Technology না — এটা হলো একটা Design Philosophy। তুমি যেকোনো Tool বা Framework দিয়ে এটা Implement করতে পারো।
 
 ---
 
@@ -79,10 +79,10 @@ Architecture ভালোভাবে বুঝলে তুমি:
 
 ```mermaid
 flowchart TD
-    A["👤 User"] --> B["🖥️ Frontend"]
-    B --> C["⚙️ Backend API"]
-    C --> D["🤖 LLM Model"]
-    D --> E["💬 AI Response"]
+    A["👤 User"] --> B[" Frontend"]
+    B --> C[" Backend API"]
+    C --> D[" LLM Model"]
+    D --> E[" AI Response"]
     E --> B
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
@@ -100,7 +100,7 @@ flowchart TD
 - Text Generation Tool
 - Quick Prototype বা Hackathon Project
 
-💻 **Developer View:** এটাই সেই Architecture যেটা তুমি প্রথমবার `openai.chat.completions.create()` Call করে বানাও। কিন্তু এখানে কোনো Memory নেই, কোনো Context নেই, কোনো Data Source নেই — তাই এটা Production-এ যথেষ্ট না।
+ **Developer View:** এটাই সেই Architecture যেটা তুমি প্রথমবার `openai.chat.completions.create()` Call করে বানাও। কিন্তু এখানে কোনো Memory নেই, কোনো Context নেই, কোনো Data Source নেই — তাই এটা Production-এ যথেষ্ট না।
 
 ---
 
@@ -110,12 +110,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["👤 User Question"] --> B["🔢 Embedding Model"]
-    B --> C["🗄️ Vector Database"]
-    C --> D["📄 Similar Documents"]
-    D --> E["📝 Prompt Builder"]
-    E --> F["🤖 LLM Model"]
-    F --> G["💬 Grounded Response"]
+    A[" User Question"] --> B[" Embedding Model"]
+    B --> C[" Vector Database"]
+    C --> D[" Similar Documents"]
+    D --> E[" Prompt Builder"]
+    E --> F[" LLM Model"]
+    F --> G[" Grounded Response"]
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
 
@@ -136,7 +136,7 @@ flowchart TD
 - Legal বা Medical Document Analysis
 - Customer Support Automation
 
-🏭 **Production Reality:** RAG System-এ সবচেয়ে বেশি সময় যায় Data Pipeline-এ — Documents কিভাবে Chunk করবে, কিভাবে Embed করবে, কোন Vector Database ব্যবহার করবে। LLM Call টা আসলে সবচেয়ে সহজ অংশ।
+ **Production Reality:** RAG System-এ সবচেয়ে বেশি সময় যায় Data Pipeline-এ — Documents কিভাবে Chunk করবে, কিভাবে Embed করবে, কোন Vector Database ব্যবহার করবে। LLM Call টা আসলে সবচেয়ে সহজ অংশ।
 
 ---
 
@@ -146,11 +146,11 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["👤 User"] --> B["🤖 LLM"]
-    B -->|"আবহাওয়া জানতে চায়"| C["🌤️ Weather API"]
-    B -->|"অর্ডার ট্র্যাক করতে চায়"| D["📦 Order API"]
-    B -->|"পেমেন্ট করতে চায়"| E["💳 Payment API"]
-    C --> F["💬 Response"]
+    A["👤 User"] --> B[" LLM"]
+    B -->|"আবহাওয়া জানতে চায়"| C[" Weather API"]
+    B -->|"অর্ডার ট্র্যাক করতে চায়"| D[" Order API"]
+    B -->|"পেমেন্ট করতে চায়"| E[" Payment API"]
+    C --> F[" Response"]
     D --> F
     E --> F
     F --> A
@@ -178,12 +178,12 @@ LLM নিজে থেকে API Call করে না। বরং সে ব�
 
 ```mermaid
 flowchart TD
-    A["🌐 Internet Data"] --> B["🧹 Data Cleaning"]
-    B --> C["✂️ Tokenizer"]
-    C --> D["🏗️ Transformer Model"]
-    D --> E["🔄 Training Loop"]
-    E --> F["💾 Checkpoint"]
-    F --> G["✅ Fine-tuned Model"]
+    A[" Internet Data"] --> B["🧹 Data Cleaning"]
+    B --> C[" Tokenizer"]
+    C --> D[" Transformer Model"]
+    D --> E[" Training Loop"]
+    E --> F[" Checkpoint"]
+    F --> G[" Fine-tuned Model"]
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
 
@@ -197,7 +197,7 @@ flowchart TD
 6. **Checkpoint** — Training-এর মাঝে মাঝে Model Save করা
 7. **Fine-tuned Model** — Final Model যেটা Deploy করা হয়
 
-> 🧠 **Remember:** GPT-4 Level-এর একটা Model Train করতে Millions of Dollars খরচ হয়। তাই বেশিরভাগ Engineer Training করে না — বরং API দিয়ে ব্যবহার করে।
+>  **Remember:** GPT-4 Level-এর একটা Model Train করতে Millions of Dollars খরচ হয়। তাই বেশিরভাগ Engineer Training করে না — বরং API দিয়ে ব্যবহার করে।
 
 ---
 
@@ -207,13 +207,13 @@ Training হলো Model শেখানো। আর Inference হলো সে
 
 ```mermaid
 flowchart TD
-    A["👤 User Input"] --> B["✂️ Tokenizer"]
-    B --> C["🔢 Embedding Layer"]
-    C --> D["🏗️ Transformer Blocks"]
-    D --> E["💾 KV Cache"]
-    E --> F["📊 Logits"]
-    F --> G["📈 Softmax"]
-    G --> H["🔤 Next Token"]
+    A[" User Input"] --> B[" Tokenizer"]
+    B --> C[" Embedding Layer"]
+    C --> D[" Transformer Blocks"]
+    D --> E[" KV Cache"]
+    E --> F[" Logits"]
+    F --> G[" Softmax"]
+    G --> H[" Next Token"]
     H -->|"Loop until done"| D
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
@@ -255,13 +255,13 @@ flowchart TD
 | **Logging** | Events Record করা Debugging-এর জন্য | ELK Stack, CloudWatch |
 | **Analytics** | Usage আর Quality Measure করা | Mixpanel, PostHog |
 
-💻 **Developer View:** তোমার প্রতিটা Project-এ এই সব Component লাগবে না। কিন্তু Architecture বুঝলে তুমি জানবে **কখন কোনটা যোগ করতে হবে**। একটা Prototype-এ হয়তো Frontend + Backend + LLM যথেষ্ট। কিন্তু Production-এ যেতে হলে বাকিগুলোও আস্তে আস্তে যোগ করতে হবে।
+ **Developer View:** তোমার প্রতিটা Project-এ এই সব Component লাগবে না। কিন্তু Architecture বুঝলে তুমি জানবে **কখন কোনটা যোগ করতে হবে**। একটা Prototype-এ হয়তো Frontend + Backend + LLM যথেষ্ট। কিন্তু Production-এ যেতে হলে বাকিগুলোও আস্তে আস্তে যোগ করতে হবে।
 
 ---
 
 ## ১০. সচরাচর ভুলগুলো
 
-🔴 **Common Mistake:** অনেক নতুন Engineer মনে করে শুধু LLM-ই সব। তারা পুরো সময় ব্যয় করে Prompt Engineering আর Model Selection-এ — কিন্তু বাকি System-এর কথা ভাবেই না।
+ **Common Mistake:** অনেক নতুন Engineer মনে করে শুধু LLM-ই সব। তারা পুরো সময় ব্যয় করে Prompt Engineering আর Model Selection-এ — কিন্তু বাকি System-এর কথা ভাবেই না।
 
 **বাস্তবতা হলো:**
 
@@ -281,19 +281,19 @@ Production-এ LLM হয়তো পুরো কাজের **২০%**। �
 
 ## ১১. ইন্টারভিউতে সাধারণ কিছু প্রশ্ন
 
-### 🟢 Beginner Level
+###  Beginner Level
 
 **প্রশ্ন:** Basic LLM Architecture আর RAG Architecture-এর মধ্যে মূল পার্থক্য কী?
 
 **উত্তর:** Basic LLM Architecture-এ User সরাসরি LLM-এর সাথে কথা বলে — LLM শুধু তার Training Data থেকে উত্তর দেয়। RAG Architecture-এ একটা অতিরিক্ত Step যোগ হয় — LLM-কে উত্তর দেওয়ার আগে Relevant Documents খুঁজে এনে দেওয়া হয় Vector Database থেকে। এতে উত্তর অনেক বেশি Accurate আর Up-to-date হয়, কারণ LLM-এর নিজের Training Data-র বাইরের Information-ও ব্যবহার হচ্ছে।
 
-### 🟡 Intermediate Level
+###  Intermediate Level
 
 **প্রশ্ন:** কখন Tool Calling ব্যবহার করবে আর কখন RAG?
 
 **উত্তর:** RAG ব্যবহার করবে যখন তোমার কাছে Static Documents আছে — PDFs, Knowledge Base, Policy Documents — যেগুলো থেকে Information Retrieve করতে হবে। Tool Calling ব্যবহার করবে যখন Real-Time Data দরকার — Live Weather, Order Status, Account Balance — যেগুলো কোনো Database বা Document-এ Pre-stored নেই, বরং একটা External API Call করে আনতে হবে। অনেক Production System-এ দুটোই একসাথে ব্যবহার হয়।
 
-### 🔴 Advanced Level
+###  Advanced Level
 
 **প্রশ্ন:** একটা E-Commerce Chatbot-এর জন্য RAG আর Tool Calling দুটো মিলিয়ে কীভাবে System Design করবে?
 
@@ -321,7 +321,7 @@ Production-এ LLM হয়তো পুরো কাজের **২০%**। �
 
 - Production-এ LLM হলো মাত্র **২০%** — বাকি ৮০% হলো Infrastructure, Security, Data Pipeline, আর Monitoring।
 
-> 🧠 **Remember:** Architecture বোঝা মানে তুমি শুধু Code লেখো না — তুমি System Design করো। এটাই একজন Junior Developer আর Senior Engineer-এর মধ্যে সবচেয়ে বড় পার্থক্য।
+>  **Remember:** Architecture বোঝা মানে তুমি শুধু Code লেখো না — তুমি System Design করো। এটাই একজন Junior Developer আর Senior Engineer-এর মধ্যে সবচেয়ে বড় পার্থক্য।
 
 ---
 
@@ -337,4 +337,4 @@ Production-এ LLM হয়তো পুরো কাজের **২০%**। �
 - High-Availability আর Disaster Recovery
 - Real-World Case Studies — কীভাবে বড় বড় Company তাদের AI Systems Design করে
 
-Architecture-এর ভিত্তি তো হলো — এবার আসল Building শুরু হবে! 🏗️
+Architecture-এর ভিত্তি তো হলো — এবার আসল Building শুরু হবে! 

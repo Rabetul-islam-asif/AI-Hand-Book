@@ -14,16 +14,16 @@
 
 ```mermaid
 flowchart TD
-    A["👤 User"] --> B["📱 Web/Mobile App"]
-    B --> C["🚪 API Gateway"]
-    C --> D["🧠 AI Backend"]
-    D --> E["🤖 LLM API"]
-    D --> F["🗄️ SQL Database"]
-    D --> G["📊 Vector Database"]
-    E --> H["📝 Response Generation"]
+    A[" User"] --> B[" Web/Mobile App"]
+    B --> C[" API Gateway"]
+    C --> D[" AI Backend"]
+    D --> E[" LLM API"]
+    D --> F[" SQL Database"]
+    D --> G[" Vector Database"]
+    E --> H[" Response Generation"]
     F --> H
     G --> H
-    H --> I["✅ Final Response"]
+    H --> I[" Final Response"]
     I --> B
 
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
@@ -53,20 +53,20 @@ Production System-এ আরেকটা গুরুত্বপূর্ণ �
 
 ```mermaid
 flowchart TD
-    A["👤 Customer"] --> B["🤖 AI Assistant"]
-    B --> C["🎯 Intent Detection"]
-    C -->|"Product Query"| D["🛍️ Product API"]
-    C -->|"Order Query"| E["📦 Order API"]
-    C -->|"Search Query"| F["🔍 Search API"]
-    D --> G["🗄️ Product DB"]
-    E --> H["🗄️ Order DB"]
-    F --> I["🗄️ Inventory DB"]
-    F --> J["📊 Vector DB"]
-    J -->|"Semantic Match"| K["🧠 LLM"]
+    A[" Customer"] --> B[" AI Assistant"]
+    B --> C[" Intent Detection"]
+    C -->|"Product Query"| D[" Product API"]
+    C -->|"Order Query"| E[" Order API"]
+    C -->|"Search Query"| F[" Search API"]
+    D --> G[" Product DB"]
+    E --> H[" Order DB"]
+    F --> I[" Inventory DB"]
+    F --> J[" Vector DB"]
+    J -->|"Semantic Match"| K[" LLM"]
     G --> K
     H --> K
     I --> K
-    K --> L["💬 Final Answer"]
+    K --> L[" Final Answer"]
     L --> A
 
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
@@ -90,14 +90,14 @@ AI Agent হলো এমন একটা System যেটা শুধু উ�
 
 ```mermaid
 flowchart TD
-    A["🎯 User Goal"] --> B["🤖 AI Agent"]
-    B --> C["📋 Planning"]
-    B --> D["🔧 Tool Use"]
-    B --> E["🧠 Memory"]
-    C -->|"Step-by-step Plan"| F["⚡ Execution"]
+    A[" User Goal"] --> B[" AI Agent"]
+    B --> C[" Planning"]
+    B --> D[" Tool Use"]
+    B --> E[" Memory"]
+    C -->|"Step-by-step Plan"| F[" Execution"]
     D -->|"API Calls, Search"| F
     E -->|"Context, History"| F
-    F --> G["✅ Response"]
+    F --> G[" Response"]
     G -->|"Feedback Loop"| B
 
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
@@ -121,17 +121,17 @@ AI Agent-এর তিনটি স্তম্ভ:
 
 ```mermaid
 flowchart TD
-    A["👤 User"] --> B["👔 Manager Agent"]
-    B -->|"Code Task"| C["💻 Coding Agent"]
-    B -->|"Research Task"| D["🔍 Search Agent"]
-    B -->|"Finance Task"| E["💰 Finance Agent"]
-    C --> F["📝 Code Output"]
-    D --> G["📊 Research Report"]
-    E --> H["💹 Financial Analysis"]
-    F --> I["🧠 Manager Aggregates"]
+    A[" User"] --> B[" Manager Agent"]
+    B -->|"Code Task"| C[" Coding Agent"]
+    B -->|"Research Task"| D[" Search Agent"]
+    B -->|"Finance Task"| E[" Finance Agent"]
+    C --> F[" Code Output"]
+    D --> G[" Research Report"]
+    E --> H[" Financial Analysis"]
+    F --> I[" Manager Aggregates"]
     G --> I
     H --> I
-    I --> J["✅ Final Response"]
+    I --> J[" Final Response"]
     J --> A
 
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
@@ -156,17 +156,17 @@ Multi-Agent System কোথায় ব্যবহার হয়?
 
 ```mermaid
 flowchart TD
-    A["👤 User Message"] --> B["🧠 LLM"]
-    B --> C["⚡ Short-Term Memory"]
-    B --> D["📚 Long-Term Memory"]
-    B --> E["👤 User Profile"]
-    C -->|"Current Conversation"| F["💬 Context Window"]
-    D -->|"Past Sessions"| G["📊 Vector Database"]
-    E -->|"Preferences, History"| H["🗄️ SQL Database"]
-    F --> I["🔄 Response Engine"]
+    A[" User Message"] --> B[" LLM"]
+    B --> C[" Short-Term Memory"]
+    B --> D[" Long-Term Memory"]
+    B --> E[" User Profile"]
+    C -->|"Current Conversation"| F[" Context Window"]
+    D -->|"Past Sessions"| G[" Vector Database"]
+    E -->|"Preferences, History"| H[" SQL Database"]
+    F --> I[" Response Engine"]
     G --> I
     H --> I
-    I --> J["✅ Personalized Response"]
+    I --> J[" Personalized Response"]
 
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
 ```
@@ -189,12 +189,12 @@ Short-Term Memory হলো তোমার Working Memory — এই মুহ�
 
 ```mermaid
 flowchart TD
-    A["👤 User Request"] --> B["🧠 LLM Planning"]
-    B --> C["📋 Step-by-Step Plan"]
-    C --> D["🔧 Tool Calling"]
-    D --> E["📊 Result Collection"]
-    E --> F["✅ Verification"]
-    F -->|"Pass"| G["💬 Final Response"]
+    A[" User Request"] --> B[" LLM Planning"]
+    B --> C[" Step-by-Step Plan"]
+    C --> D[" Tool Calling"]
+    D --> E[" Result Collection"]
+    E --> F[" Verification"]
+    F -->|"Pass"| G[" Final Response"]
     F -->|"Fail"| B
     G --> A
 
@@ -220,24 +220,24 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["👤 User"] --> B["⚖️ Load Balancer"]
-    B --> C["🚪 API Gateway"]
-    C --> D["🔐 Authentication"]
-    D --> E["🎭 AI Orchestrator"]
-    E --> F["🧠 LLM Service"]
-    E --> G["📊 Vector DB"]
-    E --> H["🗄️ SQL Database"]
-    F --> I["🔧 Tool APIs"]
-    G --> J["📚 Knowledge Base"]
-    H --> K["💼 Business Data"]
-    I --> L["🔄 Response Aggregator"]
+    A[" User"] --> B[" Load Balancer"]
+    B --> C[" API Gateway"]
+    C --> D[" Authentication"]
+    D --> E[" AI Orchestrator"]
+    E --> F[" LLM Service"]
+    E --> G[" Vector DB"]
+    E --> H[" SQL Database"]
+    F --> I[" Tool APIs"]
+    G --> J[" Knowledge Base"]
+    H --> K[" Business Data"]
+    I --> L[" Response Aggregator"]
     J --> L
     K --> L
-    L --> M["📈 Monitoring"]
-    L --> N["📝 Logging"]
-    M --> O["🚨 Alerting"]
-    N --> P["🔍 Audit Trail"]
-    L --> Q["✅ Final Response"]
+    L --> M[" Monitoring"]
+    L --> N[" Logging"]
+    M --> O[" Alerting"]
+    N --> P[" Audit Trail"]
+    L --> Q[" Final Response"]
     Q --> A
 
     classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
@@ -270,7 +270,7 @@ Enterprise Architecture Design করার সময় একটা ভাল�
 
 ---
 
-## ৮. 🏭 Production Reality
+## ৮.  Production Reality
 
 > বাস্তব Production-এ Architecture Diagram-ই শেষ কথা না। তোমাকে আরো অনেক কিছু Handle করতে হবে:
 
@@ -311,11 +311,11 @@ Architecture Static কিছু না — এটা ক্রমাগত Evol
 
 প্রথম ১-৭ শিখতে ২-৩ মাস লাগবে। ৮-১২ শিখতে আরো ৩-৪ মাস। আর ১৩-১৬ শিখতে Production Experience লাগবে — যেটা শুধু Real Project করেই আসবে।
 
-> 🧠 **Remember:** প্রতিটা Step-এ একটা ছোট Project বানাও। Client-Server শিখলে একটা Simple API বানাও। RAG শিখলে একটা Document Q&A App বানাও। শুধু পড়ে গেলে ভুলে যাবে — Build করলে মনে থাকবে।
+> **Remember:** প্রতিটা Step-এ একটা ছোট Project বানাও। Client-Server শিখলে একটা Simple API বানাও। RAG শিখলে একটা Document Q&A App বানাও। শুধু পড়ে গেলে ভুলে যাবে — Build করলে মনে থাকবে।
 
 ---
 
-## ১০. 🔴 Common Mistake
+## ১০.  Common Mistake
 
 > **ভুল:** সরাসরি Complex Enterprise Architecture দিয়ে শুরু করা — Kubernetes, Multi-Agent, Event-Driven সব একসাথে।
 >
@@ -325,7 +325,7 @@ Architecture Static কিছু না — এটা ক্রমাগত Evol
 
 ---
 
-## ১১. 💻 Developer View
+## ১১.  Developer View
 
 > যেকোনো AI System Design করার আগে — **প্রথমে Architecture Diagram আঁকো**, তারপর Code লেখো।
 >
@@ -384,4 +384,4 @@ Chapter 32 আর 33 মিলিয়ে আমরা যে Architecture গ�
 
 এখন সময় এসেছে তোমার Career Path ঠিক করার। তুমি কি AI Engineer হতে চাও? নাকি AI Architect? নাকি ML Engineer? Chapter 30 (AI Career Roadmap)-এ আমরা বিস্তারিত আলোচনা করেছি কোন পথে গেলে কী কী শিখতে হবে, কোন দক্ষতা দরকার, আর কোন ধরনের কোম্পানিতে কোন Role-এ কাজ করতে পারবে।
 
-> 🧠 **Remember:** একটি ভালো AI System শুধু একটি শক্তিশালী Model নয়। এটি হলো সঠিক Architecture, সঠিক Infrastructure, আর সঠিক Engineering Decision-এর সমষ্টি।
+>  **Remember:** একটি ভালো AI System শুধু একটি শক্তিশালী Model নয়। এটি হলো সঠিক Architecture, সঠিক Infrastructure, আর সঠিক Engineering Decision-এর সমষ্টি।
