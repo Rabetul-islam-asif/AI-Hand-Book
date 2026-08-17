@@ -140,8 +140,7 @@ Spotify তাদের কোটি কোটি গানের Embeddings Vec
 
 
 ## ৪. Developer View: pgvector ও Metric সিলেকশন
-
-💻 Developer View
+Developer Perspective
 
 PostgreSQL ডাটাবেসে `pgvector` Extension ব্যবহার করে কীভাবে টেবিল বানাবে আর Index ডিফাইন করবে, চলো তার SQL লজিকটা দেখে নিই:
 
@@ -168,8 +167,7 @@ CREATE INDEX ON document_embeddings USING hnsw (embedding vector_ip_ops);
 
 
 ## ৫. Production Reality: GPU Normalization-এর ট্রিক
-
-🏭 Production Reality
+Production Reality
 
 রিয়েল প্রজেক্টে RAG Server-এ লাখ লাখ Document সার্চ করার সময় সরাসরি Cosine Similarity ব্যবহার করা কিন্তু বেশ বড় একটা ভুল বা Anti-Pattern!
 
@@ -187,8 +185,7 @@ CREATE INDEX ON document_embeddings USING hnsw (embedding vector_ip_ops);
 
 
 ## Common Mistake
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:**
 

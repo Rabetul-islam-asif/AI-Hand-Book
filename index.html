@@ -215,6 +215,139 @@
             padding-left: 9px;
         }
 
+        /* ------------------ SECTOR SWITCHER CONTROLS ------------------ */
+        .sector-switcher-container {
+            padding: 12px 14px 6px 14px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sector-tab {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 9px 4px 7px 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            user-select: none;
+        }
+
+        .sector-tab i {
+            font-size: 13px;
+            transition: transform 0.2s ease;
+        }
+
+        .sector-tab-title {
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .sector-tab-sub {
+            font-size: 9px;
+            opacity: 0.7;
+            letter-spacing: 0.2px;
+        }
+
+        .sector-tab:hover {
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        html.light .sector-tab:hover {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Clean Professional Sector Tabs */
+        .sector-tab[data-sector="core-ai"].active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: var(--text-primary);
+        }
+        html.light .sector-tab[data-sector="core-ai"].active {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .sector-tab[data-sector="ai-agents"].active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: var(--text-primary);
+        }
+        html.light .sector-tab[data-sector="ai-agents"].active {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .sector-tab[data-sector="frontier-infra"].active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: var(--text-primary);
+        }
+        html.light .sector-tab[data-sector="frontier-infra"].active {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Dynamic Sector Header Badges */
+        .sector-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 8px;
+            vertical-align: middle;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .sector-badge.core-ai {
+            color: var(--text-primary);
+        }
+
+        .sector-badge.ai-agents {
+            color: var(--text-primary);
+        }
+
+        .sector-badge.frontier-infra {
+            color: var(--text-primary);
+        }
+
+        /* Sector PDF download action buttons */
+        .pdf-sector-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
         /* Main Area Layout */
         main {
             flex-grow: 1;
@@ -495,72 +628,97 @@
             font-weight: 500;
         }
 
-        /* CALLOUTS BOXES */
+        /* CLEAN EDITORIAL CALLOUT BOXES */
         .callout-box {
-            padding: 20px 24px;
-            border-radius: 12px;
-            margin: 28px 0;
-            border-left: 4px solid var(--accent-purple);
-            background: linear-gradient(90deg, rgba(139, 92, 246, 0.05), transparent);
-            transition: background 0.3s ease;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            transition: border-color 0.2s ease;
         }
 
-        /* ADAPT CARDS BEAUTIFULLY IN LIGHT MODE */
+        .callout-box:hover {
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
         html.light .callout-box {
-            background: rgba(124, 58, 237, 0.04) !important; /* Extremely subtle violet tint */
-            border: 1px solid rgba(124, 58, 237, 0.08) !important;
-            border-left: 4px solid var(--accent-purple) !important;
-        }
-
-        .callout-box.developer {
-            border-left-color: var(--accent-cyan);
-            background: linear-gradient(90deg, rgba(6, 182, 212, 0.05), transparent);
-        }
-
-        html.light .callout-box.developer {
-            background: rgba(13, 148, 136, 0.04) !important; /* Subtle teal/cyan tint */
-            border: 1px solid rgba(13, 148, 136, 0.08) !important;
-            border-left-color: var(--accent-cyan) !important;
-        }
-
-        .callout-box.warning {
-            border-left-color: #EF4444;
-            background: linear-gradient(90deg, rgba(239, 68, 68, 0.05), transparent);
-        }
-
-        html.light .callout-box.warning {
-            background: rgba(239, 68, 68, 0.04) !important; /* Subtle red tint */
-            border: 1px solid rgba(239, 68, 68, 0.08) !important;
-            border-left-color: #EF4444 !important;
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
         .callout-title {
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            font-size: 15px;
+            gap: 8px;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            color: var(--text-secondary);
+        }
+
+        .callout-title i {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .callout-body {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        .callout-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* CLEAN VISUAL ARCHITECTURE CONTAINERS */
+        .visual-container {
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-secondary);
+        }
+
+        .visual-header {
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.25);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        html.light .visual-header {
+            background: #f1f5f9;
+            border-bottom-color: #e2e8f0;
         }
 
         /* DYNAMIC THEMES FOR VISUAL DIAGRAMS (Matrix, Cyberpunk, Slate) */
         .visual-pre {
-            padding: 27px !important; /* Increased by 35% from 20px */
-            border-radius: 10px !important;
+            padding: 20px !important;
+            border-radius: 0 !important;
+            border: none !important;
+            margin: 0 !important;
             overflow-x: auto !important;
             font-family: var(--font-mono) !important;
-            font-size: 17px !important; /* Increased by 20% from 14px */
-            line-height: 1.62 !important; /* Increased line spacing by 35% */
-            transition: all 0.3s ease;
+            font-size: 15px !important;
+            line-height: 1.55 !important;
+            transition: all 0.2s ease;
         }
 
-        /* Theme 1: Gorgeous Sage Green (#ACAEA2) with deep charcoal highly legible text */
+        /* Theme 1: Gorgeous Sage Green (#ACAEA2) */
         .visual-pre.theme-matrix {
             background-color: #ACAEA2 !important;
-            color: #1A2421 !important; /* Deep dark slate forest green for contrast */
-            border: 1px solid rgba(0, 0, 0, 0.15) !important;
+            color: #1A2421 !important;
         }
         .visual-pre.theme-matrix code {
             color: #1A2421 !important;
@@ -570,33 +728,28 @@
         .visual-pre.theme-cyberpunk {
             background-color: #0b0c16 !important;
             color: #FF007F !important;
-            border: 1px solid rgba(255, 0, 127, 0.35) !important;
         }
         .visual-pre.theme-cyberpunk code {
-            color: #00F0FF !important; /* Glowing Blue codes on Pink ASCII lines */
+            color: #00F0FF !important;
         }
         
-        /* Premium Light Cyberpunk Theme in Day Mode */
         html.light .visual-pre.theme-cyberpunk {
-            background-color: #CAD8EE !important; /* Premium light blue-gray background requested by user */
-            color: #1E3A8A !important; /* Deep navy blue for high-contrast ASCII drawings and borders */
-            border: 1px solid rgba(30, 58, 138, 0.25) !important;
+            background-color: #CAD8EE !important;
+            color: #1E3A8A !important;
         }
         html.light .visual-pre.theme-cyberpunk code {
-            color: #025989 !important; /* Rich, readable blue for nested codes */
+            color: #025989 !important;
         }
 
         /* Theme 3: Slate High Contrast */
         .visual-pre.theme-slate {
             background-color: var(--bg-tertiary) !important;
             color: var(--text-primary) !important;
-            border: 1px solid var(--border-color) !important;
         }
         .visual-pre.theme-slate code {
             color: var(--text-primary) !important;
         }
 
-        /* Force code element backgrounds to be transparent so pre container background determines the color */
         article pre code,
         article pre .hljs {
             background: transparent !important;
@@ -1606,11 +1759,30 @@
     <!-- SIDEBAR CHAPTER DIRECTORY -->
     <aside id="sidebar">
         <div class="logo-area">
-            <i class="fa-solid fa-brain logo-icon" style="flex-shrink: 0;"></i>
+            <i class="fa-solid fa-brain logo-icon" id="mainLogoIcon" style="flex-shrink: 0;"></i>
             <div style="display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
                 <span class="logo-text">AI Handbook</span>
                 <span style="font-size: 10px; color: var(--text-secondary); font-weight: 600; margin-top: 3px; letter-spacing: 0.2px;">Created by Asif Rabetul</span>
             </div>
+        </div>
+
+        <!-- 3-SECTOR SEGMENTED CONTROLLER -->
+        <div class="sector-switcher-container" id="sectorSwitcher">
+            <button class="sector-tab active" data-sector="core-ai" onclick="switchSector('core-ai')" title="Sector 1: Core AI & LLMs">
+                <i class="fa-solid fa-brain"></i>
+                <span class="sector-tab-title">Core AI</span>
+                <span class="sector-tab-sub">33 Ch</span>
+            </button>
+            <button class="sector-tab" data-sector="ai-agents" onclick="switchSector('ai-agents')" title="Sector 2: Autonomous AI Agents">
+                <i class="fa-solid fa-robot"></i>
+                <span class="sector-tab-title">Agents</span>
+                <span class="sector-tab-sub">12 Ch</span>
+            </button>
+            <button class="sector-tab" data-sector="frontier-infra" onclick="switchSector('frontier-infra')" title="Sector 3: Frontier Breakthroughs & Infra">
+                <i class="fa-solid fa-bolt-lightning"></i>
+                <span class="sector-tab-title">Frontier</span>
+                <span class="sector-tab-sub">8 Ch</span>
+            </button>
         </div>
         
         <!-- SIDEBAR PROGRESS TRACKER -->
@@ -1699,150 +1871,313 @@
     </main>
 
     <script>
-        // Chapter indexing matching standard table of contents
-        const syllabus = [
-            {
-                part: "Part 1 — AI Foundations (AI এর সূচনা)",
-                chapters: [
-                    { num: 1, title: "Paradigm Shift" },
-                    { num: 2, title: "The Core Mechanics" }
+        // =========================================================================
+        // 3-SECTOR MASTER SYLLABUS DATA ARCHITECTURE
+        // =========================================================================
+        const bookSectors = {
+            "core-ai": {
+                id: "core-ai",
+                name: "Core AI & LLMs",
+                badge: "Sector 1: Core AI",
+                icon: "fa-brain",
+                accent: "#06B6D4",
+                gradient: "linear-gradient(135deg, #8B5CF6, #06B6D4)",
+                parts: [
+                    {
+                        part: "Part 1 — AI Foundations (AI এর সূচনা)",
+                        chapters: [
+                            { id: "1", file: "chapter_1.md", num: 1, title: "Paradigm Shift" },
+                            { id: "2", file: "chapter_2.md", num: 2, title: "The Core Mechanics" }
+                        ]
+                    },
+                    {
+                        part: "Part 2 — Machine Learning (মেশিন লার্নিংয়ের ভেতরের কাজ)",
+                        chapters: [
+                            { id: "3", file: "chapter_3.md", num: 3, title: "The Math of Learning" },
+                            { id: "4", file: "chapter_4.md", num: 4, title: "Generalization & Sweet Spot" }
+                        ]
+                    },
+                    {
+                        part: "Part 3 — Deep Learning & Neural Networks",
+                        chapters: [
+                            { id: "5", file: "chapter_5.md", num: 5, title: "Artificial Neurons" },
+                            { id: "6", file: "chapter_6.md", num: 6, title: "Deep Networks & Backpropagation" }
+                        ]
+                    },
+                    {
+                        part: "Part 4 — Modern AI Foundations (আধুনিক ভিত্তি)",
+                        chapters: [
+                            { id: "7", file: "chapter_7.md", num: 7, title: "Transformers & Attention" },
+                            { id: "8", file: "chapter_8.md", num: 8, title: "Tokens, Embeddings & Context" }
+                        ]
+                    },
+                    {
+                        part: "Part 5 — LLMs (লার্জ Language Model)",
+                        chapters: [
+                            { id: "9", file: "chapter_9.md", num: 9, title: "LLM Ecosystem" },
+                            { id: "10", file: "chapter_10.md", num: 10, title: "Reasoning Models (R1 & o3)" }
+                        ]
+                    },
+                    {
+                        part: "Part 6 — Prompt Engineering (প্রম্পট ইঞ্জিনিয়ারিং)",
+                        chapters: [
+                            { id: "11", file: "chapter_11.md", num: 11, title: "Prompt Engineering Fundamentals" },
+                            { id: "12", file: "chapter_12.md", num: 12, title: "Advanced Prompt Engineering" }
+                        ]
+                    },
+                    {
+                        part: "Part 7 — AI Data Layer (Vector Data)",
+                        chapters: [
+                            { id: "13", file: "chapter_13.md", num: 13, title: "Vector & Distance Metrics" },
+                            { id: "14", file: "chapter_14.md", num: 14, title: "Vector Databases & Indexing" }
+                        ]
+                    },
+                    {
+                        part: "Part 8 — RAG (Retrieval Augmented Generation)",
+                        chapters: [
+                            { id: "15", file: "chapter_15.md", num: 15, title: "RAG Fundamentals" },
+                            { id: "16", file: "chapter_16.md", num: 16, title: "Advanced Retrieval & Hybrid Search" }
+                        ]
+                    },
+                    {
+                        part: "Part 9 — Fine-Tuning (Model Fine-Tuning)",
+                        chapters: [
+                            { id: "17", file: "chapter_17.md", num: 17, title: "SFT & Dataset Template" },
+                            { id: "18", file: "chapter_18.md", num: 18, title: "PEFT (LoRA & QLoRA)" },
+                            { id: "19", file: "chapter_19.md", num: 19, title: "RLHF, DPO & Safety Tuning" }
+                        ]
+                    },
+                    {
+                        part: "Part 10 — Production AI (প্রোডাকশন-গ্রেড)",
+                        chapters: [
+                            { id: "23", file: "chapter_23.md", num: 23, title: "Constitutional Safety Harness" },
+                            { id: "24", file: "chapter_24.md", num: 24, title: "Observability & Tracing" },
+                            { id: "25", file: "chapter_25.md", num: 25, title: "Cost Optimization & Guardrails" }
+                        ]
+                    },
+                    {
+                        part: "Part 11 — Real AI Products (বাস্তব Blueprint)",
+                        chapters: [
+                            { id: "26", file: "chapter_26.md", num: 26, title: "Blueprint 1: Multi-Session Memory" },
+                            { id: "27", file: "chapter_27.md", num: 27, title: "Blueprint 2: Enterprise PDF Search" },
+                            { id: "29", file: "chapter_29.md", num: 29, title: "Blueprint 4: AI SaaS & Billing" }
+                        ]
+                    },
+                    {
+                        part: "Part 12 — AI System Architectures (সিস্টেম আর্কিটেকচার)",
+                        chapters: [
+                            { id: "32", file: "chapter_32.md", num: 32, title: "System Architecture Fundamentals" },
+                            { id: "33", file: "chapter_33.md", num: 33, title: "Production & Enterprise Architecture" }
+                        ]
+                    },
+                    {
+                        part: "Part 13 — AI Career Roadmap (ক্যারিয়ার গাইড)",
+                        chapters: [
+                            { id: "30", file: "chapter_30.md", num: 30, title: "Transitioning to an AI Architect" }
+                        ]
+                    },
+                    {
+                        part: "Part 14 — Appendix (পরিশিষ্ট)",
+                        chapters: [
+                            { id: "31", file: "chapter_31.md", num: 31, title: "Core Concepts & Mental Models" }
+                        ]
+                    }
                 ]
             },
-            {
-                part: "Part 2 — Machine Learning (মেশিন লার্নিংয়ের ভেতরের কাজ)",
-                chapters: [
-                    { num: 3, title: "The Math of Learning" },
-                    { num: 4, title: "Generalization & Sweet Spot" }
+            "ai-agents": {
+                id: "ai-agents",
+                name: "Autonomous AI Agents",
+                badge: "Sector 2: AI Agents",
+                icon: "fa-robot",
+                accent: "#10B981",
+                gradient: "linear-gradient(135deg, #10B981, #06B6D4)",
+                parts: [
+                    {
+                        part: "Part 1 — Agentic Foundations & Loops (এজেন্টের ভিত্তি)",
+                        chapters: [
+                            { id: "agent_1", file: "agent_ch1.md", num: 1, title: "Agent Architecture & Cognitive Loops" }
+                        ]
+                    },
+                    {
+                        part: "Part 2 — Tools, Function Calling & MCP (টুলস ও প্রটোকল)",
+                        chapters: [
+                            { id: "agent_2", file: "agent_ch2.md", num: 2, title: "Function Calling & Tool Contracts" },
+                            { id: "agent_3", file: "agent_ch3.md", num: 3, title: "Model Context Protocol (MCP) Deep Dive" }
+                        ]
+                    },
+                    {
+                        part: "Part 3 — Memory & Stateful Workflows (মেমোরি ও স্টেট)",
+                        chapters: [
+                            { id: "agent_4", file: "agent_ch4.md", num: 4, title: "Multi-Layer Agent Memory" },
+                            { id: "agent_5", file: "agent_ch5.md", num: 5, title: "State Machines & Resumable Workflows" }
+                        ]
+                    },
+                    {
+                        part: "Part 4 — Multi-Agent Systems & Frameworks (মাল্টি-এজেন্ট)",
+                        chapters: [
+                            { id: "agent_6", file: "agent_ch6.md", num: 6, title: "Multi-Agent Collaboration Patterns" },
+                            { id: "agent_7", file: "agent_ch7.md", num: 7, title: "Modern Agent Frameworks Compared" }
+                        ]
+                    },
+                    {
+                        part: "Part 5 — Production Reliability & Evals (প্রোডাকশন ও সেফটি)",
+                        chapters: [
+                            { id: "agent_8", file: "agent_ch8.md", num: 8, title: "Human-in-the-Loop & Safety Guardrails" },
+                            { id: "agent_9", file: "agent_ch9.md", num: 9, title: "Agent Observability & Evals" }
+                        ]
+                    },
+                    {
+                        part: "Part 6 — Real-World Agent Blueprints (বাস্তব ব্লুপ্রিন্ট)",
+                        chapters: [
+                            { id: "agent_10", file: "agent_ch10.md", num: 10, title: "Blueprint: Autonomous Coding Agent" },
+                            { id: "agent_11", file: "agent_ch11.md", num: 11, title: "Blueprint: Deep Research & Web Agent" },
+                            { id: "agent_12", file: "agent_ch12.md", num: 12, title: "Blueprint: Enterprise Operations Swarm" }
+                        ]
+                    }
                 ]
             },
-            {
-                part: "Part 3 — Deep Learning & Neural Networks",
-                chapters: [
-                    { num: 5, title: "Artificial Neurons" },
-                    { num: 6, title: "Deep Networks & Backpropagation" }
-                ]
-            },
-            {
-                part: "Part 4 — Modern AI Foundations (আধুনিক ভিত্তি)",
-                chapters: [
-                    { num: 7, title: "Transformers & Attention" },
-                    { num: 8, title: "Tokens, Embeddings & Context" }
-                ]
-            },
-            {
-                part: "Part 5 — LLMs (লার্জ Language Model)",
-                chapters: [
-                    { num: 9, title: "LLM Ecosystem" },
-                    { num: 10, title: "Reasoning Models (R1 & o3)" }
-                ]
-            },
-            {
-                part: "Part 6 — Prompt Engineering (প্রম্পট ইঞ্জিনিয়ারিং)",
-                chapters: [
-                    { num: 11, title: "Prompt Engineering Fundamentals" },
-                    { num: 12, title: "Advanced Prompt Engineering" }
-                ]
-            },
-            {
-                part: "Part 7 — AI Data Layer (Vector Data)",
-                chapters: [
-                    { num: 13, title: "Vector & Distance Metrics" },
-                    { num: 14, title: "Vector Databases & Indexing" }
-                ]
-            },
-            {
-                part: "Part 8 — RAG (Retrieval Augmented Generation)",
-                chapters: [
-                    { num: 15, title: "RAG Fundamentals" },
-                    { num: 16, title: "Advanced Retrieval & Hybrid Search" }
-                ]
-            },
-            {
-                part: "Part 9 — Fine-Tuning (Model Fine-Tuning)",
-                chapters: [
-                    { num: 17, title: "SFT & Dataset Template" },
-                    { num: 18, title: "PEFT (LoRA & QLoRA)" },
-                    { num: 19, title: "RLHF, DPO & Safety Tuning" }
-                ]
-            },
-            {
-                part: "Part 10 — Agentic AI & Tool Calling (এজেন্ট)",
-                chapters: [
-                    { num: 20, title: "AI Agents & ReAct" },
-                    { num: 21, title: "Tool Calling Contracts" },
-                    { num: 22, title: "Model Context Protocol (MCP)" }
-                ]
-            },
-            {
-                part: "Part 11 — Production AI (প্রোডাকশন-গ্রেড)",
-                chapters: [
-                    { num: 23, title: "Constitutional Safety Harness" },
-                    { num: 24, title: "Observability & Tracing" },
-                    { num: 25, title: "Cost Optimization & Guardrails" }
-                ]
-            },
-            {
-                part: "Part 12 — Building Real AI Products (বাস্তব Blueprint)",
-                chapters: [
-                    { num: 26, title: "Blueprint 1: Multi-Session Memory" },
-                    { num: 27, title: "Blueprint 2: Enterprise PDF Search" },
-                    { num: 28, title: "Blueprint 3: CLI Agent Auto-Healing" },
-                    { num: 29, title: "Blueprint 4: AI SaaS & Billing" }
-                ]
-            },
-            {
-                part: "Part 13 — AI System Architectures (সিস্টেম আর্কিটেকচার)",
-                chapters: [
-                    { num: 32, title: "System Architecture Fundamentals" },
-                    { num: 33, title: "Production & Enterprise Architecture" }
-                ]
-            },
-            {
-                part: "Part 14 — AI Career Roadmap (ক্যারিয়ার গাইড)",
-                chapters: [
-                    { num: 30, title: "Transitioning to an AI Architect" }
-                ]
-            },
-            {
-                part: "Part 15 — Appendix (পরিশিষ্ট)",
-                chapters: [
-                    { num: 31, title: "Core Concepts & Mental Models" }
+            "frontier-infra": {
+                id: "frontier-infra",
+                name: "Frontier & Infra",
+                badge: "Sector 3: Frontier & Infra",
+                icon: "fa-bolt-lightning",
+                accent: "#F59E0B",
+                gradient: "linear-gradient(135deg, #EC4899, #F59E0B)",
+                parts: [
+                    {
+                        part: "Part 1 — LLM Routing & Gateway Infra (গেটওয়ে ইঞ্জিনিয়ারিং)",
+                        chapters: [
+                            { id: "frontier_1", file: "frontier_ch1.md", num: 1, title: "LLM Routers, Gateways & Semantic Caching" }
+                        ]
+                    },
+                    {
+                        part: "Part 2 — Beating the GPU Shortage (চাইনিজ AI ল্যাব ইনোভেশন)",
+                        chapters: [
+                            { id: "frontier_2", file: "frontier_ch2.md", num: 2, title: "DeepSeek Architectural Mastery (MLA, MoE, DualPipe)" },
+                            { id: "frontier_3", file: "frontier_ch3.md", num: 3, title: "Extreme Context & Reasoning (Kimi k3, Qwen, CANN)" }
+                        ]
+                    },
+                    {
+                        part: "Part 3 — Nature-Inspired AI (সাকানা AI)",
+                        chapters: [
+                            { id: "frontier_4", file: "frontier_ch4.md", num: 4, title: "Sakana AI & Evolutionary Model Merging" }
+                        ]
+                    },
+                    {
+                        part: "Part 4 — Consumer Hardware Hacks (AirLLM ও 1-Bit AI)",
+                        chapters: [
+                            { id: "frontier_5", file: "frontier_ch5.md", num: 5, title: "AirLLM: Running 70B/405B on 4GB-8GB GPUs" },
+                            { id: "frontier_6", file: "frontier_ch6.md", num: 6, title: "1-Bit AI (BitNet b1.58) & Local Engines" }
+                        ]
+                    },
+                    {
+                        part: "Part 5 — AI Silicon Wars (Google TPU & Groq LPU)",
+                        chapters: [
+                            { id: "frontier_7", file: "frontier_ch7.md", num: 7, title: "Hardware Accelerators: TPU, Groq & Custom Silicon" }
+                        ]
+                    },
+                    {
+                        part: "Part 6 — Frontier Paradigms (টেস্ট-টাইম কম্পিউট)",
+                        chapters: [
+                            { id: "frontier_8", file: "frontier_ch8.md", num: 8, title: "Test-Time Compute & Inference Scaling Laws" }
+                        ]
+                    }
                 ]
             }
-        ];
+        };
 
-        // Flat array of chapters in logical reading order
-        const flatChapters = [];
-        syllabus.forEach(part => {
-            part.chapters.forEach(ch => {
-                flatChapters.push(ch);
+        // Helper functions for sector queries
+        function getSector(sectorId) {
+            return bookSectors[sectorId] || bookSectors["core-ai"];
+        }
+
+        function getSectorChapters(sectorId) {
+            const sec = getSector(sectorId);
+            const list = [];
+            sec.parts.forEach(p => {
+                p.chapters.forEach(ch => {
+                    list.push({ ...ch, sectorId: sec.id, sectorName: sec.name, sectorBadge: sec.badge, partName: p.part });
+                });
             });
-        });
+            return list;
+        }
 
-        let currentChapterNum = 1;
-        let isLight = false; // Restore default Dark Mode (#0F0F12 page background)!
-        let fontSizeMode = 0; // 0 = standard, 1 = large, 2 = larger
-        let currentFontWeight = 400; // 300 (Light), 400 (Normal), 500 (Medium), 600 (Bold)
-        let currentVisualTheme = 'matrix'; // matrix, cyberpunk, slate
-        let currentCodeTheme = 'gray'; // Keep premium Sage Green #ACAEA2 cards by default!
+        function getAllChapters() {
+            const all = [];
+            Object.keys(bookSectors).forEach(secId => {
+                all.push(...getSectorChapters(secId));
+            });
+            return all;
+        }
+
+        // Active state variables
+        let currentSectorId = localStorage.getItem('currentSectorId') || 'core-ai';
+        let currentChapterId = localStorage.getItem('currentChapterId') || '1';
+        let isLight = false;
+        let fontSizeMode = 0;
+        let currentFontWeight = 400;
+        let currentVisualTheme = 'matrix';
+        let currentCodeTheme = 'gray';
         let currentRawMarkdown = "";
 
-        // Populate sidebar
+        // Switch active sector tab
+        function switchSector(sectorId, targetChId = null) {
+            if (!bookSectors[sectorId]) sectorId = "core-ai";
+            currentSectorId = sectorId;
+            localStorage.setItem('currentSectorId', sectorId);
+
+            // Update tab visual states
+            document.querySelectorAll('.sector-tab').forEach(tab => {
+                if (tab.dataset.sector === sectorId) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // Update main logo icon according to active sector
+            const logoIcon = document.getElementById("mainLogoIcon");
+            if (logoIcon) {
+                const sec = getSector(sectorId);
+                logoIcon.className = `fa-solid ${sec.icon} logo-icon`;
+            }
+
+            populateSidebar();
+            updateSidebarProgress();
+
+            // Load chapter
+            if (targetChId) {
+                loadChapter(targetChId);
+            } else {
+                const secChapters = getSectorChapters(sectorId);
+                const isCurrentInSec = secChapters.some(c => String(c.id) === String(currentChapterId));
+                if (!isCurrentInSec && secChapters.length > 0) {
+                    loadChapter(secChapters[0].id);
+                } else {
+                    loadChapter(currentChapterId);
+                }
+            }
+        }
+
+        // Populate sidebar based on current active sector
         function populateSidebar() {
             const listDiv = document.getElementById("chaptersList");
+            if (!listDiv) return;
             listDiv.innerHTML = "";
             
-            syllabus.forEach(part => {
+            const sector = getSector(currentSectorId);
+            
+            sector.parts.forEach(part => {
                 const header = document.createElement("div");
                 header.className = "part-header";
                 header.innerText = part.part;
                 listDiv.appendChild(header);
                 
                 part.chapters.forEach(ch => {
-                    const isCompleted = getCompletedChapters().includes(ch.num);
+                    const isCompleted = getCompletedChapters().includes(String(ch.id));
                     const link = document.createElement("a");
-                    link.className = `chapter-link ${ch.num === currentChapterNum ? 'active' : ''}`;
-                    link.id = `ch-link-${ch.num}`;
+                    link.className = `chapter-link ${String(ch.id) === String(currentChapterId) ? 'active' : ''}`;
+                    link.id = `ch-link-${ch.id}`;
                     
                     // Left Side: Icon & Title
                     const leftSpan = document.createElement("span");
@@ -1850,7 +2185,7 @@
                     leftSpan.style.alignItems = "center";
                     leftSpan.style.gap = "10px";
                     leftSpan.innerHTML = `<i class="fa-solid fa-book-open"></i> <span>Ch ${ch.num}: ${ch.title}</span>`;
-                    leftSpan.onclick = () => loadChapter(ch.num);
+                    leftSpan.onclick = () => loadChapter(ch.id);
                     link.appendChild(leftSpan);
                     
                     // Right Side: Completion Checkmark Button
@@ -1860,7 +2195,7 @@
                     checkBtn.title = isCompleted ? "পঠিত হিসেবে চিহ্নিত (পড়া শেষ)" : "অপঠিত হিসেবে চিহ্নিত (পড়া বাকি)";
                     checkBtn.onclick = (e) => {
                         e.stopPropagation();
-                        toggleChapterCompletion(ch.num);
+                        toggleChapterCompletion(ch.id);
                     };
                     link.appendChild(checkBtn);
                     
@@ -1905,7 +2240,7 @@
             isLight = !isLight;
             document.documentElement.className = isLight ? "light" : "dark";
             const icon = document.getElementById("themeIcon");
-            icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
+            if (icon) icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
             
             if (currentVisualTheme === 'slate') {
                 applyVisualThemeToPage();
@@ -1917,9 +2252,9 @@
             // Re-render markdown to update Mermaid theme seamlessly!
             if (currentRawMarkdown) {
                 const container = document.querySelector(".content-container");
-                const scrollPos = container.scrollTop;
+                const scrollPos = container ? container.scrollTop : 0;
                 renderMarkdownContent(currentRawMarkdown);
-                container.scrollTop = scrollPos;
+                if (container) container.scrollTop = scrollPos;
             }
         }
 
@@ -1940,6 +2275,7 @@
 
         function applyFontWeightToPage() {
             const article = document.getElementById("markdownContent");
+            if (!article) return;
             const selectors = article.querySelectorAll("p, li, th, td");
             selectors.forEach(el => {
                 el.style.fontWeight = currentFontWeight;
@@ -1959,23 +2295,22 @@
             localStorage.setItem('visualTheme', currentVisualTheme);
         }
 
-        // Decorate diagram theme switcher button dynamically
         function decorateVisualThemeButton() {
             const btn = document.getElementById("diagramThemeBtn");
             if (!btn) return;
             if (currentVisualTheme === 'cyberpunk') {
                 btn.className = "action-btn active-theme";
                 if (isLight) {
-                    btn.style.background = "linear-gradient(135deg, #FF66B2, #33CCFF)"; // Soft pastel cyberpunk gradient
+                    btn.style.background = "linear-gradient(135deg, #FF66B2, #33CCFF)";
                 } else {
-                    btn.style.background = "linear-gradient(135deg, #FF007F, #00F0FF)"; // Neon gradient
+                    btn.style.background = "linear-gradient(135deg, #FF007F, #00F0FF)";
                 }
             } else if (currentVisualTheme === 'slate') {
                 btn.className = "action-btn active-theme";
                 if (isLight) {
-                    btn.style.background = "linear-gradient(135deg, #9CA3AF, #4B5563)"; // Light Slate gradient
+                    btn.style.background = "linear-gradient(135deg, #9CA3AF, #4B5563)";
                 } else {
-                    btn.style.background = "linear-gradient(135deg, #6B7280, #374151)"; // Dark Slate gradient
+                    btn.style.background = "linear-gradient(135deg, #6B7280, #374151)";
                 }
             } else {
                 btn.className = "action-btn";
@@ -1983,7 +2318,6 @@
             }
         }
 
-        // Converted default matrix theme to #ACAEA2 background & deep dark text!
         function applyVisualThemeToPage() {
             const preElements = document.querySelectorAll('.visual-pre');
             preElements.forEach(pre => {
@@ -1991,7 +2325,7 @@
             });
         }
 
-        // Cycle through 4 different code block background themes (Black, Sage Green #ACAEA2, Brown, Soft Whitish Blue)
+        // Cycle through 4 different code block background themes
         function cycleCodeTheme() {
             const themes = ['black', 'gray', 'brown', 'blue'];
             const idx = themes.indexOf(currentCodeTheme);
@@ -2003,9 +2337,9 @@
             localStorage.setItem('codeTheme', currentCodeTheme);
         }
 
-        // Sage code theme is default
         function decorateCodeThemeButton() {
             const btn = document.getElementById("codeThemeBtn");
+            if (!btn) return;
             if (currentCodeTheme === 'gray') {
                 btn.style.background = "#ACAEA2";
                 btn.style.color = "#1A2421";
@@ -2055,15 +2389,14 @@
             });
         }
 
-        // Cycle Font Size
         function toggleFontSize() {
             adjustFontSize(1);
         }
 
-        // Adjust Font Size (direction +1 or -1)
         function adjustFontSize(direction) {
             fontSizeMode = (fontSizeMode + direction + 3) % 3;
             const article = document.getElementById("markdownContent");
+            if (!article) return;
             if (fontSizeMode === 0) {
                 article.style.fontSize = "16px";
             } else if (fontSizeMode === 1) {
@@ -2074,39 +2407,58 @@
         }
 
         // Fetch and Render Markdown Chapter via marked.js
-        async function loadChapter(chNum) {
-            currentChapterNum = chNum;
-            populateSidebar();
+        async function loadChapter(chId) {
+            const allChapters = getAllChapters();
+            let targetCh = allChapters.find(c => String(c.id) === String(chId) || String(c.num) === String(chId));
             
-            document.getElementById("sidebar").classList.remove("open");
+            if (!targetCh) {
+                targetCh = getSectorChapters(currentSectorId)[0] || allChapters[0];
+            }
+            
+            // If chapter belongs to a different sector, switch active sector
+            if (targetCh.sectorId !== currentSectorId) {
+                currentSectorId = targetCh.sectorId;
+                localStorage.setItem('currentSectorId', currentSectorId);
+                document.querySelectorAll('.sector-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.sector === currentSectorId);
+                });
+                const logoIcon = document.getElementById("mainLogoIcon");
+                if (logoIcon) {
+                    const sec = getSector(currentSectorId);
+                    logoIcon.className = `fa-solid ${sec.icon} logo-icon`;
+                }
+            }
+            
+            currentChapterId = targetCh.id;
+            localStorage.setItem('currentChapterId', targetCh.id);
+            populateSidebar();
+            updateSidebarProgress();
+            
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar) sidebar.classList.remove("open");
             const sidebarBackdrop = document.getElementById("sidebarBackdrop");
             if (sidebarBackdrop) sidebarBackdrop.classList.remove("open");
             
-            // Also close settings sheet on chapter load
             const sheet = document.getElementById("settingsSheet");
             const settingsBackdrop = document.getElementById("settingsBackdrop");
             if (sheet) sheet.classList.remove("open");
             if (settingsBackdrop) settingsBackdrop.classList.remove("open");
             
             const headerTitle = document.getElementById("chapterTitleHeader");
-            headerTitle.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Chapter ${chNum} Loading...`;
+            headerTitle.innerHTML = `<span class="sector-badge ${targetCh.sectorId}"><i class="fa-solid ${getSector(targetCh.sectorId).icon}"></i> ${getSector(targetCh.sectorId).name}</span> <span>Ch ${targetCh.num}: ${targetCh.title}</span>`;
             
             try {
-                const response = await fetch(`/handbook/chapter_${chNum}.md?v=${Date.now()}`);
-                if (!response.ok) throw new Error("Chapter file not found");
+                const response = await fetch(`/handbook/${targetCh.file}?v=${Date.now()}`);
+                if (!response.ok) throw new Error(`Chapter file ${targetCh.file} not found`);
                 
                 let text = await response.text();
                 currentRawMarkdown = text;
                 
                 renderMarkdownContent(text);
                 
-                // Set Header title
-                const contentDiv = document.getElementById("markdownContent");
-                const mainH1 = contentDiv.querySelector("h1");
-                headerTitle.innerText = mainH1 ? mainH1.innerText : `Chapter ${chNum}`;
-                
                 // Scroll to top
-                document.querySelector(".content-container").scrollTop = 0;
+                const contentContainer = document.querySelector(".content-container");
+                if (contentContainer) contentContainer.scrollTop = 0;
                 
             } catch (err) {
                 console.error(err);
@@ -2114,75 +2466,67 @@
                     <div style="text-align: center; margin-top: 100px;">
                         <i class="fa-solid fa-circle-exclamation" style="font-size: 64px; color: #EF4444; margin-bottom: 20px;"></i>
                         <h2>চ্যাপ্টার লোড করতে ব্যর্থ হয়েছে</h2>
-                        <p style="margin-top: 10px;">দয়া করে আপনার python server সচল আছে কি না তা চেক করুন।</p>
+                        <p style="margin-top: 10px; color:var(--text-secondary);">ফাইলটি খুঁজে পাওয়া যায়নি: <code>${targetCh.file}</code></p>
+                        <p style="margin-top: 5px;">দয়া করে আপনার python server সচল আছে কি না তা চেক করুন।</p>
                     </div>
                 `;
             }
         }
 
-        // Separate render function to allow seamless re-rendering (e.g. on theme toggle)
+        // Render Markdown content with clean callouts, visual diagrams, and flashcards
         function renderMarkdownContent(text) {
-            // Parse custom visual callouts inside our chapter files into 3-theme controllable pre blocks!
-            // Handles \r\n (CRLF) line endings, extracts Title for header, strips metadata lines
-            text = text.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n---|\r?\n\r?\n###)/g, (match, content) => {
-                // Extract title from "Title: ..." line
+            // Visual containers
+            text = text.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|###|💻|🏭|🔴|Developer|Production|Common)|$)/g, (match, content) => {
                 const titleMatch = content.match(/Title:\s*(.+)/);
-                const title = titleMatch ? titleMatch[1].trim() : 'Visual Explanation / Architecture Map';
-                
-                // Strip metadata lines (Title, Illustration, Placement, Purpose)
+                const title = titleMatch ? titleMatch[1].trim() : 'Architecture Map / Visual Flow';
                 let diagram = content
                     .replace(/^Title:\s*.+$/gm, '')
                     .replace(/^Illustration:\s*.+$/gm, '')
                     .replace(/^Placement:\s*.+$/gm, '')
                     .replace(/^Purpose:\s*.+$/gm, '')
                     .trim();
-                
-                // Extract content inside ``` code fences if present
                 const codeBlockMatch = diagram.match(/```[\w]*\r?\n([\s\S]*?)```/);
                 if (codeBlockMatch) {
                     diagram = codeBlockMatch[1].trimEnd();
                 }
-                
-                return `<div class="callout-box developer">
-                    <div class="callout-title">
-                        <span><i class="fa-solid fa-diagram-project"></i> ${title}</span>
+                return `\n<div class="visual-container">
+                    <div class="visual-header">
+                        <i class="fa-solid fa-diagram-project"></i> ${title}
                     </div>
                     <pre class="visual-pre theme-${currentVisualTheme}"><code class="language-plaintext">${diagram}</code></pre>
-                </div>`;
+                </div>\n`;
             });
             
-            // Wrap Developer Perspective callouts dynamically (standalone lines only)
-            text = text.replace(/(?:^|\r?\n)[ \t]*💻 Developer View[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+            // Clean Callouts (Developer Perspective, Production Reality, Common Mistake)
+            text = text.replace(/(?:^|\r?\n)[ \t]*(?:💻[ \t]*)?(?:##[ \t]*\d*\.?[ \t]*)?Developer (?:View|Perspective)[ \t]*(?:—[^\r\n]*)?\r?\n([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|💻|🏭|🔴|Developer|Production|Common Mistake|Pitfall|Warning)|$)/g, (match, content) => {
                 return `\n<div class="callout-box developer">
-                    <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
-                    ${content.trim()}
+                    <div class="callout-title"><i class="fa-solid fa-code"></i> Developer Perspective</div>
+                    <div class="callout-body">\n\n${content.trim()}\n\n</div>
                 </div>\n`;
             });
             
-            // Wrap Production Reality callouts dynamically (standalone lines only)
-            text = text.replace(/(?:^|\r?\n)[ \t]*🏭 Production Reality[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                return `\n<div class="callout-box">
+            text = text.replace(/(?:^|\r?\n)[ \t]*(?:🏭[ \t]*)?(?:##[ \t]*\d*\.?[ \t]*)?Production Reality[ \t]*(?:—[^\r\n]*)?\r?\n([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|💻|🏭|🔴|Developer|Production|Common Mistake|Pitfall|Warning)|$)/g, (match, content) => {
+                return `\n<div class="callout-box production">
                     <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
-                    ${content.trim()}
+                    <div class="callout-body">\n\n${content.trim()}\n\n</div>
                 </div>\n`;
             });
             
-            // Wrap Common Mistakes callouts dynamically (standalone lines only)
-            text = text.replace(/(?:^|\r?\n)[ \t]*🔴 Common Mistake[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+            text = text.replace(/(?:^|\r?\n)[ \t]*(?:🔴[ \t]*)?(?:##[ \t]*\d*\.?[ \t]*)?(?:Common Mistake|Pitfall|Common Pitfall)[ \t]*(?:—[^\r\n]*)?\r?\n([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|💻|🏭|🔴|Developer|Production|Common Mistake|Pitfall|Warning)|$)/g, (match, content) => {
                 return `\n<div class="callout-box warning">
-                    <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
-                    ${content.trim()}
+                    <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Pitfall</div>
+                    <div class="callout-body">\n\n${content.trim()}\n\n</div>
                 </div>\n`;
             });
             
-            // Clean up any remaining '---' horizontal rules so they are completely removed from display
+            // Clean up any remaining emoji markers in headings
+            text = text.replace(/##[ \t]*🎯[ \t]*/g, '## ');
             text = text.replace(/\r?\n---/g, '');
 
-            // Render Markdown
             const contentDiv = document.getElementById("markdownContent");
             contentDiv.innerHTML = marked.parse(text);
             
-            // Wrap all tables in a table-container for horizontal scrolling on mobile
+            // Wrap tables
             contentDiv.querySelectorAll('table').forEach(table => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'table-container';
@@ -2190,15 +2534,15 @@
                 wrapper.appendChild(table);
             });
             
-            // Run Syntax Highlighting
+            // Syntax Highlighting
             contentDiv.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
             });
             
-            // Inject Estimated Reading Time & Word Count Metadata
+            // Metadata
             updateChapterMetadata();
 
-            // Inject Floating "Copy Code" Buttons to each pre block
+            // Copy Code Buttons
             contentDiv.querySelectorAll('pre').forEach((pre) => {
                 if (!pre.querySelector('.copy-code-btn')) {
                     const copyBtn = document.createElement('button');
@@ -2213,7 +2557,7 @@
                 }
             });
             
-            // Render KaTeX Math equations
+            // KaTeX
             if (window.renderMathInElement) {
                 renderMathInElement(contentDiv, {
                     delimiters: [
@@ -2224,51 +2568,42 @@
                 });
             }
             
-            // Transform Interview Questions into Interactive Flashcards!
+            // Flashcards
             setupInteractiveInterviewQuestions();
             
-            // Append Next & Previous Chapter Navigation Arrows
+            // Sector-Scoped Next & Prev Navigation
+            const secChapters = getSectorChapters(currentSectorId);
+            const currentIndex = secChapters.findIndex(ch => String(ch.id) === String(currentChapterId));
+            const prevCh = currentIndex > 0 ? secChapters[currentIndex - 1] : null;
+            const nextCh = currentIndex < secChapters.length - 1 ? secChapters[currentIndex + 1] : null;
+            
             const navDiv = document.createElement("div");
             navDiv.className = "chapter-navigation";
             
-            const currentIndex = flatChapters.findIndex(ch => Number(ch.num) === Number(currentChapterNum));
-            const prevCh = currentIndex > 0 ? flatChapters[currentIndex - 1] : null;
-            const nextCh = currentIndex < flatChapters.length - 1 ? flatChapters[currentIndex + 1] : null;
+            let prevBtnHtml = prevCh ? `
+                <button class="nav-prev-btn" onclick="loadChapter('${prevCh.id}')">
+                    <span class="nav-arrow"><i class="fa-solid fa-arrow-left"></i></span>
+                    <span class="nav-btn-label">
+                        <span class="nav-dir-sub">পূর্ববর্তী chapter</span>
+                        <span class="nav-chapter-title">Ch ${prevCh.num}: ${prevCh.title}</span>
+                    </span>
+                </button>
+            ` : `<div class="nav-placeholder"></div>`;
             
-            let prevBtnHtml = "";
-            if (prevCh) {
-                prevBtnHtml = `
-                    <button class="nav-prev-btn" onclick="loadChapter(${prevCh.num})">
-                        <span class="nav-arrow"><i class="fa-solid fa-arrow-left"></i></span>
-                        <span class="nav-btn-label">
-                            <span class="nav-dir-sub">পূর্ববর্তী chapter</span>
-                            <span class="nav-chapter-title">Ch ${prevCh.num}: ${prevCh.title}</span>
-                        </span>
-                    </button>
-                `;
-            } else {
-                prevBtnHtml = `<div class="nav-placeholder"></div>`;
-            }
-            
-            let nextBtnHtml = "";
-            if (nextCh) {
-                nextBtnHtml = `
-                    <button class="nav-next-btn" onclick="loadChapter(${nextCh.num})">
-                        <span class="nav-btn-label">
-                            <span class="nav-dir-sub">পরবর্তী chapter</span>
-                            <span class="nav-chapter-title">Ch ${nextCh.num}: ${nextCh.title}</span>
-                        </span>
-                        <span class="nav-arrow"><i class="fa-solid fa-arrow-right"></i></span>
-                    </button>
-                `;
-            } else {
-                nextBtnHtml = `<div class="nav-placeholder"></div>`;
-            }
+            let nextBtnHtml = nextCh ? `
+                <button class="nav-next-btn" onclick="loadChapter('${nextCh.id}')">
+                    <span class="nav-btn-label">
+                        <span class="nav-dir-sub">পরবর্তী chapter</span>
+                        <span class="nav-chapter-title">Ch ${nextCh.num}: ${nextCh.title}</span>
+                    </span>
+                    <span class="nav-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                </button>
+            ` : `<div class="nav-placeholder"></div>`;
             
             navDiv.innerHTML = prevBtnHtml + nextBtnHtml;
             contentDiv.appendChild(navDiv);
             
-            // Process and Render Mermaid Diagrams
+            // Mermaid
             if (window.mermaid) {
                 const mermaidCodes = contentDiv.querySelectorAll('pre code.language-mermaid');
                 mermaidCodes.forEach(codeEl => {
@@ -2297,15 +2632,15 @@
                 }
             }
 
-            // Apply current weights & themes
             applyFontWeightToPage();
             applyVisualThemeToPage();
             applyCodeThemeToPage();
         }
 
-        // Custom parser to transform interview questions to collapsible flashcards
+        // Interactive Flashcards
         function setupInteractiveInterviewQuestions() {
             const contentDiv = document.getElementById("markdownContent");
+            if (!contentDiv) return;
             const headers = contentDiv.querySelectorAll("h4");
             
             headers.forEach(h => {
@@ -2351,11 +2686,11 @@
             });
         }
 
-        // Search engine scanning all chapters instantly
+        // Global Cross-Sector Search Engine
         async function handleSearch() {
             const query = document.getElementById("searchInput").value.toLowerCase().trim();
             if (!query) {
-                loadChapter(currentChapterNum);
+                loadChapter(currentChapterId);
                 return;
             }
             
@@ -2363,22 +2698,28 @@
             resultsDiv.innerHTML = `
                 <div style="text-align: center; margin-top: 50px;">
                     <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px; color: var(--accent-purple);"></i>
-                    <p style="margin-top:12px;">সম্পূর্ণ বই স্ক্যান করা হচ্ছে...</p>
+                    <p style="margin-top:12px;">সম্পূর্ণ ৩-সেক্টর স্ক্যান করা হচ্ছে...</p>
                 </div>
             `;
             
             let matches = [];
-            const chapterNumsToSearch = flatChapters.map(ch => ch.num);
-            for (let i of chapterNumsToSearch) {
+            const allChs = getAllChapters();
+            
+            for (let ch of allChs) {
                 try {
-                    const resp = await fetch(`/handbook/chapter_${i}.md?v=${Date.now()}`);
+                    const resp = await fetch(`/handbook/${ch.file}?v=${Date.now()}`);
                     if (resp.ok) {
                         const text = await resp.text();
                         const lines = text.split("\n");
                         lines.forEach(line => {
                             if (line.toLowerCase().includes(query) && line.length > 20) {
                                 matches.push({
-                                    chNum: i,
+                                    chId: ch.id,
+                                    chNum: ch.num,
+                                    chTitle: ch.title,
+                                    sectorId: ch.sectorId,
+                                    sectorName: ch.sectorName,
+                                    sectorBadge: ch.sectorBadge,
                                     text: line.replace(/[#*`_]/g, "").trim()
                                 });
                             }
@@ -2396,12 +2737,15 @@
                     </div>
                 `;
             } else {
-                let html = `<h1>Search Results for "${query}"</h1><p>${matches.length} matches found across chapters:</p><hr>`;
-                matches.slice(0, 30).forEach(m => {
+                let html = `<h1>Search Results for "${query}"</h1><p>${matches.length} matches found across all sectors:</p><hr>`;
+                matches.slice(0, 35).forEach(m => {
                     html += `
-                        <div style="background-color:var(--bg-secondary); border:1px solid var(--border-color); padding:16px; border-radius:8px; margin-bottom:12px; cursor:pointer;" onclick="loadChapter(${m.chNum})">
-                            <span style="font-size:12px; font-weight:700; color:var(--accent-purple); text-transform:uppercase;">Chapter ${m.chNum}</span>
-                            <p style="margin-top:6px; font-size:14.5px; color:var(--text-primary);">${m.text.replace(new RegExp(query, 'gi'), match => `<mark style="background:var(--accent-cyan); color:#000; padding:2px 4px; border-radius:3px;">${match}</mark>`)}</p>
+                        <div style="background-color:var(--bg-secondary); border:1px solid var(--border-color); padding:16px; border-radius:8px; margin-bottom:12px; cursor:pointer;" onclick="loadChapter('${m.chId}')">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                                <span class="sector-badge ${m.sectorId}">${m.sectorName}</span>
+                                <span style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Ch ${m.chNum}: ${m.chTitle}</span>
+                            </div>
+                            <p style="font-size:14.5px; color:var(--text-primary); margin:0;">${m.text.replace(new RegExp(query, 'gi'), match => `<mark style="background:var(--accent-cyan); color:#000; padding:2px 4px; border-radius:3px;">${match}</mark>`)}</p>
                         </div>
                     `;
                 });
@@ -2409,51 +2753,36 @@
             }
         }
 
-        // Restore user preferences
-        if (localStorage.getItem('visualTheme')) {
-            currentVisualTheme = localStorage.getItem('visualTheme');
-        }
-        if (localStorage.getItem('fontWeight')) {
-            currentFontWeight = parseInt(localStorage.getItem('fontWeight'));
-        }
-        
-        // Default code theme initialization (Sage Green if not set)
-        if (localStorage.getItem('codeTheme')) {
-            currentCodeTheme = localStorage.getItem('codeTheme');
-        } else {
-            currentCodeTheme = 'gray'; // Default to premium Sage Green theme!
+        // Preferences restoration
+        if (localStorage.getItem('visualTheme')) currentVisualTheme = localStorage.getItem('visualTheme');
+        if (localStorage.getItem('fontWeight')) currentFontWeight = parseInt(localStorage.getItem('fontWeight'));
+        if (localStorage.getItem('codeTheme')) currentCodeTheme = localStorage.getItem('codeTheme');
+        else {
+            currentCodeTheme = 'gray';
             localStorage.setItem('codeTheme', 'gray');
         }
-
-        // Default Light/White Mode state restored
-        if (localStorage.getItem('themeState')) {
-            isLight = localStorage.getItem('themeState') === 'light';
-        } else {
-            isLight = true; // Default to premium WHITE/LIGHT MODE!
-            localStorage.setItem('themeState', 'light');
+        if (localStorage.getItem('themeState')) isLight = localStorage.getItem('themeState') === 'light';
+        else {
+            isLight = false;
+            localStorage.setItem('themeState', 'dark');
         }
 
-        // Force browser classes on load
         document.documentElement.className = isLight ? "light" : "dark";
         
         setTimeout(() => {
             decorateCodeThemeButton();
             decorateVisualThemeButton();
             const icon = document.getElementById("themeIcon");
-            icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
+            if (icon) icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
         }, 100);
 
-        // ------------------ NEW PREMIUM LEARNING UTILITIES ------------------
-
-        // 1. Estimated Reading Time & Word Count Generator
         function updateChapterMetadata() {
             const article = document.getElementById("markdownContent");
             if (!article) return;
             const text = article.innerText;
             const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-            const readTime = Math.max(1, Math.ceil(wordCount / 180)); // ~180 words per minute average reading speed
+            const readTime = Math.max(1, Math.ceil(wordCount / 180));
             
-            // Clean up existing metadata tag if any
             const oldMeta = article.querySelector('.chapter-meta');
             if (oldMeta) oldMeta.remove();
             
@@ -2469,20 +2798,16 @@
             }
         }
 
-        // 2. Interactive Code Block "Copy Code" Logic
         async function copyCode(btn) {
             const pre = btn.parentElement;
             const code = pre.querySelector("code");
             if (!code) return;
-            
             let text = code.innerText;
-            
             try {
                 await navigator.clipboard.writeText(text);
                 btn.innerHTML = `<i class="fa-solid fa-check" style="color:#10B981;"></i>`;
                 btn.style.borderColor = "#10B981";
                 btn.title = "Copied!";
-                
                 setTimeout(() => {
                     btn.innerHTML = `<i class="fa-regular fa-copy"></i>`;
                     btn.style.borderColor = "";
@@ -2493,7 +2818,6 @@
             }
         }
 
-        // 3. Active Reading Scroll Progress Bar Event Listener
         const contentScrollContainer = document.querySelector(".content-container");
         if (contentScrollContainer) {
             contentScrollContainer.addEventListener("scroll", () => {
@@ -2507,25 +2831,21 @@
             });
         }
 
-        // 4. Keyboard Arrow Key Navigation E-book Controls
         document.addEventListener("keydown", (e) => {
-            if (document.activeElement && document.activeElement.id === "searchInput") {
-                return;
-            }
-            
-            const currentIndex = flatChapters.findIndex(ch => ch.num === currentChapterNum);
+            if (document.activeElement && document.activeElement.id === "searchInput") return;
+            const secChapters = getSectorChapters(currentSectorId);
+            const currentIndex = secChapters.findIndex(ch => String(ch.id) === String(currentChapterId));
             if (e.key === "ArrowLeft") {
                 if (currentIndex > 0) {
-                    loadChapter(flatChapters[currentIndex - 1].num);
+                    loadChapter(secChapters[currentIndex - 1].id);
                 }
             } else if (e.key === "ArrowRight") {
-                if (currentIndex < flatChapters.length - 1) {
-                    loadChapter(flatChapters[currentIndex + 1].num);
+                if (currentIndex < secChapters.length - 1) {
+                    loadChapter(secChapters[currentIndex + 1].id);
                 }
             }
         });
 
-        // 5. Sidebar Chapter Progress Checklist Logic
         function getCompletedChapters() {
             try {
                 return JSON.parse(localStorage.getItem('completedChapters') || '[]');
@@ -2534,16 +2854,14 @@
             }
         }
 
-        function toggleChapterCompletion(chNum) {
+        function toggleChapterCompletion(chId) {
             let completed = getCompletedChapters();
-            const idx = completed.indexOf(chNum);
-            
+            const idx = completed.indexOf(String(chId));
             if (idx > -1) {
                 completed.splice(idx, 1);
             } else {
-                completed.push(chNum);
+                completed.push(String(chId));
             }
-            
             localStorage.setItem('completedChapters', JSON.stringify(completed));
             populateSidebar();
             updateSidebarProgress();
@@ -2551,8 +2869,10 @@
 
         function updateSidebarProgress() {
             const completed = getCompletedChapters();
-            const total = flatChapters.length;
-            const percentage = Math.round((completed.length / total) * 100);
+            const secChapters = getSectorChapters(currentSectorId);
+            const total = secChapters.length;
+            const completedInSec = secChapters.filter(ch => completed.includes(String(ch.id))).length;
+            const percentage = total > 0 ? Math.round((completedInSec / total) * 100) : 0;
             
             const progressText = document.getElementById("progressText");
             const progressBar = document.getElementById("progressBar");
@@ -2561,7 +2881,7 @@
             if (progressBar) progressBar.style.width = `${percentage}%`;
         }
 
-        // 6. E-Book PDF Download Compiler
+        // Multi-Sector PDF Generation Compiler
         let isGeneratingPDF = false;
         let shouldCancelPDF = false;
 
@@ -2621,7 +2941,7 @@
             }
         }
 
-        async function prepareFullBookPDF() {
+        async function prepareFullBookPDF(targetSector = 'all') {
             if (isGeneratingPDF) return;
             isGeneratingPDF = true;
             shouldCancelPDF = false;
@@ -2639,21 +2959,29 @@
             }
             printContainer.innerHTML = "";
             
-            const totalChapters = flatChapters.length;
+            let chaptersToExport = [];
+            let bookSubtitle = "Full 3-Sector Master Compilation";
             
-            // Build anti-theft repeating background watermark HTML
+            if (targetSector === 'all') {
+                chaptersToExport = getAllChapters();
+            } else {
+                chaptersToExport = getSectorChapters(targetSector);
+                bookSubtitle = `${getSector(targetSector).name} Edition`;
+            }
+            
+            const totalChapters = chaptersToExport.length;
+            
             let watermarkHTML = `
                 <div class="print-watermark-container">
                     <div class="print-watermark-text">Created by Asif Rabetul</div>
                 </div>
             `;
             
-            // Build the title cover page (drawn outside the running header/footer table)
             let titlePageHTML = `
                 <div class="print-page title-page">
                     <h1 class="print-book-title">AI Engineering Handbook</h1>
                     <div class="print-book-divider"></div>
-                    <h2 class="print-book-subtitle">A Complete Technical E-Book Guide</h2>
+                    <h2 class="print-book-subtitle">${bookSubtitle}</h2>
                     <div class="print-book-meta">
                         <p>Created by: <strong>Asif Rabetul</strong></p>
                         <p>Generated on: ${new Date().toLocaleDateString()}</p>
@@ -2661,7 +2989,6 @@
                 </div>
             `;
             
-            // Build the book content table. The thead and tfoot elements will repeat on every page of print.
             let tableHTML = `
                 <table class="print-table">
                     <thead>
@@ -2669,7 +2996,7 @@
                             <td>
                                 <div class="print-header">
                                     <span style="font-weight: 600;">AI Engineering Handbook</span>
-                                    <span style="float: right; font-style: italic;">Full E-Book Compilation</span>
+                                    <span style="float: right; font-style: italic;">${bookSubtitle}</span>
                                 </div>
                             </td>
                         </tr>
@@ -2678,17 +3005,23 @@
                         <tr>
                             <td>
                                 <div class="print-content">
-                                    <!-- Table of Contents -->
                                     <div class="print-page toc-page">
                                         <h1 class="print-section-title">Table of Contents</h1>
                                         <ul class="print-toc-list">
             `;
-            syllabus.forEach(part => {
-                tableHTML += `<li class="print-toc-part">${part.part}</li>`;
-                part.chapters.forEach(ch => {
-                    tableHTML += `<li class="print-toc-chapter">Chapter ${ch.num}: ${ch.title}</li>`;
+            
+            const sectorsInExport = targetSector === 'all' ? Object.keys(bookSectors) : [targetSector];
+            sectorsInExport.forEach(secId => {
+                const sec = getSector(secId);
+                tableHTML += `<li class="print-toc-part" style="color:var(--accent-purple); font-weight:800; margin-top:14px;">--- ${sec.name} ---</li>`;
+                sec.parts.forEach(p => {
+                    tableHTML += `<li class="print-toc-part">${p.part}</li>`;
+                    p.chapters.forEach(ch => {
+                        tableHTML += `<li class="print-toc-chapter">Ch ${ch.num}: ${ch.title}</li>`;
+                    });
                 });
             });
+            
             tableHTML += `
                                         </ul>
                                     </div>
@@ -2701,18 +3034,21 @@
                         return;
                     }
                     
-                    const ch = flatChapters[i];
-                    progressText.innerText = `Fetching Chapter ${ch.num} of ${totalChapters}: ${ch.title}...`;
+                    const ch = chaptersToExport[i];
+                    progressText.innerText = `Fetching ${ch.file} (${i+1}/${totalChapters}): ${ch.title}...`;
                     progressBar.style.width = `${Math.round((i / totalChapters) * 100)}%`;
                     
-                    const response = await fetch(`/handbook/chapter_${ch.num}.md?v=${Date.now()}`);
-                    if (!response.ok) throw new Error(`Chapter ${ch.num} could not be loaded`);
+                    const response = await fetch(`/handbook/${ch.file}?v=${Date.now()}`);
+                    if (!response.ok) {
+                        console.warn(`Chapter file ${ch.file} skipped`);
+                        continue;
+                    }
                     let markdown = await response.text();
                     
-                    // Format markdown
-                    markdown = markdown.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n---|\r?\n\r?\n###)/g, (match, content) => {
+                    // Format markdown for PDF
+                    markdown = markdown.replace(/\[VISUAL\]([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|###|💻|🏭|🔴|Developer|Production|Common)|$)/g, (match, content) => {
                         const titleMatch = content.match(/Title:\s*(.+)/);
-                        const title = titleMatch ? titleMatch[1].trim() : 'Visual Explanation';
+                        const title = titleMatch ? titleMatch[1].trim() : 'Architecture Map / Visual Flow';
                         let diagram = content
                             .replace(/^Title:\s*.+$/gm, '')
                             .replace(/^Illustration:\s*.+$/gm, '')
@@ -2723,40 +3059,41 @@
                         if (codeBlockMatch) {
                             diagram = codeBlockMatch[1].trimEnd();
                         }
-                        return `<div class="callout-box developer">
-                            <div class="callout-title"><span><i class="fa-solid fa-diagram-project"></i> ${title}</span></div>
+                        return `\n<div class="visual-container">
+                            <div class="visual-header"><i class="fa-solid fa-diagram-project"></i> ${title}</div>
                             <pre class="visual-pre theme-slate"><code class="language-plaintext">${diagram}</code></pre>
-                        </div>`;
+                        </div>\n`;
                     });
                     
-                    // Format markdown (standalone lines only)
-                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*💻 Developer View[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*(?:💻[ \t]*)?(?:##[ \t]*\d*\.?[ \t]*)?Developer (?:View|Perspective)[ \t]*(?:—[^\r\n]*)?\r?\n([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|💻|🏭|🔴|Developer|Production|Common Mistake|Pitfall|Warning)|$)/g, (match, content) => {
                         return `\n<div class="callout-box developer">
-                            <div class="callout-title"><i class="fa-solid fa-laptop-code"></i> Developer Perspective</div>
-                            ${content.trim()}
+                            <div class="callout-title"><i class="fa-solid fa-code"></i> Developer Perspective</div>
+                            <div class="callout-body">\n\n${content.trim()}\n\n</div>
                         </div>\n`;
                     });
                     
-                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*🏭 Production Reality[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
-                        return `\n<div class="callout-box">
+                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*(?:🏭[ \t]*)?(?:##[ \t]*\d*\.?[ \t]*)?Production Reality[ \t]*(?:—[^\r\n]*)?\r?\n([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|💻|🏭|🔴|Developer|Production|Common Mistake|Pitfall|Warning)|$)/g, (match, content) => {
+                        return `\n<div class="callout-box production">
                             <div class="callout-title"><i class="fa-solid fa-server"></i> Production Reality</div>
-                            ${content.trim()}
+                            <div class="callout-body">\n\n${content.trim()}\n\n</div>
                         </div>\n`;
                     });
                     
-                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*🔴 Common Mistake[ \t]*\r?\n([\s\S]*?)(?=\r?\n##|$)/g, (match, content) => {
+                    markdown = markdown.replace(/(?:^|\r?\n)[ \t]*(?:🔴[ \t]*)?(?:##[ \t]*\d*\.?[ \t]*)?(?:Common Mistake|Pitfall|Common Pitfall)[ \t]*(?:—[^\r\n]*)?\r?\n([\s\S]*?)(?=\r?\n[ \t]*(?:---|##|💻|🏭|🔴|Developer|Production|Common Mistake|Pitfall|Warning)|$)/g, (match, content) => {
                         return `\n<div class="callout-box warning">
-                            <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Mistake / Pitfall</div>
-                            ${content.trim()}
+                            <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Common Pitfall</div>
+                            <div class="callout-body">\n\n${content.trim()}\n\n</div>
                         </div>\n`;
                     });
                     
+                    markdown = markdown.replace(/##[ \t]*🎯[ \t]*/g, '## ');
                     markdown = markdown.replace(/\r?\n---/g, '');
                     
                     let parsedHTML = marked.parse(markdown);
                     
                     tableHTML += `
-                        <div class="print-page chapter-page" id="print-ch-${ch.num}">
+                        <div class="print-page chapter-page" id="print-ch-${ch.id}">
+                            <div style="font-size:10px; color:#666; text-transform:uppercase; font-weight:700; margin-bottom:8px;">${ch.sectorName} &bull; ${ch.partName}</div>
                             ${parsedHTML}
                         </div>
                     `;
@@ -2777,7 +3114,7 @@
                             <td>
                                 <div class="print-footer">
                                     <span>AI Engineering Handbook</span>
-                                    <span>Interactive Documentation Portal</span>
+                                    <span>${bookSubtitle}</span>
                                 </div>
                             </td>
                         </tr>
@@ -2787,7 +3124,6 @@
             
             printContainer.innerHTML = watermarkHTML + titlePageHTML + tableHTML;
                 
-                // Temporarily display printContainer off-screen to give it dimensions for Mermaid/KaTeX rendering
                 const originalDisplay = printContainer.style.display;
                 const originalPosition = printContainer.style.position;
                 const originalLeft = printContainer.style.left;
@@ -2847,7 +3183,6 @@
                     }
                 }
                 
-                // Restore original styles of printContainer
                 printContainer.style.display = originalDisplay;
                 printContainer.style.position = originalPosition;
                 printContainer.style.left = originalLeft;
@@ -2912,9 +3247,7 @@
         }
 
         // Initialize App
-        populateSidebar();
-        loadChapter(1);
-        updateSidebarProgress();
+        switchSector(currentSectorId, currentChapterId);
     </script>
     <!-- MOBILE READER PREFERENCES BOTTOM SHEET -->
     <div id="settingsBackdrop" class="settings-sheet-backdrop" onclick="toggleSettingsSheet()"></div>
@@ -2956,10 +3289,11 @@
                     <button class="sheet-btn" onclick="cycleVisualTheme()"><i class="fa-solid fa-palette"></i> Cycle</button>
                 </div>
             </div>
-            <div class="settings-option">
-                <span class="option-label"><i class="fa-solid fa-file-pdf"></i> Download PDF</span>
-                <div class="option-controls">
-                    <button class="sheet-btn" onclick="prepareFullBookPDF()"><i class="fa-solid fa-download"></i> Get Full Book</button>
+            <div class="settings-option" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                <span class="option-label"><i class="fa-solid fa-file-pdf"></i> Download PDF Edition</span>
+                <div class="option-controls pdf-sector-buttons">
+                    <button class="sheet-btn" onclick="prepareFullBookPDF('active')"><i class="fa-solid fa-file-arrow-down"></i> Active Sector PDF</button>
+                    <button class="sheet-btn" onclick="prepareFullBookPDF('all')" style="background: rgba(139, 92, 246, 0.15); border-color: var(--accent-purple); color: var(--text-primary);"><i class="fa-solid fa-book"></i> Full 3-Sector Book</button>
                 </div>
             </div>
         </div>

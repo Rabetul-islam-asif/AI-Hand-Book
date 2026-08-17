@@ -220,8 +220,7 @@ Officer যখন Search করলেন—
 
 
 ## ৫. Python দিয়ে Postgres pgvector এবং Semantic Chunking Implementation
-
-💻 Developer View
+Developer Perspective
 
 চলো এবার সরাসরি Code-এ হাত দেওয়া যাক!
 
@@ -343,8 +342,7 @@ print("Generated Semantic Chunks:\n", semantic_chunks)
 
 
 ## ۶. Production-এ pgvector Optimize আর Memory Scaling
-
- Production Reality
+Production Reality
 
 Production Level-এ যখন তুমি কোটি কোটি Chunk নিয়ে কাজ করবে, তখন GPU বা CPU-এর Memory ক্র্যাশ করতে পারে।
 
@@ -370,8 +368,7 @@ API-এর খরচ এবং Query Latency কমানোর জন্য `te
 
 
 ## ৭. কিছু কমন ভুল
-
-🔴 Common Mistake
+Common Mistake
 
 অনেকেরই একটা ভুল ধারণা থাকে।
 

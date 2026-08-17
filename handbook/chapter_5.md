@@ -159,8 +159,7 @@ xychart-beta
 
 
 ## ৫. Developer View: NumPy দিয়ে Activation Function Library
-
-💻 Developer View
+Developer Perspective
 
 Developer হিসেবে চলো Python-এ প্রতিটা জনপ্রিয় Activation Function আর তাদের Derivative স্ক্র্যাচ থেকে Code করি।
 
@@ -206,8 +205,7 @@ print("Softmax Probabilities:", softmax(test_input))
 
 
 ## ৬. Production Reality: Dying ReLU আর তার Solution
-
-🏭 Production Reality
+Production Reality
 
 Production-এ Deep Learning Model Train করতে গিয়ে হঠাৎ দেখলে — Loss একদম Stuck।
 
@@ -235,8 +233,7 @@ Hidden Layer-এ ReLU-র বদলে **Leaky ReLU** বা **GELU** ব্য�
 
 
 ## ৭. Common Mistake
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:** Multi-class Classification-এর Last Layer-এও ReLU বা Sigmoid বসিয়ে রাখা।
 

@@ -202,8 +202,7 @@ Loss তৈরি হলো।
 
 
 ### ৫. NumPy দিয়ে স্ক্র্যাচ থেকে Backpropagation Coding
-
-💻 Developer View
+Developer Perspective
 
 চলো সবচেয়ে মজার কাজটা করি।
 
@@ -269,8 +268,7 @@ Model perfectly শিখে ফেলেছে।
 
 
 ### ৬. Production-এ Gradient-এর সমস্যা
-
-🏭 Production Reality
+Production Reality
 
 Training-এর সময় ৫-১০ Layer-এ সব ঠিকঠাক চলে।
 
@@ -306,8 +304,7 @@ ReLU Activation ব্যবহার করো।
 
 
 ### ৭. Common Mistake
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:**
 

@@ -188,8 +188,7 @@ Remember
 
 
 ### ৫. পাইথনে কাস্টম গার্ডরেইল কোড
-
-💻 Developer View
+Developer Perspective
 
 চলো এবার কোনো লাইব্রেরি ছাড়াই পাইথনে একটি কাস্টম Prompt Injection ভ্যালিডেটর আর সিমান্টিক ক্যাশ গেটওয়ে বানিয়ে ফেলি। 
 
@@ -257,8 +256,7 @@ secure_gateway("আমার পিন লক হয়ে গেছে রি�
 
 
 ### ۶. প্র্যাকটিক্যাল Context Compaction
-
-🏭 Production Reality
+Production Reality
 
 চ্যাট যখন অনেক লম্বা হয়, VRAM কস্ট বাগে রাখতে ব্যাকএন্ডে **Context Window Compaction** অ্যালগরিদম সচল রাখতে হয়।
 
@@ -279,8 +277,7 @@ Conversational Context Window (Token Memory):
 
 
 ### ৭. সাধারণ কিছু ভুল
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:** 
 

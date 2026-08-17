@@ -191,8 +191,7 @@
 
 
 ## ৫. Python-এ স্ক্র্যাচ থেকে Agentic Loop
-
-💻 Developer View
+Developer Perspective
 
 একজন Developer হিসেবে তুমি কি কোনো কাস্টম লাইব্রেরি (যেমন LangChain বা CrewAI) ছাড়া কোড লিখতে চাও? 
 
@@ -254,8 +253,7 @@ run_agent("আমার পেমেন্ট আটকে গেছে কে�
 
 
 ## ৬. Infinite Loop ও Safety Gates
-
- Production Reality
+Production Reality
 
 যখন তুমি Agentic AI-কে প্রোডাকশনে Deploy করবে, তখন সবচেয়ে বড় ভয়ের কারণ কী হতে পারে?
 
@@ -285,8 +283,7 @@ run_agent("আমার পেমেন্ট আটকে গেছে কে�
 
 
 ## ৭. Common Mistakes
-
-🔴 Common Mistake
+Common Mistake
 
 আমরা অনেকেই ভাবি, চ্যাটবটের মতো এজেন্টকেও যেকোনো সাধারণ ওপেন-এন্ডেড চ্যাট Prompt দিয়ে সরাসরি প্রোডাকশনে ছেড়ে দেওয়া যায়।
 

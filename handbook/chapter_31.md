@@ -186,8 +186,7 @@ Model Routing হলো একটা ট্রাফিক police বা ট্�
 
 
 ## ৬. Developer View: Model Router & Evals Simulation
-
-💻 Developer View
+Developer Perspective
 
 চল পাইথনে একটি কাস্টম লাইব্রেরি ছাড়াই একদম শুরু থেকে একটি সিম্পল Model Router এবং সেটি পরীক্ষা করার জন্য একটি Evals সিস্টেম কোড করে ফেলি!
 
@@ -260,8 +259,7 @@ if __name__ == "__main__":
 
 
 ## ৭. Production Reality: গার্ডরেল ও রাউটার একসাথে
-
-🏭 Production Reality
+Production Reality
 
 প্রোডাকশনে কিন্তু শুধু রাউটার বসালেই কাজ শেষ হয় না। 
 
@@ -273,8 +271,7 @@ if __name__ == "__main__":
 
 
 ## ৮. Common Mistake: মনোযোগের বিভ্রম
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:**
 

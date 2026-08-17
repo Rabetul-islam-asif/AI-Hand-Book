@@ -170,8 +170,7 @@ Cursor যখন তোমার Project-এর স্পেসিফিক ন�
 
 
 ## ৫. Developer Perspective: Dataset লোড করা
-
-💻 Developer View
+Developer Perspective
 
 ডেভলপার হিসেবে পাইথনে `datasets` লাইব্রেরি ব্যবহার করে কাস্টম Alpaca Format-এর Dataset লোড করার উপায়টি চলো দেখে নিই।
 
@@ -210,8 +209,7 @@ print(tokenized_dataset[0]['text'])
 
 
 ## ৬. Production Perspective: Data Anonymization
-
-🏭 Production Reality
+Production Reality
 
 Dataset রেডি করার সময় সবচেয়ে বড় সিকিউরিটি রিস্ক হলো PII Leakage বা ব্যক্তিগত তথ্য ফাস হয়ে যাওয়া।
 
@@ -233,8 +231,7 @@ PII কী?
 
 
 ## ৭. Common Mistakes
-
-🔴 Common Mistake
+Common Mistake
 
 ভুল ধারণা:
 

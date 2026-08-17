@@ -153,8 +153,7 @@ IVF-FLAT = কম RAM লাগবে, কিন্তু স্পিড কি
 
 
 ## ৪. কোডিংয়ের নজর থেকে: pgvector-এ HNSW Indexing
-
-💻 Developer View
+Developer Perspective
 
 PostgreSQL-এ `pgvector` ব্যবহার করে HNSW Index তৈরি করার সময় Parameter টিউনিং করার নিয়মটি দেখে নেওয়া যাক:
 
@@ -178,8 +177,7 @@ LIMIT 5;
 
 
 ## ৫. রিয়েল লাইফ প্রোডাকশন সমস্যা ও সমাধান
-
-🏭 Production Reality
+Production Reality
 
 লাখ লাখ Vector Database প্রোডাকশনে হ্যান্ডেল করার সময় সবচেয়ে বড় বিপদ হলো Index Building RAM Spike।
 
@@ -199,8 +197,7 @@ LIMIT 5;
 
 
 ## ৬. কিছু সাধারণ ভুল ধারণা
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:** Vector Database-এ Index তৈরি করলে সবসময় ১০০% সঠিক রেজাল্টই পাওয়া যাবে।
 

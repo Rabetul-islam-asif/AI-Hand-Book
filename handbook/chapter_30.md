@@ -182,8 +182,7 @@ API Gateway-তে Redis Token Bucket রেট লিমিটিং রাখ�
 
 
 ## ৫. ক্যারিয়ার পোর্টফোলিও গড়ার সহজ গাইডলাইন
-
-💻 Developer View
+Developer Perspective
 
 একজন Developer হিসেবে শুধু সাধারণ চ্যাটবট বানিয়ে ভিড়ের মধ্যে হারিয়ে যেয়ো না।
 
@@ -209,8 +208,7 @@ API Gateway-তে Redis Token Bucket রেট লিমিটিং রাখ�
 
 
 ## ৬. লাইফ-লং লার্নিং ও AI ট্র্যাকিং
-
-🏭 Production Reality
+Production Reality
 
 AI-এর দুনিয়া কিন্তু রকেটের গতিতে পাল্টাচ্ছে।
 
@@ -234,8 +232,7 @@ AI-এর দুনিয়া কিন্তু রকেটের গতিত�
 
 
 ## ৭. কিছু কমন ভুল ধারণা
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:** AI Engineer হতে গেলে মনে হয় PhD লেভেলের জটিল Calculus, রৈখিক বীজগণিত বা TensorFlow Equation মুখস্থ রাখতে হবে!
 

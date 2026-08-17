@@ -196,8 +196,7 @@ Prompt-এর ভেতর কড়া নির্দেশ দেওয়া থ�
 
 
 ## ৫. Developer Perspective: Recursive Splitter
-
-💻 Developer View
+Developer Perspective
 
 পাইথনে `langchain` লাইব্রেরি ব্যবহার করে কীভাবে Custom রিকিউরসিভ স্প্লিটার আর Overlap তৈরি করবে, চলো সেই কোডটা দেখে নিই:
 
@@ -235,8 +234,7 @@ for idx, chunk in enumerate(chunks):
 
 
 ## ৬. Production Perspective: Security Filter
-
-🏭 Production Reality
+Production Reality
 
 আসল প্রোডাকশন সিস্টেমে কাজ করার সময় সবচেয়ে বিপজ্জনক রিস্ক হলো Context Leakage বা অনধিকার অ্যাক্সেস।
 
@@ -258,8 +256,7 @@ for idx, chunk in enumerate(chunks):
 
 
 ## ७. Common Mistakes
-
-🔴 Common Mistake
+Common Mistake
 
 ভুল ধারণা:
 

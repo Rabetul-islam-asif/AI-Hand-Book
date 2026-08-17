@@ -145,8 +145,7 @@ Gemini বা GPT-এর ডেভেলপাররাও চাইলে এ�
 
 
 ### ৪. পাইথনে নিজের Custom MCP Server বানানো
-
-💻 Developer View
+Developer Perspective
 
 পাইথনে Anthropic-এর অফিশিয়াল `mcp` SDK ব্যবহার করে কীভাবে একটি কাস্টম MCP Server তৈরি করা যায়?
 
@@ -185,8 +184,7 @@ if __name__ == "__main__":
 
 
 ### ۵. Security এবং Production টিপস
-
- Production Reality
+Production Reality
 
 প্রোডাকশন সিস্টেমে MCP Server ডেপ্লয় করার সময় আমাদের সিকিউরিটির দিকে কড়া নজর রাখতে হবে।
 
@@ -214,8 +212,7 @@ if __name__ == "__main__":
 
 
 ### ৬. কিছু সাধারণ ভুল ধারণা
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:**
 

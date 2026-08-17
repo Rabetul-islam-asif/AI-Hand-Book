@@ -208,8 +208,7 @@ Docker Port Fix করে Bug Resolve করে তোমাকে Solution Prop
 
 
 ## ৫. Developer View — নিজের Computer-এ DeepSeek R1 চালানো
-
-💻 Developer View
+Developer Perspective
 
 Developer হিসেবে তুমি নিজের Computer-এ Ollama ব্যবহার করে DeepSeek-R1 Locally Run করতে পারো।
 
@@ -264,8 +263,7 @@ Script সেটা Parse করে Thinking আর Final Answer আলাদা
 
 
 ## ৬. Production-এ Reasoning Model ব্যবহারের হিসাব
-
-🏭 Production Reality
+Production Reality
 
 Reasoning Model Production-এ Deploy করার আগে দুটো জিনিস অবশ্যই মাথায় রাখবে।
 
@@ -289,8 +287,7 @@ Production-এ Budget Plan করার সময় এটা মাথায�
 
 
 ## ৭. Common Mistake
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:**
 

@@ -145,8 +145,7 @@ Large Learning Rate (Over-shooting):
 
 
 ## ৫. Developer View: PyTorch-এ Gradient ও Optimization Loop
-
-💻 Developer View
+Developer Perspective
 
 Developer হিসেবে তোমাকে নিজে Calculus লিখতে হবে না।
 
@@ -193,8 +192,7 @@ print(f"\nFinal Learned Weight: {W.item():.2f} (Target was 2.00)")
 
 
 ## ৬. Production-এ কোন Optimizer ব্যবহার করবে?
-
-🏭 Production Reality
+Production Reality
 
 শুধু SGD দিয়ে সবসময় কাজ চলে না।
 
@@ -208,8 +206,7 @@ print(f"\nFinal Learned Weight: {W.item():.2f} (Target was 2.00)")
 
 
 ## ৭. Common Mistake
-
-🔴 Common Mistake
+Common Mistake
 
 ভুল ধারণা:
 

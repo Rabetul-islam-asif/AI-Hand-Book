@@ -135,7 +135,7 @@ Model কি আসলেই কিছু শিখছে?
 
 ```
 Machine Learning Pipeline:
-[Raw Image] ──► [👨‍💻 মানুষের ম্যানুয়াল Feature এক্সট্রাকশন (কান, চোখ)] ──► [ML Model] ──► [প্রেডিকশন]
+[Raw Image] ──► [👨‍ মানুষের ম্যানুয়াল Feature এক্সট্রাকশন (কান, চোখ)] ──► [ML Model] ──► [প্রেডিকশন]
 
 Deep Learning Pipeline:
 [Raw Image] ───────────────► 🧠 [ Deep Neural Network ] ──────────────► [প্রেডিকশন]

@@ -202,8 +202,7 @@ Score আসে ৯৮%।
 
 
 ## ৮. Developer View — PyTorch দিয়ে Self-Attention তৈরি করো
-
-💻 Developer View
+Developer Perspective
 
 চলো PyTorch দিয়ে একটা Custom Scaled Dot-Product Attention Layer স্ক্র্যাচ থেকে তৈরি করি।
 
@@ -249,8 +248,7 @@ print("Attention Weights Matrix:\n", weights[0])
 
 
 ## ৯. Production Reality — FlashAttention
-
-🏭 Production Reality
+Production Reality
 
 Self-Attention-এর একটা বড় সমস্যা আছে।
 

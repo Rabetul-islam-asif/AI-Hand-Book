@@ -163,8 +163,7 @@ flowchart TD
 
 
 ### ৫. চলো কোড লিখে ফেলি!
-
-💻 Developer View
+Developer Perspective
 
 চলো, পাইথনে একটি সম্পূর্ণ রানিং সেলফ-হিলিং এজেন্ট লুপ স্ক্র্যাচ থেকে তৈরি করি। 
 
@@ -208,7 +207,7 @@ with open(TEST_FILE, "w", encoding="utf-8") as f:
 
 # ৩. লোকাল পাইটেস্ট সাব-প্রসেস এক্সিকিউটর টুল
 def run_pytest():
-    print("[💻 Terminal] Executing: pytest test_calculator.py ...")
+    print("[ Terminal] Executing: pytest test_calculator.py ...")
     # Run pytest and capture standard output & errors
     result = subprocess.run(["pytest", TEST_FILE], capture_output=True, text=True)
     return result.returncode == 0, result.stdout
@@ -261,7 +260,7 @@ def run_self_healing_agent():
             print(agent_code)
             break
         else:
-            print(f"\n[🔴 FAILURE] Test failed in iteration {iteration}!")
+            print(f"\n[ FAILURE] Test failed in iteration {iteration}!")
             # Error লগটি কনভারসেশন হিস্টোরিতে ফিড করো অটো-হিলিংয়ের জন্য
             feedback = f"""
             The code you wrote failed the tests. Here is the pytest execution log and traceback:
@@ -287,8 +286,7 @@ def run_self_healing_agent():
 
 
 ### ৬. প্রোডাকশন ও সিকিউরিটি পলিসি
-
- Production Reality
+Production Reality
 
 প্রোডাকশন লেভেলে যখন তুমি ইউজারদের জন্য কোড এডিটিং সিস্টেম ডেপ্লয় করবে, তখন কিছু গুরুত্বপূর্ণ সিকিউরিটি পলিসি মেনে চলা দরকার।
 
@@ -306,8 +304,7 @@ def run_self_healing_agent():
 
 
 ### ৭. সাধারণ কিছু ভুল
-
-🔴 Common Mistake
+Common Mistake
 
 **ভুল ধারণা:** এজেন্টের সোর্স কোডে `eval()` বা `exec()` ফাংশন ব্যবহার করে রানিং পাইথনের ভেতর ডাইনামিকালি কোড রান করা ঠিক আছে।
 

@@ -174,8 +174,7 @@ AI Tool Calling ঠিক এভাবেই কাজ করে।
 
 
 ## ৫. কোডিংয়ের পালা: Custom Tool Executor তৈরি
-
-💻 Developer View
+Developer Perspective
 
 এবার চলো একটু কোড দেখা যাক।
 
@@ -253,8 +252,7 @@ handle_ai_response(mock_response)
 
 
 ## ৬. প্রোডাকশন লাইফে ভ্যালিডেশনের গুরুত্ব
-
-🏭 Production Reality
+Production Reality
 
 বাস্তবে যখন AI কাজ করে, সে কিন্তু মাঝে মাঝে ভুল আর্গুমেন্ট টাইপ তৈরি করে ফেলে।
 
@@ -276,8 +274,7 @@ handle_ai_response(mock_response)
 
 
 ## ৭. কিছু সাধারণ ভুল ধারণা
-
-🔴 Common Mistake
+Common Mistake
 
 অনেকেরই একটা বড় ভুল ধারণা থাকে।
 

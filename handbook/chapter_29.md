@@ -135,8 +135,7 @@ Redis-এর মেমরি key-value কমানোর সিস্টেম 
 
 
 ## ৫. চলো কোড লিখে ফেলি!
-
-💻 Developer View
+Developer Perspective
 
 চলো, পাইথনে একটি রানিং, প্রোডাকশন-গ্রেড AI SaaS ব্যাকঅ্যান্ড লজিক ডিজাইন করি।
 
@@ -258,8 +257,7 @@ print("SaaS AI Response:", reply2)
 
 
 ## ۶. প্রোডাকশনে ক্যাশ ও ডাটাবেস ডিজাইন
-
-🏭 Production Reality
+Production Reality
 
 যখন তুমি বড় স্কেলে তোমার AI SaaS ডেপ্লয় করবে, তখন তোমাকে ক্যাশ ডিজাইন নিয়ে একটু ভাবতে হবে।
 
@@ -281,8 +279,7 @@ print("SaaS AI Response:", reply2)
 
 
 ## ৭. কিছু সাধারণ ভুল ধারণা
-
-🔴 Common Mistake
+Common Mistake
 
 যেমন অনেকে মনে করেন, রেট লিমিটিং অ্যালগরিদম Postgres বা MongoDB-এর মতো Database দিয়ে তৈরি করা যায়।
 

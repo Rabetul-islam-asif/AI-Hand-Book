@@ -175,8 +175,7 @@ Overfit Model ভাবতো তুমি শুধু Horror-ই পছন্�
 
 
 ## ৫. Developer View: PyTorch দিয়ে Dropout ও Early Stopping
-
-💻 Developer View
+Developer Perspective
 
 চলো দেখি PyTorch-এ কীভাবে Dropout Layer বসাতে হয় আর Code-এ Early Stopping Logic লিখতে হয়।
 
@@ -226,8 +225,7 @@ for epoch in range(100):
 
 
 ## ৬. Production Reality: Data Augmentation
-
-🏭 Production Reality
+Production Reality
 
 Model-এর Overfitting কমানোর সবচেয়ে সস্তা উপায় কী?
 
@@ -250,7 +248,7 @@ Color Saturation বা Brightness বদলে দাও।
 
 ## ৭. Common Mistake
 
-🔴 **ভুল ধারণা:** Test বা Inference-এর সময়ও Dropout Layer চালু (Active) রাখা।
+ **ভুল ধারণা:** Test বা Inference-এর সময়ও Dropout Layer চালু (Active) রাখা।
 
 **বাস্তবতা ও সমাধান:** 
 Dropout শুধুমাত্র **Training**-এর সময় ব্যবহার করা হয় যাতে Model কোনো নির্দিষ্ট প্যাটার্ন অন্ধভাবে মুখস্থ করতে না পারে। কিন্তু যখন আমরা Model-কে বাস্তবে Test বা Production-এ ব্যবহার করি, তখন সব কয়টি Neuron সচল রাখতে হয় এবং Prediction-কে Deterministic (নির্দিষ্ট) করতে হয়। 

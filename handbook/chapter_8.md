@@ -213,8 +213,7 @@ Tokenizer এটাকে ভেঙে ১৮ থেকে ২২টা Token �
 
 
 ## ৫. Code দিয়ে দেখি — Token Count ও Embeddings
-
-💻 Developer View
+Developer Perspective
 
 চলো Python-এ Practically দেখি।
 
@@ -255,8 +254,7 @@ print(f"Similarity (King, Apple): {cosine_similarity(v_king, v_apple):.4f}") # L
 
 
 ## ৬. Production-এ Context Window ম্যানেজ করবে কীভাবে?
-
-🏭 Production Reality
+Production Reality
 
 ধরো তুমি একটা Long-term Chat Agent বানিয়েছো।
 
@@ -286,8 +284,7 @@ History এত বড় হয়ে যায় যে Context Window Limit C
 
 
 ## ৭. Common Mistake
-
-🔴 Common Mistake
+Common Mistake
 
 অনেকে মনে করে — Embeddings API-তে Text পাঠানোর আগে Regex দিয়ে সব Punctuation আর Emoji সরিয়ে "Clean" Text পাঠানো উচিত।
 

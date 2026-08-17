@@ -174,8 +174,7 @@ flowchart TD
 একেবারেই চমৎকার একটি ইউজার এক্সপেরিয়েন্স, তাই না?
 
 ### ৫. চলো কোড করি!
-
-💻 Developer View
+Developer Perspective
 
 চলো পাইথনে একটি সম্পূর্ণ রানিং, প্রোডাকশন-গ্রেড Multi-Session Memory পাইপলাইন স্ক্র্যাচ থেকে Code করি।
 
@@ -276,8 +275,7 @@ print("AI Reply 2:", reply2)
 ```
 
 ### ৬. প্রোডাকশনে ব্যবহারের নিয়ম
-
-🏭 Production Reality
+Production Reality
 
 যখন তুমি প্রোডাকশন গ্রেড চ্যাটবট হোস্ট করবে, তখন কিছু বিষয় মাথায় রাখতে হবে।
 
@@ -306,8 +304,7 @@ Mem0-তে ফ্যাক্ট সেভ করার কাজটা বে�
 এজন্য Asynchronous Background Task হিসেবে Celery বা Redis Queue ব্যবহার করা সবচেয়ে ভালো।
 
 ### ৭. সাধারণ কিছু ভুল
-
-🔴 Common Mistake
+Common Mistake
 
 অনেকেরই একটা ভুল ধারণা থাকে।
 
