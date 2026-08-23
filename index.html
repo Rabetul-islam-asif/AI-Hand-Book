@@ -539,14 +539,27 @@
         }
 
         .mermaid {
-            max-width: 31.5%; /* Decreased by 30% from 45% */
+            max-width: 100%;
             margin: 32px auto;
-            display: block;
-            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(22, 22, 29, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.25);
+        }
+
+        html.light .mermaid {
+            background: #FFFFFF;
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
         .mermaid svg {
-            width: 100% !important;
+            max-width: 100% !important;
             height: auto !important;
         }
 
@@ -2534,9 +2547,11 @@
                 wrapper.appendChild(table);
             });
             
-            // Syntax Highlighting
+            // Syntax Highlighting (ignore mermaid diagrams)
             contentDiv.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
+                if (!block.classList.contains('language-mermaid')) {
+                    hljs.highlightElement(block);
+                }
             });
             
             // Metadata

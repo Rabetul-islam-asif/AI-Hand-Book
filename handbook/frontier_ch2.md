@@ -14,27 +14,40 @@
 
 ## ১. Multi-Head Latent Attention (MLA): ৯৩% KV ক্যাশ সাশ্রয়
 
-[VISUAL]
-Title: Standard MHA/GQA vs DeepSeek Multi-Head Latent Attention (MLA)
-```
-STANDARD ATTENTION (MHA / GQA)          DEEPSEEK MLA (LOW-RANK COMPRESSION)
-   ┌───────────────────────┐               ┌───────────────────────┐
-   │ Hidden States (dim d) │               │ Hidden States (dim d) │
-   └───────────┬───────────┘               └───────────┬───────────┘
-               │                                       │
-       ┌───────┴───────┐                               ▼
-       ▼               ▼                     [Down-Projection Matrix]
-   ┌───────┐       ┌───────┐                   Compress to Latent c_t
-   │ Key K │       │Value V│                           │ (dim d_c << d)
-   └───────┘       └───────┘                           ▼
-       │               │                   ┌───────────────────────┐
-       ▼               ▼                   │  TINY LATENT KV CACHE │ ◄── [93% Memory Saved!]
-   [HUGE KV CACHE IN VRAM]                 └───────────┬───────────┘
-   (Bottleneck during inference)                       │
-                                                       ▼
-                                             [Up-Projection Matrix]
-                                             Decompress on-the-fly
-                                             during matrix multiplication
+```mermaid
+flowchart TD
+    subgraph COMPARISON["[ATTENTION ARCHITECTURES: STANDARD VS DEEPSEEK MLA]"]
+        direction LR
+
+        subgraph STANDARD["STANDARD MHA / GQA ATTENTION"]
+            direction TB
+            H1["Input Hidden State <i>h_t</i><br/>(Dimension: <i>d</i>)"]
+            PROJ1["Standard Linear Projections<br/>(<i>W_Q, W_K, W_V</i>)"]
+            KV_HUGE["<b>Full KV Cache in VRAM</b><br/>Stores complete Key & Value tensors<br/><i>(Memory bottleneck during inference)</i>"]
+            H1 --> PROJ1 --> KV_HUGE
+        end
+
+        subgraph MLA["DEEPSEEK MULTI-HEAD LATENT ATTENTION (MLA)"]
+            direction TB
+            H2["Input Hidden State <i>h_t</i><br/>(Dimension: <i>d</i>)"]
+            DOWN["<b>Down-Projection Matrix</b> <i>W_DKV</i><br/>Compresses <i>h_t</i> to low-rank latent representation"]
+            LATENT["<b>Compressed Latent KV Cache</b> <i>c_t</i><br/>Dimension: <i>d_c ≪ d</i><br/><b>93.3% VRAM Footprint Saved</b>"]
+            UP["<b>Up-Projection Matrix</b> <i>W_UK / W_UV</i><br/>Decompressed on-the-fly during GEMM execution"]
+            H2 --> DOWN --> LATENT --> UP
+        end
+    end
+
+    classDef stdStyle fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef downStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef latentStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef upStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class H1,PROJ1,KV_HUGE stdStyle;
+    class H2,DOWN downStyle;
+    class LATENT latentStyle;
+    class UP upStyle;
+    class COMPARISON,STANDARD,MLA subStyle;
 ```
 
 ### MLA-র পেছনের ম্যাথমেটিক্স:
@@ -57,17 +70,37 @@ $$c_t = W_{DKV} h_t \quad (\text{where } \dim(c_t) \ll \dim(h_t))$$
 * প্রতি টোকেনে ৮টি ক্ষুদ্র এক্সপার্ট অ্যাক্টিভেট হয়।
 * সাথে থাকে ১টি **Dedicated Shared Expert** যা সব টোকেনের কমন ব্যাকগ্রাউন্ড নলেজ প্রসেস করে।
 
-[VISUAL]
-Title: Coarse-Grained vs DeepSeek Fine-Grained MoE with Shared Experts
-```
-COARSE MoE (e.g. Mixtral 8x7B)          DEEPSEEK FINE-GRAINED MoE (256 Experts)
-  ┌─────────────────────────┐             ┌─────────────────────────┐
-  │ 8 Large Coarse Experts  │             │ 256 Fine-Grained Exp.   │
-  │ (Each expert is 7B)     │             │ (Each expert is small)  │
-  └────────────┬────────────┘             └────────────┬────────────┘
-               │                                       │
-        [Top-2 Routed]                          [Top-8 Routed] + [1 Shared Expert]
-        Heavy, broad routing                    Ultra-specialized, isolated domain
+```mermaid
+flowchart TD
+    subgraph MOE_COMP["[MIXTURE-OF-EXPERTS: COARSE VS DEEPSEEK FINE-GRAINED]"]
+        direction LR
+
+        subgraph COARSE["COARSE-GRAINED MoE (e.g. Mixtral 8x7B)"]
+            direction TB
+            TOK1["Token Input"] --> ROUTER1["Coarse Top-2 Router"]
+            ROUTER1 --> E_COARSE["<b>8 Large Coarse Experts</b><br/>(7B per expert)<br/>Broad, unspecialized domains"]
+        end
+
+        subgraph FINE["DEEPSEEK FINE-GRAINED MoE (V3 / R1)"]
+            direction TB
+            TOK2["Token Input"]
+            SHARED["<b>1 Dedicated Shared Expert</b><br/>Always active &bull; Common foundational knowledge"]
+            ROUTER2["<b>Fine-Grained Top-8 Router</b><br/>Dispatches to 8 out of 256 micro-experts"]
+            ROUTED["<b>256 Fine-Grained Experts</b><br/>Ultra-specialized, isolated domain kernels"]
+            TOK2 --> SHARED
+            TOK2 --> ROUTER2 --> ROUTED
+        end
+    end
+
+    classDef coarseStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef sharedStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef fineStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class TOK1,ROUTER1,E_COARSE coarseStyle;
+    class SHARED sharedStyle;
+    class TOK2,ROUTER2,ROUTED fineStyle;
+    class MOE_COMP,COARSE,FINE subStyle;
 ```
 
 ---
@@ -78,40 +111,31 @@ COARSE MoE (e.g. Mixtral 8x7B)          DEEPSEEK FINE-GRAINED MoE (256 Experts)
 
 DeepSeek তৈরি করেছে **DualPipe** শিডিউলার:
 * Forward Chunk এবং Backward Chunk-কে বিপরীত দিক থেকে পাইপলাইনে পাঠানো হয়।
-* যখন GPU একটি লেয়ারের টেন্সর ইন্টার-নোড ট্রান্সফার করছে, একই সময়ে সে আগের লেয়ারের ম্যাট্রিক্স ক্যালকুলেশন সম্পন্ন করে।
-* **ফলাফল:** ইন্টার-কার্ড কমিউনিকেশন বাবল **০% (Near Zero Overhead)**-এ নেমে আসে!
+* কম্পিউটেশন যখন চলে, ঠিক সেই মুহূর্তে ব্যাকগ্রাউন্ডে ইন্টার-নোড অল-টু-অল (All-to-All) কমিউনিকেশন ওভারল্যাপ হয়ে যায়।
+* **ফলাফল:** কমিউনিকেশন বাবল প্রায় **০%-এ নেমে আসে!**
 
 ---
 
-## ৪. Native FP8 Training & Multi-Token Prediction (MTP)
+## ৪. Multi-Token Prediction (MTP): দ্বিগুণ ইনফারেন্স স্পিড
 
-1. **Native FP8 Mixed Precision:** ডিপসিক সম্পূর্ণ প্রিটেইনিং FP8 ফর্ম্যাটে করেছে। গ্রেডিয়েন্ট আন্ডারফ্লো ঠেকাতে তারা নিয়ে এসেছে **Fine-Grained Tile/Block Quantization**।
-2. **Multi-Token Prediction (MTP):** প্রতিটি ফরোয়ার্ড পাসে মডেল শুধু ১টি টোকেন প্রেডিক্ট করে না; সে একসাথে ২টি ভবিষ্যতের টোকেন প্রেডিক্ট করে। ফলে ইনফারেন্সে স্পেকুলেটিভ ডিকোডিং ৫০% দ্রুততর হয়।
+সাধারণ ট্র্যান্সফরমার প্রতি স্টেপে মাত্র ১টি পরবর্তী টোকেন প্রেডিক্ট করে:
+$$P(x_{t+1} \mid x_1, \dots, x_t)$$
 
----
-Developer Perspective
-MLA-র রোটারি পজিশনাল এম্বেডিং (RoPE)-কে তারা চমৎকারভাবে স্প্লিট করেছে। ডিকপলড RoPE স্ট্রাকচার ব্যবহার করায় লেটেন্ট ভেক্টরে কম্প্রেশন করার পরও টোকেনের পজিশনাল ইনফরমেশন বিন্দুমাত্র নষ্ট হয় না।
-
----
-Production Reality
-ডিপসিকের এই আর্কিটেকচারাল মাস্টারি বিশ্বের পুরো AI ইকোনমিক্স বদলে দিয়েছে। যেখানে $২০ প্রতি মিলিয়ন টোকেন ছিল সাধারণ রেট, ডিপসিক V3 ইনফারেন্স দিচ্ছে মাত্র $০.১৪ ডলারে! এটি প্রমাণ করেছে অ্যালগরিদমিক ইনোভেশন ব্রুট-ফোর্স হার্ডওয়্যার স্কেলিংয়ের চেয়েও শক্তিশালী।
-
----
-Common Mistake
-MoE ট্রেইন করার সময় "Expert Routing Collapse" উপেক্ষা করা। যদি রাউটার লস অপটিমাইজ না করা হয়, তবে সব টোকেন মাত্র ২-৩টি জনপ্রিয় এক্সপার্টের কাছে যেতে থাকে এবং বাকি ২৫০টি এক্সপার্ট অলস বসে থাকে। ডিপসিক একটি সহায়ক **Auxiliary-Loss-Free Load Balancing Strategy** প্রয়োগ করে এই সমস্যা সমাধান করেছে।
+DeepSeek-V3 একটি ইউনিক MTP হেড যুক্ত করেছে, যা প্রতিটি স্টেপে একসাথে **২টি টোকেন প্রেডিক্ট করে ($x_{t+1}$ এবং $x_{t+2}$)**:
+1. প্রথম হেড মেইন টোকেন প্রেডিক্ট করে।
+2. সাব-হেড তার পরের টোকেন অনুমান করে স্পেকুলেটিভ ডিকোডিং স্পিডআপ দেয়।
+3. **ফলাফল:** জেনারেশন স্পিড **১.৮x থেকে ২x বৃদ্ধি পায়!**
 
 ---
 
-## Interview Flashcards
+## ৫. FP8 Mixed Precision Training: শূন্য ওভারফ্লো
 
-#### Beginner Level
-* **প্রশ্ন:** DeepSeek কীভাবে এত কম খরচে ফ্ল্যাগশিপ মডেল ট্রেইন করেছে?
-* **উত্তর:** ডিপসিক হার্ডওয়্যার ঘাটতি কাটাতে Multi-Head Latent Attention (MLA), 256টি ক্ষুদ্র এক্সপার্টযুক্ত DeepSeekMoE, DualPipe কমিউনিকেশন ওভারল্যাপিং এবং Native FP8 ট্রেনিংয়ের মতো যুগান্তকারী অ্যালগরিদম আবিষ্কার করেছে।
+সাধারণত বড় মডেল ট্রেইনিংয়ে BF16 বা FP16 ব্যবহার করা হয়। ডিপসিক তাদের সম্পূর্ণ ৬৭১ বিলিয়ন প্যারামিটারের মডেল ট্রেইন করেছে **FP8 (8-bit Floating Point)** ফরম্যাটে!
+* মেমোরি ব্যান্ডউইথ খরচ ৫০% কমে গেছে।
+* যাতে সংখ্যা আন্ডারফ্লো বা ওভারফ্লো না হয়, সেজন্য ডিপসিক নিয়ে এসেছে **Tile-wise ও Block-wise Fine-Grained Quantization Scaling**।
 
-#### Intermediate Level
-* **প্রশ্ন:** Multi-Head Latent Attention (MLA)-এর মূল সুবিধা কী?
-* **উত্তর:** এটি Key এবং Value ভেক্টরকে একটি লো-র‍্যাংক লেটেন্ট স্পেসে কম্প্রেস করে VRAM-এ ক্যাশ করে রাখে। ফলে ইনফারেন্সের সময় KV ক্যাশ মেমোরি ৯৩% কমে যায় এবং একই GPU-তে অনেক বেশি কনকারেন্ট ইউজার চালানো যায়।
+---
 
-#### Advanced Level
-* **প্রশ্ন:** DualPipe অ্যালগরিদম কীভাবে পাইপলাইন বাবল দূর করে?
-* **উত্তর:** ডুয়ালপাইপ ফরোয়ার্ড ও ব্যাকওয়ার্ড এক্সিকিউশনকে দুটি বিপরীতমুখী ধারায় চালায় এবং কম্পিউটেশন ও অল-টু-অল নেটওয়ার্ক কমিউনিকেশনকে নিখুঁতভাবে ওভারল্যাপ করায়। ফলে নেটওয়ার্ক ট্রান্সফারের জন্য GPU-কে অলস বসে থাকতে হয় না।
+## 🎯 Final Takeaway for AI Engineers
+
+> **ডিপসিকের শিক্ষা:** AI ইঞ্জিনিয়ারিং মানে কেবল আরও বেশি GPU কেনা নয়। গণিত, কার্নেল অপ্টিমাইজেশন এবং হার্ডওয়্যার-সচেতন অ্যালগরিদম ডিজাইন করে কম্পিউট খরচ ৯৫% পর্যন্ত কমিয়ে আনা সম্ভব!

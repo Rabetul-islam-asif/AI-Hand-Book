@@ -14,27 +14,48 @@
 
 ## ১. The 2026 Agent Framework Landscape (তুলনামূলক ম্যাট্রিক্স)
 
-[VISUAL]
-Title: Modern AI Agent Framework Matrix Comparison
-```
-┌───────────────┬──────────────────────┬──────────────────────┬──────────────────────┐
-│ Framework     │ Architecture Style   │ Best For             │ Developer Control    │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ LangGraph     │ Cyclic State Graph   │ Complex Enterprise,  │ Ultra-High           │
-│               │ (Nodes & Edges)      │ Long-running, HITL   │ (Fine-grained)       │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ CrewAI        │ Role-playing Crew    │ Content, Research,   │ Medium               │
-│               │ (Agents & Tasks)     │ Rapid Prototyping    │ (Opinionated)        │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ PydanticAI    │ Type-safe Pythonic   │ Production APIs,     │ High                 │
-│               │ (Pure Pydantic v2)   │ Fast Microservices   │ (Zero Black Box)     │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ OpenAI Swarm  │ Lightweight Handoffs │ Educational, simple  │ Low / Experimental   │
-│               │ (Routines & Agents)  │ multi-agent flows    │ (Stateless)          │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ Agno (Phidata)│ Model + Storage + DB │ Full-stack AI Apps,  │ High                 │
-│               │ (Multimodal Agents)  │ Postgres integration │ (Clean Abstraction)  │
-└───────────────┴──────────────────────┴──────────────────────┴──────────────────────┘
+```mermaid
+flowchart TD
+    subgraph MATRIX["[AI AGENT FRAMEWORK SELECTION MATRIX]"]
+        direction TB
+
+        REQ{"What is your primary system requirement?"}
+
+        subgraph LG["LangGraph (Stateful Cyclic Graphs)"]
+            LG_DESC["<b>Enterprise Stateful Workflows</b><br/>• Explicit Cyclic Graph Architecture<br/>• Native Checkpointing & Time-Travel Debugging<br/>• Fine-grained Human-in-the-Loop Control"]
+        end
+
+        subgraph PAI["PydanticAI (Type-Safe Engineering)"]
+            PAI_DESC["<b>Type-Safe Production Microservices</b><br/>• Pure Pydantic v2 Type Validation<br/>• Zero Black-Box Overhead & Fast Execution<br/>• First-class Dependency Injection"]
+        end
+
+        subgraph CREW["CrewAI (Role-Based Team Orchestration)"]
+            CREW_DESC["<b>Role-Playing Autonomous Crews</b><br/>• Quick Prototyping (Role, Goal, Backstory)<br/>• Collaborative Sequential/Hierarchical Tasks<br/>• High-level Opinionated Abstractions"]
+        end
+
+        subgraph AGNO["Agno / Phidata (Full-Stack Vector Engine)"]
+            AGNO_DESC["<b>Multimodal & Data-Intensive Agents</b><br/>• Built-in PostgreSQL / PgVector Storage<br/>• Native Structured Outputs & UI Integrations"]
+        end
+
+        REQ -->|"Complex Cyclic Workflows & HITL"| LG
+        REQ -->|"Strict Type-Safety & Fast APIs"| PAI
+        REQ -->|"Rapid Role-Based Swarms"| CREW
+        REQ -->|"Integrated DB & Full-Stack Apps"| AGNO
+    end
+
+    classDef reqStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef lgStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef paiStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef crewStyle fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef agnoStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class REQ reqStyle;
+    class LG,LG_DESC lgStyle;
+    class PAI,PAI_DESC paiStyle;
+    class CREW,CREW_DESC crewStyle;
+    class AGNO,AGNO_DESC agnoStyle;
+    class MATRIX subStyle;
 ```
 
 ---
@@ -79,13 +100,25 @@ Title: Modern AI Agent Framework Matrix Comparison
 
 ## ৩. Decision Guide: কোনটি কখন বেছে নেবেন?
 
-```
-Do you need strict determinism, state checkpointing, and time-travel debugging?
-   ├── YES ──► Choose LangGraph
-   └── NO
-        ├── Do you want fast, persona-based autonomous teams for research/content?
-        │     ├── YES ──► Choose CrewAI
-        │     └── NO  ──► Choose PydanticAI or Agno for pure type-safe engineering
+```mermaid
+flowchart TD
+    Q1{"Need Strict Determinism,<br/>State Checkpointing & Time-Travel?"}
+    
+    Q1 -->|"YES"| A1["<b>Choose LangGraph</b><br/>Deterministic cyclical graph & state persistence"]
+    Q1 -->|"NO"| Q2{"Want Persona-Based Autonomous<br/>Multi-Agent Roleplay Teams?"}
+    
+    Q2 -->|"YES"| A2["<b>Choose CrewAI</b><br/>High-level role assignment & task delegations"]
+    Q2 -->|"NO"| A3["<b>Choose PydanticAI / Agno</b><br/>Zero-magic, pure Pythonic type-safety & control"]
+
+    classDef qStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef a1Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef a2Style fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef a3Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+
+    class Q1,Q2 qStyle;
+    class A1 a1Style;
+    class A2 a2Style;
+    class A3 a3Style;
 ```
 
 ---

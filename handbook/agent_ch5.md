@@ -12,41 +12,49 @@
 
 ## ১. Graph State Machine Architecture (স্টেট গ্রাফ আর্কিটেকচার)
 
-[VISUAL]
-Title: Cyclic Graph State Machine with Checkpointing & Human Breakpoints
-```
-                 ┌───────────────────────────┐
-                 │       START / INPUT       │
-                 └─────────────┬─────────────┘
-                               │
-                 ┌─────────────▼─────────────┐
-                 │     NODE: Research & Plan │
-                 └─────────────┬─────────────┘
-                               │ 💾 Checkpoint #1 Saved
-                 ┌─────────────▼─────────────┐
-                 │      NODE: Code Generator │◄─────────────────┐
-                 └─────────────┬─────────────┘                  │
-                               │ 💾 Checkpoint #2 Saved         │
-                 ┌─────────────▼─────────────┐                  │ (Tests Failed)
-                 │      NODE: Test Runner    │                  │ Self-Correction Edge
-                 └─────────────┬─────────────┘                  │
-                               │                                │
-                       [Conditional Edge]                       │
-                        /              \                        │
-             (Tests Pass)              (Tests Fail)─────────────┘
-                  │
-        ┌─────────▼─────────┐
-        │  PAUSE: Wait for  │ ──► [Human approves via UI]
-        │   Human Approval  │ 💾 Checkpoint #3 Saved
-        └─────────┬─────────┘
-                  │
-        ┌─────────▼─────────┐
-        │ NODE: Deploy to S3│
-        └─────────┬─────────┘
-                  │
-        ┌─────────▼─────────┐
-        │        END        │
-        └───────────────────┘
+```mermaid
+flowchart TD
+    subgraph GRAPH["[STATE GRAPH & CHECKPOINTING ENGINE]"]
+        START(["[START: Task Ingestion]"])
+        PLAN["<b>Node: Research & Plan</b><br/>Decomposes requirements & generates plan"]
+        CODE["<b>Node: Code Generator</b><br/>Writes source implementation & tests"]
+        TEST["<b>Node: Test Runner</b><br/>Executes test suite in sandbox"]
+        CHECK{"[Conditional Edge]<br/>All tests passing?"}
+        HUMAN["<b>Breakpoint: Human-in-the-Loop</b><br/>Durable Pause: Awaiting Operator Approval"]
+        DEPLOY["<b>Node: Production Deploy</b><br/>Applies cloud deployment / PR merge"]
+        END_NODE(["[END: Task Completed]"])
+
+        DB[("<b>Durable State Checkpointer</b><br/>PostgreSQL / Redis / SQLite<br/><i>(Enables Time-Travel & Resumption)</i>")]
+
+        START --> PLAN
+        PLAN -->|"State Delta + Checkpoint #1"| CODE
+        CODE -->|"State Delta + Checkpoint #2"| TEST
+        TEST --> CHECK
+
+        CHECK -->|"Pass (Status: OK)"| HUMAN
+        CHECK -->|"Fail (Self-Correction Loop)"| CODE
+
+        HUMAN -->|"Operator Approved"| DEPLOY
+        DEPLOY -->|"Final State Logged"| END_NODE
+
+        PLAN -.->|"Persist Snapshot"| DB
+        CODE -.->|"Persist Snapshot"| DB
+        HUMAN -.->|"Persist Pause State"| DB
+    end
+
+    classDef startStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:12px,ry:12px;
+    classDef nodeStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef condStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:4px,ry:4px;
+    classDef humanStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef dbStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class START,END_NODE startStyle;
+    class PLAN,CODE,TEST,DEPLOY nodeStyle;
+    class CHECK condStyle;
+    class HUMAN humanStyle;
+    class DB dbStyle;
+    class GRAPH subStyle;
 ```
 
 একটি স্টেট মেশিনের ৪টি মূল উপাদান:

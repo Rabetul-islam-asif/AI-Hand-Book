@@ -16,22 +16,34 @@
 
 ## ১. The 10-Million Token Architecture: Moonshot Kimi
 
-[VISUAL]
-Title: RingAttention & Distributed Context Processing for 10M Tokens
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 10M TOKEN RINGATTENTION DISTRIBUTED RING                     │
-│                                                                             │
-│      [GPU Node 0: Token 0-2.5M] ──────────► [GPU Node 1: Token 2.5M-5M]     │
-│                 ▲                                        │                  │
-│                 │                                        │ Ring             │
-│                 │ Ring                                   │ KV Shift         │
-│                 │ KV Shift                               ▼                  │
-│      [GPU Node 3: Token 7.5M-10M] ◄──────── [GPU Node 2: Token 5M-7.5M]     │
-│                                                                             │
-│  * Each GPU calculates local FlashAttention while asynchronously            │
-│    rotating KV blocks to the neighboring GPU in a circular ring buffer!     │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph RING["[DISTRIBUTED RINGATTENTION TOPOLOGY (10M+ TOKEN CONTEXT)]"]
+        direction TB
+        subgraph G0["GPU Node 0 (Tokens: 0 - 2.5M)"]
+            N0["<b>Compute: FlashAttention</b><br/>Processes local Q Block &bull; Holds KV Block 0"]
+        end
+        subgraph G1["GPU Node 1 (Tokens: 2.5M - 5.0M)"]
+            N1["<b>Compute: FlashAttention</b><br/>Processes local Q Block &bull; Holds KV Block 1"]
+        end
+        subgraph G2["GPU Node 2 (Tokens: 5.0M - 7.5M)"]
+            N2["<b>Compute: FlashAttention</b><br/>Processes local Q Block &bull; Holds KV Block 2"]
+        end
+        subgraph G3["GPU Node 3 (Tokens: 7.5M - 10.0M)"]
+            N3["<b>Compute: FlashAttention</b><br/>Processes local Q Block &bull; Holds KV Block 3"]
+        end
+
+        N0 -->|"Async Overlapped KV Shift"| N1
+        N1 -->|"Async Overlapped KV Shift"| N2
+        N2 -->|"Async Overlapped KV Shift"| N3
+        N3 -->|"Async Overlapped KV Shift"| N0
+    end
+
+    classDef gStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class N0,N1,N2,N3 gStyle;
+    class RING,G0,G1,G2,G3 subStyle;
 ```
 
 ### কোর টেকনোলজি:
@@ -45,31 +57,29 @@ Title: RingAttention & Distributed Context Processing for 10M Tokens
 
 আলিবাবার **Qwen 2.5 & Qwen 2.5-Coder** আজ বিশ্বের অন্যতম শীর্ষ কোডিং ও ম্যাথ মডেল।
 
-[VISUAL]
-Title: Qwen Synthetic Data & Math/Code Reinforcement Learning Flywheel
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                      QWEN REINFORCEMENT LEARNING FLYWHEEL               │
-│                                                                         │
-│  ┌───────────────────────┐         ┌─────────────────────────────────┐  │
-│  │ 1. Seed Problem Bank  │────────►│ 2. Generator Model (Qwen-Math)  │  │
-│  │  (Olympiad Math/Code) │         │    Generates 10M Synthetic Solns│  │
-│  └───────────────────────┘         └────────────────┬────────────────┘  │
-│                                                     │                   │
-│                                    ┌────────────────▼────────────────┐  │
-│                                    │ 3. Automated Formal Verifier    │  │
-│                                    │    (Python Sandbox / Lean 4)    │  │
-│                                    └────────────────┬────────────────┘  │
-│                                                     │                   │
-│                                 ┌───────────────────┴────────────────┐  │
-│                                 │ Filter Only 100% Verified Proofs   │  │
-│                                 └───────────────────┬────────────────┘  │
-│                                                     │                   │
-│                                    ┌────────────────▼────────────────┐  │
-│                                    │ 4. Large-Scale RLVR Post-Train  │  │
-│                                    │    (Reasoning Model Evolution)  │  │
-│                                    └─────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph FLYWHEEL["[SYNTHETIC REASONING DATA & VERIFICATION FLYWHEEL]"]
+        direction TB
+        S1["<b>1. Seed Problem Bank</b><br/>Olympiad mathematics, competitive code specs, formal logic theorems"]
+        S2["<b>2. High-Temperature Generation Engine</b><br/>Generates 10M+ diverse multi-step solution rollouts"]
+        S3["<b>3. Automated Formal Ground-Truth Verifier</b><br/>Python Sandbox & Lean 4 Interactive Theorem Prover"]
+        S4["<b>4. Formal Verification Filter</b><br/>Extracts 100% mathematically proven trajectories (0% hallucination)"]
+        S5["<b>5. Large-Scale RLVR Post-Training</b><br/>Reinforcement Learning with Verifiable Rewards (Qwen / DeepSeek-R1)"]
+
+        S1 --> S2 --> S3 --> S4 --> S5
+        S5 -.->|"Self-Distillation of Harder Problems"| S1
+    end
+
+    classDef sStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef vStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef rlStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class S1,S2 sStyle;
+    class S3,S4 vStyle;
+    class S5 rlStyle;
+    class FLYWHEEL subStyle;
 ```
 
 ---
@@ -78,15 +88,31 @@ Title: Qwen Synthetic Data & Math/Code Reinforcement Learning Flywheel
 
 আমেরিকার চিপ নিষেধাজ্ঞার পর চীন তৈরি করেছে নিজস্ব চিপ ও সফটওয়্যার স্ট্যাক: **Huawei Ascend 910B/910C NPU** এবং **CANN (Compute Architecture for Neural Networks)**।
 
-```
-NVIDIA ECOSYSTEM                         HUAWEI ASCEND ECOSYSTEM
-┌────────────────────────┐               ┌────────────────────────┐
-│ PyTorch / vLLM / SGLang│               │ PyTorch / vLLM-Ascend  │
-├────────────────────────┤               ├────────────────────────┤
-│ NVIDIA CUDA / cuDNN    │ ◄──[RIVAL]──► │ Huawei CANN Stack      │
-├────────────────────────┤               ├────────────────────────┤
-│ NVIDIA H100 / B200     │               │ Huawei Ascend 910B/910C│
-└────────────────────────┘               └────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph NVIDIA["NVIDIA COMPUTE ECOSYSTEM"]
+        direction TB
+        NV_FRAME["Frameworks: PyTorch / vLLM / SGLang"]
+        NV_CUDA["Acceleration: CUDA / cuDNN / TensorRT-LLM"]
+        NV_HW["Silicon: Nvidia H100 / B200 SXM5 GPUs"]
+        NV_FRAME --> NV_CUDA --> NV_HW
+    end
+
+    subgraph HUAWEI["HUAWEI ASCEND ECOSYSTEM"]
+        direction TB
+        HW_FRAME["Frameworks: PyTorch / vLLM-Ascend"]
+        HW_CANN["Acceleration: CANN Architecture Stack"]
+        HW_NPU["Silicon: Huawei Ascend 910B / 910C NPUs"]
+        HW_FRAME --> HW_CANN --> HW_NPU
+    end
+
+    classDef nvStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef hwStyle fill:#831843,stroke:#f43f5e,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class NV_FRAME,NV_CUDA,NV_HW nvStyle;
+    class HW_FRAME,HW_CANN,HW_NPU hwStyle;
+    class NVIDIA,HUAWEI subStyle;
 ```
 
 * **CANN Compiler:** পিওর PyTorch কোডকে কনভার্ট করে হুয়াওয়ের NPU-তে অপ্টিমাইজড ভেক্টর কোড হিসেবে এক্সেকিউট করে।

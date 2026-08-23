@@ -16,20 +16,29 @@
 
 ## ১. Pre-Training vs Test-Time Compute Scaling
 
-[VISUAL]
-Title: Shift from Pre-Training Scaling to Inference-Time Compute Scaling
-```
-OLD PARADIGM (PRE-TRAINING SCALING)      NEW PARADIGM (TEST-TIME COMPUTE SCALING)
-┌────────────────────────────────┐      ┌────────────────────────────────┐
-│ Train bigger base models with  │      │ Spend more FLOPs THINKING      │
-│ more internet tokens & GPUs.   │      │ during the inference phase!    │
-│                                │      │                                │
-│       [Flops Curve]            │      │       [Reasoning Depth]        │
-│      Diminishing Returns!      │      │     Logarithmic Scaling!       │
-│                                │      │                                │
-│ 1-Second Fast Answer           │      │ 30-Second Chain-of-Thought (o1)│
-│ (Like Human System 1 Intuition)│      │ (Like Human System 2 Thinking) │
-└────────────────────────────────┘      └────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph PARADIGMS["[FOUNDATION MODEL SCALING: PRE-TRAINING VS TEST-TIME COMPUTE]"]
+        direction LR
+
+        subgraph PRE["PRE-TRAINING SCALING LAWS (CHINCHILLA)"]
+            direction TB
+            P_FLOP["<b>Parameter & Pre-Training Tokens</b><br/>• Scale parameters (10B ➔ 70B ➔ 405B)<br/>• Massive web scrapes (15T+ tokens)<br/>• <b>System 1 Intuition (Instantaneous token prediction)</b><br/>• <i>Bottleneck: High-quality web text plateau</i>"]
+        end
+
+        subgraph TEST["TEST-TIME COMPUTE SCALING (o1 / DeepSeek-R1)"]
+            direction TB
+            T_REAS["<b>Inference-Time Search & Verification</b><br/>• Scale runtime thinking tokens (Chain-of-Thought)<br/>• Self-correction, tree search & backtracking<br/>• <b>System 2 Deliberate Reasoning (Mathematical rigor)</b><br/>• <i>Logarithmic accuracy scaling at inference time</i>"]
+        end
+    end
+
+    classDef preStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef testStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class P_FLOP preStyle;
+    class T_REAS testStyle;
+    class PARADIGMS,PRE,TEST subStyle;
 ```
 
 * **System 1 (Fast Thinking):** সাধারণ LLM কোনো প্রশ্ন পেলেই তৎক্ষণাৎ পরবর্তী টোকেন প্রেডিক্ট করে ফেলে।
@@ -41,38 +50,82 @@ OLD PARADIGM (PRE-TRAINING SCALING)      NEW PARADIGM (TEST-TIME COMPUTE SCALING
 
 যখন তুমি DeepSeek-R1 বা o1-কে একটি জটিল অলিম্পিয়াড গণিত বা কার্নেল বাগ দাও, সে ব্যাকগ্রাউন্ডে কী করে?
 
-```
-User Prompt: "Solve complex geometry theorem"
-      │
-      ▼
-[THINKING PHASE] (Hidden from user or expandable)
-  • "Let's first try coordinate geometry..."
-  • "Wait, the determinant is zero. That path is invalid." (Backtrack!)
-  • "Let's switch to Euclidean angle chasing..."
-  • "Ah! Triangle ABC and DEF are similar by SAS theorem." (Aha Moment!)
-  • "Double checking arithmetic: 4 * 7 - 3 = 25. Verified."
-      │
-      ▼
-[FINAL CLEAN ANSWER DELIVERED]
+```mermaid
+flowchart TD
+    subgraph COT["[TEST-TIME REASONING TRAJECTORY & REFLECTION]"]
+        direction TB
+
+        IN["<b>User Prompt</b><br/><i>'Solve complex geometry theorem & verify proof'</i>"]
+
+        subgraph THINK["INTERNAL CHAIN-OF-THOUGHT (HIDDEN TOKENS)"]
+            direction TB
+            S1["<b>Step 1: Coordinate Geometry Attempt</b><br/>Assign vertices & compute vector dot products"]
+            EVAL1{"Formal Verifier / PRM<br/>Determinant vanishes (Dead End)"}
+            S2["<b>Step 2: Backtracking & Re-strategy</b><br/>Evict branch & transition to Euclidean angle chasing"]
+            S3["<b>Step 3: Proof Synthesis (Aha! Moment)</b><br/>Apply similarity theorem between triangles"]
+            S4["<b>Step 4: Algebraic Double-Check</b><br/>Verify arithmetic bounds & constraints"]
+
+            S1 --> EVAL1
+            EVAL1 -->|"Branch Pruned"| S2
+            S2 --> S3 --> S4
+        end
+
+        OUT["<b>Verified Output Stream</b><br/>Rigorous step-by-step mathematical proof delivered"]
+
+        IN --> THINK
+        THINK --> OUT
+    end
+
+    classDef inStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef sStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:1.5px,color:#f8fafc,rx:6px,ry:6px;
+    classDef evalStyle fill:#831843,stroke:#f43f5e,stroke-width:1.5px,color:#f8fafc,rx:6px,ry:6px;
+    classDef ahaStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef outStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class IN inStyle;
+    class S1,S2 sStyle;
+    class EVAL1 evalStyle;
+    class S3,S4 ahaStyle;
+    class OUT outStyle;
+    class COT,THINK subStyle;
 ```
 
 ---
 
 ## ৩. Process Reward Models (PRMs) vs Outcome Reward Models (ORMs)
 
-[VISUAL]
-Title: Outcome Reward (ORM) vs Process Reward (PRM) Step-Level Verification
-```
-OUTCOME REWARD MODEL (ORM)              PROCESS REWARD MODEL (PRM)
-┌─────────────────────────────────┐     ┌─────────────────────────────────┐
-│ Step 1: 2x + 5 = 15             │     │ Step 1: 2x + 5 = 15     ──► +1.0│
-│ Step 2: 2x = 10                 │     │ Step 2: 2x = 10         ──► +1.0│
-│ Step 3: x = 5                   │     │ Step 3: x = 5           ──► +1.0│
-│                                 │     │                                 │
-│ [Reward Given ONLY at the End]  │     │ [Reward Given at EVERY STEP!]   │
-│ Final Answer: +1.0 (Correct)    │     │ Step-level feedback prevents    │
-│ (Can't catch lucky wrong steps) │     │ subtle logic bugs early!        │
-└─────────────────────────────────┘     └─────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph REWARDS["[REINFORCEMENT LEARNING: ORM VS PRM STEP REWARDS]"]
+        direction LR
+
+        subgraph ORM["OUTCOME REWARD MODEL (ORM)"]
+            direction TB
+            O1["Step 1: Algebraic expansion"] --> O2["Step 2: Flawed arithmetic"] --> O3["Step 3: Lucky correct answer"]
+            O_REW["<b>Reward: +1.0 (Given ONLY at end)</b><br/><i>Cannot detect internal reasoning bugs</i>"]
+            O3 --> O_REW
+        end
+
+        subgraph PRM["PROCESS REWARD MODEL (PRM)"]
+            direction TB
+            P1["Step 1: Algebraic expansion"] --> P1_R["Reward: +1.0"]
+            P2["Step 2: Arithmetic error detected"] --> P2_R["Reward: -1.0 (Prunes Branch)"]
+            P3["Step 2b: Corrected calculation"] --> P3_R["Reward: +1.0"]
+            P4["Step 3: Valid final deduction"] --> P4_R["Reward: +1.0"]
+            P1_R --> P2
+            P2_R -.->|"Backtrack"| P3
+            P3 --> P3_R --> P4 --> P4_R
+        end
+    end
+
+    classDef ormStyle fill:#450a0a,stroke:#f87171,stroke-width:1.5px,color:#f8fafc,rx:6px,ry:6px;
+    classDef prmStyle fill:#064e3b,stroke:#34d399,stroke-width:1.5px,color:#f8fafc,rx:6px,ry:6px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class O1,O2,O3,O_REW ormStyle;
+    class P1,P1_R,P2,P2_R,P3,P3_R,P4,P4_R prmStyle;
+    class REWARDS,ORM,PRM subStyle;
 ```
 
 ---

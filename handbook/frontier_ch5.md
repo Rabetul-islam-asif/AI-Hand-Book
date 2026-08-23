@@ -20,24 +20,33 @@
 
 কিন্তু কোনো এক নির্দিষ্ট মিলি-সেকেন্ডে GPU কেবল **একটিমাত্র লেয়ারের ম্যাট্রিক্স ক্যালকুলেশন** করে! বাকি ৭৯টি লেয়ার সেই মুহূর্তে অলস বসে থাকে!
 
-[VISUAL]
-Title: AirLLM Layer-Wise Streaming vs Traditional Monolithic GPU Loading
-```
-TRADITIONAL GPU LOADING                 AIRLLM DYNAMIC LAYER STREAMING
-┌────────────────────────────────┐      ┌────────────────────────────────┐
-│   VRAM: 140GB Required         │      │   VRAM: Only 4GB Required!     │
-│                                │      │                                │
-│ ┌────────────────────────────┐ │      │ ┌────────────────────────────┐ │
-│ │ Layer 1  (Weights: 1.75GB) │ │      │ │ Active: Layer 1 (1.75GB)   │ │
-│ ├────────────────────────────┤ │      │ └──────────────▲─────────────┘ │
-│ │ Layer 2  (Weights: 1.75GB) │ │      │                │               │
-│ ├────────────────────────────┤ │      └────────────────┼───────────────┘
-│ │ ...                        │ │                       │ Stream Layer
-│ ├────────────────────────────┤ │                       │ via NVMe SSD
-│ │ Layer 80 (Weights: 1.75GB) │ │      ┌────────────────┴───────────────┐
-│ └────────────────────────────┘ │      │ FAST NVMe SSD DISK (PCIe Gen4) │
-│ (All 80 Layers loaded at once) │      │ [Layer 1] [Layer 2]...[Layer 80│
-└────────────────────────────────┘      └────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph COMPARISON["[INFERENCE ARCHITECTURES: MONOLITHIC VS AIRLLM SEQUENTIAL]"]
+        direction LR
+
+        subgraph MONOLITHIC["TRADITIONAL MONOLITHIC INFERENCE (140GB+ VRAM)"]
+            direction TB
+            VRAM_ALL["<b>Monolithic VRAM Allocation</b><br/>All 80 Transformer Layers Loaded Concurrently<br/>• Layer 1 (1.75GB)<br/>• Layer 2 (1.75GB)<br/>• ...<br/>• Layer 80 (1.75GB)<br/><i>Requires 8x A100/H100 GPUs ($30,000+)</i>"]
+        end
+
+        subgraph AIRLLM["AIRLLM LAYER PAGING ARCHITECTURE (4GB-8GB VRAM)"]
+            direction TB
+            VRAM_ACTIVE["<b>Active VRAM Kernel Window (~1.75GB)</b><br/>Only 1 active layer in VRAM at timestamp t<br/>Computes GEMM ➔ Evicts tensor ➔ Loads next layer"]
+            SSD[("<b>High-Speed NVMe SSD (PCIe Gen4 / Gen5)</b><br/>Stores Full Precision FP16/BF16 Weights<br/>Sequential 7,000 MB/s Layer Streaming Pipeline")]
+            SSD <-->|"Stream Layer k / Evict Layer k-1"| VRAM_ACTIVE
+        end
+    end
+
+    classDef monoStyle fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef airStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef ssdStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class VRAM_ALL monoStyle;
+    class VRAM_ACTIVE airStyle;
+    class SSD ssdStyle;
+    class COMPARISON,MONOLITHIC,AIRLLM subStyle;
 ```
 
 ---

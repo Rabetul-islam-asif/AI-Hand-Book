@@ -14,19 +14,29 @@
 
 ## ১. BitNet b1.58: The Addition-Only Neural Network
 
-[VISUAL]
-Title: Standard FP16 Floating-Point Multiplication vs BitNet b1.58 Ternary Addition
-```
-STANDARD NEURAL NETWORK (FP16/FP32)     BITNET b1.58 (TERNARY 1.58-BIT)
-Weights: 16-bit Floating Points        Weights: ONLY {-1, 0, +1}
-┌────────────────────────────────┐     ┌────────────────────────────────┐
-│ y = \sum (w_i * x_i)           │     │ y = \sum (x_i if w=+1          │
-│                                │     │           -x_i if w=-1         │
-│ • Floating-point Matrix Mult   │     │           0    if w=0)         │
-│ • Massive GPU Power & Heat     │     │                                │
-│ • High Memory Bandwidth        │     │ • PURE INTEGER ADDITION ONLY!  │
-│                                │     │ • 90% Less Energy Consumption! │
-└────────────────────────────────┘     └────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph ARITH["[NEURAL ARITHMETIC: STANDARD FP16 VS BITNET b1.58 TERNARY]"]
+        direction LR
+
+        subgraph FP16["STANDARD FP16 / BF16 MATRIX GEMM"]
+            direction TB
+            W_FP["<b>Weights: 16-Bit Floating Points</b><br/>y = sum(w_i * x_i)<br/>• Heavy floating-point multiplication (MAC units)<br/>• Massive thermal dissipation & memory bandwidth load<br/>• High silicon transistor area"]
+        end
+
+        subgraph BITNET["BITNET b1.58 TERNARY MATRIX ENGINE"]
+            direction TB
+            W_BIT["<b>Weights: Pure Ternary {-1, 0, +1}</b><br/>y = sum(x_i if w=+1; -x_i if w=-1; 0 if w=0)<br/>• <b>Pure Integer Addition & Accumulation Only</b><br/>• Zero floating-point multiplications (Zero MACs)<br/>• <b>89% Energy Reduction & 10x Bandwidth Savings</b>"]
+        end
+    end
+
+    classDef fpStyle fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef bitStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class W_FP fpStyle;
+    class W_BIT bitStyle;
+    class ARITH,FP16,BITNET subStyle;
 ```
 
 ### কেন এর নাম 1.58 Bit?
@@ -41,24 +51,48 @@ $$\log_2(3) \approx 1.58496 \text{ bits}$$
 
 ## ২. The Local Inference Engine Stack (লোকাল রানটাইম তুলনা)
 
-[VISUAL]
-Title: Modern Open-Source Local Inference Engines Architecture
-```
-┌───────────────┬──────────────────────┬──────────────────────┬──────────────────────┐
-│ Engine        │ Core Technology      │ Best Used For        │ Hardware Target      │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ llama.cpp     │ C/C++ Native, GGUF   │ Local PCs, Mac M-Chip│ Pure CPU + Apple M1-4│
-│               │ (Quant: Q4_K_M, Q8)  │ Edge Devices, Phones │ Embedded Silicon     │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ Ollama        │ llama.cpp wrapper    │ One-click Dev CLI &  │ Consumer Desktops &  │
-│               │ REST API daemon      │ Desktop Apps         │ Laptops              │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ vLLM / SGLang │ PagedAttention,      │ Enterprise Serving,  │ High-end NVIDIA /    │
-│               │ Continuous Batching  │ High-concurrency API │ AMD GPU Clusters     │
-├───────────────┼──────────────────────┼──────────────────────┼──────────────────────┤
-│ ExLlamaV2     │ EXL2 Mixed-Bit Quant │ Ultra-fast Single GPU│ NVIDIA RTX 3090/4090 │
-│               │ Custom CUDA Kernels  │ Enthusiasts          │ Gaming PCs           │
-└───────────────┴──────────────────────┴──────────────────────┴──────────────────────┘
+```mermaid
+flowchart TD
+    subgraph STACK["[LOCAL INFERENCE RUNTIME TAXONOMY]"]
+        direction TB
+
+        REQ{"Target Deployment & Hardware Objective"}
+
+        subgraph CPU_MAC["llama.cpp / GGUF (CPU & Apple Silicon)"]
+            D1["<b>C/C++ Native Runtime</b><br/>• Unified Memory on Mac (M1-M4)<br/>• CPU/GPU Layer Offloading (Q4_K_M, Q8)"]
+        end
+
+        subgraph CLI["Ollama (Developer Local Daemon)"]
+            D2["<b>Packaged CLI & REST Daemon</b><br/>• One-line model pulls & local API endpoints<br/>• Consumer laptops & workstations"]
+        end
+
+        subgraph PROD["vLLM / SGLang (Enterprise Multi-GPU)"]
+            D3["<b>High-Concurrency Server Engine</b><br/>• PagedAttention & Continuous Batching<br/>• 20x throughput for enterprise APIs"]
+        end
+
+        subgraph GPU["ExLlamaV2 (Dedicated Single-GPU Gaming PCs)"]
+            D4["<b>Ultra-Fast Custom CUDA Kernels</b><br/>• Mixed-bit EXL2 quantization (3.5 - 4.2 bpw)<br/>• Maximum tokens/sec on RTX 3090/4090"]
+        end
+
+        REQ -->|"CPU / Edge / Apple Unified Memory"| CPU_MAC
+        REQ -->|"Quick Developer CLI & Localhost APIs"| CLI
+        REQ -->|"High-Throughput Production Multi-User"| PROD
+        REQ -->|"Max Speed on Single Consumer NVIDIA GPU"| GPU
+    end
+
+    classDef reqStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s1Style fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s2Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s3Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s4Style fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class REQ reqStyle;
+    class CPU_MAC,D1 s1Style;
+    class CLI,D2 s2Style;
+    class PROD,D3 s3Style;
+    class GPU,D4 s4Style;
+    class STACK subStyle;
 ```
 
 ---

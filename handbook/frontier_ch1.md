@@ -12,44 +12,59 @@
 
 ## ১. How OpenRouter & Multi-Provider Gateways Work
 
-[VISUAL]
-Title: Intelligent LLM Gateway & Dynamic Routing Architecture
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          INTELLIGENT LLM GATEWAY                            │
-│                                                                             │
-│  [User / App Prompt: "Summarize this 10-line email"]                        │
-│                           │                                                 │
-│                           ▼                                                 │
-│  ┌──────────────────────────────────────────────────┐                       │
-│  │ 1. SEMANTIC CACHE (Redis / GPTCache)             │──(Hit)──► Return $0   │
-│  │    Check Cosine Similarity > 0.96                │           (0.01s res) │
-│  └────────────────────────┬─────────────────────────┘                       │
-│                           │ (Cache Miss)                                    │
-│                           ▼                                                 │
-│  ┌──────────────────────────────────────────────────┐                       │
-│  │ 2. COMPLEXITY ROUTER (RouteLLM / Bert-Classifier)│                       │
-│  │    • Low Complexity (80% traffic)                │                       │
-│  │    • High Reasoning (20% traffic)                │                       │
-│  └────────────┬─────────────────────────┬───────────┘                       │
-│               │                         │                                   │
-│    (Simple / Fast)               (Complex / Math)                           │
-│               ▼                         ▼                                   │
-│  ┌─────────────────────────┐  ┌──────────────────────────┐                  │
-│  │ 3. CHEAP TIER           │  │ 4. FRONTIER TIER         │                  │
-│  │  • DeepSeek-V3 ($0.14/M)│  │  • Claude 3.7 / o3-mini  │                  │
-│  │  • Llama-3.3-70B        │  │  • DeepSeek-R1 ($0.55/M) │                  │
-│  └────────────┬────────────┘  └─────────────┬────────────┘                  │
-│               │                             │                               │
-│               └──────────────┬──────────────┘                               │
-│                              ▼                                              │
-│  ┌──────────────────────────────────────────────────┐                       │
-│  │ 5. AUTOMATED FALLBACK & LOAD BALANCER            │                       │
-│  │    If Provider 1 429/500 ──► Fallback to Prov 2  │                       │
-│  └───────────────────────────┬──────────────────────┘                       │
-│                              ▼                                              │
-│                     [Unified Output Stream]                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph GATEWAY["[INTELLIGENT LLM GATEWAY & SEMANTIC ROUTING]"]
+        direction TB
+
+        IN["<b>Client Ingestion</b><br/>User Prompt: <i>'Summarize this customer feedback log'</i>"]
+
+        subgraph CACHE["1. SEMANTIC CACHE LAYER"]
+            SC["<b>Vector Similarity Cache</b> (Redis / GPTCache)<br/>Calculates embedding distance against stored queries"]
+            HIT["<b>Cache Hit (Cosine Sim &gt; 0.96)</b><br/>Latency: 8ms &bull; Cost: $0.00"]
+        end
+
+        subgraph ROUTING["2. COMPLEXITY ROUTER"]
+            CR["<b>Heuristic & Classifier (RouteLLM)</b><br/>Analyzes reasoning depth, token volume & syntax"]
+        end
+
+        subgraph TIERS["3 & 4. DYNAMIC MODEL TIERS"]
+            direction LR
+            CHEAP["<b>Cost-Optimized Tier</b><br/>DeepSeek-V3 / Llama 3.3 70B<br/>Cost: $0.14 / 1M tokens"]
+            FRONTIER["<b>Frontier Reasoning Tier</b><br/>Claude 3.7 Sonnet / DeepSeek-R1<br/>Cost: $0.55 - $3.00 / 1M tokens"]
+        end
+
+        subgraph RESILIENCE["5. FALLBACK & MULTI-KEY LOAD BALANCER"]
+            LB["<b>Automatic Failover Circuit</b><br/>Provider A (HTTP 429/500) ➔ Fallback to Provider B"]
+        end
+
+        OUT["<b>Unified Streaming Response</b> (SSE Token Stream)"]
+
+        IN --> CACHE
+        SC -->|"Cache Hit"| HIT --> OUT
+        SC -->|"Cache Miss"| ROUTING
+        ROUTING -->|"Standard Task (80% Traffic)"| CHEAP
+        ROUTING -->|"Deep Reasoning (20% Traffic)"| FRONTIER
+        CHEAP --> RESILIENCE
+        FRONTIER --> RESILIENCE
+        RESILIENCE --> OUT
+    end
+
+    classDef inStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef cacheStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef routeStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef cheapStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef frontierStyle fill:#831843,stroke:#f43f5e,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef resStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class IN,OUT inStyle;
+    class SC,HIT cacheStyle;
+    class CR routeStyle;
+    class CHEAP cheapStyle;
+    class FRONTIER frontierStyle;
+    class LB resStyle;
+    class GATEWAY,CACHE,ROUTING,TIERS,RESILIENCE subStyle;
 ```
 
 ---

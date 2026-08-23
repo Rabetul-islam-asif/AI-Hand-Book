@@ -14,48 +14,74 @@
 
 ## ১. The 5 Levels of Agent Autonomy (এজেন্ট স্বায়ত্তশাসনের স্তর)
 
-[VISUAL]
-Title: 5 Levels of AI Agent Autonomy & Safety Boundaries
-```
-┌───────┬──────────────────────┬──────────────────────────────────────────────┐
-│ Level │ Autonomy Name        │ Description & Safety Clearance               │
-├───────┼──────────────────────┼──────────────────────────────────────────────┤
-│ L1    │ Suggestion Mode      │ Agent suggests text/code. Human executes all.│
-│ L2    │ Supervised Co-Pilot  │ Agent executes read-only tools automatically.│
-│ L3    │ HITL Guarded (Safe)  │ Agent executes safe actions. High-risk actions│
-│       │                      │ require Human Approval Breakpoints.          │
-├───────┼──────────────────────┼──────────────────────────────────────────────┤
-│ L4    │ Autonomous Managed   │ Agent runs autonomously within hard token /  │
-│       │                      │ budget caps. Human alerted on anomalies.     │
-├───────┼──────────────────────┼──────────────────────────────────────────────┤
-│ L5    │ Fully Autonomous     │ Zero human intervention (Only for low-risk,  │
-│       │                      │ sandboxed simulation environments).          │
-└───────┴──────────────────────┴──────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph AUTONOMY["[LEVELS OF AGENT AUTONOMY & GOVERNANCE]"]
+        direction TB
+
+        L1["<b>Level 1: Suggestion Mode</b><br/>Agent outputs suggestions; human performs 100% of execution."]
+        L2["<b>Level 2: Supervised Co-Pilot</b><br/>Agent executes read-only operations automatically (search, file read)."]
+        L3["<b>Level 3: Guarded Human-in-the-Loop (Enterprise Standard)</b><br/>Agent executes safe actions; high-risk actions require operator authorization."]
+        L4["<b>Level 4: Managed Autonomy</b><br/>Agent executes multi-step workflows within hard budget/time bounds; alerts on anomaly."]
+        L5["<b>Level 5: Fully Autonomous</b><br/>Closed-loop execution without human in the loop (isolated sandboxes only)."]
+
+        L1 --> L2 --> L3 --> L4 --> L5
+    end
+
+    classDef l1Style fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef l2Style fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef l3Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef l4Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef l5Style fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class L1 l1Style;
+    class L2 l2Style;
+    class L3 l3Style;
+    class L4 l4Style;
+    class L5 l5Style;
+    class AUTONOMY subStyle;
 ```
 
 ---
 
 ## ২. Implementing Approval Breakpoints & Interceptors
 
-```
-Agent chooses Action: "DROP TABLE test_orders"
-                │
-                ▼
-      [ACTION INTERCEPTOR]
-                │
-        Is action destructive? (Yes: DROP, DELETE, REFUND > $100, SEND_EMAIL)
-                │
-                ▼
-     [PAUSE & CREATE TICKET]
-                │
-     Slack/Web Notification sent to Admin:
-     "Agent wants to DROP TABLE. Approve (Y/N)?"
-                │
-        ┌───────┴───────┐
-        ▼               ▼
-    [APPROVED]     [REJECTED]
-        │               │
-  Execute tool    Feedback to Agent: "Admin rejected action. Try alternative."
+```mermaid
+flowchart TD
+    subgraph INTERCEPTOR["[ACTION INTERCEPTOR & APPROVAL BREAKPOINT PIPELINE]"]
+        INTENT["<b>Agent Action Intent</b><br/><code>DROP TABLE test_orders</code>"]
+        CHECK{"[Risk Classifier]<br/>Is action destructive or high-cost?"}
+        SAFE["<b>Low-Risk Action Path</b><br/>Read operations / Safe calculations"]
+        BREAK["<b>Approval Breakpoint Triggered</b><br/>Webhook notification dispatched to Admin Slack/UI"]
+        DECIDE{"Operator Decision"}
+        EXEC["<b>Authorized Execution</b><br/>Dispatches to runtime sandbox"]
+        REJECT["<b>Rejection Feedback Loop</b><br/><code>'Admin rejected action. Formulate alternative plan.'</code>"]
+
+        INTENT --> CHECK
+        CHECK -->|"No (Safe)"| SAFE --> EXEC
+        CHECK -->|"Yes (Destructive / Mutation)"| BREAK
+        BREAK --> DECIDE
+        DECIDE -->|"Approved"| EXEC
+        DECIDE -->|"Rejected"| REJECT
+        REJECT -->|"State Delta Feedback"| INTENT
+    end
+
+    classDef intentStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef checkStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:4px,ry:4px;
+    classDef safeStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef breakStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef execStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef rejectStyle fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class INTENT intentStyle;
+    class CHECK,DECIDE checkStyle;
+    class SAFE safeStyle;
+    class BREAK breakStyle;
+    class EXEC execStyle;
+    class REJECT rejectStyle;
+    class INTERCEPTOR subStyle;
 ```
 
 ### পাইথনে সেফটি ইন্টারসেপ্টর কোড:

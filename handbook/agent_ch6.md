@@ -12,31 +12,75 @@
 
 ## ১. The 4 Multi-Agent Topologies (৪টি প্রধান মাল্টি-এজেন্ট প্যাটার্ন)
 
-[VISUAL]
-Title: 4 Multi-Agent Collaboration Architectures
-```
-1. SUPERVISOR - WORKER PATTERN             2. ROUTER / HANDOFF PATTERN
-   ┌────────────────────┐                     ┌────────────────────┐
-   │  Supervisor Agent  │                     │   Triage Router    │
-   └─────────┬──────────┘                     └────┬──────────┬────┘
-             │                                     │          │
-     ┌───────┼───────┐                         (Billing)   (Tech Support)
-     ▼       ▼       ▼                             ▼          ▼
-  ┌─────┐ ┌─────┐ ┌─────┐                     ┌─────────┐┌─────────┐
-  │Dev  │ │QA   │ │Sec  │                     │BillingAg││TechAg   │
-  └─────┘ └─────┘ └─────┘                     └─────────┘└─────────┘
+```mermaid
+flowchart TD
+    subgraph TOPOLOGIES["[MULTI-AGENT COLLABORATION ARCHITECTURES]"]
+        direction TB
 
-3. DEBATE / CONSENSUS NETWORK               4. AUTONOMOUS SWARM (PEER-TO-PEER)
-  ┌─────────┐         ┌─────────┐               ┌──────┐ ◄──► ┌──────┐
-  │ Agent A │◄───────►│ Agent B │               │Agnt 1│      │Agnt 2│
-  │ Proponent         │ Critic  │               └─┬──┬─┘      └──┬──┬┘
-  └────┬────┘         └────┬────┘                 │  └───────────┘  │
-       │                   │                      ▼                 ▼
-       └─────────┬─────────┘                    ┌──────┐      ┌──────┐
-                 ▼                              │Agnt 3│ ◄──► │Agnt 4│
-         ┌───────────────┐                      └──────┘      └──────┘
-         │ Final Verdict │
-         └───────────────┘
+        subgraph ROW1["HIERARCHICAL & DISPATCH PATTERNS"]
+            direction TB
+            subgraph T1["1. SUPERVISOR - WORKER PATTERN (Hierarchical Hub)"]
+                direction TB
+                SUP["<b>Supervisor / Lead Agent</b><br/>Decomposes tasks & synthesizes outputs"]
+                subgraph WORKERS["Specialist Workers"]
+                    direction LR
+                    W_DEV["Dev Agent<br/>(Writes Code)"]
+                    W_QA["QA Agent<br/>(Runs Tests)"]
+                    W_SEC["Sec Agent<br/>(Audits Code)"]
+                end
+                SUP <--> WORKERS
+            end
+
+            subgraph T2["2. ROUTER / HANDOFF PATTERN (Deterministic Dispatch)"]
+                direction TB
+                ROUTER["<b>Triage Router</b><br/>Classifies user intent"]
+                subgraph DISPATCH["Domain Specialists"]
+                    direction LR
+                    A_BILL["Billing Specialist"]
+                    A_TECH["Technical Specialist"]
+                end
+                ROUTER -->|"Billing Intent"| A_BILL
+                ROUTER -->|"Technical Intent"| A_TECH
+            end
+        end
+
+        subgraph ROW2["CONSENSUS & DECENTRALIZED PATTERNS"]
+            direction TB
+            subgraph T3["3. DEBATE & CONSENSUS NETWORK (Adversarial)"]
+                direction TB
+                A_PROP["<b>Generator / Proponent</b><br/>Proposes solution"]
+                A_CRIT["<b>Critic / Adversary</b><br/>Challenges edge cases"]
+                JUDGE["<b>Judge / Arbiter</b><br/>Calculates final consensus"]
+                A_PROP <-->|"Multi-round Debate"| A_CRIT
+                A_PROP --> JUDGE
+                A_CRIT --> JUDGE
+            end
+
+            subgraph T4["4. AUTONOMOUS SWARM (Decentralized Peer-to-Peer)"]
+                direction LR
+                P1["Peer Node A"] <--> P2["Peer Node B"]
+                P2 <--> P4["Peer Node D"]
+                P4 <--> P3["Peer Node C"]
+                P3 <--> P1
+            end
+        end
+
+        ROW1 --> ROW2
+    end
+
+    classDef supStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef workerStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef routeStyle fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef debateStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef swarmStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:6px,ry:6px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class SUP supStyle;
+    class W_DEV,W_QA,W_SEC workerStyle;
+    class ROUTER,A_BILL,A_TECH routeStyle;
+    class A_PROP,A_CRIT,JUDGE debateStyle;
+    class P1,P2,P3,P4 swarmStyle;
+    class TOPOLOGIES,ROW1,ROW2,T1,T2,T3,T4,WORKERS,DISPATCH subStyle;
 ```
 
 ---

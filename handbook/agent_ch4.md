@@ -17,32 +17,41 @@
 
 ## ১. The 4 Layers of Agent Memory (৪ স্তরের মেমোরি আর্কিটেকচার)
 
-[VISUAL]
-Title: Multi-Layer Cognitive Memory Architecture for AI Agents
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           AGENT MEMORY SUBSYSTEM                            │
-│                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │ 1. WORKING / SHORT-TERM MEMORY (In-Context RAM)                       │  │
-│  │    • Current Scratchpad, Tool Results, Active Conversation Window     │  │
-│  └──────────────────────────────────┬────────────────────────────────────┘  │
-│                                     │ (Memory Consolidation & Reflection)   │
-│                                     ▼                                       │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │ 2. EPISODIC MEMORY (What happened before?)                            │  │
-│  │    • Past debugging sessions, trial-and-error logs, failed attempts   │  │
-│  └──────────────────────────────────┬────────────────────────────────────┘  │
-│                                     │                                       │
-│        ┌────────────────────────────┴────────────────────────────┐          │
-│        ▼                                                         ▼          │
-│  ┌───────────────────────────────┐     ┌─────────────────────────────────┐  │
-│  │ 3. SEMANTIC MEMORY            │     │ 4. PROCEDURAL & GRAPH MEMORY    │  │
-│  │    (Facts & Preferences)      │     │    (Knowledge Graphs & Skills)  │  │
-│  │ • "User uses AWS us-east-1"   │     │ • Entity-Relationship Graphs    │  │
-│  │ • Vector DB (Cosine/Hybrid)   │     │ • Standard Operating Procedures │  │
-│  └───────────────────────────────┘     └─────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph SUBSYSTEM["[AGENT HIERARCHICAL MEMORY SUBSYSTEM]"]
+        direction TB
+
+        subgraph L1["1. WORKING / IN-CONTEXT MEMORY (Volatile Fast Context)"]
+            W1["<b>Active Scratchpad & Reasoning Trace</b><br/>• Current Tool Output Buffer<br/>• Sliding Conversation Window (K recent turns)"]
+        end
+
+        subgraph L2["2. EPISODIC MEMORY (Execution History & Trials)"]
+            E1["<b>Session Event Log & Execution Trajectories</b><br/>• Past trial-and-error sequences<br/>• Error recovery & reflection checkpoints"]
+        end
+
+        subgraph L3_L4["3 & 4. LONG-TERM CONSOLIDATED MEMORY"]
+            direction LR
+            SEM["<b>3. SEMANTIC MEMORY</b><br/>• Static User Preferences & Project Constraints<br/>• Vector DB Embeddings (Cosine / HNSW Search)"]
+            GRAPH["<b>4. KNOWLEDGE GRAPH MEMORY</b><br/>• Entity-Relationship Tuples (User)-[prefers]->(TypeScript)<br/>• Graph Database (Mem0 / Neo4j / Zep)"]
+        end
+
+        W1 -->|"Consolidation & Summarization"| E1
+        E1 -->|"Fact Extraction & Linking"| SEM
+        E1 -->|"Entity Resolution"| GRAPH
+    end
+
+    classDef l1Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef l2Style fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef semStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef graphStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class W1 l1Style;
+    class E1 l2Style;
+    class SEM semStyle;
+    class GRAPH graphStyle;
+    class SUBSYSTEM,L1,L2,L3_L4 subStyle;
 ```
 
 ---
@@ -51,23 +60,35 @@ Title: Multi-Layer Cognitive Memory Architecture for AI Agents
 
 একটি প্রোডাকশন মেমোরি ইঞ্জিন কীভাবে কাজ করে?
 
-```
-User Message ──► [Extractor LLM] ──► Fact Extracted ("User prefers strict TypeScript")
-                         │
-                         ▼
-                 [De-duplication & Update]
-                         │
-                         ▼
-                 [Vector + Knowledge Graph Storage (Mem0 / Zep)]
-                         │
-                         ▼
-        (Future Session) User: "Write a React component"
-                         │
-                         ▼
-                 [Memory Retrieval: Inject "Use strict TypeScript"]
-                         │
-                         ▼
-                 Agent outputs TypeScript component automatically!
+```mermaid
+flowchart LR
+    subgraph INGESTION["[MEMORY CONSOLIDATION PIPELINE]"]
+        IN["User Message<br/><i>'Always generate strict TypeScript'</i>"]
+        EXT["Extractor Engine<br/>(Structured LLM Pass)"]
+        DEDUP["Deduplication & Resolver<br/>(Cosine Similarity Match)"]
+        STORE[("Long-Term Storage<br/>Vector Store + Entity Graph")]
+    end
+
+    subgraph RETRIEVAL["[FUTURE RUNTIME INJECTION]"]
+        QUERY["New User Prompt<br/><i>'Create a Counter component'</i>"]
+        RET["Dynamic Context Injector<br/><i>Injects 'Rule: Strict TypeScript'</i>"]
+        RESP["Agent Output<br/><i>Clean .tsx Component Generated</i>"]
+    end
+
+    IN --> EXT --> DEDUP --> STORE
+    QUERY --> RET
+    STORE -.->|"Semantic Context Retrieval"| RET
+    RET --> RESP
+
+    classDef pipeStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef runStyle fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef storeStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class IN,EXT,DEDUP pipeStyle;
+    class QUERY,RET,RESP runStyle;
+    class STORE storeStyle;
+    class INGESTION,RETRIEVAL subStyle;
 ```
 
 ### পাইথনে মেমোরি এক্সট্রাকশন লজিক:

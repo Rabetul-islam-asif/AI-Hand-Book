@@ -22,34 +22,48 @@
 
 একটি AI Agent কেবল একটি লার্জ ল্যাঙ্গুয়েজ মডেল (LLM) নয়। এটি একটি পূর্ণাঙ্গ কগনিটিভ সিস্টেম।
 
-[VISUAL]
-Title: Full Anatomy of an Autonomous AI Agent System
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           AI AGENT SYSTEM                               │
-│                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                    BRAIN: Foundation Model (LLM)                  │  │
-│  │           (Reasoning, Instruction Following, Decision Making)     │  │
-│  └─────────────────────────────────┬─────────────────────────────────┘  │
-│                                    │                                    │
-│        ┌───────────────────────────┼───────────────────────────┐        │
-│        ▼                           ▼                           ▼        │
-│  ┌───────────┐               ┌───────────┐               ┌───────────┐  │
-│  │  PLANNING │               │   MEMORY  │               │   TOOLS   │  │
-│  │  & REASON │               │  (Context │               │ (Web, API,│  │
-│  │ (ReAct,   │               │   Vector, │               │  Bash, DB,│  │
-│  │  Tree-of- │               │ Episodic) │               │   Files)  │  │
-│  │  Thought) │               │           │               │           │  │
-│  └─────┬─────┘               └─────┬─────┘               └─────┬─────┘  │
-│        │                           │                           │        │
-│        └───────────────────────────┼───────────────────────────┘        │
-│                                    ▼                                    │
-│                    ┌───────────────────────────────┐                    │
-│                    │    ACTION & EXECUTION LOOP    │                    │
-│                    │ (Tool Invocation -> Observe)  │                    │
-│                    └───────────────────────────────┘                    │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph SYSTEM["AI AGENT SYSTEM ARCHITECTURE"]
+        direction TB
+
+        subgraph BRAIN_LAYER["[COGNITIVE CORE]"]
+            BRAIN["<b>Foundation Model (LLM)</b><br/><i>Claude 3.7 / GPT-4o / DeepSeek R1</i><br/>• Reasoning & Instruction Following<br/>• Decision Making & Self-Reflection"]
+        end
+
+        subgraph PILLARS["[AGENTIC SUBSYSTEMS]"]
+            PLAN["<b>PLANNING & REASONING</b><br/>• ReAct Loop & Plan-and-Solve<br/>• Tree-of-Thought (ToT)<br/>• Step-by-Step Self-Correction"]
+            MEM["<b>MEMORY SUBSYSTEM</b><br/>• Working Context Buffer<br/>• Long-Term Episodic Vector Store<br/>• Semantic Knowledge Graph (Mem0)"]
+            TOOLS["<b>TOOL INTEGRATION LAYER</b><br/>• Headless Browser & Web Search<br/>• MCP Protocol & REST APIs<br/>• Code Interpreter & Database Access"]
+        end
+
+        subgraph EXEC["[EXECUTION & FEEDBACK]"]
+            LOOP["<b>Action & Execution Loop</b><br/>Tool Invocation ➔ Environment Observation ➔ Evaluation ➔ Next Step"]
+        end
+
+        BRAIN <-->|"Deconstructs & Formulates"| PLAN
+        BRAIN <-->|"Reads & Writes State"| MEM
+        BRAIN <-->|"Selects & Dispatches"| TOOLS
+
+        PLAN -->|"Step Action"| LOOP
+        MEM -->|"State Retrieval"| LOOP
+        TOOLS -->|"Tool Payload"| LOOP
+        LOOP -->|"Observation & State Delta"| BRAIN
+    end
+
+    classDef brainStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef planStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef memStyle fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef toolStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef execStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef systemStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class BRAIN brainStyle;
+    class PLAN planStyle;
+    class MEM memStyle;
+    class TOOLS toolStyle;
+    class LOOP execStyle;
+    class SYSTEM,BRAIN_LAYER,PILLARS,EXEC systemStyle;
 ```
 
 1. **Brain (Core LLM):** সিদ্ধান্ত গ্রহণকারী ইঞ্জিন (যেমন Claude 3.7 Sonnet, DeepSeek R1, GPT-4o)।
@@ -66,28 +80,46 @@ Title: Full Anatomy of an Autonomous AI Agent System
 লুপটি তিনটি চক্রে আবর্তিত হয়:
 $$\text{Thought} \longrightarrow \text{Action} \longrightarrow \text{Observation} \longrightarrow \text{Thought}$$
 
-```
-                ┌──────────────────────────────┐
-                │   User Goal / Problem Input  │
-                └──────────────┬───────────────┘
-                               │
-                ┌──────────────▼───────────────┐
-         ┌─────►│  THOUGHT: What should I do?  │
-         │      └──────────────┬───────────────┘
-         │                     │
-         │      ┌──────────────▼───────────────┐
-         │      │  ACTION: Call specific Tool  │
-         │      └──────────────┬───────────────┘
-         │                     │
-         │      ┌──────────────▼───────────────┐
-         │      │  OBSERVATION: Tool Output    │
-         │      └──────────────┬───────────────┘
-         │                     │
-         └──────── (Goal achieved? No)
-                               │ (Yes)
-                ┌──────────────▼───────────────┐
-                │  FINAL ANSWER / Deliverable  │
-                └──────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph REACT_LOOP["[THE REACT PATTERN: REASONING + ACTING CYCLIC ENGINE]"]
+        direction TB
+
+        IN["<b>User Goal / Ingestion</b><br/>Problem statement & tool schemas injected"]
+
+        subgraph CYCLE["AUTONOMOUS REASONING & EXECUTION CYCLE"]
+            direction TB
+            T["<b>1. THOUGHT (Reasoning)</b><br/>Deconstructs trajectory state & deduces next operation"]
+            A["<b>2. ACTION (Execution)</b><br/>Emits deterministic tool invocation payload"]
+            O["<b>3. OBSERVATION (Perception)</b><br/>Ingests environment feedback, STDOUT, or API response"]
+            
+            T --> A --> O
+        end
+
+        DECIDE{"Goal Fully Satisfied?"}
+        OUT["<b>Final Answer / Task Deliverable</b>"]
+
+        IN --> T
+        O --> DECIDE
+        DECIDE -->|"No (Iterate Context)"| T
+        DECIDE -->|"Yes (Success)"| OUT
+    end
+
+    classDef inStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef tStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef aStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef oStyle fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef decStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef outStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class IN inStyle;
+    class T tStyle;
+    class A aStyle;
+    class O oStyle;
+    class DECIDE decStyle;
+    class OUT outStyle;
+    class REACT_LOOP,CYCLE subStyle;
 ```
 
 ### পাইথনে মিনিমাল ReAct লুপ ইমপ্লিমেন্টেশন:
@@ -170,5 +202,5 @@ Common Mistake
 * **উত্তর:** ReAct মডেলে ইন্টারনাল মেমোরির ওপর নির্ভর করার বদলে প্রতিটি সিদ্ধান্তের আগে "Thought" তৈরি করে এবং রিয়েল-টাইম এনভায়রনমেন্ট থেকে "Action"-এর মাধ্যমে "Observation" সংগ্রহ করে। ফলে ফ্যাক্ট ও বাস্তব ডেটার ওপর ভিত্তি করে এজেন্ট সিদ্ধান্ত নেয়।
 
 #### Advanced Level
-* **প্রশ্ন:** এজেন্টে Infinite Loop বন্ধ করার জন্য প্রোডাকশনে কী কী মেকানিজম ব্যবহার করা হয়?
+* **প্রশ্ন:** এজেন্টে Infinite Loop বন্ধ করার জন্য প্রোডাকশনে কী কী মেکানিজম ব্যবহার করা হয়?
 * **উত্তর:** ১. হার্ড স্টেপ লিমিট (যেমন Max 10-15 steps), ২. হ্যাশ-বেসড স্টেট হিস্ট্রি ট্র্যাকিং (একই Action ও Input বারবার ঘটলে ইন্টারাপ্ট করা), ৩. টোকেন ও কস্ট বাজেট ক্যাপ এবং ৪. রিপ্ল্যানার ফলব্যাক ট্রিগার।

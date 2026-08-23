@@ -16,28 +16,47 @@ AI জগতে এতদিন একটি ব্র্যান্ডের �
 
 গুগলের নিজস্ব **Tensor Processing Unit (TPU)** হলো ডিপ লার্নিংয়ের অন্যতম প্রাচীন ও শক্তিশালী ASIC আর্কিটেকচার।
 
-[VISUAL]
-Title: Google TPU Systolic Array & Optical Circuit Switch (OCS) Architecture
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      GOOGLE TPU SYSTOLIC ARRAY ENGINE                       │
-│                                                                             │
-│         Inputs (X) ──►  [ PE ] ──► [ PE ] ──► [ PE ]                        │
-│                           │          │          │                           │
-│                           ▼          ▼          ▼                           │
-│                         [ PE ] ──► [ PE ] ──► [ PE ]                        │
-│                           │          │          │                           │
-│                           ▼          ▼          ▼                           │
-│                         [ PE ] ──► [ PE ] ──► [ PE ] ──► Matrix Output (Y)  │
-│                                                                             │
-│  * Systolic Matrix Multiplier Unit (MXU): Data flows rhythmically like a    │
-│    heartbeat through Processing Elements (PE) without hitting external RAM! │
-│                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │ OPTICAL CIRCUIT SWITCHES (OCS): Google's Light-Beam Interconnect      │  │
-│  │ • Dynamically reconfigures 3D Torus network using real laser mirrors! │  │
-│  │ • Zero electrical conversion overhead across 8,960 TPU v5p Pods!      │  │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph TPU_ARCH["[GOOGLE TPU: SYSTOLIC ARRAY MATRIX MULTIPLIER & OCS POD]"]
+        direction TB
+
+        subgraph MXU["SYSTOLIC MATRIX MULTIPLIER UNIT (MXU)"]
+            direction TB
+            INPUTS["Inputs Vector <b>X</b>"]
+            
+            subgraph GRID["2D Pipelined Processing Elements (PEs)"]
+                direction LR
+                PE11["PE (0,0)"] --> PE12["PE (0,1)"] --> PE13["PE (0,2)"]
+                PE21["PE (1,0)"] --> PE22["PE (1,1)"] --> PE23["PE (1,2)"]
+                PE31["PE (2,0)"] --> PE32["PE (2,1)"] --> PE33["PE (2,2)"]
+                
+                PE11 --> PE21 --> PE31
+                PE12 --> PE22 --> PE32
+                PE13 --> PE23 --> PE33
+            end
+
+            OUTPUTS["Accumulated Matrix Output <b>Y = X · W</b>"]
+
+            INPUTS --> GRID --> OUTPUTS
+        end
+
+        subgraph OCS_POD["OPTICAL CIRCUIT SWITCH (OCS) TOPOLOGY"]
+            OCS_INFO["<b>Dynamic 3D Torus Optical Interconnect</b><br/>• Direct beam steering with MEMS micro-mirrors &bull; Zero electrical conversion<br/>• Interconnects 8,960 TPU v5p/v6 Trillium chips with microsecond latency"]
+        end
+
+        MXU --- OCS_POD
+    end
+
+    classDef peStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:1.5px,color:#f8fafc,rx:4px,ry:4px;
+    classDef ioStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef ocsStyle fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class PE11,PE12,PE13,PE21,PE22,PE23,PE31,PE32,PE33 peStyle;
+    class INPUTS,OUTPUTS ioStyle;
+    class OCS_INFO ocsStyle;
+    class TPU_ARCH,MXU,GRID,OCS_POD subStyle;
 ```
 
 * **XLA (Accelerated Linear Algebra):** গুগলের কম্পাইলার যা পাইথন/JAX কোডকে সরাসরি ম্যাট্রিক্স হার্ডওয়্যার অপারেশনে ফিউজ করে।
@@ -49,23 +68,31 @@ Title: Google TPU Systolic Array & Optical Circuit Switch (OCS) Architecture
 কেন обычный GPU ইনফারেন্সের সময় ধীরগতির হয়? 
 
 কারণ GPU-তে থাকে **HBM (High Bandwidth Memory)**। প্রতি টোকেন প্রেডিক্ট করতে ওজনগুলো DRAM চিপ থেকে GPU কোরে টেনে আনতে হয় (The Memory Wall Problem)।
+```mermaid
+flowchart TD
+    subgraph MEM_WALL["[SILICON INFERENCE ARCHITECTURE: GPU VS GROQ LPU]"]
+        direction LR
 
-[VISUAL]
-Title: GPU Memory Wall vs Groq LPU Pure On-Chip SRAM Architecture
-```
-TRADITIONAL GPU (NVIDIA H100)           GROQ LPU (LANGUAGE PROCESSING UNIT)
-┌────────────────────────────────┐      ┌────────────────────────────────┐
-│ Processing Cores               │      │ Processing Units + On-Chip SRAM│
-│ ┌────────────┐  ┌────────────┐ │      │ ┌────────────┐  ┌────────────┐ │
-│ │ TensorCore │  │ TensorCore │ │      │ │  SRAM Core │  │  SRAM Core │ │
-│ └────────────┘  └────────────┘ │      │ └────────────┘  └────────────┘ │
-│        ▲              ▲        │      │ ┌────────────┐  ┌────────────┐ │
-│ ───────┼──────────────┼─────── │      │ │  SRAM Core │  │  SRAM Core │ │
-│ Memory Bandwidth Bottleneck!   │      │ └────────────┘  └────────────┘ │
-│ ┌────────────────────────────┐ │      │                                │
-│ │ External HBM3 DRAM (80GB)  │ │      │ ULTRA-FAST ON-CHIP SRAM (230MB)│
-│ │ Speed: 3.35 TB/sec         │ │      │ Speed: 80.00 TB/sec! (24x Faster)
-└────────────────────────────────┘      └────────────────────────────────┘
+        subgraph GPU["TRADITIONAL GPU (NVIDIA H100)"]
+            direction TB
+            CORES["<b>Compute Cores (Tensor Cores)</b><br/>Massive raw TFLOPS compute"]
+            HBM[("<b>External HBM3 DRAM (80GB)</b><br/>Bandwidth: 3.35 TB/s<br/><i>(Memory Wall: Cores stall waiting for weights)</i>")]
+            CORES <-->|"Off-Chip Interconnect Bottleneck"| HBM
+        end
+
+        subgraph GROQ["GROQ LPU (LANGUAGE PROCESSING UNIT)"]
+            direction TB
+            SRAM_CELLS["<b>Integrated Tensor Engine + On-Chip SRAM</b><br/>• 230MB SRAM per chip &bull; <b>80.0 TB/s On-Chip Bandwidth</b><br/>• Deterministic execution pipeline (Zero cache misses)<br/>• <b>500 - 1,000+ Tokens/Sec Real-Time Inference</b>"]
+        end
+    end
+
+    classDef gpuStyle fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef groqStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class CORES,HBM gpuStyle;
+    class SRAM_CELLS groqStyle;
+    class MEM_WALL,GPU,GROQ subStyle;
 ```
 
 ### Groq-এর ৩টি ইউনিক আর্কিটেকচারাল স্তম্ভ:

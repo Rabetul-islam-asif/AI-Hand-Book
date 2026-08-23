@@ -14,41 +14,79 @@
 
 ## ১. The Anatomy of an Agent Trace (ট্রেসের স্তরবিন্যাস)
 
-[VISUAL]
-Title: Hierarchical Distributed Span Tree for AI Agent Observability
-```
-[TRACE] Run Agent Task ("Fix DB Bug") ── [Total Time: 3.4s | Cost: $0.024]
-  │
-  ├── [SPAN 1] LLM Call (Think & Plan) ── [Time: 1.1s | Tokens: 450 | Model: Claude 3.7]
-  │     └── Output: Tool Call `read_log_file(path='/var/log/db.err')`
-  │
-  ├── [SPAN 2] Tool Execution `read_log_file` ── [Time: 0.2s | Exit Code: 0]
-  │     └── Output: "ERROR: Connection pool exhausted at max 20"
-  │
-  ├── [SPAN 3] LLM Call (Diagnose & Patch) ── [Time: 1.5s | Tokens: 820]
-  │     └── Output: Tool Call `edit_config(pool_size=50)`
-  │
-  └── [SPAN 4] Tool Execution `edit_config` ── [Time: 0.1s | Exit Code: 0]
-        └── Output: "Config updated successfully."
+```mermaid
+flowchart TD
+    subgraph ROOT["[ROOT TRACE: Task Execution — 'Fix DB Connection Pool Exhaustion']"]
+        ROOT_META["<b>Total Duration:</b> 3.42s &bull; <b>Total Cost:</b> $0.024 &bull; <b>Status:</b> Success"]
+
+        subgraph SPAN1["Span 1: LLM Inference (Planning & Root Cause Analysis)"]
+            S1_META["<b>Model:</b> Claude 3.7 Sonnet &bull; <b>Tokens:</b> 450 &bull; <b>Latency:</b> 1.1s<br/><b>Output:</b> Tool Call <code>read_log_file(path='/var/log/db.err')</code>"]
+        end
+
+        subgraph SPAN2["Span 2: Tool Runtime Execution (Filesystem)"]
+            S2_META["<b>Tool:</b> <code>read_log_file</code> &bull; <b>Latency:</b> 0.2s &bull; <b>Exit Code:</b> 0<br/><b>Observation:</b> <code>'ERROR: Connection pool exhausted at max 20'</code>"]
+        end
+
+        subgraph SPAN3["Span 3: LLM Inference (Patch Formulation)"]
+            S3_META["<b>Model:</b> Claude 3.7 Sonnet &bull; <b>Tokens:</b> 820 &bull; <b>Latency:</b> 1.5s<br/><b>Output:</b> Tool Call <code>edit_config(pool_size=50)</code>"]
+        end
+
+        subgraph SPAN4["Span 4: Tool Runtime Execution (Config Patch)"]
+            S4_META["<b>Tool:</b> <code>edit_config</code> &bull; <b>Latency:</b> 0.1s &bull; <b>Exit Code:</b> 0<br/><b>Observation:</b> <code>'Config updated successfully. Connection pool set to 50.'</code>"]
+        end
+
+        ROOT_META --> SPAN1 --> SPAN2 --> SPAN3 --> SPAN4
+    end
+
+    classDef rootStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef llmStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef toolStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class ROOT_META rootStyle;
+    class S1_META,S3_META llmStyle;
+    class S2_META,S4_META toolStyle;
+    class ROOT,SPAN1,SPAN2,SPAN3,SPAN4 subStyle;
 ```
 
 ---
 
 ## ২. The 3 Golden Metrics of Agent Evals (এজেন্ট মূল্যায়নের ৩ স্তম্ভ)
 
-```
-                       ┌─────────────────────────────┐
-                       │   AGENT EVALUATION TRIAD    │
-                       └──────────────┬──────────────┘
-                                      │
-            ┌─────────────────────────┼─────────────────────────┐
-            ▼                         ▼                         ▼
-  ┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
-  │ TASK SUCCESS RATE │     │  STEP EFFICIENCY  │     │ TOOL ACCURACY     │
-  │     (Pass@1)      │     │  (Trajectory Opt) │     │ (Precision/Recall)│
-  │ Did the agent     │     │ How many steps    │     │ Did it call the   │
-  │ achieve the goal? │     │ did it take?      │     │ right tool?       │
-  └───────────────────┘     └───────────────────┘     └───────────────────┘
+```mermaid
+flowchart TD
+    subgraph TRIAD["[PRODUCTION AGENT EVALUATION TRIAD]"]
+        direction TB
+        EVAL_CORE["<b>Agent Evaluation Engine</b><br/>Automated Benchmarking & Regression CI/CD"]
+
+        subgraph M1["1. TASK SUCCESS RATE"]
+            M1_DESC["<b>Pass@1 / Pass@k Metric</b><br/>• Automated test assertions<br/>• End-to-end goal achievement rate"]
+        end
+
+        subgraph M2["2. STEP EFFICIENCY"]
+            M2_DESC["<b>Trajectory Length & Cost</b><br/>• Optimal step count ratio<br/>• Token usage & latency optimization"]
+        end
+
+        subgraph M3["3. TOOL CALL ACCURACY"]
+            M3_DESC["<b>Precision & Schema Adherence</b><br/>• Parameter validation accuracy<br/>• Elimination of hallucinated arguments"]
+        end
+
+        EVAL_CORE --> M1
+        EVAL_CORE --> M2
+        EVAL_CORE --> M3
+    end
+
+    classDef coreStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef m1Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef m2Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef m3Style fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class EVAL_CORE coreStyle;
+    class M1,M1_DESC m1Style;
+    class M2,M2_DESC m2Style;
+    class M3,M3_DESC m3Style;
+    class TRIAD subStyle;
 ```
 
 1. **Task Success Rate (Pass@1 / Pass@k):** প্রদত্ত ১০০টি টেস্ট টাস্কের মধ্যে কয়টি টাস্ক স্বয়ংক্রিয়ভাবে পাস করেছে।

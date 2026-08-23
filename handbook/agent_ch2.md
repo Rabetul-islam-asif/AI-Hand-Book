@@ -14,35 +14,46 @@
 
 ## ১. The Tool Calling Lifecycle (টুল কলিংয়ের পূর্ণাঙ্গ জীবনচক্র)
 
-[VISUAL]
-Title: Exact Execution Lifecycle of OpenAI/Anthropic/DeepSeek Tool Calling
-```
-  ┌───────────┐                                 ┌──────────────────┐
-  │   User    │──(1) "What's the weather in NY?"─►│  Your App Server │
-  └───────────┘                                 └────────┬─────────┘
-                                                         │ (2) Send Prompt + Tool Schema
-                                                         ▼
-                                                ┌──────────────────┐
-                                                │   LLM Engine     │
-                                                └────────┬─────────┘
-                                                         │ (3) Returns Structured JSON:
-                                                         │     `get_weather(city='NYC')`
-                                                         ▼
-  ┌───────────┐                                 ┌──────────────────┐
-  │ Real Tool │◄──(4) Execute Python Function───│  Your App Server │
-  │ WeatherAPI│───(5) Return `{"temp": 72}`─────►│  (Validates JSON)│
-  └───────────┘                                 └────────┬─────────┘
-                                                         │ (6) Send Observation Back
-                                                         ▼
-                                                ┌──────────────────┐
-                                                │   LLM Engine     │
-                                                │ (Synthesizes Res)│
-                                                └────────┬─────────┘
-                                                         │ (7) "The weather in NY is 72°F."
-                                                         ▼
-                                                ┌──────────────────┐
-                                                │   User Output    │
-                                                └──────────────────┘
+```mermaid
+flowchart TD
+    subgraph CLIENT["[USER INTERFACE]"]
+        U["User Query<br/><i>'What is the current weather in NYC?'</i>"]
+        OUT["Final Answer<br/><i>'The current weather in NYC is 72°F and sunny.'</i>"]
+    end
+
+    subgraph ORCHESTRATOR["[APPLICATION RUNTIME & ORCHESTRATOR]"]
+        VAL["Schema & Parameter Validator<br/>(Pydantic v2 / Zod Contract)"]
+        EXEC["Tool Execution Runtime<br/>(Sandbox / API Client / Subprocess)"]
+    end
+
+    subgraph MODEL["[FOUNDATION MODEL ENGINE]"]
+        DECIDE["Tool Decision Engine<br/>• Matches Intent with Function Schema<br/>• Outputs Structured JSON Call"]
+        SYNTH["Response Synthesizer<br/>• Ingests Raw Observation<br/>• Generates Natural Language Answer"]
+    end
+
+    subgraph EXTERNAL["[EXTERNAL ENVIRONMENT]"]
+        API["External Tool / Service<br/>(WeatherAPI / Postgres / Bash)"]
+    end
+
+    U -->|"1. Raw Prompt"| VAL
+    VAL -->|"2. Prompt + Tool Schemas"| DECIDE
+    DECIDE -->|"3. Structured JSON Call"| EXEC
+    EXEC -->|"4. Invocation Payload"| API
+    API -->|"5. Raw Observation Output"| EXEC
+    EXEC -->|"6. Tool Output Context"| SYNTH
+    SYNTH -->|"7. Final Synthesized Text"| OUT
+
+    classDef clientStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef orchStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef modelStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef extStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class U,OUT clientStyle;
+    class VAL,EXEC orchStyle;
+    class DECIDE,SYNTH modelStyle;
+    class API extStyle;
+    class CLIENT,ORCHESTRATOR,MODEL,EXTERNAL subStyle;
 ```
 
 ---

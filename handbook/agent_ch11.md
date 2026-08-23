@@ -10,40 +10,49 @@ OpenAI Deep Research বা Perplexity Pro কীভাবে একটি ম�
 
 ## ১. The Deep Research Pipeline Architecture
 
-[VISUAL]
-Title: Multi-Stage Recursive Deep Research & Citation Architecture
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       DEEP RESEARCH AGENT WORKFLOW                          │
-│                                                                             │
-│  ┌────────────────────────┐         ┌────────────────────────────────────┐  │
-│  │ User Goal / Question   │────────►│ 1. QUERY EXPANSION & SUB-PLAN      │  │
-│  │ "Latest AI Chip Wars"  │         │  • Decompose into 4 search queries │  │
-│  └────────────────────────┘         └─────────────────┬──────────────────┘  │
-│                                                       │                     │
-│               ┌───────────────────────────────────────┴──────────────┐      │
-│               ▼                                                      ▼      │
-│  ┌─────────────────────────┐                            ┌────────────────┐  │
-│  │ 2. PARALLEL WEB SEARCH  │                            │ 3. CRAWLER /   │  │
-│  │  • Tavily / Brave API   │                            │    SCRAPER     │  │
-│  │  • 20 top URLs pulled   │                            │  • Crawl4AI /  │  │
-│  └────────────┬────────────┘                            │    Playwright  │  │
-│               │                                         └────────┬───────┘  │
-│               └───────────────────────┬──────────────────────────┘          │
-│                                       ▼                                     │
-│                        ┌──────────────────────────────┐                     │
-│                        │ 4. FACT EXTRACTION & DEDUP   │                     │
-│                        │  • Strip boilerplate & ads   │                     │
-│                        │  • Extract claims + sources  │                     │
-│                        └──────────────┬───────────────┘                     │
-│                                       │ (Need more info? Recursive search)  │
-│                                       ▼                                     │
-│                        ┌──────────────────────────────┐                     │
-│                        │ 5. SYNTHESIS & REPORT WRITER │                     │
-│                        │  • Multi-perspective analysis│                     │
-│                        │  • Verified [1][2] citations │                     │
-│                        └──────────────────────────────┘                     │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph RESEARCH["[AUTONOMOUS DEEP RESEARCH & CITATION PIPELINE]"]
+        direction TB
+
+        IN["<b>User Research Objective</b><br/><i>'Silicon Wars: Nvidia Blackwell vs Google TPU v6 vs Groq LPU'</i>"]
+
+        subgraph S1["1. QUERY EXPANSION & SUB-PLANNING"]
+            Q1["<b>Sub-Query Decomposer</b><br/>• Generates orthogonal investigative queries<br/>• Maps architectural benchmarks, memory bandwidth, and papers"]
+        end
+
+        subgraph S2["2. MULTI-SOURCE DISCOVERY & PARALLEL CRAWLING"]
+            direction LR
+            SEARCH["<b>Parallel Search Engine</b><br/>• Tavily / Brave Search API<br/>• 20+ authoritative sources indexed"]
+            CRAWL["<b>Headless Browser Crawler</b><br/>• Crawl4AI / Playwright engine<br/>• DOM tree pruning & markdown extraction"]
+        end
+
+        subgraph S3["3. EVIDENCE EXTRACTION & DEDUPLICATION"]
+            EXT["<b>Fact & Citation Extractor</b><br/>• Strips navigational boilerplate & noise<br/>• Extracts atomic factual claims tagged with Source URLs"]
+        end
+
+        subgraph S4["4. SYNTHESIS & REPORT COMPILATION"]
+            SYNTH["<b>Synthesis & Analytical Engine</b><br/>• Comparative tables & benchmark synthesis<br/>• Strict academic citations [1][2] with verifiable links"]
+        end
+
+        IN --> S1 --> S2 --> S3
+        S3 -->|"Sufficient Evidence Gathered"| S4
+        S3 -.->|"Knowledge Gap Detected (Recursive Loop)"| S1
+    end
+
+    classDef inStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s1Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s2Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s3Style fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s4Style fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class IN inStyle;
+    class Q1 s1Style;
+    class SEARCH,CRAWL s2Style;
+    class EXT s3Style;
+    class SYNTH s4Style;
+    class RESEARCH,S1,S2,S3,S4 subStyle;
 ```
 
 ---

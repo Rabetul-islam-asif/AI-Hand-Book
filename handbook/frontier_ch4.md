@@ -10,37 +10,43 @@
 
 ## ১. Evolutionary Model Merging (জিরো-ব্যাকপ্রোপাগেশন মডেল মার্জিং)
 
-[VISUAL]
-Title: Evolutionary Optimization for Cross-Domain Model Merging (Zero Backpropagation)
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 SAKANA EVOLUTIONARY MODEL MERGING PIPELINE                  │
-│                                                                             │
-│  [Parent Model A: Japanese Language]    [Parent Model B: Math/Vision LLM]   │
-│             │                                           │                   │
-│             └─────────────────────┬─────────────────────┘                   │
-│                                   │                                         │
-│                                   ▼                                         │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │ 1. WEIGHT-SPACE CHROMOSOME ENCODING                                   │  │
-│  │    • Layer Permutations & Slicing                                     │  │
-│  │    • Cross-Model Tensor Blending Coefficients (\alpha_1, \alpha_2...) │  │
-│  └────────────────────────────────┬──────────────────────────────────────┘  │
-│                                   │                                         │
-│                                   ▼                                         │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │ 2. EVOLUTIONARY SEARCH LOOP (CMA-ES Algorithm)                        │  │
-│  │    • Generate 100 Child Hybrid Models                                 │  │
-│  │    • Evaluate Fitness on Japanese Math Benchmark                      │  │
-│  │    • Select Top 5 Winners ──► Mutate & Cross-over                     │  │
-│  └────────────────────────────────┬──────────────────────────────────────┘  │
-│                                   │ (After 50 Generations)                  │
-│                                   ▼                                         │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │ RESULT: Japanese Math-Vision Frontier Model                           │  │
-│  │ * Created in weight-space with ZERO GPU Gradient Backpropagation!    │  │
-│  └───────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph SAKANA["[SAKANA EVOLUTIONARY MODEL MERGING (ZERO BACKPROPAGATION)]"]
+        direction TB
+
+        subgraph PARENTS["PARENT FOUNDATION MODELS"]
+            direction LR
+            P1["<b>Parent Model A</b><br/>Japanese Natural Language Specialization"]
+            P2["<b>Parent Model B</b><br/>Mathematical Reasoning & Vision Specialization"]
+        end
+
+        subgraph S1["1. WEIGHT-SPACE CHROMOSOME ENCODING"]
+            W1["<b>Tensor Recombination & Layer Slicing</b><br/>• Layer permutation coefficients <code>(\alpha_1, \alpha_2...)</code><br/>• SLERP & DARE parameter interpolation matrices"]
+        end
+
+        subgraph S2["2. EVOLUTIONARY SEARCH OPTIMIZATION (CMA-ES)"]
+            W2["<b>Generational Fitness Evaluation</b><br/>• Generates population of 100 hybrid candidate models<br/>• Evaluates multi-task benchmark fitness score<br/>• Selects top 5 candidates ➔ Crossover & Mutation"]
+        end
+
+        subgraph S3["3. OPTIMAL HYBRID OFFSPRING"]
+            W3["<b>Frontier Cross-Domain Model (e.g. Japanese-Math-Vision)</b><br/>Created purely in parameter weight-space with <b>Zero GPU Gradient Compute</b>"]
+        end
+
+        PARENTS --> S1 --> S2 --> S3
+    end
+
+    classDef pStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s1Style fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s2Style fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s3Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class P1,P2 pStyle;
+    class W1 s1Style;
+    class W2 s2Style;
+    class W3 s3Style;
+    class SAKANA,PARENTS,S1,S2,S3 subStyle;
 ```
 
 ### কেন এটি যুগান্তকারী?
@@ -54,32 +60,34 @@ Title: Evolutionary Optimization for Cross-Domain Model Merging (Zero Backpropag
 
 ২০২৪ সালে Sakana AI অক্সফোর্ড ইউনিভার্সিটির গবেষকদের সাথে মিলে রিলিজ করে **The AI Scientist** — যা মানুষের সাহায্য ছাড়াই বিজ্ঞান গবেষণার পুরো জীবনচক্র পরিচালনা করে।
 
-[VISUAL]
-Title: The AI Scientist Autonomous Scientific Discovery Loop
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                      THE AI SCIENTIST AUTONOMOUS SUITE                  │
-│                                                                         │
-│  ┌───────────────────────┐         ┌─────────────────────────────────┐  │
-│  │ 1. RESEARCH IDEATION  │────────►│ 2. LITERATURE SEARCH (Semantic) │  │
-│  │  Brainstorm novel idea│         │    Check arXiv for novelty      │  │
-│  └───────────────────────┘         └────────────────┬────────────────┘  │
-│                                                     │                   │
-│                                    ┌────────────────▼────────────────┐  │
-│                                    │ 3. CODE EXPERIMENTS & EXECUTION │  │
-│                                    │    Write PyTorch code & run GPU │  │
-│                                    └────────────────┬────────────────┘  │
-│                                                     │                   │
-│                                    ┌────────────────▼────────────────┐  │
-│                                    │ 4. PLOTTING & LATEX GENERATION  │  │
-│                                    │    Generate figures & PDF paper │  │
-│                                    └────────────────┬────────────────┘  │
-│                                                     │                   │
-│                                    ┌────────────────▼────────────────┐  │
-│                                    │ 5. AUTOMATED LLM PEER REVIEW    │  │
-│                                    │    NeurIPS-style Review Score   │  │
-│                                    └─────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph SCIENTIST["[THE AI SCIENTIST: AUTONOMOUS RESEARCH PIPELINE]"]
+        direction TB
+
+        S1["<b>1. RESEARCH IDEATION</b><br/>Brainstorms novel hypotheses & cross-references arXiv API"]
+        S2["<b>2. CODE EXPERIMENT GENERATION</b><br/>Writes PyTorch experiments & executes in GPU sandbox"]
+        S3["<b>3. VISUAL METRICS & PLOTTING</b><br/>Aggregates loss curves & generates publication figures"]
+        S4["<b>4. LATEX MANUSCRIPT COMPILATION</b><br/>Drafts full academic paper with BibTeX citations"]
+        S5["<b>5. AUTOMATED PEER REVIEW</b><br/>NeurIPS-grade Reviewer evaluates soundness & novelty"]
+
+        S1 --> S2 --> S3 --> S4 --> S5
+        S5 -.->|"Iterative Refinement"| S1
+    end
+
+    classDef s1Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s2Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s3Style fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s4Style fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s5Style fill:#831843,stroke:#f43f5e,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class S1 s1Style;
+    class S2 s2Style;
+    class S3 s3Style;
+    class S4 s4Style;
+    class S5 s5Style;
+    class SCIENTIST subStyle;
 ```
 
 * **ব্যয়:** প্রতিটি পূর্ণাঙ্গ বৈজ্ঞানিক পেপারের গবেষণা ও লেখার খরচ মাত্র **~$১৫ ডলার!**

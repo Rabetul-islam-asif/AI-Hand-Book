@@ -14,30 +14,51 @@ AI এজেন্ট ইন্ডাস্ট্রিতে এতদিন �
 
 ## ১. The 3-Tier MCP Architecture (MCP আর্কিটেকচার)
 
-[VISUAL]
-Title: Model Context Protocol (Host - Client - Server) Architecture
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            MCP HOST APPLICATION                             │
-│                  (Claude Desktop, Cursor IDE, Custom Agent)                 │
-│                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │                              MCP CLIENT                               │  │
-│  │                 (Protocol Negotiation & Session Manager)              │  │
-│  └───────────────────┬───────────────────────────────┬───────────────────┘  │
-└──────────────────────┼───────────────────────────────┼──────────────────────┘
-                       │ Transport: STDIO / Stdin-Stdout
-                       │ OR Remote: Server-Sent Events (SSE / HTTP)
-        ┌──────────────┴──────────────┐ ┌──────────────┴──────────────┐
-        ▼                             ▼ ▼                             ▼
-┌───────────────────────────────┐     ┌───────────────────────────────┐
-│       LOCAL MCP SERVER        │     │       REMOTE MCP SERVER       │
-│    (PostgreSQL / Filesystem)  │     │      (GitHub / Jira / Slack)  │
-│                               │     │                               │
-│  • Resources: Read schema/logs│     │  • Resources: Pull PRs/Issues │
-│  • Tools: Run SQL queries     │     │  • Tools: Create Issue/Branch │
-│  • Prompts: Pre-set templates │     │  • Prompts: Code review prompt│
-└───────────────────────────────┘     └───────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph HOST["[HOST APPLICATION LAYER]"]
+        direction TB
+        HD["<b>Host Application Platform</b><br/><i>Claude Desktop / Cursor IDE / Agent CLI</i>"]
+        CLIENT["<b>MCP Client Runtime</b><br/>• Protocol Handshake & Capability Negotiation<br/>• Request Multiplexing & Security Boundary"]
+        HD --- CLIENT
+    end
+
+    subgraph TRANSPORTS["[TRANSPORT BUS]"]
+        STDIO["<b>Standard I/O Transport (stdio)</b><br/>Local Child Subprocesses (Fast, Secure IPC)"]
+        SSE["<b>HTTP + SSE Transport</b><br/>Remote Cloud Endpoints (Server-Sent Events)"]
+    end
+
+    subgraph LOCAL_SRV["[LOCAL MCP SERVERS]"]
+        L1["<b>Local Database Server</b><br/>• Resources: <code>postgres://schema/public</code><br/>• Tools: <code>execute_readonly_sql()</code>"]
+        L2["<b>Filesystem Server</b><br/>• Resources: <code>file:///workspace/logs</code><br/>• Tools: <code>read_directory(), edit_file()</code>"]
+    end
+
+    subgraph REMOTE_SRV["[REMOTE MCP SERVERS]"]
+        R1["<b>GitHub MCP Server</b><br/>• Resources: Pull Requests & Issues<br/>• Tools: <code>create_branch(), submit_review()</code>"]
+        R2["<b>Slack & Jira Server</b><br/>• Prompts: <code>/incident-postmortem</code><br/>• Tools: <code>dispatch_notification()</code>"]
+    end
+
+    CLIENT <-->|"JSON-RPC 2.0 (IPC)"| STDIO
+    CLIENT <-->|"JSON-RPC 2.0 (HTTPS)"| SSE
+
+    STDIO <--> L1
+    STDIO <--> L2
+    SSE <--> R1
+    SSE <--> R2
+
+    classDef hostStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef clientStyle fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef transStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef localStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef remoteStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class HD hostStyle;
+    class CLIENT clientStyle;
+    class STDIO,SSE transStyle;
+    class L1,L2 localStyle;
+    class R1,R2 remoteStyle;
+    class HOST,TRANSPORTS,LOCAL_SRV,REMOTE_SRV subStyle;
 ```
 
 MCP আর্কিটেকচারে ৩টি মূল অংশ থাকে:

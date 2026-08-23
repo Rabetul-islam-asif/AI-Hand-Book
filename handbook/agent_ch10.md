@@ -12,35 +12,56 @@ Devin, Claude Code, কিংবা Cursor Composer কীভাবে পুর
 
 ## ১. The 5-Stage Coding Agent Pipeline (৫-ধাপের কোডিং ইঞ্জিন)
 
-[VISUAL]
-Title: End-to-End Autonomous Coding & Self-Healing Architecture
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       AUTONOMOUS CODING AGENT PIPELINE                      │
-│                                                                             │
-│  ┌───────────────────────┐       ┌───────────────────────┐                  │
-│  │ 1. WORKSPACE SCANNER  │──────►│ 2. REASONING & PLAN   │                  │
-│  │  • ripgrep / AST parse│       │  • Task decomposition │                  │
-│  │  • File tree index    │       │  • Edit strategy      │                  │
-│  └───────────────────────┘       └───────────┬───────────┘                  │
-│                                              │                              │
-│                                  ┌───────────▼───────────┐                  │
-│                                  │ 3. SURGICAL DIFF EDIT │                  │
-│                                  │  • Exact string match │                  │
-│                                  │  • Unified diff patch │                  │
-│                                  └───────────┬───────────┘                  │
-│                                              │                              │
-│                                  ┌───────────▼───────────┐                  │
-│               ┌──────────────────┤ 4. TEST RUNNER (BASH) │                  │
-│               │ (Test Failed)    │  • pytest / npm test  │                  │
-│               │ Self-Heal Loop   └───────────┬───────────┘                  │
-│               ▼                              │ (Test Passed)                │
-│  ┌───────────────────────┐       ┌───────────▼───────────┐                  │
-│  │ 5. ERROR DIAGNOSIS    │       │   GIT COMMIT & PR     │                  │
-│  │  • Read stderr trace  │       │  • Clean git diff     │                  │
-│  │  • Retry diff edit    │       │  • Auto PR summary    │                  │
-│  └───────────────────────┘       └───────────────────────┘                  │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph PIPELINE["[AUTONOMOUS CODING AGENT & SELF-HEALING ARCHITECTURE]"]
+        direction TB
+
+        subgraph S1["1. WORKSPACE INDEXING & CONTEXT GATHERING"]
+            W1["<b>Workspace Scanner</b><br/>• Fast ripgrep keyword & symbol search<br/>• File tree indexing & AST symbol extraction"]
+        end
+
+        subgraph S2["2. REASONING & EDIT STRATEGY"]
+            W2["<b>Task Planner & Reasoner</b><br/>• Requirement decomposition<br/>• Target file & surgical line-range mapping"]
+        end
+
+        subgraph S3["3. SURGICAL CODE PATCHING"]
+            W3["<b>Diff & Patch Engine</b><br/>• Exact string match replacement<br/>• Unified diff patching (Zero complete file rewrites)"]
+        end
+
+        subgraph S4["4. SANDBOX EXECUTION & TEST RUNNER"]
+            W4["<b>Automated Test Suite</b><br/>• Executes pytest / vitest in isolated container<br/>• Captures stdout, stderr, and exit codes"]
+        end
+
+        subgraph S5["5. DIAGNOSIS & SELF-HEALING LOOP"]
+            W5["<b>Error Diagnostic Sub-Agent</b><br/>• Parses stack trace & failed assertions<br/>• Generates corrective patch delta"]
+        end
+
+        subgraph FINAL["FINALIZATION & SHIP"]
+            OUT["<b>Git Commit & Pull Request</b><br/>• Verified clean git diff<br/>• Automated changelog & PR summary"]
+        end
+
+        W1 --> W2 --> W3 --> W4
+        W4 -->|"Test Failed (Exit code != 0)"| W5
+        W5 -->|"Self-Correcting Diff Patch"| W3
+        W4 -->|"All Tests Passed (Exit code = 0)"| OUT
+    end
+
+    classDef s1Style fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s2Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s3Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s4Style fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef s5Style fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef finalStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class W1 s1Style;
+    class W2 s2Style;
+    class W3 s3Style;
+    class W4 s4Style;
+    class W5 s5Style;
+    class OUT finalStyle;
+    class PIPELINE,S1,S2,S3,S4,S5,FINAL subStyle;
 ```
 
 ---

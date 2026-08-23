@@ -12,47 +12,53 @@
 
 ## ১. The Enterprise Swarm Architecture (সোয়ার্ম আর্কিটেকচার)
 
-[VISUAL]
-Title: Enterprise Multi-Agent Operations Swarm Architecture
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    ENTERPRISE CUSTOMER OPERATIONS SWARM                     │
-│                                                                             │
-│  [User Ticket / Email / WhatsApp: "My order #8841 arrived broken. Refund!"] │
-│                                      │                                      │
-│                                      ▼                                      │
-│                        ┌───────────────────────────┐                        │
-│                        │    1. TRIAGE ROUTER AGENT │                        │
-│                        │  • Sentiment: Angry       │                        │
-│                        │  • Intent: Refund Request │                        │
-│                        │  • Priority: HIGH (P1)    │                        │
-│                        └─────────────┬─────────────┘                        │
-│                                      │                                      │
-│               ┌──────────────────────┼──────────────────────┐               │
-│               ▼                      ▼                      ▼               │
-│     ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐      │
-│     │ 2. SQL DATA AGENT│   │ 3. POLICY RAG AGT│   │ 4. FRAUD GUARD AG│      │
-│     │  • Fetch Order   │   │  • Read Refund   │   │  • Check user    │      │
-│     │    #8841 ($45)   │   │    Policy Doc    │   │    risk score    │      │
-│     │  • Status: Deliv │   │  • Allowed if <7d│   │  • Risk: LOW (0%)│      │
-│     └────────┬─────────┘   └────────┬─────────┘   └────────┬─────────┘      │
-│              │                      │                      │                │
-│              └──────────────────────┼──────────────────────┘                │
-│                                     ▼                                       │
-│                        ┌───────────────────────────┐                        │
-│                        │ 5. DECISION SUPERVISOR    │                        │
-│                        │  • Verification: APPROVED │                        │
-│                        │  • Amount: $45.00         │                        │
-│                        └─────────────┬─────────────┘                        │
-│                                      │                                      │
-│        ┌─────────────────────────────┴─────────────────────────────┐        │
-│        ▼                                                           ▼        │
-│  ┌───────────────────────────┐                       ┌───────────────────┐  │
-│  │ 6. PAYMENT ACTION AGENT   │                       │ 7. RESPONSE AGENT │  │
-│  │  • Stripe API Refund $45  │                       │  • Empathetic msg │  │
-│  │  • Confirmation #ref_9921 │                       │  • Sent via Email │  │
-│  └───────────────────────────┘                       └───────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph SWARM["[ENTERPRISE CUSTOMER OPERATIONS SWARM]"]
+        direction TB
+
+        IN["<b>Inbound Ingestion Gateway</b><br/>Ticket / Email: <i>'Order #8841 arrived broken. Requesting refund.'</i>"]
+
+        subgraph TRIAGE["1. TRIAGE & INTENT CLASSIFIER"]
+            T1["<b>Triage Router Agent</b><br/>• Sentiment: Urgent / Dissatisfied<br/>• Domain: Return & Refund Flow<br/>• Priority: P1 Escalation"]
+        end
+
+        subgraph WORKERS["2, 3 & 4. SPECIALIST SUB-AGENTS (PARALLEL EXECUTION)"]
+            direction LR
+            A_SQL["<b>SQL Data Agent</b><br/>• Queries PostgreSQL store<br/>• Verified: Order #8841 ($45.00)"]
+            A_POL["<b>Policy RAG Agent</b><br/>• Vector search refund manual<br/>• Rule: Valid within 14-day window"]
+            A_FRD["<b>Fraud Guard Agent</b><br/>• Risk heuristic model<br/>• Risk Score: 0.02 (Safe)"]
+        end
+
+        subgraph SUP["5. DECISION SUPERVISOR & HITL"]
+            DECIDE["<b>Operations Supervisor</b><br/>Synthesizes specialist states ➔ Verifies eligibility ($45.00 Approved)"]
+        end
+
+        subgraph ACTIONS["6 & 7. ACTION & NOTIFICATION DISPATCH"]
+            direction LR
+            A_PAY["<b>Payment Action Worker</b><br/>Dispatches Stripe API Refund ($45.00)<br/>Transaction ID: <code>ref_99420</code>"]
+            A_COM["<b>Customer Comms Worker</b><br/>Generates personalized empathetic email<br/>with carrier return label"]
+        end
+
+        IN --> TRIAGE
+        TRIAGE --> WORKERS
+        WORKERS --> SUP
+        SUP --> ACTIONS
+    end
+
+    classDef inStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef triageStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef workerStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef supStyle fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef actStyle fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class IN inStyle;
+    class T1 triageStyle;
+    class A_SQL,A_POL,A_FRD workerStyle;
+    class DECIDE supStyle;
+    class A_PAY,A_COM actStyle;
+    class SWARM,TRIAGE,WORKERS,SUP,ACTIONS subStyle;
 ```
 
 ---
