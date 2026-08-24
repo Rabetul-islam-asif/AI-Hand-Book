@@ -12,7 +12,7 @@
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -45,7 +45,7 @@
             --sidebar-width: 320px;
             --navbar-height: 70px;
             --font-main: 'Outfit', 'Noto Sans Bengali', sans-serif;
-            --font-mono: 'Fira Code', monospace;
+            --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
 
         /* PREMIUM LIGHT MODE / DAY MODE (Beautiful Clean Premium White Theme) */
@@ -461,11 +461,24 @@
                 padding-bottom: 120px !important; /* Guarantee scrolling clearance for navigation buttons */
             }
             article img {
-                max-width: 65% !important; /* Increased by 25% from 52% */
+                max-width: 100% !important;
                 margin: 20px auto;
             }
             .mermaid {
-                max-width: 42% !important; /* Resized for readability on mobile (decreased by 30% from 60%) */
+                max-width: 100% !important;
+                width: 100%;
+                padding: 16px 12px;
+                box-sizing: border-box;
+            }
+            article pre {
+                padding: 16px 14px !important;
+                font-size: 13px !important;
+                line-height: 1.62 !important;
+                border-radius: 10px !important;
+                margin: 18px 0 !important;
+            }
+            article code {
+                font-size: 13px !important;
             }
         }
 
@@ -565,13 +578,24 @@
 
         /* Fenced Code Highlights */
         article pre {
-            padding: 20px;
+            padding: 20px 24px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             overflow-x: auto;
             margin: 24px 0;
             transition: all 0.3s ease;
             position: relative; /* Essential for floating copy button */
+            font-family: var(--font-mono), 'Noto Sans Bengali', monospace;
+            font-size: 14px;
+            line-height: 1.68;
+            letter-spacing: -0.01em;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            font-feature-settings: "liga" on, "calt" on;
+            font-variant-ligatures: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.25);
         }
 
         .copy-code-btn {
@@ -629,16 +653,28 @@
         }
 
         article code {
-            font-family: var(--font-mono);
+            font-family: var(--font-mono), 'Noto Sans Bengali', monospace;
             font-size: 14px;
+        }
+
+        article pre code {
+            display: block;
+            font-family: var(--font-mono), 'Noto Sans Bengali', monospace !important;
+            font-size: 14px;
+            line-height: 1.68;
+            letter-spacing: -0.01em;
         }
 
         article :not(pre) > code {
             background-color: var(--bg-tertiary);
-            padding: 3px 6px;
-            border-radius: 4px;
+            padding: 2px 7px;
+            border-radius: 6px;
             color: var(--accent-purple);
             font-weight: 500;
+            font-size: 13.5px;
+            border: 1px solid var(--border-color);
+            font-family: var(--font-mono), 'Noto Sans Bengali', monospace;
+            word-break: break-word;
         }
 
         /* CLEAN EDITORIAL CALLOUT BOXES */
@@ -2461,7 +2497,7 @@
             headerTitle.innerHTML = `<span class="sector-badge ${targetCh.sectorId}"><i class="fa-solid ${getSector(targetCh.sectorId).icon}"></i> ${getSector(targetCh.sectorId).name}</span> <span>Ch ${targetCh.num}: ${targetCh.title}</span>`;
             
             try {
-                const response = await fetch(`/handbook/${targetCh.file}?v=${Date.now()}`);
+                const response = await fetch(`./handbook/${targetCh.file}?v=${Date.now()}`);
                 if (!response.ok) throw new Error(`Chapter file ${targetCh.file} not found`);
                 
                 let text = await response.text();
@@ -2722,7 +2758,7 @@
             
             for (let ch of allChs) {
                 try {
-                    const resp = await fetch(`/handbook/${ch.file}?v=${Date.now()}`);
+                    const resp = await fetch(`./handbook/${ch.file}?v=${Date.now()}`);
                     if (resp.ok) {
                         const text = await resp.text();
                         const lines = text.split("\n");
@@ -3053,7 +3089,7 @@
                     progressText.innerText = `Fetching ${ch.file} (${i+1}/${totalChapters}): ${ch.title}...`;
                     progressBar.style.width = `${Math.round((i / totalChapters) * 100)}%`;
                     
-                    const response = await fetch(`/handbook/${ch.file}?v=${Date.now()}`);
+                    const response = await fetch(`./handbook/${ch.file}?v=${Date.now()}`);
                     if (!response.ok) {
                         console.warn(`Chapter file ${ch.file} skipped`);
                         continue;
