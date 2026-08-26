@@ -74,7 +74,7 @@ To provide clear visual cues and prevent cognitive fatigue across the 3 sectors,
   * `frontier_ch4.md`: **Sakana AI & Evolutionary Model Merging** (Zero-backprop genetic model merging, The AI Scientist autonomous research pipeline from idea to LaTeX & review, Swarm intelligence).
 * **Part 4 — Extreme Low-Resource & Consumer Inference**
   * `frontier_ch5.md`: **AirLLM: Running 70B/405B Models on 4GB-8GB GPUs** (Layer-wise sequential execution, Disk-to-VRAM streaming, Memory paging without accuracy loss).
-  * `frontier_ch6.md`: **1-Bit AI & Local Inference Engines** (BitNet b1.58 addition-only neural networks, GGUF/llama.cpp, AWQ/EXL2 quantization benchmarks).
+  * `frontier_ch6.md`: **1-Bit AI & Modern Serving Engines (Ollama vs vLLM)** (BitNet b1.58 addition-only neural networks, Ollama architecture, vLLM PagedAttention & Continuous Batching, SGLang, TensorRT-LLM, KV-Cache VRAM math).
 * **Part 5 — AI Silicon Wars Beyond Nvidia**
   * `frontier_ch7.md`: **Hardware Accelerators: Google TPU, Groq LPU & Custom Chips** (Google TPU v5p/v6 Trillium & Optical Circuit Switches, Groq SRAM LPU 500+ tok/s architecture, Cerebras Wafer-Scale WSE-3, Apple Unified Memory).
 * **Part 6 — Frontier Paradigms & Test-Time Scaling**
