@@ -61,6 +61,9 @@ To provide clear visual cues and prevent cognitive fatigue across the 3 sectors,
   * `agent_ch10.md`: **Blueprint 1: Autonomous Coding Agent** (Devin/Claude Code-style Workspace scanner, Diff patcher, Test-and-heal loop).
   * `agent_ch11.md`: **Blueprint 2: Deep Research & Web Browsing Agent** (Query expansion, Headless browser navigation, Citation extraction, Synthesis).
   * `agent_ch12.md`: **Blueprint 3: Enterprise Multi-Agent Operations Swarm** (Triage Agent → SQL Data Agent → Customer Support Dispatcher).
+* **Part 7 — Agent Skills, Plugins & Extensibility Ecosystem**
+  * `agent_ch13.md`: **Agent Skills Architecture & Custom Skills Creation** (Procedural Knowledge, Progressive Disclosure, Semantic Triggers, Scripts, SOPs).
+  * `agent_ch14.md`: **Agent Plugins, Sidecars & Extensibility** (Full-Stack Bundles, Manifests, MCP Integration, UI Sidecars, Secure Auth Vault).
 
 ---
 
