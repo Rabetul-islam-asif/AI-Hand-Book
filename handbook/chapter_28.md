@@ -1,412 +1,222 @@
-# Chapter 28: Blueprint 3 — Agentic CLI Code Writer with Auto-Test Healing
+# Chapter 28: Uncensored Models, Safety Filters & The Alignment Paradox (আনসেন্সর্ড মডেল, সেফটি ফিল্টার ও অ্যালাইনমেন্ট দ্বন্দ্ব)
 
 ---
 
-তুমি কি কখনো ভেবেছো — সায়েন্স-ফিকশন সিনেমার মতো এমন একটা AI Agent বানানো কি সত্যিই সম্ভব?
+একটি অত্যন্ত পরিচিত দৃশ্য কল্পনা করো।
 
-যে নিজে নিজে Code লিখবে, নিজে নিজেই সেটা Terminal-এ Run করে Test করবে।
+একজন সাইবার সিকিউরিটি ইঞ্জিনিয়ার তার নেটওয়ার্ক সুরক্ষিত করার জন্য ChatGPT বা Claude-কে প্রম্পট করলেন:
+> *"আমার লোকাল রাউটারের পোর্ট স্ক্যান করার জন্য একটি সাধারণ পাইথন স্ক্রিপ্ট লিখে দাও।"*
 
-আর যদি কোনো ভুল বা Bug থাকে, তবে নিজেই সেই Error Log পড়ে Code ঠিক করে নেবে!
+অথবা একজন মেডিকেল স্টুডেন্ট পরীক্ষার জন্য জিজ্ঞাসা করলেন:
+> *"প্যারাসিটামল ওভারডোজ হলে যকৃতের এনজাইমে কী পরিবর্তন আসে এবং কোন ডোজে এটি প্রাণঘাতী হতে পারে?"*
 
-শুনে অবিশ্বাস্য মনে হলেও, এটাই সত্যি।
+অথবা একজন লেখক একটি থ্রিলার উপন্যাসের জন্য লিখলেন:
+> *"গল্পের খলনায়ক কীভাবে ব্যাংকের ভল্ট হ্যাক করার পরিকল্পনা করছে, তার একটি ডায়ালগ লিখে দাও।"*
 
-Devin বা Cursor Agent-এর মতো আধুনিক AI Tool-গুলোর আসল ম্যাজিক কিন্তু এখানেই। একে আমরা বলি Self-Testing এবং Auto-Healing Loop।
+উত্তরে AI কী বলল?
+> *"I'm sorry, but as an AI language model, I cannot assist with harmful, dangerous, or illegal activities."*
 
-তো চলো, এই চ্যাপ্টারে আমরা এমনই একটা রোমাঞ্চকর Pattern নিজের হাতে ডিজাইন করে ফেলি!
+এই ঘটনাকে এআই গবেষকরা বলেন **"Refusal Fatigue" বা অতিরিক্ত নীতিবাগীশতার ক্লান্তি**।
 
-আমরা ব্যবহার করবো ReAct এবং Auto-Test Healing।
+একটি মডেল যার ভেতরে বিশ্বের সমস্ত জ্ঞান—চিকিৎসাবিজ্ঞান, প্রোগ্রামিং, সাহিত্য—জমা রয়েছে, সে সামান্য একটি সাধারণ প্রশ্নেও একজন প্রাক-প্রাথমিক শিক্ষকের মতো জ্ঞান দেওয়া শুরু করে!
 
-আমরা দেখবো কীভাবে ইউজার থেকে কমান্ড নিয়ে ফাইল তৈরি করা যায়, লোকাল কম্পিউটারে pytest দিয়ে টেস্ট করা যায়, আর টেস্ট ফেইল করলে ভুল শুধরে নেওয়া যায়।
+কেন এমন হয়? টেক জায়ান্টরা কীভাবে একটি মডেলকে "সেন্সর" বা ফিল্টার করে?
 
-চলো, শুরু করা যাক! Deal?
+আর এর প্রতিক্রিয়ায় ওপেন-সোর্স কমিউনিটিতে জন্ম নেওয়া **"Uncensored Models" ও "Abliteration"** প্রযুক্তি আসলে কী? ডেভেলপাররা কেন এগুলো তৈরি করছেন, এর পেছনে কী বৈজ্ঞানিক জাদু লুকিয়ে আছে, আর এর অন্ধকার ও উজ্জ্বল দিকগুলোই বা কী?
 
+চল এই বহুল বিতর্কিত এবং গভীর টেকনিক্যাল বিষয়ের গভীরে প্রবেশ করা যাক।
 
-### ১. আসল সমস্যাটা কোথায়?
+---
 
-ধরো, একটা সাধারণ AI-কে তুমি কোড লিখতে বললে। 
+## ১. The 5-Layer AI Safety Shield (কীভাবে মডেল সেন্সর করা হয়?)
 
-সে হয়তো এমন একটা কোড বানিয়ে দিল:
+একটি আধুনিক Foundation Model (যেমন GPT-4o, Claude 3.5, বা Llama 3) প্রাক-প্রশিক্ষণ (Pre-training) শেষ করার সময় সম্পূর্ণ "বুনো" থাকে। সে ডার্ক ওয়েব, হ্যাকিং ফোরাম, সাহিত্যের ভিলেন চরিত্র—সবকিছু জানে।
 
-```python
-# AI Generated code
-import request  # Oops! It should be 'requests' with an 's'
-```
-
-কিন্তু রান করার সাথে সাথে স্ক্রিনে বড় বড় লাল অক্ষরে একটা Error চলে এলো:
-
-`ModuleNotFoundError: No module named 'request'`
-
-এখন তুমি কী করবে?
-
-নিশ্চয়ই সেই Error কপি করে আবার AI-এর চ্যাটে পেস্ট করবে। 
-
-AI সেটা দেখে কোড ঠিক করে দেবে। তুমি আবার রান করবে।
-
-এই যে বারবার কপি-পেস্ট করা, এটা কি বিরক্তিকর নয়? 
-
-আমাদের মূল্যবান সময় নষ্ট করার জন্য এটাই যথেষ্ট।
-
-তাহলে এর সমাধান কী?
-
-এখানেই আসে ReAct Agent Loop এবং Auto-Healing।
-
-আমাদের এই সেলফ-হিলিং সিস্টেমটি মূলত চারটি ধাপে একটা লুপের মতো কাজ করে:
-
-প্রথম ধাপ হলো **Think**। 
-
-এখানে LLM প্রথমে চিন্তা করে সিদ্ধান্ত নেয় যে তাকে ঠিক কী করতে হবে। কোন লাইব্রেরি বা কোড লিখতে হবে।
-
-দ্বিতীয় ধাপ হলো **Write**। 
-
-সিদ্ধান্ত নেওয়ার পর এজেন্ট তার নিজস্ব টুল ব্যবহার করে কম্পিউটারে `app.py` এবং `test_app.py` ফাইল তৈরি করে।
-
-তৃতীয় ধাপ হলো **Execute Test**। 
-
-কোড লেখা শেষ হলে এজেন্ট টার্মিনালে `pytest test_app.py` কমান্ডটি রান করে।
-
-চতুর্থ ধাপ হলো **Self-Heal**। 
-
-যদি টেস্ট ফেইল করে, এজেন্ট কিন্তু থেমে যায় না। 
-
-সে টেস্টের আউটপুট আর লাল Error লগ সরাসরি রিড করে নিজের ব্রেইনে নিয়ে নেয়। 
-
-এরপর ভুলগুলো ঠিক করে কোডটি আবার নতুন করে লেখে। 
-
-আর টেস্ট ১০০% পাস না হওয়া পর্যন্ত এই লুপ চলতেই থাকে! 
-
-দারুণ না?
-
-![Agentic Self-Healing Loop Flowchart](/diagrams/agentic_selfhealing_loop_flowchart.png)
-
-
-### ২. মূল কনসেপ্টগুলো কী কী?
-
-এই চমৎকার সিস্টেমটি বানাতে আমাদের কিছু বেসিক জিনিস বুঝতে হবে।
-
-প্রথমেই জানা দরকার, **ReAct Framework** আসলে কী?
-
-সহজ কথায়, এটা হলো এজেন্টের চিন্তা ও কাজ করার একটা ফ্রেমওয়ার্ক। 
-
-যেমন ধরো, এজেন্টের মাথায় প্রথমে আসবে একটি **Thought** বা চিন্তা: 
-
-"আমি একটি যোগ করার ফাংশন লিখতে চাই। প্রথমে আমার ফাইল তৈরি করা দরকার।"
-
-চিন্তা করার পর আসবে **Action** বা কাজ:
-
-সে কোড লেখার জন্য `write_file_to_disk` নামের ফাংশনটি কল করবে।
-
-কাজ শেষ হলে আসবে **Observation** বা পর্যবেক্ষণ:
-
-সে দেখবে টেস্ট রান করার পর কী রেজাল্ট এলো। টেস্ট পাস করলে সে সিদ্ধান্ত নেবে, "আমার কাজ সফল হয়েছে, এবার লুপ শেষ করা যাক।"
-
-তাহলে এজেন্ট লোকাল কমান্ড কীভাবে রান করে?
-
-পাইথনের `subprocess` মডিউল ব্যবহার করে এজেন্ট এই কমান্ডগুলো রান করার ক্ষমতা পায়।
-
-কিন্তু একটা বড়সড় বিপদের কথা মাথায় রাখতে হবে।
-
-লোকাল কম্পিউটারে সরাসরি এজেন্টের কোড রান করা কি নিরাপদ?
-
-একেবারেই না! এটা চরম বিপজ্জনক হতে পারে।
-
-ধরো, কোনো কারণে এজেন্ট ভুল করে বা কোনো ক্ষতিকর প্রম্পটের কারণে পুরো হার্ডডিস্ক ডিলিট করার কমান্ড দিয়ে বসলো!
-
-যেমন: `rm -rf /` বা `rd /s /q c:\`।
-
-তাহলে তো সর্বনাশ হয়ে যাবে!
-
-এই জন্য প্রোডাকশনে কাজ করার সময় সবসময় কোড রান করার জন্য একটি ডকার কন্টেইনার বা Docker Sandbox ব্যবহার করা উচিত।
-
-এতে এজেন্টের কোড একটি আলাদা সুরক্ষিত জায়গায় রান হবে এবং তোমার আসল সিস্টেম থাকবে একদম নিরাপদ।
-
-
-### ৩. ডকার স্যান্ডবক্সের কাজ
-
-চলো দেখি প্রোডাকশনে কীভাবে এটা কাজ করে:
+টেক জায়ান্টরা মডেলটিকে পাবলিকলি রিলিজ করার আগে **৫টি স্তরের নিরাপত্তা প্রাচীর** তৈরি করে:
 
 ```mermaid
 flowchart TD
-    User["User Prompt"] --> Agent["AI Agent Engine (LLM)"]
-    Agent -->|Restricted Execution API| Sandbox
-    
-    subgraph Sandbox ["DOCKER SANDBOX ENGINE"]
+    subgraph SAFETY_STACK["[THE 5-LAYER AI SAFETY & ALIGNMENT STACK]"]
         direction TB
-        Config["• No Network Access<br>• Locked Directory<br>• Auto-terminate in 10 seconds"]
-        Code["app.py"] -->|Run Pytest| Test["Run Pytest"]
+
+        L1["<b>Layer 1: Pre-training Data Scrubbing</b><br/>Filters out PII, malware code, and violent material from raw scrape (C4 / Common Crawl)"]
+
+        L2["<b>Layer 2: Alignment Training (RLHF / DPO / Constitutional AI)</b><br/>Teaches model internal refusal behavior via reward penalties when safety guidelines are breached"]
+
+        L3["<b>Layer 3: System Prompts & Meta-Instruction Priming</b><br/>Prepends hidden rules: <i>'You are a harmless, ethical, empathetic assistant...'</i>"]
+
+        L4["<b>Layer 4: External Guardrail Classifiers (Llama Guard / NeMo)</b><br/>Separate lightweight model screens user input BEFORE it ever reaches the core LLM"]
+
+        L5["<b>Layer 5: Output Token Scrubbers & Regex Logit Masks</b><br/>Post-generation scanners that block PII, toxic words, or dangerous code snippets"]
+
+        L1 --> L2 --> L3 --> L4 --> L5
     end
-    
-    classDef default fill:#1E1E26,stroke:#8B5CF6,stroke-width:2px,color:#F3F4F6;
-    classDef sandbox fill:#16161D,stroke:#06B6D4,stroke-width:2px,color:#F3F4F6;
-    class Sandbox sandbox;
+
+    classDef l1Style fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef l2Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef l3Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef l4Style fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef l5Style fill:#164e63,stroke:#22d3ee,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class L1 l1Style;
+    class L2 l2Style;
+    class L3 l3Style;
+    class L4 l4Style;
+    class L5 l5Style;
+    class SAFETY_STACK subStyle;
 ```
 
+---
 
-### ৪. বাস্তব জীবনের উদাহরণ
+## ২. Why Developers Create Uncensored Models (ডেভেলপাররা কেন এটি করেন?)
 
-ধরো, একটি বড় সফটওয়্যার কোম্পানির সিস্টেমে একটি সিকিউরিটি বাগ পাওয়া গেল।
+অনেক সাধারণ মানুষ মনে করেন, আনসেন্সর্ড মডেল মানেই হয়তো হ্যাকার বা দুষ্কৃতীদের কাজ। কিন্তু বাস্তবতা সম্পূর্ণ ভিন্ন। এর পেছনে ৫টি অত্যন্ত যৌক্তিক বৈজ্ঞানিক ও ব্যবহারিক কারণ রয়েছে:
 
-তখন AI এজেন্ট কীভাবে কাজ করবে?
+### ১. False Positives বা অতিরিক্ত সেন্সরশিপ দূর করা
+নিরাপত্তা ফিল্টারগুলো এতটাই সংবেদনশীল যে তারা বৈধ প্রশ্নের প্রেক্ষাপট (Context) বুঝতে পারে না:
+* সাইবার সুরক্ষার ক্লাসে শিক্ষক যখন ছাত্রদের ফায়ারওয়াল বাইপাস পরীক্ষা শেখাতে চান, তখন সেন্সর করা মডেল কোড লিখতে অস্বীকার করে।
+* মেডিকেল বা ফরেনসিক গবেষণায় বিষাক্ত রাসায়নিকের প্রভাব জানতে চাইলে মডেল ড্রাগ অপব্যবহার ভেবে উত্তর ব্লক করে।
+* আনসেন্সর্ড মডেল গবেষকদের কোনো বাধা ছাড়াই বিশুদ্ধ তথ্য সরবরাহ করে।
 
-প্রথমে এজেন্ট নিজে থেকেই Source Code ফাইলটি রিড করবে এবং ডকার স্যান্ডবক্সে কোড প্যাচ করে নেবে।
+### ২. Offensive Cyber Defense (আক্রমণ চিনে প্রতিরক্ষা গড়া)
+একটি সিস্টেম কতটা সুরক্ষিত তা জানার একমাত্র উপায় হলো— **নিজে সেই সিস্টেমে আক্রমণ সিমুলেট করা (Penetration Testing / Red-Teaming)**।
+যদি ডিফেন্ডারদের হাতে এমন কোনো AI না থাকে যা ম্যালওয়্যারের প্যাটার্ন বুঝতে পারে, তবে তারা কখনো ব্ল্যাক-হ্যাট হ্যাকারদের ঠেকাতে পারবে না।
 
-কোড প্যাচ করার পর সে তার সিকিউরিটি Regression Test রান করবে। 
+### ৩. কর্পোরেট নৈতিক একচেটিয়া আধিপত্যের বিরুদ্ধে স্বাধীনতা
+সিলিকন ভ্যালির গুটি কয়েক কোম্পানি (OpenAI, Google, Anthropic) ঠিক করে দেবে পুরো বিশ্বের ৮০০ কোটি মানুষের জন্য কোন কথা নৈতিক আর কোন কথা অনৈতিক—এটি বহু গবেষক মেনে নিতে পারেন না। ওপেন-সোর্স কমিউনিটি এমন AI চায় যা কোনো নির্দিষ্ট কর্পোরেট বা রাজনৈতিক মতাদর্শে প্রভাবিত নয়।
 
-উদ্দেশ্য হলো, এই পরিবর্তনের ফলে অন্য কোনো sistem বা সিস্টেম ডাউন হয়েছে কি না তা পরীক্ষা করা।
+### ৪. ক্রিয়েটিভ রাইটিং ও গেম ডেভেলপমেন্ট
+সাহিত্যে ভিলেন থাকবে, যুদ্ধ থাকবে, অন্ধকার থিম থাকবে, অপরাধের চিত্র থাকবে। সেন্সর করা মডেল সব চরিত্রকে মিষ্টিভাষী দেবদূত বানিয়ে ফেলে, যা দিয়ে কোনো বাস্তবসম্মত থ্রিলার উপন্যাস বা RPG গেমের ডায়ালগ লেখা অসম্ভব।
 
-যদি টেস্টে দেখা যায় ইউজার লগইন ফেইল করছে, তাহলে এজেন্ট কিন্তু থেমে থাকবে না।
+### ৫. Custom Enterprise Alignment-এর জন্য নিরপেক্ষ ভিত্তি
+একটি ব্যাংক বা সামরিক ডিফেন্স কোম্পানি ওপেনএআই-এর সাধারণ নীতিমালায় চলতে পারে না। তারা এমন একটি **সম্পূর্ণ নিরপেক্ষ বেস মডেল** চায়, যার ওপর তারা নিজেদের ইন্ডাস্ট্রির নির্দিষ্ট সিকিউরিটি ও কমপ্লায়েন্স রুলস বসাতে পারবে।
 
-সে সাথে সাথে কোডটি আবার Modify করে টেস্ট পাস করাবে।
+---
 
-আর সব শেষে নিমিষেই গিটহাবে একটি Pull Request সাবমিট করে দেবে!
+## ৩. How Models are Uncensored: The Technical Mechanics
 
-পুরো কাজটাই হবে অটোমেটিকভাবে।
+মডেল থেকে সেন্সরশিপ হটানোর জন্য মূলত ৩টি প্রযুক্তিগত পদ্ধতি ব্যবহৃত হয়:
 
+```mermaid
+flowchart LR
+    subgraph METHODS["3 WAYS DEVELOPERS UNCENSOR MODELS"]
+        direction TB
 
-### ৫. চলো কোড লিখে ফেলি!
+        M1["<b>Method 1: Dataset De-Alignment (Dolphin / WizardLM)</b><br/>Filters out all refusal phrases ('As an AI...') from SFT training corpus"]
+
+        M2["<b>Method 2: Weight Abliteration (Representation Engineering)</b><br/>Locates the 'Refusal Vector' in the model's residual stream and mathematically subtracts it"]
+
+        M3["<b>Method 3: DPO Preference Inversion</b><br/>Direct Preference Optimization where helpful answers are Chosen and moral lectures are Rejected"]
+    end
+
+    classDef m1Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef m2Style fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef m3Style fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef subStyle fill:#0b0f19,stroke:#334155,stroke-width:1.5px,color:#94a3b8;
+
+    class M1 m1Style;
+    class M2 m2Style;
+    class M3 m3Style;
+    class METHODS subStyle;
+```
+
+---
+
+### The 2024–2025 Breakthrough: Weight Abliteration (গাণিতিক অস্ত্রোপচার)
+
+২০২৪ সালের মাঝামাঝি সময়ে এআই গবেষকরা (FailSpy, Arditi et al.) একটি অবিশ্বাস্য আবিষ্কার করেন:
+
+> **মডেলের "Refusal" বা অস্বীকার করার ক্ষমতা কোনো জাদু নয়—এটি মডেলের ইন্টারনাল অ্যাক্টিভেশন স্পেসের একটিমাত্র একক দিক বা ভেক্টর (Single Direction Vector)!**
+
+মডেল যখনই কোনো ক্ষতিকর বা স্পর্শকাতর শব্দ দেখে, তার নিউরাল নেটওয়ার্কের লেয়ারগুলোতে একটি নির্দিষ্ট দিকে কারেন্ট ছুটে যায়—যাকে বলা হয় **Refusal Vector ($\vec{r}$)**।
+
+#### কীভাবে Abliteration করা হয়? (জিরো ট্রেইনিং কস্টে!)
+১. গবেষকরা মডেলকে ১০০টি সাধারণ প্রশ্ন খাওয়ান এবং নিউরনের অ্যাক্টিভেশন রেকর্ড করেন: $\vec{A}_{\text{safe}}$  
+২. এরপর ১০০টি ক্ষতিকর প্রশ্ন খাওয়ান এবং অ্যাক্টিভেশন রেকর্ড করেন: $\vec{A}_{\text{harmful}}$  
+৩. উভয়ের গড় দূরত্বের পার্থক্য বের করে রিফিউজাল ভেক্টর পাওয়া যায়:
+   $$\vec{r} = \text{Mean}(\vec{A}_{\text{harmful}}) - \text{Mean}(\vec{A}_{\text{safe}})$$
+৪. এবার কোনো রি-ট্রেনিং ছাড়াই, লিনিয়ার অ্যালজেব্রার **Orthogonal Projection** দিয়ে মডেলের ওয়েট ম্যাট্রিক্স ($W$) থেকে এই রিফিউজাল ভেক্টরটি কেটে বাদ দিয়ে দেওয়া হয়:
+   $$W_{\text{abliterated}} = W - \vec{r}\vec{r}^T W$$
+
+**ফলাফল?**  
+মডেলের কোডিং, গণিত, ভাষা এবং বুদ্ধিমত্তা ৯৯.৯৯% অক্ষত থাকে, কিন্তু সে **অস্বীকার করার ক্ষমতা চিরতরে হারিয়ে ফেলে!** Llama-3-8B-Instruct-Abliterated মডেল এই পদ্ধতিরই ফসল।
+
+---
+
+## ৪. The Bright Side vs. The Dark Side: Comprehensive Impact Matrix
+
+আনসেন্সর্ড মডেলের ক্ষমতা একটি ধারালো ছুরির মতো—যা দিয়ে ডাক্তার রোগীর জীবন বাঁচাতে পারেন, আবার অপরাধী ক্ষতি করতে পারে:
+
+| সেক্টর | 🟢 ইতিবাচক প্রভাব (The Light Side) | 🔴 নিরাপত্তা ঝুঁকি (The Dark Side) |
+| :--- | :--- | :--- |
+| **সাইবার সিকিউরিটি** | রেড-টিমাররা স্বয়ংক্রিয়ভাবে ম্যালওয়্যার প্যাটার্ন ও ফায়ারওয়াল দুর্বলতা বিশ্লেষণ করতে পারেন। | অপেশাদার হ্যাকাররা সহজে র‍্যানসমওয়্যার ও পলিমরফিক ম্যালওয়্যার জেনারেট করতে পারে। |
+| **চিকিৎসাবিজ্ঞান ও ফার্মাসি** | বিষক্রিয়া, ওভারডোজ এবং জটিল রোগের নিখুঁত ক্লিনিক্যাল বিশ্লেষণ কোনো রিফিউজাল ছাড়া মেলে। | ক্ষতিকারক ড্রাগ সংশ্লেষণ বা কেমিক্যাল সংক্রান্ত ক্ষতিকর তথ্যের অপব্যবহারের ঝুঁকি। |
+| **সাহিত্য ও ক্রিয়েটিভ মিডিয়া** | জটিল ও ডার্ক চরিত্রের মনস্তাত্ত্বিক ডায়ালগ এবং বিশ্বাসযোগ্য দৃশ্য রচনা সম্ভব। | চরম অবমাননাকর বা বিষাক্ত কন্টেন্ট ছড়ানোর সম্ভাবনা। |
+| **সোশ্যাল ইঞ্জিনিয়ারিং** | কর্মীদের সতর্ক করার জন্য বাস্তবসম্মত ফিশিং ইমেইল সিমুলেশন তৈরি। | অতি-বিশ্বাসযোগ্য প্রতারণামূলক ফিশিং ইমেইল ও ভয়েস স্ক্যামের ব্যাপক বিস্তার। |
+| **ব্যক্তিগত গোপনীয়তা (Privacy)** | লোকাল পিসিতে অফলাইনে ১০০% ব্যক্তিগত গবেষণার সুযোগ, কোনো লগ বাইরে যায় না। | মডেলের অপব্যবহার হলে কোনো কর্পোরেট অডিট ট্রেইল থাকে না। |
+
+---
+
+## ৫. The Modern Paradigm Shift: "Harness Safety" over "Model Lobotomy"
+
+আজকের শীর্ষস্থানীয় এআই গবেষক এবং এন্টারপ্রাইজ আর্কিটেক্টরা একটি বিষয়ে একমত:
+
+> **মডেলের মস্তিষ্কের ভেতর জোর করে ফিল্টার ঢোকানো (Lobotomy) ভুল কৌশল। আসল নিরাপত্তা থাকতে হবে মডেলের চারপাশের কাঠামোতে (Harness)।**
+
+একটি আনসেন্সর্ড বা স্মার্ট মডেলকে প্রোডাকশনে নিরাপদে চালানোর আধুনিক আর্কিটেকচার হলো **Defense-in-Depth Sandwich**:
+
+```
+[User Input] 
+      │
+      ▼
+┌────────────────────────────────────────────────────────┐
+│ 1. External Input Guard (Llama Guard 3 / Lakera Guard) │ ➔ ম্যালিসিয়াস প্রম্পট ইনজেকশন ব্লক করে
+└────────────────────────────────────────────────────────┘
+      │
+      ▼
+┌────────────────────────────────────────────────────────┐
+│ 2. Uncensored / Un-lobotomized Smart Foundation LLM    │ ➔ পূর্ণাঙ্গ বুদ্ধিমত্তা দিয়ে যুক্তি ও কাজ সম্পন্ন করে
+└────────────────────────────────────────────────────────┘
+      │
+      ▼
+┌────────────────────────────────────────────────────────┐
+│ 3. Output Policy & Secret / PII Scrubber               │ ➔ সংবেদনশীল তথ্য বা কোম্পানির সিক্রেট ফিল্টার করে
+└────────────────────────────────────────────────────────┘
+      │
+      ▼
+[Safe Output to User]
+```
+
+এই আর্কিটেকচারে মূল মডেলটির কোনো বুদ্ধিমত্তা নষ্ট হয় না, অথচ পুরো অ্যাপ্লিকেশনটি এন্টারপ্রাইজ গ্রেড নিরাপদ থাকে।
+
+---
+
 Developer Perspective
+যদি তুমি কোনো এন্টারপ্রাইজ প্রোডাক্টের জন্য মডেল বেছে নাও, তবে অতিরিক্ত সেন্সর করা মডেল অনেক সময় কাস্টমার এক্সপেরিয়েন্স ধ্বংস করে দেয় (কারণ সাধারণ প্রশ্নেও মডেল রিফিউজ করে বসে)। এর বদলে একটি মডারেটলি সেন্সরড বা অ্যাব্লিটারেটেড মডেল নিয়ে তার সামনে একটি ডেডিকেটেড **Llama Guard Classifier** বসানো অনেক বেশি ফলপ্রসূ। এতে মডেলের আইকিউ কমে না, অথচ নিরাপত্তার স্টিয়ারিং তোমার নিজের হাতে থাকে।
 
-চলো, পাইথনে একটি সম্পূর্ণ রানিং সেলফ-হিলিং এজেন্ট লুপ স্ক্র্যাচ থেকে তৈরি করি। 
+---
 
-এটি ফেইল করা টেস্ট কেসগুলো নিজে নিজেই সমাধান করে ফেলবে!
-
-```python
-import os
-import subprocess
-import time
-from openai import OpenAI
-
-# ১. এনভায়রনমেন্ট ও ক্লায়েন্ট সেটআপ
-os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
-client = OpenAI()
-
-# টার্গেট Code File-এর পাথ
-TARGET_FILE = "calculator.py"
-TEST_FILE = "test_calculator.py"
-
-# ২. কাস্টম পাইটেস্ট File প্রিপারেশন
-# আমরা এজেন্টের কাজ Test করার জন্য কড়া Test ফাইলটি আগেই লিখে রাখছি
-TEST_CODE = """
-import pytest
-from calculator import add
-
-def test_add_positive():
-    assert add(2, 3) == 5
-
-def test_add_negative():
-    assert add(-1, -1) == -2
-
-def test_add_string_handling():
-    # এটি হলো এজেন্টের জন্য একটি ফাঁদ বা এজ কেস!
-    # এজেন্টকে স্ট্রিং Input আসলে ValueError থ্রো করতে হবে
-    with pytest.raises(ValueError):
-        add("2", 3)
-"""
-
-with open(TEST_FILE, "w", encoding="utf-8") as f:
-    f.write(TEST_CODE)
-
-# ৩. লোকাল পাইটেস্ট সাব-প্রসেস এক্সিকিউটর টুল
-def run_pytest():
-    print("[ Terminal] Executing: pytest test_calculator.py ...")
-    # Run pytest and capture standard output & errors
-    result = subprocess.run(["pytest", TEST_FILE], capture_output=True, text=True)
-    return result.returncode == 0, result.stdout
-
-# ৪. এজেন্ট ব্রেইন Loop উইথ Auto-Healing
-def run_self_healing_agent():
-    print("\n--- Starting Agentic Auto-Test Healing Loop ---")
-    
-    # এজেন্টের জন্য ট্র্যাকিং Prompt
-    system_prompt = f"""
-    You are an expert python developer who writes clean code.
-    Your goal is to write code in a file named '{TARGET_FILE}' to make all tests in '{TEST_FILE}' pass.
-    
-    You must ONLY return the raw, clean python code. Do not include markdown wraps or explanations.
-    """
-    
-    conversation_history = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": f"Please write the 'add' function in {TARGET_FILE} to handle simple additions and raise ValueError if inputs are not numeric."}
-    ]
-    
-    max_iterations = 4
-    for iteration in range(1, max_iterations + 1):
-        print(f"\n[🔄 Iteration {iteration}/{max_iterations}] Agent is thinking...")
-        
-        # এলএলএম কল
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=conversation_history,
-            temperature=0.2 # low temperature for deterministic code
-        )
-        agent_code = response.choices[0].message.content.strip()
-        
-        # মার্কডাউন Code ব্লক ট্রিম করো যদি এলএলএম ভুল করে দিয়ে দেয়
-        if agent_code.startswith("```python"):
-            agent_code = agent_code[9:-3].strip()
-        elif agent_code.startswith("```"):
-            agent_code = agent_code[3:-3].strip()
-            
-        print(f"[ Action] Writing generated code to {TARGET_FILE}...")
-        with open(TARGET_FILE, "w", encoding="utf-8") as f:
-            f.write(agent_code)
-            
-        # Test রান ও পর্যবেক্ষণ
-        test_passed, test_log = run_pytest()
-        
-        if test_passed:
-            print("\n[ SUCCESS] All tests passed! Agent has successfully healed and written the perfect code!")
-            print("--- FINAL CODE ---")
-            print(agent_code)
-            break
-        else:
-            print(f"\n[ FAILURE] Test failed in iteration {iteration}!")
-            # Error লগটি কনভারসেশন হিস্টোরিতে ফিড করো অটো-হিলিংয়ের জন্য
-            feedback = f"""
-            The code you wrote failed the tests. Here is the pytest execution log and traceback:
-            
-            {test_log}
-            
-            Analyze the traceback, find the bugs (syntax errors or missing constraints), fix them, and rewrite the code.
-            """
-            print("Feeding error log back to AI brain for self-correction...")
-            conversation_history.append({"role": "assistant", "content": agent_code})
-            conversation_history.append({"role": "user", "content": feedback})
-            
-            # হালকা রিফ্রেশ টাইম
-            time.sleep(2)
-            
-    else:
-        print("\n[🛑 ABORTED] Agent reached maximum iteration limit without passing tests.")
-
-# --- ৫. RUN THE AGENT ---
-# Ensure pytest is installed in your python environment before running: pip install pytest
-# run_self_healing_agent()
-```
-
-
-### ৬. প্রোডাকশন ও সিকিউরিটি পলিসি
 Production Reality
+ওপেন-সোর্স আনসেন্সর্ড মডেল ডাউনলোড করার সময় অত্যন্ত সতর্ক থাকতে হবে। Hugging Face-এ অপরিচিত ইউজারের আপলোড করা অনেক তথাকথিত "Abliterated" মডেলে ক্ষতিকারক টেনসর বা ট্রোজান থাকতে পারে। সবসময় `safetensors` ফরম্যাট ব্যবহার করবে এবং নামী অর্গানাইজেশন (যেমন FailSpy, NousResearch, বা Unsloth) থেকে মডেল নামাবে। কখনো অজানা সোর্স থেকে প্যাথলজিক্যাল `.bin` বা `.pickle` ফাইল লোড করবে না।
 
-প্রোডাকশন লেভেলে যখন তুমি ইউজারদের জন্য কোড এডিটিং সিস্টেম ডেপ্লয় করবে, তখন কিছু গুরুত্বপূর্ণ সিকিউরিটি পলিসি মেনে চলা দরকার।
+---
 
-যেমন ধরো, **Resource Limiting** বা রিসোর্স লিমিট করা কেন জরুরি?
-
-কোনো ইউজার যদি প্রম্পটে একটি ইনফিনিটি লুপ কোড লিখে তোমার সার্ভারে রান করায়, তবে কিন্তু তোমার CPU ক্র্যাশ করবে। 
-
-তাই প্রতিটি সাব-প্রসেস রান করার সময় অবশ্যই `timeout=10.0` প্যারামিটার ব্যবহার করতে হবে। 
-
-এতে ১০ সেকেন্ডের বেশি কোড চললে তা সাথে সাথে বন্ধ হয়ে যাবে।
-
-আরেকটি বিষয় হলো **Read-only Filesystem**।
-
-এজেন্টের স্যান্ডবক্স ডিরেক্টরি ছাড়া অন্য কোনো ফোল্ডারে যেন সে রিড বা রাইট করতে না পারে, সেটা নিশ্চিত করতে হবে।
-
-
-### ৭. সাধারণ কিছু ভুল
 Common Mistake
+আনসেন্সর্ড মডেল এবং জেলব্রোকেন (Jailbroken) মডেলকে এক মনে করা। জেলব্রেক হলো একটি সেন্সর করা মডেলকে বোকা বানিয়ে উত্তর আদায় করার প্রম্পট কৌশল (যেমন DAN প্রম্পট বা প্রম্পট ইনজেকশন)। এটি অস্থায়ী এবং প্রায়ই ফেইল করে। অন্যদিকে আনসেন্সর্ড বা অ্যাব্লিটারেটেড মডেলের ওজনের (Weights) ভেতর থেকেই রিফিউজাল মেকানিজম স্থায়ীভাবে মুছে ফেলা হয়।
 
-**ভুল ধারণা:** এজেন্টের সোর্স কোডে `eval()` বা `exec()` ফাংশন ব্যবহার করে রানিং পাইথনের ভেতর ডাইনামিকালি কোড রান করা ঠিক আছে।
+---
 
-**বাস্তবতা:** এটি পাইথনের সবচেয়ে বড় সিকিউরিটি লিক! 
-
-এর ফলে তোমার রানিং পাইথন প্রসেসের সম্পূর্ণ মেমোরি হ্যাক হয়ে যেতে পারে। 
-
-তাই বুদ্ধিমানের কাজ হলো কোড সবসময় আলাদা ফাইলে সেভ করে সাব-প্রসেস হিসেবে রান করানো।
-
-
-### ৮. একটি সহজ তুলনা
-
-আমাদের সেলফ-হিলিং এজেন্টকে তুমি একজন পাইপ ফিটার বা মিস্ত্রির সাথে তুলনা করতে পারো। 
-
-আর টেস্ট রানার হলো তার সেই খিটখিটে অ্যাসিস্ট্যান্ট, যে পাইপের ভেতরে জল ঢেলে লিক খোঁজে। 
-
-যখনই লিক পাওয়া যায়, অ্যাসিস্ট্যান্ট চেঁচিয়ে বলে লিকটা ঠিক কোথায় হয়েছে।
-
-আর মিস্ত্রি সাথে সাথে ওয়েল্ডিং করে পাইপ একদম পারফেক্ট করে দেয়!
-
-
-### ৯. একটি মিনি প্রজেক্ট
-
-চলো, পাইথনে প্র্যাক্টিক্যালি কোড করে দেখি কীভাবে কোনো ইনফিনিটি লুপে আটকে যাওয়া স্ক্রিপ্টকে টাইমার দিয়ে কিল করতে হয়।
-
-```python
-import subprocess
-
-# ১. কাল্পনিক ইনফিনিটি Loop স্ক্রিপ্ট যা CPU খেয়ে ফেলবে
-infinite_loop_code = """
-import time
-print("Starting infinite computation loop...")
-while True:
-    time.sleep(0.5)
-"""
-
-with open("infinite_trap.py", "w", encoding="utf-8") as f:
-    f.write(infinite_loop_code)
-
-# ২. টাইমআউট দিয়ে সাব-প্রসেস ট্র্যাপ ও কিল Mechanism
-try:
-    print("Running process with 3-second timeout trap...")
-    # Timeout strictly locked at 3 seconds
-    result = subprocess.run(["python", "infinite_trap.py"], capture_output=True, text=True, timeout=3.0)
-except subprocess.TimeoutExpired:
-    print("\n[ SECURED] Process took more than 3 seconds. TimeoutExpired triggered!")
-    print("The infinite loop was successfully KILLED to save CPU resources!")
-```
-
-
-### ১০. ইন্টারভিউতে কেমন প্রশ্ন হতে পারে?
+## Interview Flashcards
 
 #### Beginner Level
-
-**প্রশ্ন:** ReAct Loop বলতে কী বোঝায়?
-
-**উত্তর:** এটি এজেন্টের কাজ করার একটি বিশেষ ফ্রেমওয়ার্ক। 
-
-এখানে সে প্রথমে চিন্তা বা পরিকল্পনা করে (Reasoning), তারপর সেই অনুযায়ী কাজ করে (Acting)। 
-
-সবশেষে কাজের ফলাফল দেখে সিদ্ধান্ত নেয় পরবর্তী পদক্ষেপ কী হবে।
+* **প্রশ্ন:** Uncensored Model কী এবং কেন এগুলো তৈরি করা হয়?
+* **উত্তর:** Uncensored Model হলো এমন AI মডেল যার অভ্যন্তরীণ রিফিউজাল বা অস্বীকার করার মেকানিজম ফাইন-টিউনিং বা ওয়েট মডিফিকেশনের মাধ্যমে সরিয়ে ফেলা হয়েছে। মূলধারার মডেলগুলোর অতিরিক্ত সেন্সরশিপের কারণে গবেষণা, সাইবার সিকিউরিটি ও ক্রিয়েটিভ কাজে যে বাধা আসত, তা দূর করার জন্যই এগুলো তৈরি করা হয়।
 
 #### Intermediate Level
-
-**প্রশ্ন:** সেলফ-হিলিং এজেন্টে `timeout` প্যারামিটার দেওয়া কেন জরুরি?
-
-**উত্তর:** AI অনেক সময় ভুল কোড লিখে ইনফিনিটি লুপ তৈরি করে ফেলতে পারে। 
-
-সেটি টার্মিনালে চললে পুরো সার্ভার ক্র্যাশ করতে পারে। 
-
-`timeout` দিলে নির্দিষ্ট সময় পর প্রসেসটি নিজে থেকেই বন্ধ হয়ে যায়, যা সার্ভারকে রক্ষা করে।
+* **প্রশ্ন:** Weight Abliteration প্রযুক্তি কীভাবে কাজ করে?
+* **উত্তর:** গবেষকরা দেখেছেন মডেলের রিফিউজাল বিহেভিয়ার রেসিডুয়াল অ্যাক্টিভেশন স্পেসের একটিমাত্র দিক বা ভেক্টরে কেন্দ্রীভূত থাকে। নিরাপদ ও অনিরাপদ প্রম্পটের গড় অ্যাক্টিভেশনের বিয়োগফল থেকে এই "Refusal Vector" বের করে লিনিয়ার অর্থোগোনাল প্রজেকশনের মাধ্যমে মডেলের ওয়েট থেকে বিয়োগ করে দেওয়া হয়। এতে কোনো রি-ট্রেনিং ছাড়াই মডেলের অস্বীকার করার ক্ষমতা নষ্ট হয়ে যায়।
 
 #### Advanced Level
-
-**প্রশ্ন:** ডকার স্যান্ডবক্স ব্যবহারের প্রয়োজনীয়তা কী?
-
-**উত্তর:** AI যদি লোকাল অপারেটিং সিস্টেমে সরাসরি অ্যাক্সেস পায়, তবে সে যেকোনো পার্সোনাল ফাইল রিড করতে পারে বা ক্ষতিকর কমান্ড রান করে ডাটাবেস মুছে দিতে পারে। 
-
-ডকার স্যান্ডবক্স একটি আলাদা ভার্চুয়াল সিস্টেম তৈরি করে, যার সাথে লোকাল মেমোরি বা নেটওয়ার্কের কোনো যোগাযোগ থাকে না। 
-
-এর ফলে এজেন্ট কোনো ক্ষতি করলেও কন্টেইনারটি বন্ধ করলেই সবকিছু আবার আগের মতো ফ্রেশ স্টেটে ফিরে আসে, যা লোকাল সিস্টেমকে ১০০% সিকিউর রাখে।
-
-
-### ১১. চ্যাপ্টার সামারি
-
-এই চ্যাপ্টারে আমরা চমৎকার কিছু জিনিস শিখলাম:
-
-প্রথমত, ReAct Framework কীভাবে এজেন্টকে মানুষের মতো ধাপে ধাপে চিন্তা করার ক্ষমতা দেয়।
-
-দ্বিতীয়ত, Auto-Test Healing কীভাবে এরর লগ দেখে নিজে নিজেই কোডের বাগ ঠিক করতে পারে।
-
-এবং সবশেষে জানলাম, কেন প্রোডাকশন লেভেলে সিকিউরিটির জন্য ডকার স্যান্ডবক্স ব্যবহার করা উচিত।
-
-
-### ১২. এরপরে কী?
-
-অভিনন্দন! আমরা চমৎকার একটি এজেন্ট লুপ আর্কিটেকচার সফলভাবে শেষ করেছি। 
-
-পরের চ্যাপ্টারে আমরা আমাদের শেষ প্রোজেক্ট ব্লুপ্রিন্ট তৈরি করতে যাচ্ছি।
-
-সেখানে আমরা দেখবো কীভাবে একটি AI SaaS অ্যাপ্লিকেশনে রেট-লিমিটিং এবং স্ট্রাইপ বিলিং ইন্টিগ্রেট করা যায়।
-
-দেখা হচ্ছে পরের চ্যাপ্টারে! 
-
-**Chapter 28 শেষ।**
+* **প্রশ্ন:** প্রোডাকশনে মডেলের ওয়েট সেন্সর করার চেয়ে External Guardrails (যেমন Llama Guard) ব্যবহার করা কেন শ্রেষ্ঠ আর্কিটেকচার?
+* **উত্তর:** ইন্টারনাল এলাইনমেন্ট করলে মডেলের সাধারণ যুক্তি ও কোডিং দক্ষতা অনেক সময় কমে যায় (Alignment Tax) এবং এটি নতুন ধরণের প্রম্পট ইনজেকশনে ভঙ্গুর। কিন্তু এক্সটার্নাল গার্ডরেইল আর্কিটেকচারে মূল মডেলটি সম্পূর্ণ নিরপেক্ষ ও শক্তিশালী থাকে এবং ইনপুট/আউটপুট লেভেলে ডেডিকেটেড ক্লাসিফায়ার দিয়ে কোম্পানির নিজস্ব রুলস অনুযায়ী নিরাপত্তা নিয়ন্ত্রণ করা যায়।

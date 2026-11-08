@@ -35,7 +35,7 @@ To provide clear visual cues and prevent cognitive fatigue across the 3 sectors,
 * **Part 7 — AI Data Layer**: Ch 13 (Vector & Distance Metrics), Ch 14 (Vector Databases & Indexing)
 * **Part 8 — RAG Systems**: Ch 15 (RAG Fundamentals), Ch 16 (Advanced Retrieval & Hybrid Search), Ch 22 (Inside 100-Page PDF Q&A: RAG vs. Native Long-Context)
 * **Part 9 — Model Fine-Tuning & Cloud GPU Labs**: Ch 17 (SFT & Dataset Prep), Ch 18 (PEFT, LoRA & QLoRA), Ch 19 (RLHF, DPO & Safety Tuning), Ch 20 (Free Cloud GPU Mastery: Colab & Kaggle), Ch 21 (Hands-On Fine-Tuning Lab with Unsloth), Notebook (`notebooks/Free_Cloud_GPU_FineTuning_Lab.ipynb`)
-* **Part 10 — Production AI**: Ch 23 (Constitutional Safety), Ch 24 (Observability), Ch 25 (Cost Optimization)
+* **Part 10 — Production AI & Safety**: Ch 23 (Constitutional Safety), Ch 24 (Observability), Ch 25 (Cost Optimization), Ch 28 (Uncensored Models, Safety Filters & Alignment Paradox)
 * **Part 11 — Real AI Products**: Ch 26 (Multi-Session Memory), Ch 27 (Enterprise PDF Search), Ch 29 (AI SaaS & Billing)
 * **Part 12 — AI System Architectures**: Ch 32 (Fundamentals), Ch 33 (Enterprise Architecture)
 * **Part 13 — Career & Appendix**: Ch 30 (Career Roadmap), Ch 31 (Mental Models)
