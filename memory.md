@@ -82,6 +82,11 @@ To provide clear visual cues and prevent cognitive fatigue across the 3 sectors,
   * `frontier_ch7.md`: **Hardware Accelerators: Google TPU, Groq LPU & Custom Chips** (Google TPU v5p/v6 Trillium & Optical Circuit Switches, Groq SRAM LPU 500+ tok/s architecture, Cerebras Wafer-Scale WSE-3, Apple Unified Memory).
 * **Part 6 — Frontier Paradigms & Test-Time Scaling**
   * `frontier_ch8.md`: **Test-Time Compute & Inference Scaling Laws** (Why pre-training scaling laws hit a wall, OpenAI o1/o3 & DeepSeek R1 reasoning tokens, Process Reward Models - PRMs, Reinforcement Learning with Verifiable Rewards - RLVR).
+* **Part 7 — Frontier Model Capabilities & Hands-On Workflows**
+  * `frontier_ch9.md`: **AI in Software Engineering** (Full-Stack Autonomy, Code Graph AST Indexing, Auto-Healing TDD Loops, Legacy Modernization).
+  * `frontier_ch10.md`: **AI in Cybersecurity** (Dual-Use Matrix, Semantic Taint SAST, Assembly-to-C Reverse Engineering, Automated Exploit & Patching).
+  * `frontier_ch11.md`: **Generative Video, Audio & Multimodal Studio** (Diffusion Transformers DiT, 3D Spatio-Temporal Cuboids, Inpainting, Neural Voice Cloning).
+  * `frontier_ch12.md`: **Frontier Science & Autonomous Discovery** (AlphaFold 3 Biomolecular Diffusion, Lean 4 Formal Mathematics, Sakana AI Scientist).
 
 ---
 
