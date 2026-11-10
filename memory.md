@@ -18,7 +18,7 @@ To provide clear visual cues and prevent cognitive fatigue across the 3 sectors,
 | Sector | Title | Primary Accent | Gradient Glow | Icon | Scope |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Sector 1** | Core AI & GenAI | `#06B6D4` (Cyan) | `linear-gradient(135deg, #8B5CF6, #06B6D4)` | `fa-brain` | Ch 1 – Ch 33 (Mapped) |
-| **Sector 2** | AI Agents & Swarms | `#10B981` (Emerald) | `linear-gradient(135deg, #10B981, #06B6D4)` | `fa-robot` | Agent Ch 1 – Ch 12 |
+| **Sector 2** | AI Agents & Swarms | `#10B981` (Emerald) | `linear-gradient(135deg, #10B981, #06B6D4)` | `fa-robot` | Agent Ch 1 – Ch 16 |
 | **Sector 3** | Frontier & Infra | `#F59E0B` (Amber/Gold) | `linear-gradient(135deg, #EC4899, #F59E0B)` | `fa-bolt-lightning` | Frontier Ch 1 – Ch 8 |
 
 ---
@@ -64,6 +64,9 @@ To provide clear visual cues and prevent cognitive fatigue across the 3 sectors,
 * **Part 7 — Agent Skills, Plugins & Extensibility Ecosystem**
   * `agent_ch13.md`: **Agent Skills Architecture & Custom Skills Creation** (Procedural Knowledge, Progressive Disclosure, Semantic Triggers, Scripts, SOPs).
   * `agent_ch14.md`: **Agent Plugins, Sidecars & Extensibility** (Full-Stack Bundles, Manifests, MCP Integration, UI Sidecars, Secure Auth Vault).
+* **Part 8 — Frontier Reverse Engineering & Verification (REA)**
+  * `agent_ch15.md`: **REA Engine: Genesis, 207-Tool Matrix & Cognitive Mechanics** (Fail-Closed Evidence Ledger, Epistemic Triad, Summary-First Projection Lens, Residual Unknown Registry, Reconstruction Obligation Ledger).
+  * `agent_ch16.md`: **Industrial REA in Action: Native, Electron, Mobile & Signal Auditing** (Headless Ghidra/Kuna ELF reversing, Electron ASAR AST auditing, Android APK signature & JADX triage, TShark & Sigrok signal decoding, Autonomous Porting Loop).
 
 ---
 
